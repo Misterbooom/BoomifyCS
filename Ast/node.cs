@@ -1,5 +1,6 @@
 ﻿using System;
 using BoomifyCS.Lexer;
+using BoomifyCS.Objects;
 
 namespace BoomifyCS.Ast
 {
@@ -8,7 +9,6 @@ namespace BoomifyCS.Ast
         public Token Token;
         public AstNode Left;
         public AstNode Right;
-
         public AstNode(Token token, AstNode left = null, AstNode right = null)
         {
             Token = token;
@@ -47,13 +47,34 @@ namespace BoomifyCS.Ast
 
         }
     }
-    public class AstConstant:AstNode
-    {
-        public AstConstant(Token token, AstNode left = null, AstNode right = null) : base(token, left, right)
-        {
+    
 
+
+    public class AstInt : AstNode
+    {
+        public BifyInteger BifyValue;
+
+        public AstInt(Token token, BifyInteger bifyValue, AstNode left = null, AstNode right = null) : base(token, left, right)
+        {
+            this.BifyValue = bifyValue;
+        }
+
+        public override string ToString()
+        {
+            return StrHelper() + $"({BifyValue})";
         }
     }
+    public class AstString : AstNode
+    {
+        public BifyString BifyValue;
+        public AstString(Token token, BifyString bifyValue, AstNode left = null, AstNode right = null) : base(token, left, right)
+        {
+            this.BifyValue = bifyValue;
+        }
+
+    }
+
+
 
 
 

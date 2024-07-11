@@ -21,11 +21,7 @@ namespace BoomifyCS.Lexer
             while (_position < _code.Length)
             {
                 char currentChar = _code[_position];
-                if (currentChar == ';')
-                {
-                    Console.WriteLine($"Next - {_code[_position + 1]}");
-
-                }
+                
                 if (currentChar == ';')
                 {
                     tokens.Add(new Token(TokenType.EOL, ";"));
@@ -35,8 +31,8 @@ namespace BoomifyCS.Lexer
                 }
                 if (char.IsWhiteSpace(currentChar))
                 {
-                    //Token token = new Token(TokenType.WHITESPACE, currentChar.ToString());
-                    //tokens.Add(token);
+                    Token token = new Token(TokenType.WHITESPACE, " ");
+                    tokens.Add(token);
                     _position++;
                     continue;
 
@@ -91,7 +87,6 @@ namespace BoomifyCS.Lexer
 
                 _position++;
             }
-            Console.WriteLine(string.Join("\n", tokens));
 
             return tokens;
         }
@@ -146,16 +141,20 @@ namespace BoomifyCS.Lexer
 
             foreach (KeyValuePair<string, TokenType> kvp in TokenConfig.multiCharTokens)
             {
-                match = _code.Substring(_position, kvp.Key.Length);
-                if (match == kvp.Key)
+                if (_position + kvp.Key.Length <= _code.Length)
                 {
-                    multiChar = match;
-                    _position += match.Length;
-                    return kvp;
+                    match = _code.Substring(_position, kvp.Key.Length);
+                    if (match == kvp.Key)
+                    {
+                        multiChar = match;
+                        _position += match.Length - 1;
+                        return kvp;
+                    }
                 }
             }
             return new KeyValuePair<string, TokenType>(" ", TokenType.WHITESPACE);
         }
+
         public string GenerateString()
         {
             string str = "";
@@ -215,7 +214,8 @@ namespace BoomifyCS.Lexer
                 {
                     break;
                 }
-            }      
+            }
+            _position--;    
             return identifier;
         }
         public Token GenerateObject()

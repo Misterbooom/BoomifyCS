@@ -33,8 +33,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Colorful.Console, Version=1.2.15.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Colorful.Console.1.2.15\lib\net461\Colorful.Console.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -43,7 +47,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Ast\node.cs" />
+    <Compile Include="Ast\AstConfig.cs" />
+    <Compile Include="Ast\AstTree.cs" />
+    <Compile Include="Ast\Node.cs" />
+    <Compile Include="exceptions.cs" />
+    <Compile Include="Lexer\TokensConfig.cs" />
+    <Compile Include="Objects\BifyBoolean.cs" />
+    <Compile Include="Objects\BifyString.cs" />
+    <Compile Include="Parser\ListExtensions.cs" />
+    <Compile Include="Parser\AstParser.cs" />
+    <Compile Include="Parser\TokensParser.cs" />
     <Compile Include="Lexer\Lexer.cs" />
     <Compile Include="Lexer\Token.cs" />
     <Compile Include="Main.cs" />
@@ -53,9 +66,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
