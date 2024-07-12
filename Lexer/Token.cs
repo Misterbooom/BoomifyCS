@@ -52,6 +52,11 @@ namespace BoomifyCS.Lexer
         NEQ,
         ARRAY,
         OBJECT,
+        NULL,
+        TRUE,
+        FALSE,
+        FUNCTION,
+        RETURN,
     }
     public class Token
     {

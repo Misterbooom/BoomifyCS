@@ -23,7 +23,6 @@ namespace BoomifyCS.Parser
         {
             List<Token> lineTokens = new List<Token>();
             Token currentToken = tokens[tokenPosition];
-
             while (tokenPosition < tokens.Count && currentToken.Type != TokenType.EOL)
             {
                 currentToken = tokens[tokenPosition];
@@ -42,6 +41,33 @@ namespace BoomifyCS.Parser
         {
 
             return TokenConfig.arithmeticOperators.ContainsValue(type);
+        }
+        public static Tuple<Token,int> FindTokenByTT(TokenType tokenType,List<Token> tokens,int start = 0)
+        {
+            for (int i = start; i < tokens.Count;i++)
+            {
+                Token token = tokens[i];
+                if (token.Type == tokenType)
+                {
+                    return new Tuple<Token, int>(token, i);
+                }
+            }
+            return null;
+
+        }
+        public static Tuple<List<Token>,int> AllTokensToEol(List<Token> tokens,int start = 0)
+        {
+            List<Token> result = new List<Token>();
+            for (int i = start; i < tokens.Count; i++)
+            {
+                Token token = tokens[i];
+                if (token.Type == TokenType.EOL)
+                {
+                    return new Tuple<List<Token>, int>(result, i);
+                }
+                result.Add(token);
+            }
+            throw new NotImplementedException();
         }
     }
 

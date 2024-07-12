@@ -28,7 +28,29 @@ namespace BoomifyCS.Parser
                 BifyString bifyString = new BifyString(token, token.Value);
                 return new AstString(token, bifyString);
             }     
-            return new AstNode(token);
+            else  if (token.Type == TokenType.TRUE)
+            {
+                return new AstBoolean(token, new BifyBoolean(token,true));
+            }
+            else if (token.Type == TokenType.FALSE)
+            {
+                return new AstBoolean(token, new BifyBoolean(token, false));
+            }
+            else if (token.Type == TokenType.NULL)
+            {
+                return new AstNull(token);
+            }
+            else 
+            throw new Exception("Unsupported token - " + token.Type);
+        }
+        public static Tuple<AstNode,int> MultiTokenStatement(Token token,List<Token> tokens,int currentPos)
+        {
+            if (token.Type == TokenType.VARDECL)
+            {
+                Tuple<AstNode, int> result = StatementParser.ParseVarDecl(token,tokens,currentPos);
+                return new Tuple<AstNode, int> (result.Item1,result.Item2);
+            }
+            throw new NotImplementedException($"Not implemented token - {token.Type}");
         }
         public static AstNode ConnectNodes(List<AstNode> operatorStack,List<AstNode> operandStack)
         {
@@ -106,6 +128,12 @@ namespace BoomifyCS.Parser
             }
             throw new InvalidOperationException($"Unsupported operator: {op}");
         }
+        public static AstNode TokenToAst(List<Token> tokens) 
+        {
+            AstTree ast = new AstTree();
 
+            return ast.ParseTokens(tokens);
+        }
+         
     }
 }

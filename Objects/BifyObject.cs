@@ -6,7 +6,6 @@ namespace BoomifyCS.Objects
     public class BifyObject
     {
         public Token Token;
-        public object Value;
 
         public BifyObject(Token token)
         {

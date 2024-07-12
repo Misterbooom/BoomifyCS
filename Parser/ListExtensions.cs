@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BoomifyCS.Lexer;
-
+using BoomifyCS.Ast;
 public static class ListExtensions
 {
     public static T Pop<T>(this List<T> list)
@@ -44,5 +44,19 @@ public static class ListExtensions
             result += token.ToString() + "\n";
         }
         Console.WriteLine(result);
+    }
+    public static void WriteNodes<T>(this List<T> list) where T : AstNode
+    {
+        Console.Write('[');
+        foreach (var node in list)
+        {
+            if (node != null)
+            {            
+                Console.WriteLine(node.ToString());
+
+            }
+        }
+        Console.Write(']');
+
     }
 }

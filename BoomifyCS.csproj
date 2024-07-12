@@ -53,9 +53,11 @@
     <Compile Include="exceptions.cs" />
     <Compile Include="Lexer\TokensConfig.cs" />
     <Compile Include="Objects\BifyBoolean.cs" />
+    <Compile Include="Objects\BifyNull.cs" />
     <Compile Include="Objects\BifyString.cs" />
     <Compile Include="Parser\ListExtensions.cs" />
     <Compile Include="Parser\AstParser.cs" />
+    <Compile Include="Parser\StatementParser.cs" />
     <Compile Include="Parser\TokensParser.cs" />
     <Compile Include="Lexer\Lexer.cs" />
     <Compile Include="Lexer\Token.cs" />

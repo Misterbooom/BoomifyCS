@@ -9,6 +9,7 @@ namespace BoomifyCS.Ast
         public Token Token;
         public AstNode Left;
         public AstNode Right;
+
         public AstNode(Token token, AstNode left = null, AstNode right = null)
         {
             Token = token;
@@ -38,46 +39,148 @@ namespace BoomifyCS.Ast
 
             return treeStr;
         }
+
     }
 
     public class AstBinaryOp : AstNode
     {
         public AstBinaryOp(Token token, AstNode left = null, AstNode right = null) : base(token, left, right)
         {
+        }
 
+        public override string StrHelper(int level = 0, string note = "")
+        {
+            string baseStr = base.StrHelper(level, note);
+            return baseStr + $"{new String(' ', 4 * (level + 1))}Binary Operation\n";
+        }
+        public override string ToString()
+        {
+            return StrHelper();
         }
     }
-    
 
-
-    public class AstInt : AstNode
+    public class AstConstant : AstNode
     {
-        public BifyInteger BifyValue;
+        public BifyObject BifyValue;
+        public AstConstant(Token token) : base(token)
+        {
+        }
 
-        public AstInt(Token token, BifyInteger bifyValue, AstNode left = null, AstNode right = null) : base(token, left, right)
+        public override string StrHelper(int level = 0, string note = "")
+        {
+            string baseStr = base.StrHelper(level, note);
+            return baseStr + $"{new String(' ', 4 * (level + 1))}Constant Value\n";
+        }
+        public override string ToString()
+        {
+            return StrHelper();
+        }
+    }
+
+    public class AstInt : AstConstant
+    {
+        public AstInt(Token token, BifyInteger bifyValue) : base(token)
         {
             this.BifyValue = bifyValue;
+        }
+
+        public override string StrHelper(int level = 0, string note = "")
+        {
+            string baseStr = base.StrHelper(level, note);
+            return baseStr + $"{new String(' ', 4 * (level + 1))}Integer Value: {BifyValue}\n";
         }
 
         public override string ToString()
         {
-            return StrHelper() + $"({BifyValue})";
+            return StrHelper();
         }
     }
-    public class AstString : AstNode
+
+    public class AstString : AstConstant
     {
-        public BifyString BifyValue;
-        public AstString(Token token, BifyString bifyValue, AstNode left = null, AstNode right = null) : base(token, left, right)
+        public AstString(Token token, BifyString bifyValue) : base(token)
         {
             this.BifyValue = bifyValue;
         }
 
+        public override string StrHelper(int level = 0, string note = "")
+        {
+            string baseStr = base.StrHelper(level, note);
+            return baseStr + $"{new String(' ', 4 * (level + 1))}String Value: {BifyValue}\n";
+        }
+
+        public override string ToString()
+        {
+            return StrHelper();
+        }
     }
 
+    public class AstBoolean : AstConstant
+    {
+        public AstBoolean(Token token, BifyBoolean bifyValue) : base(token)
+        {
+            this.BifyValue = bifyValue;
+        }
 
+        public override string StrHelper(int level = 0, string note = "")
+        {
+            string baseStr = base.StrHelper(level, note);
+            return baseStr + $"{new String(' ', 4 * (level + 1))}Boolean Value: {BifyValue}\n";
+        }
 
+        public override string ToString()
+        {
+            return StrHelper();
+        }
+    }
+    public class AstNull : AstConstant
+    {
+        public AstNull(Token token): base(token)
+        {
+            this.BifyValue = new BifyNull(token);
+        }
+    }
 
+    public class AstAssignment : AstNode
+    {
+        public AstAssignment(Token token, AstNode left = null, AstNode right = null) : base(token, left, right)
+        {
+        }
 
+        public override string StrHelper(int level = 0, string note = "")
+        {
+            string baseStr = base.StrHelper(level, note);
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n" ;
+        }
+        public override string ToString()
+        {
+            return StrHelper();
+        }
+    }
 
+    public class AstVarDecl : AstNode
+    {
+        AstAssignment AssignmentNode;
+        public AstVarDecl(Token token, AstAssignment assignmentNode, AstNode left = null, AstNode right = null) : base(token, left, right)
+        {
+            AssignmentNode = assignmentNode;
+        }
 
+        public override string StrHelper(int level = 0, string note = "")
+        {
+            string baseStr = base.StrHelper(level, note);
+            string assignmentStr = AssignmentNode?.StrHelper(level + 1, "assignment:") ?? "";
+            return baseStr + $"{new String(' ', 4 * (level + 1))}Variable Declaration\n{assignmentStr}";
+        }
+        public override string ToString()
+        {
+            return StrHelper();
+        }
+    }
+    public class AstLine : AstNode 
+    {
+        public AstLine(AstNode left = null, AstNode right = null) : base(new Token(TokenType.EOL, ";"), left, right)
+        {
+        }
+    }
 }

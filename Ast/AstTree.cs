@@ -22,29 +22,34 @@ namespace BoomifyCS.Ast
         /// Parses a list of tokens, processing them line by line.
         /// </summary>
         /// <param name="tokens">The list of tokens to be parsed.</param>
-        public void ParseTokens(List<Token> tokens)
+        public AstNode ParseTokens(List<Token> tokens)
         {
             _codeTokens = tokens;
-
+            List<AstNode> nodes = new List<AstNode>();
             while (_codeTokenPosition < tokens.Count)
             {
                 var (lineTokens, newTokenPosition) = TokensParser.SplitTokensByLine(tokens, _codeTokenPosition);
-
                 _codeTokenPosition = newTokenPosition;
                 _lineTokens = lineTokens;
                 AstNode node = BuildAstTree(lineTokens);
-                Console.WriteLine(node.ToString());
-            
+                nodes.Add(node);
                 //Console.WriteLine(AstParser.SimpleEval(node));
             }
+            while (nodes.Count > 1)
+            {
+                AstNode right = nodes.Pop();
+                AstNode left = nodes.Pop();
+                AstLine line = new AstLine(left, right);
+                nodes.Add(line);
+            }
+            return nodes[0];
         }
-
-        /// <summary>
-        /// Builds an Abstract Syntax Tree (AST) from a list of tokens.
-        /// </summary>
-        /// <param name="tokens">The list of tokens to build the AST from.</param>
-        /// <returns>The root node of the constructed AST.</returns>
-        public AstNode BuildAstTree(List<Token> tokens)
+            /// <summary>
+            /// Builds an Abstract Syntax Tree (AST) from a list of tokens.
+            /// </summary>
+            /// <param name="tokens">The list of tokens to build the AST from.</param>
+            /// <returns>The root node of the constructed AST.</returns>
+            public AstNode BuildAstTree(List<Token> tokens)
         {
             
             List<AstNode> operandStack = new List<AstNode>();
@@ -54,7 +59,19 @@ namespace BoomifyCS.Ast
             while (_lineTokenPosition < tokens.Count)
             {
                 Token currentToken = tokens[_lineTokenPosition];
-                if (TokensParser.IsOperator(currentToken.Type))
+                if (currentToken.Type == TokenType.WHITESPACE)
+                {
+                    _lineTokenPosition++;
+                    continue;
+                }
+                if (TokenConfig.multiTokenStatements.ContainsValue(currentToken.Type))
+                {
+                    Tuple<AstNode, int> result = AstParser.MultiTokenStatement(currentToken, tokens, _lineTokenPosition);
+                    _lineTokenPosition = result.Item2;
+                    operandStack.Add(result.Item1);
+
+                }
+                else if (TokensParser.IsOperator(currentToken.Type))
                 {
                     operatorStack.Add(AstParser.TokenToNode(currentToken));
                 }
@@ -62,11 +79,18 @@ namespace BoomifyCS.Ast
                 {
                     operandStack.Add(AstParser.TokenToNode(currentToken));
                 }
-                Console.WriteLine(currentToken);
                 _lineTokenPosition++;
             }
-            return AstParser.ConnectNodes(operatorStack, operandStack);
-            
+            if (operandStack.Count > 1)
+            {
+                return AstParser.ConnectNodes(operatorStack, operandStack);
+
+            }
+            else
+            {
+                return operandStack[0];
+            }
+
         }
 
 

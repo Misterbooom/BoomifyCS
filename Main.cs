@@ -13,21 +13,28 @@ namespace BoomifyCS
     {
         static void Main(string[] args)
         {
-            string code =
-@"
-var a = '12';
-";
+            string code = @"var a = null;";
             MyLexer lexer = new MyLexer(code);
-            List<Token> tokens = lexer.Tokenize();
-            tokens.WriteTokens();
-            AstTree astParser = new AstTree();
-            string[] callStack = {"Main"};
+            try
+            {
+                List<Token> tokens = lexer.Tokenize();
+                //tokens.WriteTokens();
+                AstTree astParser = new AstTree();
+                string[] callStack = { "Main" };
+
+                AstNode node = astParser.ParseTokens(tokens);
+                Console.WriteLine(node);
+            }
+            catch (BifyException e) 
+            {
+                e.PrintException();
+            }
+
             
-            BifyException exception =  new BifyException("Test Exception", 1, callStack, tokens, tokens.GetRange(1,3));
-            exception.PrintException();
             //astParser.ParseTokens(tokens);
         }
 
 
     }
 }
+// Add separating lines by AstLine node,Add Base constant node , Add AstInt,Ast

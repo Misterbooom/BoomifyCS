@@ -12,7 +12,11 @@ namespace BoomifyCS.Lexer
             { "for", TokenType.FOR },
             { "var", TokenType.VARDECL },
             { "//", TokenType.FLOORDIV },
-            { "**", TokenType.POW },
+            {"null", TokenType.NULL},
+            {"true", TokenType.TRUE},
+            {"false", TokenType.FALSE},
+            { "return", TokenType.RETURN },
+            {"**", TokenType.POW},
             { "<=", TokenType.LTE },
             { ">=", TokenType.GTE },
             { "+=", TokenType.IADD },
@@ -70,6 +74,15 @@ namespace BoomifyCS.Lexer
             { "/=", TokenType.IDIV },
             { "//=", TokenType.IFLOORDIV },
             { "**=", TokenType.IPOW },
+        };
+        public static Dictionary<string, TokenType> multiTokenStatements = new Dictionary<string, TokenType>
+        {
+            { "if", TokenType.IF },
+            { "else", TokenType.ELSE },
+            { "while", TokenType.WHILE },
+            { "for", TokenType.FOR },
+            { "var", TokenType.VARDECL },
+            { "return", TokenType.RETURN },
         };
     }
 }

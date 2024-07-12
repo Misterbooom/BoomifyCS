@@ -3,39 +3,118 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Text.RegularExpressions;
+using static System.Net.Mime.MediaTypeNames;
 namespace BoomifyCS.Lexer
 {
     public class MyLexer
     {
         private int _position;
         private string _code;
+        private string _currentLine;
+        private int _lineCount = 0;
+        private string[] _lines;
         public MyLexer(string code)
         {
             this._code = code;
-            _position = 0;
+
+            List<string> tempLines = new List<string>();
+
+            string[] linesArray = Regex.Split(code, "\r?\n");
+
+            foreach (string line in linesArray)
+            {
+                if (!string.IsNullOrWhiteSpace(line)) 
+                {
+                    tempLines.Add(line); 
+                }
+            }
+
+            _lines = tempLines.ToArray();
+
+            if (_lines.Length > 1)
+            {
+                _currentLine = _lines[1]; 
+            }
+            else
+            {
+                _currentLine = _lines[0]; 
+            }
+            _position = 0; 
         }
+    
+
         public List<Token> Tokenize()
         {
             List<Token> tokens = new List<Token>();
+            bool lastTokenWasSemicolon = false;
             while (_position < _code.Length)
             {
                 char currentChar = _code[_position];
-                
+
+
                 if (currentChar == ';')
                 {
                     tokens.Add(new Token(TokenType.EOL, ";"));
+                    lastTokenWasSemicolon = true;
                     _position++;
                     continue;
-
                 }
+
                 if (char.IsWhiteSpace(currentChar))
                 {
-                    Token token = new Token(TokenType.WHITESPACE, " ");
-                    tokens.Add(token);
+                    if (currentChar == '\n')
+                    {
+                        if (lastTokenWasSemicolon)
+                        {
+                            tokens.Add(new Token(TokenType.EOL, "\n"));
+                        }
+                        else
+                        {
+                            tokens.Add(new Token(TokenType.WHITESPACE, "\n"));
+                        }
+                        lastTokenWasSemicolon = false; 
+                        _lineCount++;
+                        _currentLine = string.Empty;
+                        continue;
+                    }
+                    else if (currentChar == '\r')
+                    {
+                        if (_position + 1 < _code.Length && _code[_position + 1] == '\n')
+                        {
+                            if (lastTokenWasSemicolon)
+                            {
+                                tokens.Add(new Token(TokenType.EOL, "\r\n"));
+                            }
+                            else
+                            {
+                                tokens.Add(new Token(TokenType.WHITESPACE, "\r\n"));
+                            }
+                            _position++;
+                            _currentLine = _lines[_lineCount];
+                        }
+                        else
+                        {
+                            if (lastTokenWasSemicolon)
+                            {
+                                tokens.Add(new Token(TokenType.EOL, "\r"));
+                            }
+                            else
+                            {
+                                tokens.Add(new Token(TokenType.WHITESPACE, "\r"));
+                            }
+                        }
+                        lastTokenWasSemicolon = false; 
+                        _lineCount++;
+                        _currentLine = string.Empty; 
+                    }
+                    else
+                    {
+                        tokens.Add(new Token(TokenType.WHITESPACE, currentChar.ToString()));
+                        lastTokenWasSemicolon = false;
+                    }
                     _position++;
                     continue;
-
                 }
 
                 KeyValuePair<string, TokenType> multichar = GenerateMultiChar();
@@ -172,6 +251,7 @@ namespace BoomifyCS.Lexer
                     }
                     else if (currentChar == stringChar)
                     {
+                        counter--;
                         break;
                     }
                 }
@@ -181,21 +261,54 @@ namespace BoomifyCS.Lexer
                 }
                 _position++;
             }
+            if (counter > 0)
+            {
+                throw new BifySyntaxError(
+                    "Syntax Error: You forgot to close a quotation mark.",
+                    _currentLine, 
+                    _currentLine, 
+                    _lineCount 
+                );
+
+            }
             return str;
 
         }
         public string GenerateArray()
         {
             string array = "";
+            int counter = 0;
             while (_position < _code.Length)
             {
                 char currentChar = _code[_position];
-                if (currentChar == ']')
+                if (currentChar == '[')
                 {
-                    break;
+                    counter++;
                 }
-                array += currentChar;
+                else if (currentChar == '['){
+                    counter--;
+                    if (counter == 0)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    array += currentChar;
+                }
                 _position++;
+            }
+            if (counter > 0)
+            {
+                int _lineCount = 42; // Example line count
+                // Use the appropriate constructor based on the type of parameters
+                throw new BifySyntaxError(
+                    "Syntax Error: You forgot to close '[' with ']'.",
+                    _currentLine, // This should be a string representing tokens
+                    _currentLine, // This should be a string representing invalid tokens
+                    _lineCount // Line number
+                );
+
             }
             return array;
         }
