@@ -57,6 +57,22 @@ namespace BoomifyCS.Lexer
         FALSE,
         FUNCTION,
         RETURN,
+        GTEQ,
+        LTEQ,
+        EQEQ,
+        LSHIFT,
+        RSHIFT,
+        BIT_AND,
+        BIT_OR,
+        BIT_XOR,
+        AND,
+        OR,
+        NOT,
+        BIT_NOT,
+        BIT_NEG,
+        INCR,
+        DECR,
+        
     }
     public class Token
     {

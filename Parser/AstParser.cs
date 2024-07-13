@@ -78,66 +78,8 @@ namespace BoomifyCS.Parser
 
             return operandStack.First();
         }
-        public static object SimpleEval(AstNode node)
-        {
-            if (node == null)
-            {
-                return null;
-            }
-            if (node is AstBinaryOp binaryOpNode)
-            {
-                object leftValue = SimpleEval(binaryOpNode.Left);   
-                object rightValue = SimpleEval(binaryOpNode.Right);
-                if (leftValue != null && rightValue != null)
-                {
-                    if (leftValue is BifyObject bifyLeft && rightValue is BifyObject bifyRight)
-                    {
-                        return CalculateBifyObjects(bifyLeft,bifyRight,binaryOpNode.Token.Type);
-                    }
-                }
+        
 
-
-
-            }
-            else if (node is AstInt astIntNode)
-            {
-                var bifyValue = astIntNode.BifyValue;
-                return bifyValue;
-            }
-            return null;
-        }
-        public static BifyObject CalculateBifyObjects(BifyObject a,BifyObject b,TokenType op)
-        {
-            if (op == TokenType.ADD)
-            {
-                return a.Add(b);
-            }
-            else if (op == TokenType.SUB)
-            {
-                return a.Sub(b);
-            }
-            else if (op == TokenType.MUL)
-            {
-                return a.Mul(b);
-            }
-            else if (op == TokenType.DIV)
-            {
-                return a.Div(b);
-            }
-            else if (op == TokenType.MOD)
-            {
-                return a.Mod(b);
-            }
-            else if (op == TokenType.POW)
-            {
-                return a.Pow(b);
-            }
-            else if (op == TokenType.FLOORDIV)
-            {
-                return a.FloorDiv(b);
-            }
-            throw new InvalidOperationException($"Unsupported operator: {op}");
-        }
         public static AstNode TokenToAst(List<Token> tokens) 
         {
             AstTree ast = new AstTree();

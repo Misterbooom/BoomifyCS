@@ -131,7 +131,6 @@ namespace BoomifyCS.Ast
         private void ProcessOperator(Stack<AstNode> operatorStack, Stack<AstNode> operandStack, Token currentToken)
         {
             while (operatorStack.Count > 0 &&
-                    operatorStack.Peek().Token.Type != TokenType.EOL &&
                    operatorStack.Peek().Token.Type != TokenType.LPAREN &&
 
                    AstConfig.Precedence.TryGetValue(operatorStack.Peek().Token.Type, out int operatorPrecedence) &&

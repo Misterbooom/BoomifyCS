@@ -153,11 +153,7 @@ namespace BoomifyCS.Lexer
                     tokens.Add(token);
 
                 }
-                else if (TokenConfig.singleCharTokens.TryGetValue(currentChar, out TokenType tokenType))
-                {
-                    Token token = new Token(tokenType, currentChar.ToString());
-                    tokens.Add(token);
-                }
+
                 else if (char.IsDigit(currentChar))
                 {
                     string digit = GenerateDigit();
@@ -169,6 +165,11 @@ namespace BoomifyCS.Lexer
                 {
 
                     Token token = new Token(multichar.Value, multichar.Key);
+                    tokens.Add(token);
+                }
+                else if (TokenConfig.singleCharTokens.TryGetValue(currentChar, out TokenType tokenType))
+                {
+                    Token token = new Token(tokenType, currentChar.ToString());
                     tokens.Add(token);
                 }
                 else if (IsIdentifier(currentChar))

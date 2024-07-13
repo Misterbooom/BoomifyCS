@@ -51,10 +51,13 @@
     <Compile Include="Ast\AstTree.cs" />
     <Compile Include="Ast\Node.cs" />
     <Compile Include="exceptions.cs" />
+    <Compile Include="Interpreter\Interpreter.cs" />
     <Compile Include="Lexer\TokensConfig.cs" />
     <Compile Include="Objects\BifyBoolean.cs" />
+    <Compile Include="Objects\BifyFloat.cs" />
     <Compile Include="Objects\BifyNull.cs" />
     <Compile Include="Objects\BifyString.cs" />
+    <Compile Include="Parser\BifyObjectParser.cs" />
     <Compile Include="Parser\ListExtensions.cs" />
     <Compile Include="Parser\AstParser.cs" />
     <Compile Include="Parser\StatementParser.cs" />
@@ -69,6 +72,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="test.bify" />
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />

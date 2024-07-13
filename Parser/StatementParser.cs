@@ -26,7 +26,7 @@ namespace BoomifyCS.Parser
 
             var (varValueTokens, tokensProcessed) = TokensParser.AllTokensToEol(tokens, currentPos);
             currentPos += tokensProcessed;
-
+            varValueTokens.WriteTokens();
 
             if (varNameToken == null)
             {

@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using BoomifyCS.Lexer;
 using BoomifyCS.Ast;
+using System.Reflection.Emit;
+using System.Text;
+using System.Collections;
 public static class ListExtensions
 {
     public static T Pop<T>(this List<T> list)
@@ -72,5 +75,18 @@ public static class ListExtensions
         }
         Console.Write(']');
 
+    }
+    public static string ToCustomString(this Hashtable table)
+    {
+        var sb = new StringBuilder();
+        foreach (DictionaryEntry kvp in table)
+        {
+            sb.Append($"{kvp.Key}:{kvp.Value}, ");
+        }
+        if (sb.Length > 2)
+        {
+            sb.Length -= 2; 
+        }
+        return sb.ToString();
     }
 }

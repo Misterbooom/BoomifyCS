@@ -170,7 +170,7 @@ namespace BoomifyCS.Ast
 
     public class AstVarDecl : AstNode
     {
-        AstAssignment AssignmentNode;
+        public AstAssignment AssignmentNode;
         public AstVarDecl(Token token, AstAssignment assignmentNode, AstNode left = null, AstNode right = null) : base(token, left, right)
         {
             AssignmentNode = assignmentNode;
