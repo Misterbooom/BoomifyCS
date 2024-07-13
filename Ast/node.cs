@@ -201,5 +201,15 @@ namespace BoomifyCS.Ast
             this.Name = name;
         }
     }
+    public class AstBracket: AstNode
+    {
+        public AstBracket(Token token) : base(token)
+        {
+        }
+    }
+    public class AstEOL : AstNode
+    {
+        public AstEOL(Token token): base(token) { }
+    }
 
 }

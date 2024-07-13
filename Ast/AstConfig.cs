@@ -9,23 +9,20 @@ namespace BoomifyCS.Ast
 {
     public class AstConfig
     {
-        public static Dictionary<string, int> Precedence = new Dictionary<string, int>
+        public static Dictionary<TokenType, int> Precedence = new Dictionary<TokenType, int>
         {
-            { "++", 30 },
-            { "--", 30 },
-            { "+", 20 },
-            { "-", 20 },
-            { "*", 40 },
-            { "/", 40 },
-            { "%", 40 },
-            { "==", 10 },
-            { "!=", 10 },
-            { ">", 10 },
-            { "<", 10 },
-            { ">=", 10 },
-            { "<=", 10 },
-            { "&&", 5 },
-            { "||", 4 },
+            {TokenType.ADD, 1},
+            {TokenType.SUB, 1},
+            {TokenType.MUL, 2},
+            {TokenType.DIV, 2},
+            {TokenType.MOD, 2},
+            {TokenType.POW, 3},
+            {TokenType.EQ, 6},
+            {TokenType.NEQ, 6},
+            {TokenType.GT, 7},
+            {TokenType.LT, 7},
+            {TokenType.LPAREN,0},
+            {TokenType.RPAREN, 0},
         };
         public static Dictionary<TokenType, Func<int, int, int>> operationDictionary = new Dictionary<TokenType, Func<int, int, int>>
         {

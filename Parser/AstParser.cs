@@ -43,7 +43,13 @@ namespace BoomifyCS.Parser
             else if (token.Type == TokenType.IDENTIFIER)
             {
                 return new AstIdentifier(token, token.Value);
-
+            }
+            else if (token.Type == TokenType.LPAREN || token.Type == TokenType.RPAREN)
+            {
+                return new AstBracket(token);
+            }
+            else if (token.Type == TokenType.EOL)
+            {
             }
             throw new Exception("Unsupported token - " + token.Type);
         }
@@ -56,7 +62,7 @@ namespace BoomifyCS.Parser
             }
             throw new NotImplementedException($"Not implemented token - {token.Type}");
         }
-        public static AstNode ConnectNodes(List<AstNode> operatorStack,List<AstNode> operandStack)
+        public static AstNode ConnectNodes(Stack<AstNode> operatorStack,Stack<AstNode> operandStack)
         {
             while (operatorStack.Count > 0)
             {
@@ -65,12 +71,12 @@ namespace BoomifyCS.Parser
                 AstNode op = operatorStack.Pop();
                 op.Left = left;
                 op.Right = right;
-                operandStack.Add(op);
+                operandStack.Push(op);
             }
             
 
 
-            return operandStack[0];
+            return operandStack.First();
         }
         public static object SimpleEval(AstNode node)
         {
@@ -98,7 +104,7 @@ namespace BoomifyCS.Parser
                 var bifyValue = astIntNode.BifyValue;
                 return bifyValue;
             }
-            throw new InvalidOperationException($"Unsupported node type: {node.GetType().Name}");
+            return null;
         }
         public static BifyObject CalculateBifyObjects(BifyObject a,BifyObject b,TokenType op)
         {

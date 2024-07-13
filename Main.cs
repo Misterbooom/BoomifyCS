@@ -13,7 +13,7 @@ namespace BoomifyCS
     {
         static void Main(string[] args)
         {
-            string code = @"var a = null;";
+            string code = @"(2 + 2) * 2;";
             MyLexer lexer = new MyLexer(code);
             try
             {
@@ -23,6 +23,7 @@ namespace BoomifyCS
                 string[] callStack = { "Main" };
 
                 AstNode node = astParser.ParseTokens(tokens);
+                Console.WriteLine(AstParser.SimpleEval(node));
                 Console.WriteLine(node);
             }
             catch (BifyException e) 
@@ -37,4 +38,3 @@ namespace BoomifyCS
 
     }
 }
-// Add separating lines by AstLine node,Add Base constant node , Add AstInt,AstString,AstBoolean,AstNull,AstAssignment,AstVarDecl,AstLine Node ,Fixed EOL token Add BifyBoolean Create StatementParser add some exceptions

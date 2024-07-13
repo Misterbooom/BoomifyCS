@@ -36,7 +36,7 @@ public static class ListExtensions
     {
         string result = "";
         foreach (var token in list)
-        {  
+        {
             if (token.Type == TokenType.WHITESPACE)
             {
                 continue;
@@ -51,7 +51,21 @@ public static class ListExtensions
         foreach (var node in list)
         {
             if (node != null)
-            {            
+            {
+                Console.WriteLine(node.ToString());
+
+            }
+        }
+        Console.Write(']');
+
+    }
+    public static void WriteNodes<T>(this Stack<T> list) where T : AstNode
+    {
+        Console.Write('[');
+        foreach (var node in list)
+        {
+            if (node != null)
+            {
                 Console.WriteLine(node.ToString());
 
             }

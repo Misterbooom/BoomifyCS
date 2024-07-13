@@ -48,6 +48,7 @@ namespace BoomifyCS.Lexer
         {
             List<Token> tokens = new List<Token>();
             bool lastTokenWasSemicolon = false;
+            List<int> bracketsStack = new List<int>();
             while (_position < _code.Length)
             {
                 char currentChar = _code[_position];
@@ -59,6 +60,19 @@ namespace BoomifyCS.Lexer
                     lastTokenWasSemicolon = true;
                     _position++;
                     continue;
+                }
+                if (currentChar == '(')
+                {
+                    bracketsStack.Add(_lineCount);
+                }
+                else if (currentChar == ')') 
+                {
+                    if (bracketsStack.Count == 0) 
+                    { 
+                        throw new BifySyntaxError("Unmatched ')': missing '('.",_lines[_lineCount], ")", _lineCount);
+
+                    }
+                    bracketsStack.Pop();
                 }
 
                 if (char.IsWhiteSpace(currentChar))
@@ -165,6 +179,10 @@ namespace BoomifyCS.Lexer
                 }
 
                 _position++;
+            }
+            if (bracketsStack.Count > 0)
+            {
+                throw new BifySyntaxError("Unmatched '(': missing ')'.",_lines[bracketsStack[0]], "(",bracketsStack[0]);
             }
 
             return tokens;
