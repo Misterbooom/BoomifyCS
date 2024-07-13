@@ -8,8 +8,8 @@ using BoomifyCS.Ast;
 using BoomifyCS.Lexer;
 using BoomifyCS.Parser;
 using BoomifyCS.Interpreter;
-namespace BoomifyCS
-{
+namespace BoomifyCS 
+{                   
     internal class Program
     {
         static void Main(string[] args)

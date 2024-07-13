@@ -35,6 +35,16 @@ public static class ListExtensions
         }
         Console.WriteLine(result);
     }
+    public static string TokensToString<T>(this List<T> list) where T : Token
+    {
+        string result = "";
+        foreach (var token in list)
+        {
+            result += token.ToString() + "\n";
+        }
+        return result;
+    }
+
     public static void WriteTokensWithoutWhiteSpace<T>(this List<T> list) where T : Token
     {
         string result = "";

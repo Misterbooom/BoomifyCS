@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -48,8 +49,9 @@ namespace BoomifyCS.Parser
             {
                 return new AstBracket(token);
             }
-            else if (token.Type == TokenType.EOL)
+            else if (token.Type == TokenType.OBJECT)
             {
+                return new AstBlock(TokenToAst(token.Tokens));
             }
             throw new Exception("Unsupported token - " + token.Type);
         }
@@ -58,7 +60,16 @@ namespace BoomifyCS.Parser
             if (token.Type == TokenType.VARDECL)
             {
                 Tuple<AstNode, int> result = StatementParser.ParseVarDecl(token,tokens,currentPos);
-                return new Tuple<AstNode, int> (result.Item1,result.Item2);
+                return result;
+            }
+            else if (token.Type == TokenType.IF)
+            {
+                Tuple<AstNode, int> result = StatementParser.ParseIf(token, tokens, currentPos);
+                return result;
+            }
+            else if (token.Type == TokenType.ELSE)
+            {
+                return StatementParser.ParseElse(token, tokens, currentPos);
             }
             throw new NotImplementedException($"Not implemented token - {token.Type}");
         }

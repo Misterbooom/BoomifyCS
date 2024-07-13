@@ -72,7 +72,8 @@ namespace BoomifyCS.Lexer
         BIT_NEG,
         INCR,
         DECR,
-        
+        BLOCK,
+        q
     }
     public class Token
     {
@@ -87,6 +88,11 @@ namespace BoomifyCS.Lexer
         }
         public override string ToString()
         {
+            if (Tokens != null)
+            {
+                return $"Token(type = '{Type}',value = '{Value} tokens - {Tokens.TokensToString()}')";
+
+            }
             return $"Token(type = '{Type}',value = '{Value}')";
         }
 

@@ -69,6 +69,58 @@ namespace BoomifyCS.Parser
             }
             throw new NotImplementedException();
         }
+        public static Tuple<List<Token>, int> TokensInBrackets(List<Token> tokens, int start = 0)
+        {
+            List<Token> result = new List<Token>();
+            int bracketCounter = 0;
+            bool insideBrackets = false;
+
+            for (int i = start; i < tokens.Count; i++)
+            {
+                Token token = tokens[i];
+
+                if (token.Type == TokenType.LPAREN)
+                {
+                    bracketCounter++;
+                    if (!insideBrackets)
+                    {
+                        insideBrackets = true;
+                    }
+                    else
+                    {
+                        result.Add(token);
+                    }
+                }
+                else if (token.Type == TokenType.RPAREN)
+                {
+                    bracketCounter--;
+                    if (bracketCounter == 0)
+                    {
+                        return new Tuple<List<Token>, int>(result, i);
+                    }
+                    else
+                    {
+                        result.Add(token); 
+                    }
+                }
+                else
+                {
+                    if (insideBrackets)
+                    {
+                        result.Add(token);
+                    }
+                }
+            }
+
+            if (bracketCounter > 0)
+            {
+                throw new InvalidOperationException("Unmatched parentheses in token list.");
+            }
+
+            return new Tuple<List<Token>, int>(result, tokens.Count);
+        }
+
+
     }
 
 }

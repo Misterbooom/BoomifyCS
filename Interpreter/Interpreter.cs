@@ -26,7 +26,7 @@ namespace BoomifyCS.Interpreter
             if (node == null) 
             {
                 return null;
-            }
+            } 
             else if (node is AstBinaryOp)
             {
                 object left = Visit(node.Left);

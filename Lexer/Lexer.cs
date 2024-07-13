@@ -385,7 +385,9 @@ namespace BoomifyCS.Lexer
                 throw new InvalidOperationException("Unmatched '{' found.");
             }
             string block_string = block.ToString();
-            return new Token(TokenType.OBJECT,block_string);
+            MyLexer lexer = new MyLexer(block_string.Trim());
+            List<Token> tokens = lexer.Tokenize();
+            return new Token(TokenType.OBJECT,block_string,tokens);
         }
 
     }

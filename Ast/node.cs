@@ -135,7 +135,7 @@ namespace BoomifyCS.Ast
     }
     public class AstNull : AstConstant
     {
-        public AstNull(Token token): base(token)
+        public AstNull(Token token) : base(token)
         {
             this.BifyValue = new BifyNull(token);
         }
@@ -155,12 +155,12 @@ namespace BoomifyCS.Ast
                 baseStr += Left.StrHelper(level, "Var name: ");
                 baseStr += Right.StrHelper(level, "Var Value: ");
             }
-            catch (NullReferenceException) 
+            catch (NullReferenceException)
             {
                 throw new NullReferenceException("Left or right value in AstAssignment is null");
             }
 
-            return baseStr + $"{new String(' ', 4 * (level + 1))}\n" ;
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n";
         }
         public override string ToString()
         {
@@ -180,28 +180,28 @@ namespace BoomifyCS.Ast
         {
             string baseStr = base.StrHelper(level, note);
             string assignmentStr = AssignmentNode?.StrHelper(level + 1, "assignment:") ?? "";
-            return baseStr + $"{new String(' ', 4 * (level + 1))}Variable Declaration\n{assignmentStr}";
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{assignmentStr}";
         }
         public override string ToString()
         {
             return StrHelper();
         }
     }
-    public class AstLine : AstNode 
+    public class AstLine : AstNode
     {
         public AstLine(AstNode left = null, AstNode right = null) : base(new Token(TokenType.EOL, ";"), left, right)
         {
         }
     }
-    public class AstIdentifier : AstNode 
+    public class AstIdentifier : AstNode
     {
         public string Name;
-        public AstIdentifier(Token token,string name) : base(token)
+        public AstIdentifier(Token token, string name) : base(token)
         {
             this.Name = name;
         }
     }
-    public class AstBracket: AstNode
+    public class AstBracket : AstNode
     {
         public AstBracket(Token token) : base(token)
         {
@@ -209,7 +209,65 @@ namespace BoomifyCS.Ast
     }
     public class AstEOL : AstNode
     {
-        public AstEOL(Token token): base(token) { }
+        public AstEOL(Token token) : base(token) { }
     }
+    public class AstBlock : AstNode
+    {
 
+        public AstNode StatementsNode;
+        public AstBlock(AstNode statementsNode) : base(new Token(TokenType.BLOCK, "Block"))
+        {
+            this.StatementsNode = statementsNode;
+        }
+        public override string StrHelper(int level = 0, string note = "")
+        {
+            string baseStr = base.StrHelper(level, note);
+            string statementsStr = StatementsNode?.StrHelper(level + 1, "statements: ") ?? "";
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{statementsStr}";
+        }
+    }
+    public class AstIf : AstNode
+    {
+        public AstNode ConditionNode;
+        public AstBlock BlockNode;
+        public AstElse ElseNode;
+        public AstIf(Token token, AstNode conditionNode, AstBlock blockNode, AstElse elseNode = null) : base(token)
+        {
+            this.ElseNode = elseNode;
+            this.ConditionNode = conditionNode;
+            this.BlockNode = blockNode;
+        }
+        public override string StrHelper(int level = 0, string note = "")
+        {
+            string baseStr = base.StrHelper(level, note);
+            string conditionStr = ConditionNode.StrHelper(level + 1, "condition: ");
+            string blockStr = BlockNode.StrHelper(level + 1, "block: ");
+            if (ElseNode != null)
+            {
+                string elseStr = ElseNode.StrHelper(level + 1, "else: ");
+                return baseStr + $"{new String(' ', 4 * (level + 1))}\n{conditionStr}\n{blockStr}\n{elseStr}";
+
+            }
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{conditionStr}\n{blockStr}";
+        }
+        public override string ToString()
+        {
+            return StrHelper();
+        }
+    }
+    public class AstElse : AstNode
+    {
+        public AstBlock BlockNode;
+        public AstElse(Token token, AstBlock blockNode) : base(token, blockNode)
+        {
+            this.BlockNode = blockNode;
+        }
+        public override string StrHelper(int level = 0, string note = "")
+        {
+            string baseStr = base.StrHelper(level, note);
+            string blockStr = BlockNode.StrHelper(level + 1, "block: ");
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{blockStr}";
+        }
+    }
 }
+

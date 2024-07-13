@@ -72,7 +72,17 @@ namespace BoomifyCS.Ast
                 {
                     Tuple<AstNode, int> result = AstParser.MultiTokenStatement(currentToken, tokens, _lineTokenPosition);
                     _lineTokenPosition = result.Item2;
-                    operandStack.Push(result.Item1);
+                    if (result.Item1 is AstElse)
+                    {
+                        operatorStack.WriteNodes();
+                        if (operatorStack.Peek() is AstIf astIf)
+                        {
+                            astIf.ElseNode = (AstElse)result.Item1;
+                            _lineTokenPosition++;
+                            continue;
+                        }
+                    }
+                    operatorStack.Push(result.Item1);
                 }
                 else if (TokensParser.IsOperator(currentToken.Type))
                 {
@@ -106,9 +116,13 @@ namespace BoomifyCS.Ast
 
                 _lineTokenPosition++;
             }
-
+            if (operatorStack.Count == 1 && operandStack.Count == 0)
+            {
+                return operatorStack.Peek();
+            }
             while (operatorStack.Count > 0)
             {
+                
                 AstNode right = operandStack.Pop();
                 AstNode left = operandStack.Pop();
                 AstNode op = operatorStack.Pop();
