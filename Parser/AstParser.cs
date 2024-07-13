@@ -40,7 +40,11 @@ namespace BoomifyCS.Parser
             {
                 return new AstNull(token);
             }
-            else 
+            else if (token.Type == TokenType.IDENTIFIER)
+            {
+                return new AstIdentifier(token, token.Value);
+
+            }
             throw new Exception("Unsupported token - " + token.Type);
         }
         public static Tuple<AstNode,int> MultiTokenStatement(Token token,List<Token> tokens,int currentPos)

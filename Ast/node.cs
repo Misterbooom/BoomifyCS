@@ -149,7 +149,17 @@ namespace BoomifyCS.Ast
 
         public override string StrHelper(int level = 0, string note = "")
         {
-            string baseStr = base.StrHelper(level, note);
+            string baseStr = "";
+            try
+            {
+                baseStr += Left.StrHelper(level, "Var name: ");
+                baseStr += Right.StrHelper(level, "Var Value: ");
+            }
+            catch (NullReferenceException) 
+            {
+                throw new NullReferenceException("Left or right value in AstAssignment is null");
+            }
+
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n" ;
         }
         public override string ToString()
@@ -183,4 +193,13 @@ namespace BoomifyCS.Ast
         {
         }
     }
+    public class AstIdentifier : AstNode 
+    {
+        public string Name;
+        public AstIdentifier(Token token,string name) : base(token)
+        {
+            this.Name = name;
+        }
+    }
+
 }

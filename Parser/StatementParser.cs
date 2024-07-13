@@ -10,29 +10,40 @@ namespace BoomifyCS.Parser
 {
     public static class StatementParser
     {
-        public static Tuple<AstNode,int> ParseVarDecl(Token token, List<Token> tokens, int currentPos)
+        public static Tuple<AstNode, int> ParseVarDecl(Token token, List<Token> tokens, int currentPos)
         {
-            int i;
-            Token assignmentToken;
-            Tuple<Token, int> result = TokensParser.FindTokenByTT(TokenType.ASSIGN, tokens, currentPos);
-            assignmentToken = result.Item1;
+            var (varNameToken, varNameIndex) = TokensParser.FindTokenByTT(TokenType.IDENTIFIER, tokens, currentPos);
+            var (assignmentToken, assignmentIndex) = TokensParser.FindTokenByTT(TokenType.ASSIGN, tokens, currentPos);
+
             if (assignmentToken == null)
             {
                 List<Token> invalidTokens = new List<Token> { token };
-                throw new BifySyntaxError("Assignment token not found", tokens, invalidTokens, 0);
+                throw new BifySyntaxError("Assignment token not found", tokens, invalidTokens, currentPos);
             }
-            i = result.Item2;
-            currentPos += i + 1;
-            AstAssignment assignmentNode = new AstAssignment(assignmentToken);
-            Tuple<List<Token>,int> resultList = TokensParser.AllTokensToEol(tokens, currentPos);
-            
-            List<Token> varValueTokens = resultList.Item1;
 
-            i = resultList.Item2;
+            currentPos = assignmentIndex + 1;
+            AstAssignment assignmentNode = new AstAssignment(assignmentToken);
+
+            var (varValueTokens, tokensProcessed) = TokensParser.AllTokensToEol(tokens, currentPos);
+            currentPos += tokensProcessed;
+
+
+            if (varNameToken == null)
+            {
+                List<Token> invalidTokens = new List<Token> { token };
+                throw new BifySyntaxError("Identifier token not found", tokens, invalidTokens, currentPos - tokensProcessed);
+            }
+
+            AstNode varNameNode = AstParser.TokenToNode(varNameToken);
             AstNode varValueNode = AstParser.TokenToAst(varValueTokens);
+
+            assignmentNode.Left = varNameNode;
             assignmentNode.Right = varValueNode;
+
             AstVarDecl astVarDecl = new AstVarDecl(token, assignmentNode);
-            return new Tuple<AstNode, int>(astVarDecl,i);
+
+            return new Tuple<AstNode, int>(astVarDecl, currentPos);
         }
+
     }
 }

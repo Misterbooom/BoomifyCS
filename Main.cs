@@ -37,4 +37,4 @@ namespace BoomifyCS
 
     }
 }
-// Add separating lines by AstLine node,Add Base constant node , Add AstInt,Ast
+// Add separating lines by AstLine node,Add Base constant node , Add AstInt,AstString,AstBoolean,AstNull,AstAssignment,AstVarDecl,AstLine Node ,Fixed EOL token Add BifyBoolean Create StatementParser add some exceptions
