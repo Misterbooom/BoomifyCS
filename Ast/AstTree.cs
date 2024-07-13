@@ -155,17 +155,7 @@ namespace BoomifyCS.Ast
         }
 
 
-        //    while (self.operator_stack and
-        //                   self.operator_stack[-1].token.value != '(' and
-        //                   config.precedence.get(self.operator_stack[-1].token.value, 0) >= config.precedence.get(token.type, 0)):
-        //                operator = self.operator_stack.pop()
-        //                right = self.operand_stack.pop() if operator.token.type not in {TokenType.IF, TokenType.ELSE, TokenType.FUNCDECL, TokenType.RETURN } else None
-        //                                                                                                                                                              
-        //                left = self.operand_stack.pop() if not Ast.in_object(token.type, config.other) else None
-        //                operator.left = left
-        //                operator.right = right
-        //                self.operand_stack.append(operator)
-        //            self.operator_stack.append(self.parse_node(token))
+      
 
 
 
