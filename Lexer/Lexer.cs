@@ -24,14 +24,12 @@ namespace BoomifyCS.Lexer
 
             foreach (string line in linesArray)
             {
-                if (!string.IsNullOrWhiteSpace(line)) 
-                {
-                    tempLines.Add(line); 
-                }
+                tempLines.Add(line); 
+                
             }
 
             _lines = tempLines.ToArray();
-
+ 
             if (_lines.Length > 1)
             {
                 _currentLine = _lines[1]; 
@@ -51,6 +49,7 @@ namespace BoomifyCS.Lexer
             List<int> bracketsStack = new List<int>();
             while (_position < _code.Length)
             {
+
                 char currentChar = _code[_position];
 
 
@@ -88,61 +87,6 @@ namespace BoomifyCS.Lexer
                     bracketsStack.Pop();
                 }
 
-                if (char.IsWhiteSpace(currentChar))
-                {
-                    if (currentChar == '\n')
-                    {
-                        if (lastTokenWasSemicolon)
-                        {
-                            tokens.Add(new Token(TokenType.EOL, "\n"));
-                        }
-                        else
-                        {
-                            tokens.Add(new Token(TokenType.WHITESPACE, "\n"));
-                        }
-                        lastTokenWasSemicolon = false; 
-                        _lineCount++;
-                        _currentLine = string.Empty;
-                        continue;
-                    }
-                    else if (currentChar == '\r')
-                    {
-                        if (_position + 1 < _code.Length && _code[_position + 1] == '\n')
-                        {
-                            if (lastTokenWasSemicolon)
-                            {
-                                tokens.Add(new Token(TokenType.EOL, "\r\n"));
-                            }
-                            else
-                            {
-                                tokens.Add(new Token(TokenType.WHITESPACE, "\r\n"));
-                            }
-                            _position++;
-                            _currentLine = _lines[_lineCount];
-                        }
-                        else
-                        {
-                            if (lastTokenWasSemicolon)
-                            {
-                                tokens.Add(new Token(TokenType.EOL, "\r"));
-                            }
-                            else
-                            {
-                                tokens.Add(new Token(TokenType.WHITESPACE, "\r"));
-                            }
-                        }
-                        lastTokenWasSemicolon = false; 
-                        _lineCount++;
-                        _currentLine = string.Empty; 
-                    }
-                    else
-                    {
-                        tokens.Add(new Token(TokenType.WHITESPACE, currentChar.ToString()));
-                        lastTokenWasSemicolon = false;
-                    }
-                    _position++;
-                    continue;
-                }
 
                 KeyValuePair<string, TokenType> multichar = GenerateMultiChar();
                   
@@ -397,10 +341,15 @@ namespace BoomifyCS.Lexer
             {
                 throw new InvalidOperationException("Unmatched '{' found.");
             }
-            string block_string = block.ToString();
-            MyLexer lexer = new MyLexer(block_string.Trim());
+            string block_string = block.ToString().Trim();
+            MyLexer lexer = new MyLexer(block_string);
             List<Token> tokens = lexer.Tokenize();
-            return new Token(TokenType.OBJECT,"{" + block_string + "}",tokens);
+            _position -= 2;
+            return new Token(TokenType.OBJECT, "{" + block_string + "}", tokens);
+
+
+            
+            
         }
 
     }

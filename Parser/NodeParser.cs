@@ -54,6 +54,10 @@ namespace BoomifyCS.Parser
                 AstNode node = TokenToAst(token.Tokens);
                 return new AstBlock(node);
             }
+            else if (token.Type == TokenType.ASSIGN)
+            {
+                return new AstAssignment(token);
+            }
             throw new Exception("Unsupported token - " + token.Type);
         }
 
@@ -71,6 +75,10 @@ namespace BoomifyCS.Parser
             else if (token.Type == TokenType.ELSE)
             {
                 return StatementParser.ParseElse(token, tokens, currentPos);
+            }
+            else if (token.Type == TokenType.ELSEIF)
+            {
+                return StatementParser.ParseElseIf(token, tokens, currentPos);
             }
             throw new NotImplementedException($"Not implemented token - {token.Type}");
         }

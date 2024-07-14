@@ -231,6 +231,7 @@ namespace BoomifyCS.Ast
         public AstNode ConditionNode;
         public AstBlock BlockNode;
         public AstElse ElseNode;
+        public AstElseIf ElseIf;
         public AstIf(Token token, AstNode conditionNode, AstBlock blockNode, AstElse elseNode = null) : base(token)
         {
             this.ElseNode = elseNode;
@@ -267,6 +268,24 @@ namespace BoomifyCS.Ast
             string baseStr = base.StrHelper(level, note);
             string blockStr = BlockNode.StrHelper(level + 1, "block: ");
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{blockStr}";
+        }
+    }
+    public class AstElseIf : AstNode
+    {
+        public AstBlock BlockNode;
+        public AstNode ConditionNode;
+        public AstElseIf(Token token, AstBlock blockNode, AstNode conditionNode) : base(token)
+        {
+            this.BlockNode = blockNode;
+            this.ConditionNode = conditionNode;
+        }
+        public override string StrHelper(int level = 0, string note = "")
+        {
+            string baseStr = base.StrHelper(level,note);
+            string conditionStr = ConditionNode.StrHelper(level + 1 , "Condition: ");
+            string blockStr = BlockNode.StrHelper(level + 1, "Block: ");
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{conditionStr}\n{blockStr}";
+
         }
     }
 }

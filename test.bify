@@ -1,3 +1,7 @@
 ﻿if (true){
-	var 2 = 45;
+	var a = 45;
+}
+else if (true){
+	var a = 45;
+	
 }

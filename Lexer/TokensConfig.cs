@@ -7,6 +7,8 @@ namespace BoomifyCS.Lexer
         public static Dictionary<string, TokenType> multiCharTokens = new Dictionary<string, TokenType>
         {
             { "if", TokenType.IF },
+            { "else if",TokenType.ELSEIF},
+
             { "else", TokenType.ELSE },
             { "while", TokenType.WHILE },
             { "for", TokenType.FOR },
@@ -25,7 +27,7 @@ namespace BoomifyCS.Lexer
             { "/=", TokenType.IDIV },
             { "//=", TokenType.IFLOORDIV },
             { "**=", TokenType.IPOW },
-            { "==", TokenType.EQ }
+            { "==", TokenType.EQ },
         };
 
         public static Dictionary<char, TokenType> singleCharTokens = new Dictionary<char, TokenType>
@@ -85,6 +87,7 @@ namespace BoomifyCS.Lexer
         {
             { "if", TokenType.IF },
             { "else", TokenType.ELSE },
+            {"elseif", TokenType.ELSEIF },
             { "while", TokenType.WHILE },
             { "for", TokenType.FOR },
             { "var", TokenType.VARDECL },

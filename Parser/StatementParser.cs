@@ -57,6 +57,8 @@ namespace BoomifyCS.Parser
             List<Token> blockTokens = new List<Token> { blockToken };
             AstNode blockNode = NodeParser.TokenToAst(blockTokens);
             AstIf astIf = new AstIf(token, conditionNode, (AstBlock)blockNode);
+            //Console.WriteLine("After block tokens - " + tokens.Count.ToString());
+            //tokens.GetRange(currentPos, tokens.Count).WriteTokens();
             return Tuple.Create<AstNode, int>(astIf, currentPos);
         }
 
@@ -68,6 +70,19 @@ namespace BoomifyCS.Parser
             AstNode blockNode = NodeParser.TokenToAst(blockTokens);
             AstElse astElse = new AstElse(token, (AstBlock)blockNode);
             return Tuple.Create<AstNode, int>(astElse, currentPos);
+        }
+        public static Tuple<AstNode, int> ParseElseIf(Token token, List<Token> tokens, int currentPos)
+        {
+            var (conditionTokens, conditionEnd) = TokensParser.TokensInBrackets(tokens, currentPos);
+            currentPos = conditionEnd + 1;
+            AstNode conditionNode = NodeParser.TokenToAst(conditionTokens);
+            var (blockToken, blockEnd) = TokensParser.FindTokenByTT(TokenType.OBJECT, tokens, currentPos);
+            blockToken.Tokens.WriteTokens();
+            currentPos = blockEnd;
+            List<Token> blockTokens = new List<Token> { blockToken };
+            AstNode blockNode = NodeParser.TokenToAst(blockTokens);
+            AstElseIf astIfElse = new AstElseIf(token, (AstBlock)blockNode,conditionNode);
+            return Tuple.Create<AstNode, int>(astIfElse, currentPos);
         }
     }
 }

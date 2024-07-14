@@ -13,6 +13,7 @@ namespace BoomifyCS.Ast
         private int _codeTokenPosition = 0;
         private int _lineTokenPosition = 0;
         public int lineCount = 1;
+        public string runFrom = "";
         private List<Token> _codeTokens = new List<Token>();
         private List<Token> _lineTokens = new List<Token>();
         public AstTree(int lineCount = 1) {
@@ -30,11 +31,15 @@ namespace BoomifyCS.Ast
             while (_codeTokenPosition < tokens.Count)
             {
                 var (lineTokens, newTokenPosition) = TokensParser.SplitTokensByLine(tokens, _codeTokenPosition);
-                lineTokens.WriteTokens(); 
                 _codeTokenPosition = newTokenPosition;
                 _lineTokens = lineTokens;
                 lineCount += 1;
-                
+                if (runFrom == "main")
+                {
+                    Console.WriteLine(lineCount);
+                    lineTokens.WriteTokens();
+
+                }
                 AstNode node = BuildAstTree(lineTokens);
                 nodes.Add(node);
                 //Console.WriteLine(AstParser.SimpleEval(node));
@@ -98,8 +103,12 @@ namespace BoomifyCS.Ast
                                 throw new BifySyntaxError("Unexpected else ", tokens, new List<Token> { currentToken }, lineCount);
 
                             }
-
                         }
+                        else if (result.Item1 is AstElseIf)
+                        {
+                            Console.WriteLine(result.Item1);
+                        }
+                        
                         operatorStack.Push(result.Item1);
 
                     }

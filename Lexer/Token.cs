@@ -73,7 +73,7 @@ namespace BoomifyCS.Lexer
         INCR,
         DECR,
         BLOCK,
-        q
+        ELSEIF,
     }
     public class Token
     {

@@ -24,16 +24,16 @@ namespace BoomifyCS
             try
             {
                 List<Token> tokens = lexer.Tokenize();
-                tokens.WriteTokens();
+                //tokens.WriteTokens();
                 AstTree astParser = new AstTree();
+                astParser.runFrom = "main";
                 string[] callStack = { "Main" };
 
                 AstNode node = astParser.ParseTokens(tokens);
                 //Console.WriteLine(AstParser.SimpleEval(node));
                 Console.WriteLine(node);
                 BetaInterpreter interpreter = new BetaInterpreter();
-                interpreter.run(node);
-                throw new BifyException("Test", "test", "test", 10);
+                //interpreter.run(node);
             }
             catch (BifyException e) 
             {
