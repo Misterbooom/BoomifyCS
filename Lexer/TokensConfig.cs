@@ -28,6 +28,8 @@ namespace BoomifyCS.Lexer
             { "//=", TokenType.IFLOORDIV },
             { "**=", TokenType.IPOW },
             { "==", TokenType.EQ },
+            { "--", TokenType.INCREMENT },
+            { "++",TokenType.DECREMENT},
         };
 
         public static Dictionary<char, TokenType> singleCharTokens = new Dictionary<char, TokenType>
@@ -54,6 +56,7 @@ namespace BoomifyCS.Lexer
 
         public static Dictionary<string, TokenType> arithmeticOperators = new Dictionary<string, TokenType>
             {
+
                 { "+", TokenType.ADD },
                 { "-", TokenType.SUB },
                 { "*", TokenType.MUL },
@@ -65,9 +68,18 @@ namespace BoomifyCS.Lexer
                 { "&", TokenType.BIT_AND },
                 { "|", TokenType.BIT_OR },
                 { "^", TokenType.BIT_XOR },
-                { "==",TokenType.EQ }
+                { "==",TokenType.EQ },
+                { "<",TokenType.LT},
+                { ">", TokenType.GT},
+                { "<=", TokenType.LTEQ },
+                { ">=", TokenType.GTEQ },
+                { "&&", TokenType.AND },
+                { "||", TokenType.OR },
+                { "!", TokenType.NOT },
+                { "--", TokenType.INCREMENT },
+                { "++",TokenType.DECREMENT},
 
-            };
+        };
 
         public static Dictionary<string, TokenType> comparisonOperators = new Dictionary<string, TokenType>
         {
@@ -84,6 +96,8 @@ namespace BoomifyCS.Lexer
             { "/=", TokenType.IDIV },
             { "//=", TokenType.IFLOORDIV },
             { "**=", TokenType.IPOW },
+            { "--", TokenType.INCREMENT },
+            { "++",TokenType.DECREMENT},
         };
         public static Dictionary<string, TokenType> multiTokenStatements = new Dictionary<string, TokenType>
         {
@@ -94,6 +108,8 @@ namespace BoomifyCS.Lexer
             { "for", TokenType.FOR },
             { "var", TokenType.VARDECL },
             { "return", TokenType.RETURN },
+            { "--", TokenType.INCREMENT },
+            { "++",TokenType.DECREMENT},
         };
     }
 }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Data;
 using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Parser
@@ -73,7 +71,7 @@ namespace BoomifyCS.Parser
                 }
                 result.Add(token);
             }
-            throw new NotImplementedException();
+            throw new SyntaxErrorException("Eol token not found");
         }
         public static Tuple<List<Token>, int> TokensInBrackets(List<Token> tokens, int start = 0)
         {
@@ -124,6 +122,28 @@ namespace BoomifyCS.Parser
             }
 
             return new Tuple<List<Token>, int>(result, tokens.Count);
+        }
+        public static List<List<Token>> SplitTokensByTT(List<Token> tokens, TokenType tokenType, int start = 0)
+        {
+            List<List<Token>> result = new List<List<Token>>();
+            int lastTokenIndex = start;
+
+            for (int i = start; i < tokens.Count; i++)
+            {
+                Token token = tokens[i];
+                if (token.Type == tokenType)
+                {
+                    result.Add(tokens.GetRange(lastTokenIndex, i - lastTokenIndex));
+                    lastTokenIndex = i + 1;
+                }
+            }
+
+            if (lastTokenIndex < tokens.Count)
+            {
+                result.Add(tokens.GetRange(lastTokenIndex, tokens.Count - lastTokenIndex));
+            }
+
+            return result;
         }
 
 

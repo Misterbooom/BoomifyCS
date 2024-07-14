@@ -61,7 +61,7 @@ namespace BoomifyCS.Parser
             throw new Exception("Unsupported token - " + token.Type);
         }
 
-        public static Tuple<AstNode, int> MultiTokenStatement(Token token, List<Token> tokens,int currentPos)
+        public static (AstNode, int) MultiTokenStatement(Token token, List<Token> tokens,int currentPos)
         {
 
             if (token.Type == TokenType.VARDECL)
@@ -79,6 +79,18 @@ namespace BoomifyCS.Parser
             else if (token.Type == TokenType.ELSEIF)
             {
                 return StatementParser.ParseElseIf(token, tokens, currentPos);
+            }
+            else if (token.Type == TokenType.WHILE)
+            {
+                return StatementParser.ParseWhile(token, tokens, currentPos);
+            }
+            else if (token.Type == TokenType.FOR)
+            {
+                return StatementParser.ParseFor(token, tokens, currentPos);
+            }
+            else if (token.Type == TokenType.INCREMENT || token.Type == TokenType.DECREMENT)
+            {
+                return StatementParser.ParseUnaryOp(token, tokens, currentPos);
             }
             throw new NotImplementedException($"Not implemented token - {token.Type}");
         }
@@ -102,6 +114,21 @@ namespace BoomifyCS.Parser
         {
             AstTree ast = new AstTree();
             return ast.ParseTokens(tokens);
+        }
+        public static AstNode TokenToAst(Token token)
+        {
+            AstTree ast = new AstTree();
+            return ast.ParseTokens(new List<Token> {token});
+        }
+        public static AstNode BuiltTokensToAst(Token token)
+        {
+            AstTree ast = new AstTree();
+            return ast.BuildAstTree(new List<Token> {token});
+        }
+        public static AstNode BuiltTokensToAst(List<Token> tokens)
+        {
+            AstTree ast = new AstTree();
+            return ast.BuildAstTree(tokens);
         }
     }
 }

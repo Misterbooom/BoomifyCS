@@ -312,11 +312,13 @@ namespace BoomifyCS.Ast
         public AstBlock BlockNode;
         public AstNode ConditionNode;
         public AstNode IncrementNode;
-        public AstFor(Token token, AstBlock blockNode, AstNode conditionNode, AstNode incrementNode) : base(token)
+        public AstNode InitNode;
+        public AstFor(Token token, AstBlock blockNode, AstNode conditionNode, AstNode incrementNode, AstNode initNode) : base(token)
         {
             this.BlockNode = blockNode;
             this.ConditionNode = conditionNode;
             this.IncrementNode = incrementNode;
+            this.InitNode = initNode;
         }
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -346,6 +348,22 @@ namespace BoomifyCS.Ast
             string returnStr = ReturnNode.StrHelper(level + 3, "Return: ");
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{callableStr}\n{argumentsStr}\n{returnStr}";
 
+        }
+    }
+    public class AstUnaryOperator : AstNode
+    {
+        public AstNode value;
+        public int increment;
+        public AstUnaryOperator(Token token, AstNode value, int increment) : base(token)
+        {
+            this.value = value;
+            this.increment = increment;
+        }
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
+        {
+            string baseStr = base.StrHelper(level, note);
+            string valueStr = value.StrHelper(level + 1, "Value: ");
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{valueStr}";
         }
     }
 }

@@ -45,7 +45,6 @@ namespace BoomifyCS.Lexer
         public List<Token> Tokenize()
         {
             List<Token> tokens = new List<Token>();
-            bool lastTokenWasSemicolon = false;
             List<int> bracketsStack = new List<int>();
             while (_position < _code.Length)
             {
@@ -69,7 +68,14 @@ namespace BoomifyCS.Lexer
 
                 if (currentChar == ';')
                 {
-                    tokens.Add(new Token(TokenType.EOL, ";"));
+                    if (bracketsStack.Count == 0)
+                    {
+                        tokens.Add(new Token(TokenType.EOL, ";"));
+                    }
+                    else
+                    {
+                        tokens.Add(new Token(TokenType.SEMICOLON,";"));
+                    }
                     _position++;
                     continue;
                 }

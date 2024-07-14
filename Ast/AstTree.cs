@@ -16,7 +16,7 @@ namespace BoomifyCS.Ast
         public string runFrom = "";
         private List<Token> _codeTokens = new List<Token>();
         private List<Token> _lineTokens = new List<Token>();
-        public AstTree(int lineCount = 1) {
+        public AstTree(int lineCount = 0) {
             this.lineCount = lineCount; 
 
         }
@@ -51,7 +51,13 @@ namespace BoomifyCS.Ast
                 AstLine line = new AstLine(left, right);
                 nodes.Add(line);
             }
-            return nodes[0];
+            if (nodes.Count > 0)
+            {
+                return nodes[0];
+
+            }
+            return new AstEOL(new Token(TokenType.EOL,""));
+
         }
         /// <summary>
         /// Builds an Abstract Syntax Tree (AST) from a list of tokens.
@@ -81,7 +87,7 @@ namespace BoomifyCS.Ast
                 {
                     try
                     {
-                        Tuple<AstNode, int> result = NodeParser.MultiTokenStatement(currentToken, tokens, _lineTokenPosition);
+                        (AstNode, int) result = NodeParser.MultiTokenStatement(currentToken, tokens, _lineTokenPosition);
                         _lineTokenPosition = result.Item2;
                         if (result.Item1 is AstElse)
                         {
@@ -98,7 +104,7 @@ namespace BoomifyCS.Ast
                                     throw new BifySyntaxError("Unexpected else ", tokens, tokens, lineCount);
                                 }
                             }
-                            catch (InvalidOperationException e)
+                            catch (InvalidOperationException)
                             {
                                 throw new BifySyntaxError("Unexpected else ", tokens, new List<Token> { currentToken }, lineCount);
 
@@ -107,6 +113,10 @@ namespace BoomifyCS.Ast
                         else if (result.Item1 is AstElseIf)
                         {
                             Console.WriteLine(result.Item1);
+                        }
+                        else if (result.Item1 is AstUnaryOperator)
+                        {
+                            operandStack.Pop();
                         }
                         
                         operatorStack.Push(result.Item1);
@@ -188,13 +198,29 @@ namespace BoomifyCS.Ast
                    operatorPrecedence >= currentOperatorPrecedence
                   )
             {
-                operatorStack.WriteNodes();
-                AstNode right = operandStack.Pop();
-                AstNode left = operandStack.Pop();
                 AstNode op = operatorStack.Pop();
-                op.Left = left;
-                op.Right = right;
-                operandStack.Push(op);
+                if (operandStack.Count >= 2 && TokenConfig.assignmentOperators.ContainsValue(op.Token.Type))
+                {
+                    AstNode right = operandStack.Pop();
+                    AstNode left = operandStack.Pop();
+                    op.Left = left;
+                    op.Right = right;
+                    operandStack.Push(op);
+                    continue;
+
+                }
+
+
+                else 
+                {
+                    AstNode right = null;
+                    AstNode left = null;
+                    op.Left = left;
+                    op.Right = right;
+                    operandStack.Push(op);
+                    continue;
+                }
+                
             }
             if (currentToken.Type != TokenType.EOL)
             {
