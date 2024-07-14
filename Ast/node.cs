@@ -6,9 +6,9 @@ namespace BoomifyCS.Ast
 {
     public class AstNode
     {
-        public Token Token;
-        public AstNode Left;
-        public AstNode Right;
+        public Token Token { get; set; }
+        public AstNode Left { get; set; }
+        public AstNode Right { get; set; }
 
         public AstNode(Token token, AstNode left = null, AstNode right = null)
         {
@@ -22,25 +22,26 @@ namespace BoomifyCS.Ast
             return StrHelper();
         }
 
-        public virtual string StrHelper(int level = 0, string note = "")
+        public virtual string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string indent = new String(' ', 4 * level);
-            string treeStr = $"{indent}└──{note}{GetType().Name}({Token.Value})\n";
+            string branch = isLeft ? "|- " : "|- ";
+            string treeStr = $"{indent}{branch}{note}{GetType().Name}({Token.Value})\n";
 
             if (Left != null)
             {
-                treeStr += Left.StrHelper(level + 1, "left:");
+                treeStr += Left.StrHelper(level + 1, "left:", true);
             }
 
             if (Right != null)
             {
-                treeStr += Right.StrHelper(level + 1, "right:");
+                treeStr += Right.StrHelper(level + 1, "right:", false);
             }
 
             return treeStr;
         }
-
     }
+
 
     public class AstBinaryOp : AstNode
     {
@@ -48,10 +49,10 @@ namespace BoomifyCS.Ast
         {
         }
 
-        public override string StrHelper(int level = 0, string note = "")
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
-            return baseStr + $"{new String(' ', 4 * (level + 1))}Binary Operation\n";
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n";
         }
         public override string ToString()
         {
@@ -66,10 +67,10 @@ namespace BoomifyCS.Ast
         {
         }
 
-        public override string StrHelper(int level = 0, string note = "")
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
-            return baseStr + $"{new String(' ', 4 * (level + 1))}Constant Value\n";
+            return baseStr + $"{new String(' ', 4 * (level + 1))}";
         }
         public override string ToString()
         {
@@ -84,10 +85,10 @@ namespace BoomifyCS.Ast
             this.BifyValue = bifyValue;
         }
 
-        public override string StrHelper(int level = 0, string note = "")
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
-            return baseStr + $"{new String(' ', 4 * (level + 1))}Integer Value: {BifyValue}\n";
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n";
         }
 
         public override string ToString()
@@ -103,10 +104,10 @@ namespace BoomifyCS.Ast
             this.BifyValue = bifyValue;
         }
 
-        public override string StrHelper(int level = 0, string note = "")
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
-            return baseStr + $"{new String(' ', 4 * (level + 1))}String Value: {BifyValue}\n";
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n";
         }
 
         public override string ToString()
@@ -122,10 +123,10 @@ namespace BoomifyCS.Ast
             this.BifyValue = bifyValue;
         }
 
-        public override string StrHelper(int level = 0, string note = "")
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
-            return baseStr + $"{new String(' ', 4 * (level + 1))}Boolean Value: {BifyValue}\n";
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n";
         }
 
         public override string ToString()
@@ -147,7 +148,7 @@ namespace BoomifyCS.Ast
         {
         }
 
-        public override string StrHelper(int level = 0, string note = "")
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = "";
             try
@@ -176,10 +177,10 @@ namespace BoomifyCS.Ast
             AssignmentNode = assignmentNode;
         }
 
-        public override string StrHelper(int level = 0, string note = "")
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
-            string assignmentStr = AssignmentNode?.StrHelper(level + 1, "assignment:") ?? "";
+            string assignmentStr = AssignmentNode?.StrHelper(level + 1, "Assignment:") ?? "";
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{assignmentStr}";
         }
         public override string ToString()
@@ -219,10 +220,10 @@ namespace BoomifyCS.Ast
         {
             this.StatementsNode = statementsNode;
         }
-        public override string StrHelper(int level = 0, string note = "")
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
-            string statementsStr = StatementsNode?.StrHelper(level + 1, "statements: ") ?? "";
+            string statementsStr = StatementsNode?.StrHelper(level + 1, "Statements: ") ?? "";
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{statementsStr}";
         }
     }
@@ -238,7 +239,7 @@ namespace BoomifyCS.Ast
             this.ConditionNode = conditionNode;
             this.BlockNode = blockNode;
         }
-        public override string StrHelper(int level = 0, string note = "")
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
             string conditionStr = ConditionNode.StrHelper(level + 1, "condition: ");
@@ -263,7 +264,7 @@ namespace BoomifyCS.Ast
         {
             this.BlockNode = blockNode;
         }
-        public override string StrHelper(int level = 0, string note = "")
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
             string blockStr = BlockNode.StrHelper(level + 1, "block: ");
@@ -279,12 +280,71 @@ namespace BoomifyCS.Ast
             this.BlockNode = blockNode;
             this.ConditionNode = conditionNode;
         }
-        public override string StrHelper(int level = 0, string note = "")
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
-            string baseStr = base.StrHelper(level,note);
-            string conditionStr = ConditionNode.StrHelper(level + 1 , "Condition: ");
+            string baseStr = base.StrHelper(level, note);
+            string conditionStr = ConditionNode.StrHelper(level + 1, "Condition: ");
             string blockStr = BlockNode.StrHelper(level + 1, "Block: ");
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{conditionStr}\n{blockStr}";
+
+        }
+    }
+    public class AstWhile : AstNode
+    {
+        public AstBlock BlockNode;
+        public AstNode ConditionNode;
+        public AstWhile(Token token, AstBlock blockNode, AstNode conditionNode) : base(token)
+        {
+            this.BlockNode = blockNode;
+            this.ConditionNode = conditionNode;
+        }
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
+        {
+            string baseStr = base.StrHelper(level, note);
+            string conditionStr = ConditionNode.StrHelper(level + 1, "Condition: ");
+            string blockStr = BlockNode.StrHelper(level + 1, "Block: ");
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{conditionStr}\n{blockStr}";
+
+        }
+    }
+    public class AstFor : AstNode
+    {
+        public AstBlock BlockNode;
+        public AstNode ConditionNode;
+        public AstNode IncrementNode;
+        public AstFor(Token token, AstBlock blockNode, AstNode conditionNode, AstNode incrementNode) : base(token)
+        {
+            this.BlockNode = blockNode;
+            this.ConditionNode = conditionNode;
+            this.IncrementNode = incrementNode;
+        }
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
+        {
+            string baseStr = base.StrHelper(level, note);
+            string conditionStr = ConditionNode.StrHelper(level + 1, "Condition: ");
+            string incrementStr = IncrementNode.StrHelper(level + 1, "Increment: ");
+            string blockStr = BlockNode.StrHelper(level + 1, "Block");
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{conditionStr}\n{incrementStr}\n{blockStr}";
+        }
+    }
+    public class AstFunctionCall : AstNode
+    {
+        public AstNode CallableName;
+        public AstNode ArgumentsNode;
+        public AstNode ReturnNode;
+        public AstFunctionCall(Token token, AstNode callableName, AstNode argumentsNode = null, AstNode returnNode = null) : base(token)
+        {
+            this.CallableName = callableName;
+            this.ArgumentsNode = argumentsNode;
+            this.ReturnNode = returnNode;
+        }
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
+        {
+            string baseStr = base.StrHelper(level, note);
+            string callableStr = CallableName.StrHelper(level + 1,"Name: ");
+            string argumentsStr = ArgumentsNode.StrHelper(level + 2, "Arguments: ");
+            string returnStr = ReturnNode.StrHelper(level + 3, "Return: ");
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{callableStr}\n{argumentsStr}\n{returnStr}";
 
         }
     }

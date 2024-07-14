@@ -54,17 +54,19 @@ namespace BoomifyCS.Lexer
 
         public static Dictionary<string, TokenType> arithmeticOperators = new Dictionary<string, TokenType>
             {
-                { "+", TokenType.ADD },     
-                { "-", TokenType.SUB },     
-                { "*", TokenType.MUL },     
-                { "/", TokenType.DIV },     
-                { "%", TokenType.MOD },     
-                { "**", TokenType.POW },    
-                { "<<", TokenType.LSHIFT }, 
-                { ">>", TokenType.RSHIFT }, 
-                { "&", TokenType.BIT_AND }, 
-                { "|", TokenType.BIT_OR },  
-                { "^", TokenType.BIT_XOR }, 
+                { "+", TokenType.ADD },
+                { "-", TokenType.SUB },
+                { "*", TokenType.MUL },
+                { "/", TokenType.DIV },
+                { "%", TokenType.MOD },
+                { "**", TokenType.POW },
+                { "<<", TokenType.LSHIFT },
+                { ">>", TokenType.RSHIFT },
+                { "&", TokenType.BIT_AND },
+                { "|", TokenType.BIT_OR },
+                { "^", TokenType.BIT_XOR },
+                { "==",TokenType.EQ }
+
             };
 
         public static Dictionary<string, TokenType> comparisonOperators = new Dictionary<string, TokenType>
