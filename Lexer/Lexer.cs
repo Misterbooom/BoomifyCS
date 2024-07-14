@@ -54,10 +54,23 @@ namespace BoomifyCS.Lexer
                 char currentChar = _code[_position];
 
 
+                if (char.IsWhiteSpace(currentChar))
+                {
+                    if (currentChar == '\n')
+                    {
+                        tokens.Add(new Token(TokenType.EOL, "\\n"));
+                    }
+                    else if (currentChar == ' ')
+                    {
+                        tokens.Add(new Token(TokenType.WHITESPACE, " "));
+                    }
+                    _position++;
+                    continue;
+                }
+
                 if (currentChar == ';')
                 {
                     tokens.Add(new Token(TokenType.EOL, ";"));
-                    lastTokenWasSemicolon = true;
                     _position++;
                     continue;
                 }
@@ -387,7 +400,7 @@ namespace BoomifyCS.Lexer
             string block_string = block.ToString();
             MyLexer lexer = new MyLexer(block_string.Trim());
             List<Token> tokens = lexer.Tokenize();
-            return new Token(TokenType.OBJECT,block_string,tokens);
+            return new Token(TokenType.OBJECT,"{" + block_string + "}",tokens);
         }
 
     }

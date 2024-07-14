@@ -23,14 +23,20 @@ namespace BoomifyCS.Parser
         {
             List<Token> lineTokens = new List<Token>();
             Token currentToken = tokens[tokenPosition];
+           
             while (tokenPosition < tokens.Count && currentToken.Type != TokenType.EOL)
             {
                 currentToken = tokens[tokenPosition];
                 lineTokens.Add(currentToken);
                 tokenPosition++;
             }
+            if (currentToken .Type == TokenType.EOL)
+            {
+                tokenPosition++;
+            }
             return new Tuple<List<Token>, int>(lineTokens, tokenPosition);
         }
+
         public static bool IsOperator(string key)
         {
 

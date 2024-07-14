@@ -59,7 +59,7 @@
     <Compile Include="Objects\BifyString.cs" />
     <Compile Include="Parser\BifyObjectParser.cs" />
     <Compile Include="Parser\ListExtensions.cs" />
-    <Compile Include="Parser\AstParser.cs" />
+    <Compile Include="Parser\NodeParser.cs" />
     <Compile Include="Parser\StatementParser.cs" />
     <Compile Include="Parser\TokensParser.cs" />
     <Compile Include="Lexer\Lexer.cs" />

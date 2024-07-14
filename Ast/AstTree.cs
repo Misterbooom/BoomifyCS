@@ -15,8 +15,9 @@ namespace BoomifyCS.Ast
         public int lineCount = 1;
         private List<Token> _codeTokens = new List<Token>();
         private List<Token> _lineTokens = new List<Token>();
-        public AstTree() { 
-                            
+        public AstTree(int lineCount = 1) {
+            this.lineCount = lineCount; 
+
         }
         /// <summary>
         /// Parses a list of tokens, processing them line by line.
@@ -29,8 +30,11 @@ namespace BoomifyCS.Ast
             while (_codeTokenPosition < tokens.Count)
             {
                 var (lineTokens, newTokenPosition) = TokensParser.SplitTokensByLine(tokens, _codeTokenPosition);
+                lineTokens.WriteTokens(); 
                 _codeTokenPosition = newTokenPosition;
                 _lineTokens = lineTokens;
+                lineCount += 1;
+                
                 AstNode node = BuildAstTree(lineTokens);
                 nodes.Add(node);
                 //Console.WriteLine(AstParser.SimpleEval(node));
@@ -70,19 +74,41 @@ namespace BoomifyCS.Ast
                 }
                 else if (TokenConfig.multiTokenStatements.ContainsValue(currentToken.Type))
                 {
-                    Tuple<AstNode, int> result = AstParser.MultiTokenStatement(currentToken, tokens, _lineTokenPosition);
-                    _lineTokenPosition = result.Item2;
-                    if (result.Item1 is AstElse)
+                    try
                     {
-                        operatorStack.WriteNodes();
-                        if (operatorStack.Peek() is AstIf astIf)
+                        Tuple<AstNode, int> result = NodeParser.MultiTokenStatement(currentToken, tokens, _lineTokenPosition);
+                        _lineTokenPosition = result.Item2;
+                        if (result.Item1 is AstElse)
                         {
-                            astIf.ElseNode = (AstElse)result.Item1;
-                            _lineTokenPosition++;
-                            continue;
+                            try
+                            {
+                                if (operatorStack.Peek() is AstIf astIf)
+                                {
+                                    astIf.ElseNode = (AstElse)result.Item1;
+                                    _lineTokenPosition++;
+                                    continue;
+                                }
+                                else
+                                {
+                                    throw new BifySyntaxError("Unexpected else ", tokens, tokens, lineCount);
+                                }
+                            }
+                            catch (InvalidOperationException e)
+                            {
+                                throw new BifySyntaxError("Unexpected else ", tokens, new List<Token> { currentToken }, lineCount);
+
+                            }
+
                         }
+                        operatorStack.Push(result.Item1);
+
                     }
-                    operatorStack.Push(result.Item1);
+                    catch (BifyException e)
+                    {
+                        e.CurrentLine = lineCount;
+                        throw e;
+                    }
+
                 }
                 else if (TokensParser.IsOperator(currentToken.Type))
                 {
@@ -90,7 +116,7 @@ namespace BoomifyCS.Ast
                 }
                 else if (currentToken.Type == TokenType.LPAREN)
                 {
-                    operatorStack.Push(AstParser.TokenToNode(currentToken));
+                    operatorStack.Push(NodeParser.TokenToNode(currentToken));
                 }
                 else if (currentToken.Type == TokenType.RPAREN)
                 {
@@ -111,7 +137,7 @@ namespace BoomifyCS.Ast
                 }
                 else
                 {
-                    operandStack.Push(AstParser.TokenToNode(currentToken));
+                    operandStack.Push(NodeParser.TokenToNode(currentToken));
                 }
 
                 _lineTokenPosition++;
@@ -133,12 +159,13 @@ namespace BoomifyCS.Ast
 
             if (operandStack.Count > 1)
             {
-                return AstParser.ConnectNodes(operatorStack, operandStack);
+                return NodeParser.ConnectNodes(operatorStack, operandStack);
             }
-            else
+            else if (operandStack.Count == 1)
             {
                 return operandStack.Pop();
             }
+            return null;
         }
 
 
@@ -162,7 +189,7 @@ namespace BoomifyCS.Ast
             }
             if (currentToken.Type != TokenType.EOL)
             {
-                operatorStack.Push(AstParser.TokenToNode(currentToken));
+                operatorStack.Push(NodeParser.TokenToNode(currentToken));
 
             }
         }

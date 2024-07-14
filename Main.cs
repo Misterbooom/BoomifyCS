@@ -33,6 +33,7 @@ namespace BoomifyCS
                 Console.WriteLine(node);
                 BetaInterpreter interpreter = new BetaInterpreter();
                 interpreter.run(node);
+                throw new BifyException("Test", "test", "test", 10);
             }
             catch (BifyException e) 
             {

@@ -11,7 +11,7 @@ using BoomifyCS.Objects;
 
 namespace BoomifyCS.Parser
 {
-    public class AstParser
+    public class NodeParser
     {
         public static AstNode TokenToNode(Token token)
         {
@@ -21,17 +21,17 @@ namespace BoomifyCS.Parser
             }
             else if (token.Type == TokenType.NUMBER)
             {
-                BifyInteger integer = new BifyInteger(token,int.Parse(token.Value));
-                return new AstInt(token,integer);
+                BifyInteger integer = new BifyInteger(token, int.Parse(token.Value));
+                return new AstInt(token, integer);
             }
             else if (token.Type == TokenType.STRING)
             {
                 BifyString bifyString = new BifyString(token, token.Value);
                 return new AstString(token, bifyString);
-            }     
-            else  if (token.Type == TokenType.TRUE)
+            }
+            else if (token.Type == TokenType.TRUE)
             {
-                return new AstBoolean(token, new BifyBoolean(token,true));
+                return new AstBoolean(token, new BifyBoolean(token, true));
             }
             else if (token.Type == TokenType.FALSE)
             {
@@ -51,21 +51,22 @@ namespace BoomifyCS.Parser
             }
             else if (token.Type == TokenType.OBJECT)
             {
-                return new AstBlock(TokenToAst(token.Tokens));
+                AstNode node = TokenToAst(token.Tokens);
+                return new AstBlock(node);
             }
             throw new Exception("Unsupported token - " + token.Type);
         }
-        public static Tuple<AstNode,int> MultiTokenStatement(Token token,List<Token> tokens,int currentPos)
+
+        public static Tuple<AstNode, int> MultiTokenStatement(Token token, List<Token> tokens,int currentPos)
         {
+
             if (token.Type == TokenType.VARDECL)
             {
-                Tuple<AstNode, int> result = StatementParser.ParseVarDecl(token,tokens,currentPos);
-                return result;
+                return StatementParser.ParseVarDecl(token, tokens, currentPos);
             }
             else if (token.Type == TokenType.IF)
             {
-                Tuple<AstNode, int> result = StatementParser.ParseIf(token, tokens, currentPos);
-                return result;
+                return StatementParser.ParseIf(token, tokens, currentPos);
             }
             else if (token.Type == TokenType.ELSE)
             {
@@ -73,7 +74,8 @@ namespace BoomifyCS.Parser
             }
             throw new NotImplementedException($"Not implemented token - {token.Type}");
         }
-        public static AstNode ConnectNodes(Stack<AstNode> operatorStack,Stack<AstNode> operandStack)
+
+        public static AstNode ConnectNodes(Stack<AstNode> operatorStack, Stack<AstNode> operandStack)
         {
             while (operatorStack.Count > 0)
             {
@@ -84,19 +86,14 @@ namespace BoomifyCS.Parser
                 op.Right = right;
                 operandStack.Push(op);
             }
-            
-
 
             return operandStack.First();
         }
-        
 
-        public static AstNode TokenToAst(List<Token> tokens) 
+        public static AstNode TokenToAst(List<Token> tokens)
         {
             AstTree ast = new AstTree();
-
             return ast.ParseTokens(tokens);
         }
-         
     }
 }
