@@ -193,6 +193,11 @@ namespace BoomifyCS.Ast
         public AstLine(AstNode left = null, AstNode right = null) : base(new Token(TokenType.EOL, ";"), left, right)
         {
         }
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
+        {
+            return base.StrHelper(level, note, isLeft);
+        }
+
     }
     public class AstIdentifier : AstNode
     {

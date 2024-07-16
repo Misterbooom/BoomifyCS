@@ -34,15 +34,24 @@ namespace BoomifyCS.Ast
                 _codeTokenPosition = newTokenPosition;
                 _lineTokens = lineTokens;
                 lineCount += 1;
-                if (runFrom == "main")
-                {
-                    Console.WriteLine(lineCount);
-                    lineTokens.WriteTokens();
+                //if (runFrom == "main")
+                //{
+                //    Console.WriteLine(lineCount);
+                //    lineTokens.WriteTokens();
 
-                }
+                //}
                 AstNode node = BuildAstTree(lineTokens);
                 nodes.Add(node);
                 //Console.WriteLine(AstParser.SimpleEval(node));
+            }
+            if (runFrom == "main")
+            {
+                Console.WriteLine(nodes.Count);
+
+            }
+            if (nodes.Count == 1)
+            {
+                return new AstLine(nodes[0]);
             }
             while (nodes.Count > 1)
             {
