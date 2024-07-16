@@ -79,11 +79,11 @@ namespace BoomifyCS
 
             ColorConsole.WriteLine(exceptionInfo,Color.IndianRed);
             ColorConsole.WriteLine(fileInfo,Color.OrangeRed);
-            WriteLineTokens(5);
+            WriteLineTokens(LineTokens,5);
            
 
         }
-        public void WriteLineTokens(int indentInt)
+        public void WriteLineTokens(List<Token> tokens,int indentInt)
         {
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < indentInt; i++)
@@ -91,19 +91,22 @@ namespace BoomifyCS
                 builder.Append(' ');
             }
             Console.Write(builder.ToString());
-            if (LineTokens != null)
+            if (tokens != null)
             {
-                foreach (Token token in LineTokens)
+                foreach (Token token in tokens)
                 {
-
+                    if (token.Type == TokenType.NEXTLINE)
+                    {
+                        break;
+                    }
                     if (InvalidTokens.Contains(token))
                     {
-
-                        ColorConsole.Write(token.Value, Color.Red);
+                        WriteToken(token,Color.Red,indentInt);
                     }
                     else
                     {
-                        ColorConsole.Write(token.Value, Color.White);
+                        WriteToken(token,Color.White,indentInt);
+
                     }
 
                 }
@@ -127,6 +130,23 @@ namespace BoomifyCS
             }
             Console.Write("\n");
 
+        }
+        private void WriteToken(Token token, Color color,int indentInt = 0)
+        {
+            if (token.Type == TokenType.OBJECT)
+            {
+                string[] lines = token.Value.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+
+            }
+            else if (token.Type == TokenType.NEXTLINE)
+            {
+                Console.Write($"{new String(' ', indentInt)}\n");
+            }
+            else
+            {
+                ColorConsole.Write(token.Value, color);
+
+            }
         }
 
     }

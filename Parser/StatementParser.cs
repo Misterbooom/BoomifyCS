@@ -21,7 +21,7 @@ namespace BoomifyCS.Parser
                 currentPos += tokensProcessed;
 
                 AstNode varNameNode = NodeParser.TokenToNode(varNameToken);
-                AstNode varValueNode = NodeParser.TokenToAst(varValueTokens);
+                AstNode varValueNode = NodeParser.BuiltTokensToAst(varValueTokens);
 
                 assignmentNode.Left = varNameNode;
                 assignmentNode.Right = varValueNode;
@@ -41,12 +41,12 @@ namespace BoomifyCS.Parser
             {
                 var (conditionTokens, conditionEnd) = FindTokensInBracketsSafe(tokens, currentPos);
                 currentPos = conditionEnd + 1;
-                AstNode conditionNode = NodeParser.TokenToAst(conditionTokens);
+                AstNode conditionNode = NodeParser.BuiltTokensToAst(conditionTokens);
 
                 var (blockToken, blockEnd) = FindTokenSafe(TokenType.OBJECT, tokens, currentPos);
                 currentPos = blockEnd;
                 List<Token> blockTokens = new List<Token> { blockToken };
-                AstNode blockNode = NodeParser.TokenToAst(blockTokens);
+                AstNode blockNode = NodeParser.BuiltTokensToAst(blockTokens);
 
                 AstIf astIf = new AstIf(token, conditionNode, (AstBlock)blockNode);
                 return  (astIf, currentPos);
@@ -61,17 +61,36 @@ namespace BoomifyCS.Parser
         {
             try
             {
-                var (blockToken, blockEnd) = FindTokenSafe(TokenType.OBJECT, tokens, currentPos);
-                currentPos = blockEnd;
-                List<Token> blockTokens = new List<Token> { blockToken };
-                AstNode blockNode = NodeParser.TokenToAst(blockTokens);
+                if (tokens[currentPos + 2].Type == TokenType.IF)
+                {
+                    var (conditionTokens, conditionEnd) = TokensParser.TokensInBrackets(tokens, currentPos);
+                    currentPos = conditionEnd + 1;
+                    AstNode conditionNode = NodeParser.BuiltTokensToAst(conditionTokens);
 
-                AstElse astElse = new AstElse(token, (AstBlock)blockNode);
-                return (astElse, currentPos);
+                    var (blockToken, blockEnd) = FindTokenSafe(TokenType.OBJECT, tokens, currentPos);
+                    currentPos = blockEnd;
+                    List<Token> blockTokens = new List<Token> { blockToken };
+                    AstNode blockNode = NodeParser.BuiltTokensToAst(blockTokens);
+
+                    AstElseIf astElseIf = new AstElseIf(token, (AstBlock)blockNode, conditionNode);
+                    Console.WriteLine(astElseIf);
+                    return (astElseIf, currentPos);
+                }
+                else
+                {
+                    // Parse else block
+                    var (blockToken, blockEnd) = FindTokenSafe(TokenType.OBJECT, tokens, currentPos);
+                    currentPos = blockEnd;
+                    List<Token> blockTokens = new List<Token> { blockToken };
+                    AstNode blockNode = NodeParser.BuiltTokensToAst(blockTokens);
+
+                    AstElse astElse = new AstElse(token, (AstBlock)blockNode);
+                    return (astElse, currentPos);
+                }
             }
             catch (NullReferenceException)
             {
-                throw new BifySyntaxError("Failed to parse else statement", tokens, new List<Token> { token }, 0    );
+                throw new BifySyntaxError("Failed to parse else statement", tokens, new List<Token> { token }, currentPos);
             }
         }
 
@@ -81,12 +100,12 @@ namespace BoomifyCS.Parser
             {
                 var (conditionTokens, conditionEnd) = FindTokensInBracketsSafe(tokens, currentPos);
                 currentPos = conditionEnd + 1;
-                AstNode conditionNode = NodeParser.TokenToAst(conditionTokens);
+                AstNode conditionNode = NodeParser.BuiltTokensToAst(conditionTokens);
 
                 var (blockToken, blockEnd) = FindTokenSafe(TokenType.OBJECT, tokens, currentPos);
                 currentPos = blockEnd;
                 List<Token> blockTokens = new List<Token> { blockToken };
-                AstNode blockNode = NodeParser.TokenToAst(blockTokens);
+                AstNode blockNode = NodeParser.BuiltTokensToAst(blockTokens);
 
                 AstElseIf astElseIf = new AstElseIf(token, (AstBlock)blockNode, conditionNode);
                 return (astElseIf, currentPos);

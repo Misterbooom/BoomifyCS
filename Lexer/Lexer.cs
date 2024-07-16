@@ -56,7 +56,7 @@ namespace BoomifyCS.Lexer
                 {
                     if (currentChar == '\n')
                     {
-                        tokens.Add(new Token(TokenType.EOL, "\\n"));
+                        tokens.Add(new Token(TokenType.NEXTLINE, "\n"));
                     }
                     else if (currentChar == ' ')
                     {
@@ -317,6 +317,7 @@ namespace BoomifyCS.Lexer
         {
             int counter = 0;
             StringBuilder block = new StringBuilder();
+            int start = _position;
             while (_position < _code.Length)
             {
                 char currentChar = _code[_position];
@@ -347,11 +348,12 @@ namespace BoomifyCS.Lexer
             {
                 throw new InvalidOperationException("Unmatched '{' found.");
             }
-            string block_string = block.ToString().Trim();
-            MyLexer lexer = new MyLexer(block_string);
+            string block_string = _code.Substring(start, _position - start);
+
+            MyLexer lexer = new MyLexer(block.ToString());
             List<Token> tokens = lexer.Tokenize();
             _position -= 2;
-            return new Token(TokenType.OBJECT, "{" + block_string + "}", tokens);
+            return new Token(TokenType.OBJECT, block_string, tokens);
 
 
             

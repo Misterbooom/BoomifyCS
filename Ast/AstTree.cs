@@ -88,6 +88,12 @@ namespace BoomifyCS.Ast
                     _lineTokenPosition++;
                     continue;
                 }
+                else if (currentToken.Type  == TokenType.NEXTLINE)
+                {
+                    _lineTokenPosition++;
+                    lineCount++;
+                    continue;
+                }
                 else if (currentToken.Type == TokenType.EOL)
                 {
                     break;
@@ -102,15 +108,17 @@ namespace BoomifyCS.Ast
                         {
                             try
                             {
+
                                 if (operatorStack.Peek() is AstIf astIf)
                                 {
                                     astIf.ElseNode = (AstElse)result.Item1;
                                     _lineTokenPosition++;
                                     continue;
                                 }
+                                
                                 else
                                 {
-                                    throw new BifySyntaxError("Unexpected else ", tokens, tokens, lineCount);
+                                    throw new BifySyntaxError($"Unexpected else, last token - {operandStack.Peek().Token.Type}", tokens, tokens, lineCount);
                                 }
                             }
                             catch (InvalidOperationException)
@@ -119,15 +127,40 @@ namespace BoomifyCS.Ast
 
                             }
                         }
-                        else if (result.Item1 is AstElseIf)
+                        else if (result.Item1 is AstElseIf astElseIf) 
                         {
-                            Console.WriteLine(result.Item1);
+                            try
+                            {
+                                if (operatorStack.Peek() is AstIf astIf)
+                                {
+                                    if (astIf.ElseNode != null)
+                                    {
+                                        throw new BifySyntaxError($"Else-if used after else statement", tokens, tokens, lineCount);
+
+                                    }
+                                    astIf.SetElseIfNode(astElseIf);
+                                    _lineTokenPosition++;
+                                    continue;
+                                }
+                                else
+                                {
+                                    throw new BifySyntaxError($"Unexpected else-if, last token - {operandStack.Peek().Token.Type}", tokens, tokens, lineCount);
+                                }
+
+                            }
+                            catch (InvalidOperationException)
+                            {
+                                throw new BifySyntaxError("Unexpected else if ", tokens, new List<Token> { currentToken }, lineCount);
+                            }
+
+
                         }
+                        
                         else if (result.Item1 is AstUnaryOperator)
                         {
                             operandStack.Pop();
                         }
-                        
+
                         operatorStack.Push(result.Item1);
 
                     }
@@ -176,7 +209,12 @@ namespace BoomifyCS.Ast
             }
             while (operatorStack.Count > 0)
             {
-                
+                if (runFrom == "main")
+                {
+                    operandStack.WriteNodes();
+                    operatorStack.WriteNodes();
+                }
+
                 AstNode right = operandStack.Pop();
                 AstNode left = operandStack.Pop();
                 AstNode op = operatorStack.Pop();

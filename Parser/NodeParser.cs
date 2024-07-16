@@ -76,10 +76,6 @@ namespace BoomifyCS.Parser
             {
                 return StatementParser.ParseElse(token, tokens, currentPos);
             }
-            else if (token.Type == TokenType.ELSEIF)
-            {
-                return StatementParser.ParseElseIf(token, tokens, currentPos);
-            }
             else if (token.Type == TokenType.WHILE)
             {
                 return StatementParser.ParseWhile(token, tokens, currentPos);
@@ -134,5 +130,21 @@ namespace BoomifyCS.Parser
             AstTree ast = new AstTree();
             return ast.BuildAstTree(tokens);
         }
+        public static AstNode SetMaxRightNode(AstNode node, AstNode setNode)
+        {
+            if (node == null) throw new ArgumentNullException(nameof(node));
+
+            AstNode current = node;
+
+            while (current.Right != null)
+            {
+                current = current.Right;
+            }
+
+            current.Right = setNode;
+
+            return node;
+        }
+
     }
 }
