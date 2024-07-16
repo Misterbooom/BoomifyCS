@@ -57,6 +57,7 @@ namespace BoomifyCS.Lexer
                     if (currentChar == '\n')
                     {
                         tokens.Add(new Token(TokenType.NEXTLINE, "\n"));
+                        _lineCount++;
                     }
                     else if (currentChar == ' ')
                     {
@@ -146,7 +147,8 @@ namespace BoomifyCS.Lexer
             }
             if (bracketsStack.Count > 0)
             {
-                throw new BifySyntaxError("Unmatched '(': missing ')'.",_lines[bracketsStack[0]], "(",bracketsStack[0]);
+                int line = bracketsStack[bracketsStack.Count - 1];
+                throw new BifySyntaxError("Unmatched '(': missing ')'.",_lines[line - 1], "(",line);
             }
 
             return tokens;
@@ -237,6 +239,10 @@ namespace BoomifyCS.Lexer
                         break;
                     }
                 }
+                else if (currentChar == '\n')
+                {
+                    break;
+                }
                 else
                 {
                     str += currentChar;
@@ -249,7 +255,7 @@ namespace BoomifyCS.Lexer
                     "Syntax Error: You forgot to close a quotation mark.",
                     _currentLine, 
                     _currentLine, 
-                    _lineCount 
+                    _lineCount
                 );
 
             }
@@ -282,8 +288,6 @@ namespace BoomifyCS.Lexer
             }
             if (counter > 0)
             {
-                int _lineCount = 42; // Example line count
-                // Use the appropriate constructor based on the type of parameters
                 throw new BifySyntaxError(
                     "Syntax Error: You forgot to close '[' with ']'.",
                     _currentLine, // This should be a string representing tokens
@@ -338,6 +342,10 @@ namespace BoomifyCS.Lexer
                         block[0] = ' ';
                         break;
                     }
+                }
+                else if (currentChar == '\n')
+                {
+                    _lineCount++;
                 }
 
                 block.Append(currentChar);

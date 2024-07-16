@@ -209,11 +209,6 @@ namespace BoomifyCS.Ast
             }
             while (operatorStack.Count > 0)
             {
-                if (runFrom == "main")
-                {
-                    operandStack.WriteNodes();
-                    operatorStack.WriteNodes();
-                }
 
                 AstNode right = operandStack.Pop();
                 AstNode left = operandStack.Pop();

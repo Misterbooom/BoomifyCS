@@ -73,7 +73,6 @@ namespace BoomifyCS.Parser
                     AstNode blockNode = NodeParser.BuiltTokensToAst(blockTokens);
 
                     AstElseIf astElseIf = new AstElseIf(token, (AstBlock)blockNode, conditionNode);
-                    Console.WriteLine(astElseIf);
                     return (astElseIf, currentPos);
                 }
                 else

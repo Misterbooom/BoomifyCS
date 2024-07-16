@@ -24,7 +24,7 @@ namespace BoomifyCS
             try
             {
                 List<Token> tokens = lexer.Tokenize();
-                tokens.WriteTokens();
+                //tokens.WriteTokens();
                 AstTree astParser = new AstTree();
                 astParser.runFrom = "main";
                 string[] callStack = { "Main" };
