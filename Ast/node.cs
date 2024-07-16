@@ -249,22 +249,28 @@ namespace BoomifyCS.Ast
         {
             string baseStr = base.StrHelper(level, note);
             string conditionStr = ConditionNode.StrHelper(level + 1, "condition: ");
-            string blockStr = BlockNode.StrHelper(level + 1, "block: ");
 
+            string blockStr = "";
+            if (BlockNode != null)
+            {
+                blockStr = BlockNode.StrHelper(level + 1, "block: ");
+            }
+
+            string elseStr = "";
             if (ElseNode != null)
             {
-                string elseStr = ElseNode.StrHelper(level + 1, "else: ");
-                return baseStr + $"{new String(' ', 4 * (level + 1))}\n{conditionStr}\n{blockStr}\n{elseStr}";
-
+                elseStr = ElseNode.StrHelper(level + 1, "else: ");
             }
-            else if (ElseIf != null)
+
+            string elseIfStr = "";
+            if (ElseIf != null)
             {
-                string elseIfstr = ElseIf.StrHelper(level + 1, "else if: ");
-                return baseStr + $"{new String(' ', 4 * (level + 1))}\n{conditionStr}\n{blockStr}\n{elseIfstr}";
-
+                elseIfStr = ElseIf.StrHelper(level + 1, "else if: ");
             }
-            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{conditionStr}\n{blockStr}";
+
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{conditionStr}\n{blockStr}\n{elseStr}\n{elseIfStr}";
         }
+
         public override string ToString()
         {
             return StrHelper();

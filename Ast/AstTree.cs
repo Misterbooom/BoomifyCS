@@ -118,7 +118,7 @@ namespace BoomifyCS.Ast
                                 
                                 else
                                 {
-                                    throw new BifySyntaxError($"Unexpected else, last token - {operandStack.Peek().Token.Type}", tokens, tokens, lineCount);
+                                    throw new BifySyntaxError($"Unexpected else, last token - {operatorStack.Peek().Token.Type}", tokens, tokens, lineCount);
                                 }
                             }
                             catch (InvalidOperationException)
@@ -144,7 +144,7 @@ namespace BoomifyCS.Ast
                                 }
                                 else
                                 {
-                                    throw new BifySyntaxError($"Unexpected else-if, last token - {operandStack.Peek().Token.Type}", tokens, tokens, lineCount);
+                                    throw new BifySyntaxError($"Unexpected else-if, last token - {operatorStack.Peek().Token.Type}", tokens, tokens, lineCount);
                                 }
 
                             }
