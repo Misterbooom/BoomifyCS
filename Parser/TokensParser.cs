@@ -38,13 +38,13 @@ namespace BoomifyCS.Parser
         public static bool IsOperator(string key)
         {
 
-            return TokenConfig.arithmeticOperators.ContainsKey(key);
+            return TokenConfig.binaryOperators.ContainsKey(key);
     
         }
         public static bool IsOperator(TokenType type)
         {
 
-            return TokenConfig.arithmeticOperators.ContainsValue(type);
+            return TokenConfig.binaryOperators.ContainsValue(type);
         }
         public static Tuple<Token,int> FindTokenByTT(TokenType tokenType,List<Token> tokens,int start = 0)
         {

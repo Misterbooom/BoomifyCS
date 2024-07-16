@@ -18,6 +18,7 @@ namespace BoomifyCS.Lexer
             {"true", TokenType.TRUE},
             {"false", TokenType.FALSE},
             { "return", TokenType.RETURN },
+            { "function",TokenType.FUNCTIONDECL },
             {"**", TokenType.POW},
             { "<=", TokenType.LTE },
             { ">=", TokenType.GTE },
@@ -54,7 +55,7 @@ namespace BoomifyCS.Lexer
             { '!', TokenType.NEQ },
         };
 
-        public static Dictionary<string, TokenType> arithmeticOperators = new Dictionary<string, TokenType>
+        public static Dictionary<string, TokenType> binaryOperators = new Dictionary<string, TokenType>
             {
 
                 { "+", TokenType.ADD },
@@ -78,6 +79,7 @@ namespace BoomifyCS.Lexer
                 { "!", TokenType.NOT },
                 { "--", TokenType.INCREMENT },
                 { "++",TokenType.DECREMENT},
+                { ",",TokenType.COMMA}
 
         };
 
@@ -108,6 +110,7 @@ namespace BoomifyCS.Lexer
             { "for", TokenType.FOR },
             { "var", TokenType.VARDECL },
             { "return", TokenType.RETURN },
+            { "function",TokenType.FUNCTIONDECL },
             { "--", TokenType.INCREMENT },
             { "++",TokenType.DECREMENT},
         };

@@ -151,6 +151,22 @@ namespace BoomifyCS.Parser
 
             }
         }
+        public static (AstNode, int) ParseFunctionDecl(Token token, List<Token> tokens,int currentPos)
+        {
+            var (identifierToken, tokenEnd) = FindTokenSafe(TokenType.IDENTIFIER, tokens, currentPos);
+            currentPos = tokenEnd + 1;
+            var (argumentsTokens, argumentsEnd) = FindTokensInBracketsSafe(tokens, currentPos);
+            AstNode identifierNode = NodeParser.TokenToNode(identifierToken);
+            currentPos = argumentsEnd + 1;
+            AstNode argumentsNode = NodeParser.BuiltTokensToAst(argumentsTokens);
+            var (blockToken, blockEnd) = FindTokenSafe(TokenType.OBJECT, tokens, currentPos);
+            currentPos = blockEnd;
+            AstNode blockNode = NodeParser.TokenToNode(blockToken);
+            AstFunctionDecl astFunctionDecl = new AstFunctionDecl(token, (AstIdentifier)identifierNode, argumentsNode, (AstBlock)blockNode);
+            return (astFunctionDecl,currentPos);
+
+
+        }
         private static (Token, int) FindTokenSafe(TokenType tokenType, List<Token> tokens, int currentPos)
         {
             try
@@ -184,6 +200,7 @@ namespace BoomifyCS.Parser
                 throw new BifySyntaxError("Condition tokens in brackets not found", tokens, tokens, 0);
             }
         }
+        
         
     }
 }

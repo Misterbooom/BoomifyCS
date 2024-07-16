@@ -92,6 +92,10 @@ namespace BoomifyCS.Parser
             {
                 return StatementParser.ParseUnaryOp(token, tokens, currentPos);
             }
+            else if (token.Type == TokenType.FUNCTIONDECL)
+            {
+                return StatementParser.ParseFunctionDecl(token, tokens, currentPos);
+            }
             throw new NotImplementedException($"Not implemented token - {token.Type}");
         }
 

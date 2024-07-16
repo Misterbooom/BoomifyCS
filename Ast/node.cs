@@ -343,7 +343,7 @@ namespace BoomifyCS.Ast
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
-            string callableStr = CallableName.StrHelper(level + 1,"Name: ");
+            string callableStr = CallableName.StrHelper(level + 1, "Name: ");
             string argumentsStr = ArgumentsNode.StrHelper(level + 2, "Arguments: ");
             string returnStr = ReturnNode.StrHelper(level + 3, "Return: ");
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{callableStr}\n{argumentsStr}\n{returnStr}";
@@ -364,6 +364,26 @@ namespace BoomifyCS.Ast
             string baseStr = base.StrHelper(level, note);
             string valueStr = value.StrHelper(level + 1, "Value: ");
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{valueStr}";
+        }
+    }
+    public class AstFunctionDecl : AstNode
+    {
+        public AstNode argumentsNode;
+        public AstIdentifier functionNameNode;
+        public AstBlock blockNode;
+        public AstFunctionDecl(Token token, AstIdentifier functionNameNode, AstNode argumentsNode, AstBlock blockNode) : base(token)
+        {
+            this.functionNameNode = functionNameNode;
+            this.argumentsNode = argumentsNode;
+            this.blockNode = blockNode;
+        }
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
+        {
+            string baseStr = base.StrHelper(level, note,false);
+            string functionNameStr = functionNameNode.StrHelper(level + 1, "Name: ");
+            string argumentsStr = argumentsNode.StrHelper(level + 1, "Arguments: ");
+            string blockStr = blockNode.StrHelper(level + 1, "Block: ");
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{functionNameStr}\n{argumentsStr}\n{blockStr}";
         }
     }
 }

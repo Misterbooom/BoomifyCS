@@ -76,7 +76,7 @@ namespace BoomifyCS.Lexer
         ELSEIF,
         DECREMENT,
         INCREMENT,
-
+        FUNCTIONDECL
     }
     public class Token
     {
