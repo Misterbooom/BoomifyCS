@@ -19,10 +19,9 @@ namespace BoomifyCS.Parser
 
                 var (varValueTokens, tokensProcessed) = TokensParser.AllTokensToEol(tokens, currentPos);
                 currentPos += tokensProcessed;
-
                 AstNode varNameNode = new AstVar(varNameToken, new BifyVar(varNameToken.Value));
                 AstNode varValueNode = NodeParser.BuiltTokensToAst(varValueTokens);
-
+                varValueTokens.WriteTokens();
                 assignmentNode.Left = varNameNode;
                 assignmentNode.Right = varValueNode;
 
@@ -195,9 +194,9 @@ namespace BoomifyCS.Parser
                 Token callToken = new Token(TokenType.CALL, token.Value + "(" + argumentsTokens.ToCustomString() + ")");
                 return (new AstCall(callToken,identifierNode,argumentsNode),currentPos);
             }
-            catch (NullReferenceException)
+            catch (BifySyntaxError)
             {
-                return (NodeParser.TokenToNode(token), currentPos + 1);
+                return (NodeParser.TokenToNode(token), currentPos);
             }
         }
         private static (Token, int) FindTokenSafe(TokenType tokenType, List<Token> tokens, int currentPos)

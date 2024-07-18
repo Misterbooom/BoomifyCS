@@ -33,7 +33,7 @@ namespace BoomifyCS
                 //Console.WriteLine(AstParser.SimpleEval(node));
                 Console.WriteLine(node);
                 MyInterpreter interpreter = new MyInterpreter();
-                //interpreter.runVM(node);
+                interpreter.runVM(node);
             }
             catch (BifyException e) 
             {

@@ -248,7 +248,7 @@ namespace BoomifyCS.Ast
                   )
             {
                 AstNode op = operatorStack.Pop();
-                if (operandStack.Count >= 2 && TokenConfig.assignmentOperators.ContainsValue(op.Token.Type))
+                if (operandStack.Count >= 2 )
                 {
                     AstNode right = operandStack.Pop();
                     AstNode left = operandStack.Pop();

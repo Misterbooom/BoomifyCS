@@ -16,6 +16,7 @@ namespace BoomifyCS.Ast
         { TokenType.POW, 3 },
         { TokenType.MUL, 2 },
         { TokenType.DIV, 2 },
+        { TokenType.FLOORDIV,2 },
         { TokenType.MOD, 2 },
         { TokenType.ADD, 1 },
         { TokenType.SUB, 1 },

@@ -44,7 +44,8 @@ namespace BoomifyCS.Interpreter.VM
             {
                 BifyObject right = _stackManager.Pop();
                 BifyObject left = _stackManager.Pop();
-                BifyObject result = PerformBinaryOperation(right, left,operatorType);
+                BifyObject result = PerformBinaryOperation(left, right,operatorType);
+                //Console.WriteLine($"{left} {operatorType} {right} = {result}");
                 _stackManager.Push(result);
             }
 

@@ -11,7 +11,7 @@ namespace BoomifyCS.Objects
         {
             this.Token = token;
         }
-
+        
         public virtual BifyObject Add(BifyObject other)
         {
             throw new NotImplementedException("Add operation not implemented for this type.");
