@@ -32,8 +32,8 @@ namespace BoomifyCS
                 AstNode node = astParser.ParseTokens(tokens);
                 //Console.WriteLine(AstParser.SimpleEval(node));
                 Console.WriteLine(node);
-                BetaInterpreter interpreter = new BetaInterpreter();
-                //interpreter.run(node);
+                MyInterpreter interpreter = new MyInterpreter();
+                //interpreter.runVM(node);
             }
             catch (BifyException e) 
             {

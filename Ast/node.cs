@@ -142,6 +142,13 @@ namespace BoomifyCS.Ast
             this.BifyValue = new BifyNull(token);
         }
     }
+    public class AstVar : AstConstant
+    {
+
+        public AstVar(Token token,BifyVar bifyVar):base(token) {
+            this.BifyValue = bifyVar;
+        }
+    }
 
     public class AstAssignment : AstNode
     {
@@ -360,24 +367,21 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{conditionStr}\n{incrementStr}\n{blockStr}";
         }
     }
-    public class AstFunctionCall : AstNode
+    public class AstCall : AstNode
     {
         public AstNode CallableName;
         public AstNode ArgumentsNode;
-        public AstNode ReturnNode;
-        public AstFunctionCall(Token token, AstNode callableName, AstNode argumentsNode = null, AstNode returnNode = null) : base(token)
+        public AstCall(Token token, AstNode callableName, AstNode argumentsNode = null, AstNode returnNode = null) : base(token)
         {
             this.CallableName = callableName;
             this.ArgumentsNode = argumentsNode;
-            this.ReturnNode = returnNode;
         }
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
             string callableStr = CallableName.StrHelper(level + 1, "Name: ");
             string argumentsStr = ArgumentsNode.StrHelper(level + 2, "Arguments: ");
-            string returnStr = ReturnNode.StrHelper(level + 3, "Return: ");
-            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{callableStr}\n{argumentsStr}\n{returnStr}";
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{callableStr}\n{argumentsStr}";
 
         }
     }
@@ -417,5 +421,6 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{functionNameStr}\n{argumentsStr}\n{blockStr}";
         }
     }
+
 }
 

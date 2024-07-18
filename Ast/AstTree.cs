@@ -152,13 +152,19 @@ namespace BoomifyCS.Ast
                             {
                                 throw new BifySyntaxError("Unexpected else if ", tokens, new List<Token> { currentToken }, lineCount);
                             }
-
-
+                        }
+                        else if (result.Item1 is AstCall || result.Item1 is AstIdentifier)
+                        {
+                            operandStack.Push(result.Item1);
+                            _lineTokenPosition++;
+                            continue;
                         }
                         
                         else if (result.Item1 is AstUnaryOperator)
                         {
                             operandStack.Pop();
+                            _lineTokenPosition++;
+                            continue;
                         }
 
                         operatorStack.Push(result.Item1);
@@ -207,6 +213,7 @@ namespace BoomifyCS.Ast
             {
                 return operatorStack.Peek();
             }
+            
             while (operatorStack.Count > 0)
             {
 

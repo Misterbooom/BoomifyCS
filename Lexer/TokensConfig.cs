@@ -61,6 +61,7 @@ namespace BoomifyCS.Lexer
                 { "-", TokenType.SUB },
                 { "*", TokenType.MUL },
                 { "/", TokenType.DIV },
+                { "//",TokenType.FLOORDIV},
                 { "%", TokenType.MOD },
                 { "**", TokenType.POW },
                 { "<<", TokenType.LSHIFT },
@@ -111,6 +112,7 @@ namespace BoomifyCS.Lexer
             { "function",TokenType.FUNCTIONDECL },
             { "--", TokenType.INCREMENT },
             { "++",TokenType.DECREMENT},
+            { "identifier", TokenType.IDENTIFIER },
         };
     }
 }

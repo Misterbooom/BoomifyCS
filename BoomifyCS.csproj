@@ -51,12 +51,17 @@
     <Compile Include="Ast\AstTree.cs" />
     <Compile Include="Ast\Node.cs" />
     <Compile Include="exceptions.cs" />
+    <Compile Include="Interpreter\ByteCode.cs" />
     <Compile Include="Interpreter\Interpreter.cs" />
+    <Compile Include="Interpreter\VM\StackManager.cs" />
+    <Compile Include="Interpreter\VM\VarManager.cs" />
+    <Compile Include="Interpreter\VM\VirtualMachine.cs" />
     <Compile Include="Lexer\TokensConfig.cs" />
     <Compile Include="Objects\BifyBoolean.cs" />
     <Compile Include="Objects\BifyFloat.cs" />
     <Compile Include="Objects\BifyNull.cs" />
     <Compile Include="Objects\BifyString.cs" />
+    <Compile Include="Objects\BifyVar.cs" />
     <Compile Include="Parser\BifyObjectParser.cs" />
     <Compile Include="Parser\ListExtensions.cs" />
     <Compile Include="Parser\NodeParser.cs" />

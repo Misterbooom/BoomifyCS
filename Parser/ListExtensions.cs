@@ -5,6 +5,7 @@ using BoomifyCS.Ast;
 using System.Reflection.Emit;
 using System.Text;
 using System.Collections;
+using BoomifyCS.Interpreter;
 public static class ListExtensions
 {
     public static T Pop<T>(this List<T> list)
@@ -95,8 +96,32 @@ public static class ListExtensions
         }
         if (sb.Length > 2)
         {
-            sb.Length -= 2; 
+            sb.Length -= 2;
         }
         return sb.ToString();
+    }
+    public static string ToCustomString<T>(this List<T> list) where T : Token
+    {
+        var sb = new StringBuilder();
+        foreach (Token token in list)
+        {
+            sb.Append($"{token.Value}");
+        }
+        
+        return sb.ToString();
+    }
+    public static void WriteBytes<T>(this List<T> list) where T : ByteInstruction
+    {
+        var sb = new StringBuilder();
+        foreach (ByteInstruction instruction in list)
+        {
+            if (instruction != null)
+            {
+                sb.AppendLine(instruction.ToString());
+
+            }
+
+        }
+        Console.WriteLine(sb.ToString());
     }
 }

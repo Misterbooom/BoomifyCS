@@ -1,55 +1,76 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BoomifyCS.Ast;
 using BoomifyCS.Objects;
-using BoomifyCS.Parser;
+using BoomifyCS.Interpreter.VM;
 namespace BoomifyCS.Interpreter
 {
-    public class BetaInterpreter
+    public class MyInterpreter
     {
-        public Hashtable hashTable = new Hashtable();
-        public BetaInterpreter() 
-        {
-        
+        List<ByteInstruction> instructions = new List<ByteInstruction>();
+        private VirtualMachine VM = new VirtualMachine();
+
+        public MyInterpreter() { 
         }
-        public void run(AstNode node)
+        public void runVM(AstNode root)
         {
-            Visit(node);
-            Console.WriteLine(hashTable.ToCustomString());
+            Visit(root);
+            instructions.WriteBytes();
+            VM.Run(instructions);
+
         }
         public object Visit(AstNode node)
         {
-            if (node == null) 
+            if (node == null)
             {
                 return null;
-            } 
-            else if (node is AstBinaryOp)
+            }
+            if (node is AstLine astLine)
             {
-                object left = Visit(node.Left);
-                object right = Visit(node.Right);
-                BifyObject result = BifyObjectParser.CalculateBifyObjects((BifyObject)left, (BifyObject)right, node.Token.Type);
-                return result;
+                Visit(astLine.Left);
+                Visit(astLine.Right);
+            }
+            if (node is AstBinaryOp astBinaryOp)
+            {
+                Visit(astBinaryOp.Left);
+                Visit(astBinaryOp.Right);
+                if (ByteCodeConfig.TokenToByte.TryGetValue(astBinaryOp.Token.Type, out ByteType byteType))
+                {
+                    ByteInstruction instruction = new ByteInstruction(byteType);
+                    instructions.Add(instruction);
+                    return instruction;
+                }
+
+            }
+            else if (node is AstConstant astConstant)
+            {
+                instructions.Add(new ByteInstruction(ByteType.LOAD_CONST,astConstant.BifyValue));
+
+            }
+            else if (node is AstVarDecl astVarDecl)
+            {
+                Visit(astVarDecl.AssignmentNode);
+                Visit(node.Right);
 
 
             }
-            else if (node is AstVarDecl varDeclNode)
+            else if (node is AstAssignment astAssignment)
             {
-                return Visit(varDeclNode.AssignmentNode);
+                Visit(node.Right);
+
+                if (astAssignment.Left is AstVar astVar)
+                {
+                    BifyVar bifyVar = (BifyVar)astVar.BifyValue;
+                    instructions.Add(new ByteInstruction(ByteType.STORE, bifyVar));
+                }
+                
             }
-            else if (node is AstAssignment)
-            {
-                BifyObject value = Visit(node.Right) as BifyObject;
-                hashTable[node.Left.Token.Value] = value;
-            }
-            else if (node is AstConstant)
-            {
-                return (node as AstConstant).BifyValue;
-            }
-            return node;
+
+            return null;
+            
         }
-    }
+    }   
 }
