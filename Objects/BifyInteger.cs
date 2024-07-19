@@ -133,5 +133,143 @@ namespace BoomifyCS.Objects
             }
             throw new InvalidOperationException("Invalid type for FloorDiv operation");
         }
+        // Bitwise AND operator (&)
+        public override BifyObject BitAnd(BifyObject other)
+        {
+            if (other is BifyInteger otherInt)
+            {
+                return new BifyInteger(this.Token, this.Value & otherInt.Value);
+            }
+            throw new InvalidOperationException("Invalid type for BitAnd operation");
+        }
+
+        // Bitwise OR operator (|)
+        public override BifyObject BitOr(BifyObject other)
+        {
+            if (other is BifyInteger otherInt)
+            {
+                return new BifyInteger(this.Token, this.Value | otherInt.Value);
+            }
+            throw new InvalidOperationException("Invalid type for BitOr operation");
+        }
+
+        // Bitwise XOR operator (^)
+        public override BifyObject BitXor(BifyObject other)
+        {
+            if (other is BifyInteger otherInt)
+            {
+                return new BifyInteger(this.Token, this.Value ^ otherInt.Value);
+            }
+            throw new InvalidOperationException("Invalid type for BitXor operation");
+        }
+
+        // Bitwise NOT operator (~)
+        public override BifyObject BitNot()
+        {
+            return new BifyInteger(this.Token, ~this.Value);
+        }
+
+        // Left shift operator (<<)
+        public override BifyObject LeftShift(BifyObject other)
+        {
+            if (other is BifyInteger shiftAmount)
+            {
+                return new BifyInteger(this.Token, this.Value << shiftAmount.Value);
+            }
+            throw new InvalidOperationException("Invalid type for LeftShift operation");
+        }
+
+        // Right shift operator (>>)
+        public override BifyObject RightShift(BifyObject other)
+        {
+            if (other is BifyInteger shiftAmount)
+            {
+                return new BifyInteger(this.Token, this.Value >> shiftAmount.Value);
+            }
+            throw new InvalidOperationException("Invalid type for RightShift operation");
+        }
+        // Equality operator (==)
+        public override BifyObject Eq(BifyObject other)
+        {
+            if (other is BifyInteger otherInt)
+            {
+                return new BifyBoolean(this.Token, this.Value == otherInt.Value);
+            }
+            if (other is BifyFloat otherFloat)
+            {
+                return new BifyBoolean(this.Token, this.Value == otherFloat.Value);
+            }
+            return new BifyBoolean(this.Token, false);
+        }
+
+        // Inequality operator (!=)
+        public override BifyObject Neq(BifyObject other)
+        {
+            if (other is BifyInteger otherInt)
+            {
+                return new BifyBoolean(this.Token, this.Value != otherInt.Value);
+            }
+            if (other is BifyFloat otherFloat)
+            {
+                return new BifyBoolean(this.Token, this.Value != otherFloat.Value);
+            }
+            return new BifyBoolean(this.Token, true);
+        }
+
+        // Less than operator (<)
+        public override BifyObject Lt(BifyObject other)
+        {
+            if (other is BifyInteger otherInt)
+            {
+                return new BifyBoolean(this.Token, this.Value < otherInt.Value);
+            }
+            if (other is BifyFloat otherFloat)
+            {
+                return new BifyBoolean(this.Token, this.Value < otherFloat.Value);
+            }
+            throw new InvalidOperationException("Invalid type for Lt operation");
+        }
+
+        // Greater than operator (>)
+        public override BifyObject Gt(BifyObject other)
+        {
+            if (other is BifyInteger otherInt)
+            {
+                return new BifyBoolean(this.Token, this.Value > otherInt.Value);
+            }
+            if (other is BifyFloat otherFloat)
+            {
+                return new BifyBoolean(this.Token, this.Value > otherFloat.Value);
+            }
+            throw new InvalidOperationException("Invalid type for Gt operation");
+        }
+
+        // Less than or equal to operator (<=)
+        public override BifyObject Lte(BifyObject other)
+        {
+            if (other is BifyInteger otherInt)
+            {
+                return new BifyBoolean(this.Token, this.Value <= otherInt.Value);
+            }
+            if (other is BifyFloat otherFloat)
+            {
+                return new BifyBoolean(this.Token, this.Value <= otherFloat.Value);
+            }
+            throw new InvalidOperationException("Invalid type for Lte operation");
+        }
+
+        // Greater than or equal to operator (>=)
+        public override BifyObject Gte(BifyObject other)
+        {
+            if (other is BifyInteger otherInt)
+            {
+                return new BifyBoolean(this.Token, this.Value >= otherInt.Value);
+            }
+            if (other is BifyFloat otherFloat)
+            {
+                return new BifyBoolean(this.Token, this.Value >= otherFloat.Value);
+            }
+            throw new InvalidOperationException("Invalid type for Gte operation");
+        }
     }
 }

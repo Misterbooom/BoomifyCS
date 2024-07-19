@@ -11,9 +11,10 @@ namespace BoomifyCS.Interpreter
     public class MyInterpreter
     {
         List<ByteInstruction> instructions = new List<ByteInstruction>();
-        private VirtualMachine VM = new VirtualMachine();
-
-        public MyInterpreter() { 
+        private VirtualMachine VM;
+        private int _lineCount = 1;
+        public MyInterpreter(string[] sourcecode) {
+            VM = new VirtualMachine(sourcecode);
         }
         public void runVM(AstNode root)
         {
@@ -32,14 +33,15 @@ namespace BoomifyCS.Interpreter
             {
                 Visit(astLine.Left);
                 Visit(astLine.Right);
+                _lineCount++;
             }
             if (node is AstBinaryOp astBinaryOp)
             {
                 Visit(astBinaryOp.Left);
                 Visit(astBinaryOp.Right);
-                if (ByteCodeConfig.TokenToByte.TryGetValue(astBinaryOp.Token.Type, out ByteType byteType))
+                if (ByteCodeConfig.BinaryOperators.TryGetValue(astBinaryOp.Token.Type, out ByteType byteType))
                 {
-                    ByteInstruction instruction = new ByteInstruction(byteType);
+                    ByteInstruction instruction = new ByteInstruction(byteType, _lineCount);
                     instructions.Add(instruction);
                     return instruction;
                 }
@@ -47,7 +49,7 @@ namespace BoomifyCS.Interpreter
             }
             else if (node is AstConstant astConstant)
             {
-                instructions.Add(new ByteInstruction(ByteType.LOAD_CONST,astConstant.BifyValue));
+                instructions.Add(new ByteInstruction(ByteType.LOAD_CONST, astConstant.BifyValue, _lineCount));
 
             }
             else if (node is AstVarDecl astVarDecl)
@@ -64,13 +66,48 @@ namespace BoomifyCS.Interpreter
                 if (astAssignment.Left is AstVar astVar)
                 {
                     BifyVar bifyVar = (BifyVar)astVar.BifyValue;
-                    instructions.Add(new ByteInstruction(ByteType.STORE, bifyVar));
+                    instructions.Add(new ByteInstruction(ByteType.STORE, bifyVar, _lineCount));
                 }
-                
+
+            }
+            else if (node is AstIf astIf)
+            {
+                _CompileIfStatement(astIf);
+            }
+            else if (node is AstBlock astBlock)
+            {
+                Visit(astBlock.StatementsNode);
+
+            }
+            else if (node is AstElse astElse)
+            {
+                Visit(astElse.BlockNode);
             }
 
+
             return null;
-            
         }
-    }   
+        private void _CompileIfStatement(AstIf ifNode)
+        {
+            Visit(ifNode.ConditionNode);
+
+            int jumpIfFalseIndex = instructions.Count;
+            instructions.Add(new ByteInstruction(ByteType.JUMP_IF_FALSE, _lineCount)); 
+
+            Visit(ifNode.BlockNode);
+
+            int jumpToEndIndex = instructions.Count;
+            instructions.Add(new ByteInstruction(ByteType.JUMP, _lineCount));
+
+            instructions[jumpIfFalseIndex].SetValue(instructions.Count);
+
+            if (ifNode.ElseNode != null)
+            {
+                Visit(ifNode.ElseNode);
+            }
+
+            instructions[jumpToEndIndex].SetValue(instructions.Count);
+        }
+
+    }
 }

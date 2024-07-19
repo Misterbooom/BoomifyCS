@@ -339,4 +339,9 @@ namespace BoomifyCS
         public BifyResourceWarning(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
         public BifyResourceWarning(string message, string tokens, string invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
     }
+    public class BifyOperationError : BifyException
+    {
+        public BifyOperationError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
+        public BifyOperationError(string message, string tokens, string invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
+    }
 }

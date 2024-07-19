@@ -24,7 +24,7 @@ namespace BoomifyCS
             try
             {
                 List<Token> tokens = lexer.Tokenize();
-                //tokens.WriteTokens();
+                tokens.WriteTokensWithoutWhiteSpace();
                 AstTree astParser = new AstTree();
                 astParser.runFrom = "main";
                 string[] callStack = { "Main" };
@@ -32,7 +32,9 @@ namespace BoomifyCS
                 AstNode node = astParser.ParseTokens(tokens);
                 //Console.WriteLine(AstParser.SimpleEval(node));
                 Console.WriteLine(node);
-                MyInterpreter interpreter = new MyInterpreter();
+                string[] codeByLine = code.Split('\n');
+                Console.WriteLine(string.Join("\n",codeByLine));
+                MyInterpreter interpreter = new MyInterpreter(codeByLine);
                 interpreter.runVM(node);
             }
             catch (BifyException e) 

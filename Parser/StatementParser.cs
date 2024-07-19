@@ -80,7 +80,6 @@ namespace BoomifyCS.Parser
                     currentPos = blockEnd;
                     List<Token> blockTokens = new List<Token> { blockToken };
                     AstNode blockNode = NodeParser.BuiltTokensToAst(blockTokens);
-
                     AstElse astElse = new AstElse(token, (AstBlock)blockNode);
                     return (astElse, currentPos);
                 }

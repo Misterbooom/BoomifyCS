@@ -1,5 +1,5 @@
-﻿using System;
-using BoomifyCS.Lexer;
+﻿using BoomifyCS.Lexer;
+using System;
 
 namespace BoomifyCS.Objects
 {
@@ -128,5 +128,6 @@ namespace BoomifyCS.Objects
             }
             throw new InvalidOperationException("Invalid type for FloorDiv operation");
         }
+
     }
 }

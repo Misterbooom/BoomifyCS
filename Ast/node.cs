@@ -159,17 +159,12 @@ namespace BoomifyCS.Ast
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = "";
-            try
-            {
-                baseStr += Left.StrHelper(level, "Var name: ");
-                baseStr += Right.StrHelper(level, "Var Value: ");
-            }
-            catch (NullReferenceException)
-            {
-                throw new NullReferenceException("Left or right value in AstAssignment is null");
-            }
 
-            return baseStr + $"{new String(' ', 4 * (level + 1))}\n";
+            string leftStr = Left.StrHelper(level, "Var name: ");
+            string rightStr = Right.StrHelper(level, "Var Value: ");
+            
+
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{leftStr}\n{rightStr}";
         }
         public override string ToString()
         {

@@ -59,7 +59,7 @@ namespace BoomifyCS.Parser
             return null;
 
         }
-        public static Tuple<List<Token>,int> AllTokensToEol(List<Token> tokens,int start = 0)
+        public static (List<Token>,int) AllTokensToEol(List<Token> tokens,int start = 0)
         {
             List<Token> result = new List<Token>();
             for (int i = start; i < tokens.Count; i++)
@@ -67,12 +67,13 @@ namespace BoomifyCS.Parser
                 Token token = tokens[i];
                 if (token.Type == TokenType.EOL)
                 {
-                    return new Tuple<List<Token>, int>(result, i);
+                    return (result, i);
                 }
                 result.Add(token);
             }
-            throw new SyntaxErrorException("Eol token not found");
+            return (result,tokens.Count);
         }
+
         public static Tuple<List<Token>, int> TokensInBrackets(List<Token> tokens, int start = 0)
         {
             List<Token> result = new List<Token>();

@@ -30,6 +30,8 @@ namespace BoomifyCS.Lexer
             { "==", TokenType.EQ },
             { "--", TokenType.INCREMENT },
             { "++",TokenType.DECREMENT},
+            { "!=", TokenType.NEQ },
+
         };
 
         public static Dictionary<char, TokenType> singleCharTokens = new Dictionary<char, TokenType>
@@ -53,34 +55,32 @@ namespace BoomifyCS.Lexer
             { ' ', TokenType.WHITESPACE },
             { '!', TokenType.NEQ },
         };
-
         public static Dictionary<string, TokenType> binaryOperators = new Dictionary<string, TokenType>
-            {
-
-                { "+", TokenType.ADD },
-                { "-", TokenType.SUB },
-                { "*", TokenType.MUL },
-                { "/", TokenType.DIV },
-                { "//",TokenType.FLOORDIV},
-                { "%", TokenType.MOD },
-                { "**", TokenType.POW },
-                { "<<", TokenType.LSHIFT },
-                { ">>", TokenType.RSHIFT },
-                { "&", TokenType.BIT_AND },
-                { "|", TokenType.BIT_OR },
-                { "^", TokenType.BIT_XOR },
-                { "==",TokenType.EQ },
-                { "<",TokenType.LT},
-                { ">", TokenType.GT},
-                { "<=", TokenType.LTEQ },
-                { ">=", TokenType.GTEQ },
-                { "&&", TokenType.AND },
-                { "||", TokenType.OR },
-                { "!", TokenType.NOT },
-                { "--", TokenType.INCREMENT },
-                { "++",TokenType.DECREMENT},
-                { ",",TokenType.COMMA}
-
+        {
+            { "+", TokenType.ADD },
+            { "-", TokenType.SUB },
+            { "*", TokenType.MUL },
+            { "/", TokenType.DIV },
+            { "//", TokenType.FLOORDIV },
+            { "%", TokenType.MOD },
+            { "**", TokenType.POW },
+            { "<<", TokenType.LSHIFT },
+            { ">>", TokenType.RSHIFT },
+            { "&", TokenType.BIT_AND },
+            { "|", TokenType.BIT_OR },
+            { "^", TokenType.BIT_XOR },
+            { "==", TokenType.EQ },
+            { "!=", TokenType.NEQ },  
+            { "<", TokenType.LT },
+            { ">", TokenType.GT },
+            { "<=", TokenType.LTEQ },
+            { ">=", TokenType.GTEQ },
+            { "&&", TokenType.AND },
+            { "||", TokenType.OR },
+            { "!", TokenType.NOT },
+            { "--", TokenType.DECREMENT },
+            { "++", TokenType.INCREMENT },
+            { ",", TokenType.COMMA }
         };
 
         public static Dictionary<string, TokenType> comparisonOperators = new Dictionary<string, TokenType>

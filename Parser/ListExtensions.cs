@@ -113,11 +113,12 @@ public static class ListExtensions
     public static void WriteBytes<T>(this List<T> list) where T : ByteInstruction
     {
         var sb = new StringBuilder();
-        foreach (ByteInstruction instruction in list)
+        for (int i = 0;i < list.Count;i++)
         {
+            ByteInstruction instruction = list[i];
             if (instruction != null)
             {
-                sb.AppendLine(instruction.ToString());
+                sb.AppendLine($"{i + 1}:{instruction.ToString()}");
 
             }
 

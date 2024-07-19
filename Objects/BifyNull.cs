@@ -19,7 +19,25 @@ namespace BoomifyCS.Objects
 
         public string Repr()
         {
-            return $" BifyNull({Value})";
+            return $"BifyNull({Value})";
+        }
+
+        public override BifyObject Eq(BifyObject other)
+        {
+            if (other is BifyNull)
+            {
+                return new BifyBoolean(this.Token, true);
+            }
+            return new BifyBoolean(this.Token, false);
+        }
+
+        public override BifyObject Neq(BifyObject other)
+        {
+            if (other is BifyNull)
+            {
+                return new BifyBoolean(this.Token, false);
+            }
+            return new BifyBoolean(this.Token, true);
         }
     }
 }

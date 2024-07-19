@@ -79,6 +79,11 @@ namespace BoomifyCS.Lexer
         INCREMENT,
         FUNCTIONDECL,
         NEXTLINE,
+        BITAND,
+        BITOR,
+        BITXOR,
+        BITNOT,
+
     }
     public class Token
     {
