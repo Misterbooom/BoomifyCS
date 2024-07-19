@@ -61,40 +61,40 @@ namespace BoomifyCS.Parser
             throw new Exception("Unsupported token - " + token.Type);
         }
 
-        public static (AstNode, int) MultiTokenStatement(Token token, List<Token> tokens,int currentPos)
+        public static (AstNode, int) MultiTokenStatement(Token token, List<Token> tokens,int currentPos,AstTree astParser)
         {
 
             if (token.Type == TokenType.VARDECL)
             {
-                return StatementParser.ParseVarDecl(token, tokens, currentPos);
+                return StatementParser.ParseVarDecl(token, tokens, currentPos,astParser);
             }
             else if (token.Type == TokenType.IF)
             {
-                return StatementParser.ParseIf(token, tokens, currentPos);
+                return StatementParser.ParseIf(token, tokens, currentPos, astParser);
             }
             else if (token.Type == TokenType.ELSE)
             {
-                return StatementParser.ParseElse(token, tokens, currentPos);
+                return StatementParser.ParseElse(token, tokens, currentPos,astParser);
             }
             else if (token.Type == TokenType.WHILE)
             {
-                return StatementParser.ParseWhile(token, tokens, currentPos);
+                return StatementParser.ParseWhile(token, tokens, currentPos,astParser);
             }
             else if (token.Type == TokenType.FOR)
             {
-                return StatementParser.ParseFor(token, tokens, currentPos);
+                return StatementParser.ParseFor(token, tokens, currentPos,astParser);
             }
             else if (token.Type == TokenType.INCREMENT || token.Type == TokenType.DECREMENT)
             {
-                return StatementParser.ParseUnaryOp(token, tokens, currentPos);
+                return StatementParser.ParseUnaryOp(token, tokens, currentPos,astParser);
             }
             else if (token.Type == TokenType.FUNCTIONDECL)
             {
-                return StatementParser.ParseFunctionDecl(token, tokens, currentPos);
+                return StatementParser.ParseFunctionDecl(token, tokens, currentPos,astParser);
             }
             else if (token.Type == TokenType.IDENTIFIER)
             {
-                return StatementParser.ParseIdentifier(token, tokens, currentPos);
+                return StatementParser.ParseIdentifier(token, tokens, currentPos,astParser);
             }
             throw new NotImplementedException($"Not implemented token - {token.Type}");
         }

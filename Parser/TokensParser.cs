@@ -21,7 +21,7 @@ namespace BoomifyCS.Parser
         {
             List<Token> lineTokens = new List<Token>();
             Token currentToken = tokens[tokenPosition];
-           
+            
             while (tokenPosition < tokens.Count && currentToken.Type != TokenType.EOL)
             {
                 currentToken = tokens[tokenPosition];

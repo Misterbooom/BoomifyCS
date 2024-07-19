@@ -52,20 +52,21 @@ namespace BoomifyCS.Lexer
                 char currentChar = _code[_position];
 
 
-                if (char.IsWhiteSpace(currentChar))
+                
+                if (currentChar == '\n')
                 {
-                    if (currentChar == '\n')
-                    {
-                        tokens.Add(new Token(TokenType.NEXTLINE, "\n"));
-                        _lineCount++;
-                    }
-                    else if (currentChar == ' ')
-                    {
-                        tokens.Add(new Token(TokenType.WHITESPACE, " "));
-                    }
+                    tokens.Add(new Token(TokenType.NEXTLINE, "\n"));
+                    _lineCount++;
                     _position++;
                     continue;
                 }
+                else if (currentChar == ' ')
+                {
+                    tokens.Add(new Token(TokenType.WHITESPACE, " "));
+                    _position++;
+                    continue;
+                }
+                
 
                 if (currentChar == ';')
                 {
@@ -148,7 +149,7 @@ namespace BoomifyCS.Lexer
             if (bracketsStack.Count > 0)
             {
                 int line = bracketsStack[bracketsStack.Count - 1];
-                throw new BifySyntaxError("Unmatched '(': missing ')'.",_lines[line - 1], "(",line);
+                throw new BifySyntaxError("Unmatched '(': missing ')'.",_lines[line], "(",line);
             }
 
             return tokens;

@@ -25,14 +25,18 @@ namespace BoomifyCS
             {
                 List<Token> tokens = lexer.Tokenize();
                 tokens.WriteTokensWithoutWhiteSpace();
-                AstTree astParser = new AstTree();
+                string[] codeByLine = code.Split('\n');
+                //for (int i = 0;i < codeByLine.Length;i++) {
+                //    Console.WriteLine($"{i}:{codeByLine[i]}");  
+                //}
+
+                AstTree astParser = new AstTree(codeByLine);
                 astParser.runFrom = "main";
                 string[] callStack = { "Main" };
 
                 AstNode node = astParser.ParseTokens(tokens);
                 //Console.WriteLine(AstParser.SimpleEval(node));
                 Console.WriteLine(node);
-                string[] codeByLine = code.Split('\n');
                 Console.WriteLine(string.Join("\n",codeByLine));
                 MyInterpreter interpreter = new MyInterpreter(codeByLine);
                 interpreter.runVM(node);
