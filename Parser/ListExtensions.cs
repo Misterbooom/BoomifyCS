@@ -118,7 +118,7 @@ public static class ListExtensions
             ByteInstruction instruction = list[i];
             if (instruction != null)
             {
-                sb.AppendLine($"{i + 1}:{instruction.ToString()}");
+                sb.AppendLine($"{i}:{instruction.ToString()}");
 
             }
 

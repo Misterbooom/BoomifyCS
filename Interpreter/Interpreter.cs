@@ -83,6 +83,7 @@ namespace BoomifyCS.Interpreter
             {
                 Visit(astElse.BlockNode);
             }
+            
 
 
             return null;
@@ -92,14 +93,32 @@ namespace BoomifyCS.Interpreter
             Visit(ifNode.ConditionNode);
 
             int jumpIfFalseIndex = instructions.Count;
-            instructions.Add(new ByteInstruction(ByteType.JUMP_IF_FALSE, _lineCount)); 
+            instructions.Add(new ByteInstruction(ByteType.JUMP_IF_FALSE, null, _lineCount));
 
             Visit(ifNode.BlockNode);
 
             int jumpToEndIndex = instructions.Count;
-            instructions.Add(new ByteInstruction(ByteType.JUMP, _lineCount));
+            instructions.Add(new ByteInstruction(ByteType.JUMP, null, _lineCount));
 
-            instructions[jumpIfFalseIndex].SetValue(instructions.Count);
+            instructions[jumpIfFalseIndex].SetValue(jumpToEndIndex);
+
+            foreach (var elseIf in ifNode.ElseIfNodes)
+            {
+                Visit(elseIf.ConditionNode);
+
+                int jumpElseIfFalseIndex = instructions.Count;
+                instructions.Add(new ByteInstruction(ByteType.JUMP_IF_FALSE, null, _lineCount));
+
+                Visit(elseIf.BlockNode);
+
+                int jumpElseIfEndIndex = instructions.Count;
+                instructions.Add(new ByteInstruction(ByteType.JUMP, null, _lineCount));
+
+                instructions[jumpElseIfFalseIndex].SetValue(jumpElseIfEndIndex);
+                instructions[jumpToEndIndex].SetValue(jumpElseIfEndIndex);
+
+                jumpToEndIndex = jumpElseIfEndIndex;
+            }
 
             if (ifNode.ElseNode != null)
             {
@@ -109,5 +128,4 @@ namespace BoomifyCS.Interpreter
             instructions[jumpToEndIndex].SetValue(instructions.Count);
         }
 
-    }
-}
+    }}

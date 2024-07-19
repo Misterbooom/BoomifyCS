@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using BoomifyCS.Lexer;
 using BoomifyCS.Objects;
 using BoomifyCS.Parser;
@@ -240,7 +241,7 @@ namespace BoomifyCS.Ast
         public AstNode ConditionNode;
         public AstBlock BlockNode;
         public AstElse ElseNode;
-        public AstElseIf ElseIf;
+        public List<AstElseIf> ElseIfNodes = new List<AstElseIf>();
         public AstIf(Token token, AstNode conditionNode, AstBlock blockNode, AstElse elseNode = null) : base(token)
         {
             this.ElseNode = elseNode;
@@ -263,14 +264,14 @@ namespace BoomifyCS.Ast
             {
                 elseStr = ElseNode.StrHelper(level + 1, "else: ");
             }
-
-            string elseIfStr = "";
-            if (ElseIf != null)
+            string elseIfNodes = "";
+            foreach(AstElseIf astElseIf in ElseIfNodes)
             {
-                elseIfStr = ElseIf.StrHelper(level + 1, "else if: ");
+                elseIfNodes += astElseIf.StrHelper(level + 1, "else if: ");
             }
+            
 
-            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{conditionStr}\n{blockStr}\n{elseStr}\n{elseIfStr}";
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{conditionStr}\n{blockStr}\n{elseStr}\n{elseIfNodes}";
         }
 
         public override string ToString()
@@ -279,15 +280,7 @@ namespace BoomifyCS.Ast
         }
         public void SetElseIfNode(AstElseIf astElseIf)
         {
-            if (this.ElseIf == null)
-            {
-                this.ElseIf = astElseIf;
-
-            }
-            else
-            {
-                ElseIf = (AstElseIf)NodeParser.SetMaxRightNode(ElseIf, astElseIf);
-            }
+            ElseIfNodes.Add(astElseIf);
         }
     }
     public class AstElse : AstNode

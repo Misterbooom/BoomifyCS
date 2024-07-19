@@ -44,9 +44,29 @@ namespace BoomifyCS.Interpreter.VM
                     }
                     if (bifyBoolean.Value == false )
                     {
+                        instructionIndex = jumpIndex - 1;
+                    }
+                    _stackManager.Pop();
+
+                }
+                else if (instruction.Type == ByteType.JUMP_IF_TRUE)
+                {
+                    int jumpIndex = (int)instruction.Value[0];
+                    if (!(_stackManager.Peek() is BifyBoolean bifyBoolean))
+                    {
+                        throw new BifyTypeError("Condition must be a boolean", SourceCode[instruction.IndexOfInstruction], SourceCode[instruction.IndexOfInstruction], instruction.IndexOfInstruction + 1);
+                    }
+                    if (bifyBoolean.Value == true)
+                    {
                         instructionIndex = jumpIndex;
                     }
                     _stackManager.Pop();
+                }
+                else if (instruction.Type == ByteType.JUMP)
+                {
+                    int jumpIndex = (int)instruction.Value[0];
+                    instructionIndex = jumpIndex;
+
                 }
                 instructionIndex++;
             }
