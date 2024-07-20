@@ -128,6 +128,17 @@ namespace BoomifyCS.Objects
             }
             throw new BifyTypeError($"Invalid type for FloorDiv operation: {GetType().Name} and {other.GetType().Name}");
         }
+        public override BifyBoolean Bool()
+        {
+            if (this.Value == 0)
+            {
+                return new BifyBoolean(false);
+            }
+            else
+            {
+                return new BifyBoolean(true);
+            }
+        }
 
     }
 }

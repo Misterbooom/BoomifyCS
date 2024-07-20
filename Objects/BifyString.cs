@@ -66,6 +66,15 @@ namespace BoomifyCS.Objects
             return new BifyBoolean(this.Token, true);
 
         }
+        public override BifyBoolean Bool()
+        {
+            if (Value == "")
+            {
+                return new BifyBoolean(false);
+            }
+            return new BifyBoolean(true);
+
+        }
     }
 }
 

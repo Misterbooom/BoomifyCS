@@ -39,5 +39,9 @@ namespace BoomifyCS.Objects
             }
             return new BifyBoolean(this.Token, true);
         }
+        public override BifyBoolean Bool()
+        {
+            return new BifyBoolean(false);
+        }
     }
 }

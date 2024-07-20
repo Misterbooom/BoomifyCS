@@ -31,6 +31,8 @@ namespace BoomifyCS.Lexer
             { "--", TokenType.INCREMENT },
             { "++",TokenType.DECREMENT},
             { "!=", TokenType.NEQ },
+            { "&&", TokenType.AND },
+
 
         };
 

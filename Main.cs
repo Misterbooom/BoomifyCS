@@ -8,6 +8,7 @@ using BoomifyCS.Ast;
 using BoomifyCS.Lexer;
 using BoomifyCS.Parser;
 using BoomifyCS.Interpreter;
+using BoomifyCS.Objects;
 namespace BoomifyCS 
 {                   
     internal class Program
@@ -40,6 +41,10 @@ namespace BoomifyCS
                 Console.WriteLine(string.Join("\n",codeByLine));
                 MyInterpreter interpreter = new MyInterpreter(codeByLine);
                 interpreter.runVM(node);
+
+                BifyInteger a = new BifyInteger(new Token(TokenType.IDENTIFIER, "1"), 1);
+                BifyInteger b = new BifyInteger(new Token(TokenType.IDENTIFIER, "1"), 1);
+
             }
             catch (BifyException e) 
             {

@@ -143,5 +143,9 @@ namespace BoomifyCS.Objects
         {
             throw new BifyOperationError($"Unary NOT operation not supported for {GetType().Name}.");
         }
+        public virtual BifyBoolean Bool()
+        {
+            throw new BifyOperationError($"Boolean conversion not supported for {GetType().Name}.");
+        }
     }
 }

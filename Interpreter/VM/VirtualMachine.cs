@@ -46,11 +46,8 @@ namespace BoomifyCS.Interpreter.VM
                 }
                 else if (instruction.Type == ByteType.JUMP_IF_FALSE) {
                     int jumpIndex = (int)instruction.Value[0];
-                    if (!(_stackManager.Peek() is BifyBoolean bifyBoolean))
-                    {
-                        throw new BifyTypeError("Condition must be a boolean", SourceCode[instruction.IndexOfInstruction], SourceCode[instruction.IndexOfInstruction],instruction.IndexOfInstruction + 1);
-                    }
-                    if (bifyBoolean.Value == false )
+                    
+                    if (_stackManager.Peek().Bool().Value == false )
                     {
                         instructionIndex = jumpIndex - 1;
                     }
@@ -60,11 +57,8 @@ namespace BoomifyCS.Interpreter.VM
                 else if (instruction.Type == ByteType.JUMP_IF_TRUE)
                 {
                     int jumpIndex = (int)instruction.Value[0];
-                    if (!(_stackManager.Peek() is BifyBoolean bifyBoolean))
-                    {
-                        throw new BifyTypeError("Condition must be a boolean", SourceCode[instruction.IndexOfInstruction], SourceCode[instruction.IndexOfInstruction], instruction.IndexOfInstruction + 1);
-                    }
-                    if (bifyBoolean.Value == true)
+                    
+                    if (_stackManager.Peek().Bool().Value == true)
                     {
                         instructionIndex = jumpIndex;
                     }
@@ -137,13 +131,13 @@ namespace BoomifyCS.Interpreter.VM
                 case ByteType.GTE:
                     return a.Gte(b);
                 case ByteType.AND:
-                    return a.And(b);
+                    return a.Bool().And(b.Bool());
                 case ByteType.OR:
-                    return a.Or(b);
+                    return a.Bool().Or(b.Bool());
                 case ByteType.NEQ:
                     return a.Neq(b);
                 case ByteType.NOT:
-                    return a.Not();
+                    return a.Bool().Not();
                 case ByteType.BITAND:
                     return a.BitAnd(b);
                 case ByteType.BITOR:

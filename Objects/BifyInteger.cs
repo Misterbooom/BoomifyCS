@@ -271,5 +271,11 @@ namespace BoomifyCS.Objects
             }
             throw new BifyTypeError($"Invalid type for Gte operation: {GetType().Name} and {other.GetType().Name}");
         }
+        public override BifyBoolean Bool()
+        {
+            return new BifyBoolean(Value != 0);
+            
+            
+        }
     }
 }
