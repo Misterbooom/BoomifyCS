@@ -34,7 +34,7 @@ namespace BoomifyCS.Objects
                 }
                 return new BifyString(Token, builder.ToString());
             }
-            throw new InvalidOperationException("Invalid type for Mul operation");
+            return new BifyBoolean(this.Token, false);
         }
 
         public override BifyObject Add(BifyObject other)
@@ -43,7 +43,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyString(this.Token, this.Value + otherStr.Value);
             }
-            throw new InvalidOperationException("Invalid type for Add operation");
+            return new BifyBoolean(this.Token, false);
+
         }
 
         public override BifyObject Eq(BifyObject other)
@@ -52,7 +53,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyBoolean(this.Token, this.Value == otherStr.Value);
             }
-            throw new InvalidOperationException("Invalid type for Eq operation");
+            return new BifyBoolean(this.Token, false);
+
         }
 
         public override BifyObject Neq(BifyObject other)
@@ -61,7 +63,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyBoolean(this.Token, this.Value != otherStr.Value);
             }
-            throw new InvalidOperationException("Invalid type for Neq operation");
+            return new BifyBoolean(this.Token, true);
+
         }
     }
 }

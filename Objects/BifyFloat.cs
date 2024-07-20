@@ -32,7 +32,7 @@ namespace BoomifyCS.Objects
             {
                 return new BifyFloat(this.Token, this.Value + otherInt.Value);
             }
-            throw new InvalidOperationException("Invalid type for Add operation");
+            throw new BifyTypeError($"Invalid type for Add operation: {GetType().Name} and {other.GetType().Name}");
         }
 
         public override BifyObject Sub(BifyObject other)
@@ -45,7 +45,7 @@ namespace BoomifyCS.Objects
             {
                 return new BifyFloat(this.Token, this.Value - otherInt.Value);
             }
-            throw new InvalidOperationException("Invalid type for Sub operation");
+            throw new BifyTypeError($"Invalid type for Sub operation: {GetType().Name} and {other.GetType().Name}");
         }
 
         public override BifyObject Mul(BifyObject other)
@@ -58,7 +58,7 @@ namespace BoomifyCS.Objects
             {
                 return new BifyFloat(this.Token, this.Value * otherInt.Value);
             }
-            throw new InvalidOperationException("Invalid type for Mul operation");
+            throw new BifyTypeError($"Invalid type for Mul operation: {GetType().Name} and {other.GetType().Name}");
         }
 
         public override BifyObject Div(BifyObject other)
@@ -67,7 +67,7 @@ namespace BoomifyCS.Objects
             {
                 if (otherFloat.Value == 0)
                 {
-                    throw new DivideByZeroException("Cannot divide by zero.");
+                    throw new BifyZeroDivisionError("Cannot divide by zero.");
                 }
                 return new BifyFloat(this.Token, this.Value / otherFloat.Value);
             }
@@ -75,11 +75,11 @@ namespace BoomifyCS.Objects
             {
                 if (otherInt.Value == 0)
                 {
-                    throw new DivideByZeroException("Cannot divide by zero.");
+                    throw new BifyZeroDivisionError("Cannot divide by zero.");
                 }
                 return new BifyFloat(this.Token, this.Value / otherInt.Value);
             }
-            throw new InvalidOperationException("Invalid type for Div operation");
+            throw new BifyTypeError($"Invalid type for Div operation: {GetType().Name} and {other.GetType().Name}");
         }
 
         public override BifyObject Mod(BifyObject other)
@@ -92,7 +92,7 @@ namespace BoomifyCS.Objects
             {
                 return new BifyFloat(this.Token, this.Value % otherInt.Value);
             }
-            throw new InvalidOperationException("Invalid type for Mod operation");
+            throw new BifyTypeError($"Invalid type for Mod operation: {GetType().Name} and {other.GetType().Name}");
         }
 
         public override BifyObject Pow(BifyObject other)
@@ -105,7 +105,7 @@ namespace BoomifyCS.Objects
             {
                 return new BifyFloat(this.Token, Math.Pow(this.Value, otherInt.Value));
             }
-            throw new InvalidOperationException("Invalid type for Pow operation");
+            throw new BifyTypeError($"Invalid type for Pow operation: {GetType().Name} and {other.GetType().Name}");
         }
 
         public override BifyObject FloorDiv(BifyObject other)
@@ -126,7 +126,7 @@ namespace BoomifyCS.Objects
                 }
                 return new BifyFloat(this.Token, Math.Floor(this.Value / otherInt.Value));
             }
-            throw new InvalidOperationException("Invalid type for FloorDiv operation");
+            throw new BifyTypeError($"Invalid type for FloorDiv operation: {GetType().Name} and {other.GetType().Name}");
         }
 
     }

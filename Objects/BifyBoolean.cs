@@ -11,6 +11,10 @@ namespace BoomifyCS.Objects
         {
             this.Value = value;
         }
+        public BifyBoolean(bool value) : base(new Token(TokenType.IDENTIFIER, value.ToString()))
+        {
+            this.Value = value;
+        }
 
         public override string ToString()
         {
@@ -29,7 +33,7 @@ namespace BoomifyCS.Objects
             {
                 return new BifyBoolean(this.Token, this.Value && otherBool.Value);
             }
-            throw new InvalidOperationException("Logical AND operation not implemented for this type.");
+            return new BifyBoolean(false);
         }
 
         // Logical OR operator (||)
@@ -39,7 +43,7 @@ namespace BoomifyCS.Objects
             {
                 return new BifyBoolean(this.Token, this.Value || otherBool.Value);
             }
-            throw new InvalidOperationException("Logical OR operation not implemented for this type.");
+            return new BifyBoolean(false);               
         }
 
         // Logical NOT operator (!)
@@ -55,7 +59,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyBoolean(this.Token, this.Value == otherBool.Value);
             }
-            throw new InvalidOperationException("Equality operation not implemented for this type.");
+            return new BifyBoolean(false);
+
         }
 
         // Not equal to (!=)
@@ -65,7 +70,7 @@ namespace BoomifyCS.Objects
             {
                 return new BifyBoolean(this.Token, this.Value != otherBool.Value);
             }
-            throw new InvalidOperationException("Inequality operation not implemented for this type.");
+            return new BifyBoolean(false);
         }
     }
 }

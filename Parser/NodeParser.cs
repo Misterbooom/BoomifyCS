@@ -96,7 +96,7 @@ namespace BoomifyCS.Parser
             {
                 return StatementParser.ParseIdentifier(token, tokens, currentPos,astParser);
             }
-            throw new NotImplementedException($"Not implemented token - {token.Type}");
+            throw new NotImplementedException($"Not implemented token to parse multitoken statement - {token.Type}");
         }
 
         public static AstNode ConnectNodes(Stack<AstNode> operatorStack, Stack<AstNode> operandStack)

@@ -32,6 +32,14 @@ namespace BoomifyCS.Interpreter.VM
                     _ProcessOperator(instruction);
                 }
                 else if (instruction.Type == ByteType.STORE) { 
+                    if (_stackManager.Count() == 0)
+                    {
+                        throw new BifyInitializationError("Variable initialized incorrectly. Make sure to assign a value when declaring the variable.",
+                            SourceCode[instruction.IndexOfInstruction - 1],
+                            SourceCode[instruction.IndexOfInstruction - 1],
+                            instruction.IndexOfInstruction);
+                    }
+
                     var value = _stackManager.Pop();
                     var bifyVar = (BifyVar)instruction.Value[0];
                     _varManager.DefineVariable(bifyVar.Name, value);
@@ -87,12 +95,15 @@ namespace BoomifyCS.Interpreter.VM
                     _stackManager.Push(result);
 
                 }
-                catch (Exception e)
+                catch (BifyException e)
                 {
                     ByteCodeConfig.byteToString.TryGetValue(instruction.Type,out string operatorChar);
-                    throw new BifyOperationError(e.Message, SourceCode[instruction.IndexOfInstruction - 1],operatorChar,instruction.IndexOfInstruction);
+                    e.CurrentLine = instruction.IndexOfInstruction;
+                    e.LineTokensString = SourceCode[instruction.IndexOfInstruction - 1];
+                    e.InvalidTokensString = operatorChar;
+                    Console.WriteLine(e.LineTokensString);
+                    throw e;
                 }
-                //Console.WriteLine($"{left} {operatorType} {right} = {result}");
             }
 
         }
