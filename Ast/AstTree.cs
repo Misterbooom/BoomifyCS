@@ -232,7 +232,17 @@ namespace BoomifyCS.Ast
 
             if (operandStack.Count > 1)
             {
-                return NodeParser.ConnectNodes(operatorStack, operandStack);
+                try
+                {
+                    NodeParser.ConnectNodes(operatorStack, operandStack);
+
+                }
+                catch (BifySyntaxError e) {
+                    e.CurrentLine = lineCount;
+                    e.LineTokensString = _sourceCode[lineCount];
+                    e.InvalidTokensString = _sourceCode[lineCount];
+                    throw e;
+                }
             }
             else if (operandStack.Count == 1)
             {

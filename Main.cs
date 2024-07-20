@@ -39,7 +39,7 @@ namespace BoomifyCS
                 //Console.WriteLine(AstParser.SimpleEval(node));
                 Console.WriteLine(node);
                 Console.WriteLine(string.Join("\n",codeByLine));
-                MyInterpreter interpreter = new MyInterpreter(codeByLine);
+                MyCompiler interpreter = new MyCompiler(codeByLine);
                 interpreter.runVM(node);
 
                 BifyInteger a = new BifyInteger(new Token(TokenType.IDENTIFIER, "1"), 1);

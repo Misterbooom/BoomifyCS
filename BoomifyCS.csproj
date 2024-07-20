@@ -50,9 +50,11 @@
     <Compile Include="Ast\AstConfig.cs" />
     <Compile Include="Ast\AstTree.cs" />
     <Compile Include="Ast\Node.cs" />
+    <Compile Include="BuiltIn\Function\BifyFunction.cs" />
+    <Compile Include="BuiltIn\Function\Explode.cs" />
     <Compile Include="exceptions.cs" />
     <Compile Include="Interpreter\VM\ByteCode.cs" />
-    <Compile Include="Interpreter\Interpreter.cs" />
+    <Compile Include="Interpreter\Compiler.cs" />
     <Compile Include="Interpreter\VM\StackManager.cs" />
     <Compile Include="Interpreter\VM\VarManager.cs" />
     <Compile Include="Interpreter\VM\VirtualMachine.cs" />

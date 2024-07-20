@@ -3,15 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BoomifyCS.BuiltIn.Function;
 using BoomifyCS.Objects;
 namespace BoomifyCS.Interpreter.VM
 {
     public class VarManager
     {
         private Dictionary<string, Dictionary<string, BifyObject>> variables = new Dictionary<string, Dictionary<string, BifyObject>>
-    {
-        { "locals", new Dictionary<string, BifyObject>() },
-        { "globals", new Dictionary<string, BifyObject>() }
+        {
+            { "locals", new Dictionary<string, BifyObject>() },
+            { "globals", new Dictionary<string, BifyObject>{
+                { "explode",new Explode()},
+
+        } }
     };
 
         private string context = "globals";

@@ -110,6 +110,10 @@ namespace BoomifyCS.Parser
                 op.Right = right;
                 operandStack.Push(op);
             }
+            if (operandStack.Count > 1)
+            {
+                throw new BifySyntaxError("Not enough operators");
+            }
 
             return operandStack.First();
         }

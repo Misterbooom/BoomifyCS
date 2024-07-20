@@ -8,12 +8,12 @@ using BoomifyCS.Objects;
 using BoomifyCS.Interpreter.VM;
 namespace BoomifyCS.Interpreter
 {
-    public class MyInterpreter
+    public class MyCompiler
     {
         List<ByteInstruction> instructions = new List<ByteInstruction>();
         private VirtualMachine VM;
         private int _lineCount = 1;
-        public MyInterpreter(string[] sourcecode) {
+        public MyCompiler(string[] sourcecode) {
             VM = new VirtualMachine(sourcecode);
         }
         public void runVM(AstNode root)
@@ -56,8 +56,11 @@ namespace BoomifyCS.Interpreter
             {
                 Visit(astVarDecl.AssignmentNode);
                 Visit(node.Right);
-
-
+            }
+            else if (node is AstIdentifier astIdentifier)
+            {
+                ByteInstruction instruction = new ByteInstruction(ByteType.LOAD,astIdentifier.Token.Value,_lineCount);
+                instructions.Add(instruction);
             }
             else if (node is AstAssignment astAssignment)
             {
@@ -82,6 +85,13 @@ namespace BoomifyCS.Interpreter
             else if (node is AstElse astElse)
             {
                 Visit(astElse.BlockNode);
+            }
+            else if (node is AstCall astCall)
+            {
+                Visit(astCall.ArgumentsNode);
+                ByteInstruction instruction = new ByteInstruction(ByteType.CALL,astCall.CallableName.Token.Value,_lineCount);
+                instructions.Add(instruction);
+
             }
             
 

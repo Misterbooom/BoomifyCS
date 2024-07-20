@@ -1,5 +1,6 @@
 ﻿using BoomifyCS.Lexer;
 using System;
+using System.Collections.Generic;
 
 namespace BoomifyCS.Objects
 {
@@ -147,5 +148,10 @@ namespace BoomifyCS.Objects
         {
             throw new BifyOperationError($"Boolean conversion not supported for {GetType().Name}.");
         }
+        public virtual BifyObject Call(List<BifyObject> bifyObjects)
+        {
+            throw new BifyOperationError($"Call operation not supported for {GetType().Name}.");
+        }
+
     }
 }

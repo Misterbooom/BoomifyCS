@@ -39,7 +39,8 @@ namespace BoomifyCS.Interpreter
         RSHIFT, 
         JUMP,
         JUMP_IF_TRUE,
-        JUMP_IF_FALSE
+        JUMP_IF_FALSE,
+        CALL
     }
     public class ByteInstruction
     {

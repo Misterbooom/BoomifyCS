@@ -11,7 +11,10 @@ namespace BoomifyCS.Objects
         {
             this.Value = null;
         }
-
+        public BifyNull() : base(new Token(TokenType.NULL,"null"))
+        {
+            this.Value = null;
+        }
         public override string ToString()
         {
             return $"null";

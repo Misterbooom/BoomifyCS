@@ -27,6 +27,20 @@ namespace BoomifyCS.Interpreter.VM
                     var constant = instruction.Value[0];
                     _stackManager.Push((BifyObject)constant);
                 }
+                else if (instruction.Type == ByteType.LOAD)
+                {
+                    var varName = (string)instruction.Value[0];
+                    try
+                    {
+                        BifyObject varValue = _varManager.GetVariable(varName);
+                        _stackManager.Push(varValue);
+
+                    }
+                    catch (KeyNotFoundException )
+                    {
+                        throw new BifyUndefinedError($"Undefined variable - {varName}", SourceCode[instruction.IndexOfInstruction - 1],varName,instruction.IndexOfInstruction);
+                    }
+                }
                 else if (ByteCodeConfig.BinaryOperators.ContainsValue(instruction.Type))
                 {
                     _ProcessOperator(instruction);
@@ -69,6 +83,17 @@ namespace BoomifyCS.Interpreter.VM
                     int jumpIndex = (int)instruction.Value[0];
                     instructionIndex = jumpIndex;
 
+                }
+                else if (instruction.Type== ByteType.CALL)
+                {
+                    List<BifyObject> arguments = new List<BifyObject>();
+                    while (_stackManager.Count() > 0)
+                    {
+                        arguments.Add(_stackManager.Pop());
+                    }
+                    BifyObject function = _varManager.GetVariable((string)instruction.Value[0]);
+                    BifyObject functionReturn = function.Call(arguments);
+                    _stackManager.Push(functionReturn);
                 }
                 instructionIndex++;
             }
