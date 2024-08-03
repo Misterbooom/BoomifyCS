@@ -1,2 +1,1 @@
-﻿var a = 12;
-var b = a;
+﻿var a = ignite("Write Sumeti",1)

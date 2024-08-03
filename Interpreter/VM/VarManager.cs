@@ -14,6 +14,8 @@ namespace BoomifyCS.Interpreter.VM
             { "locals", new Dictionary<string, BifyObject>() },
             { "globals", new Dictionary<string, BifyObject>{
                 { "explode",new Explode()},
+                { "ignite",new Ignite()},
+
 
         } }
     };

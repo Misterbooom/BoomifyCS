@@ -42,6 +42,13 @@ namespace BoomifyCS.Ast
 
             return treeStr;
         }
+        public int Len(int level = 1)
+        {
+            int leftLen = (Left != null) ? Left.Len(level + 1) : level;
+            int rightLen = (Right != null) ? Right.Len(level + 1) : level;
+            return Math.Max(leftLen, rightLen);
+        }
+
     }
 
 
@@ -409,6 +416,11 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{functionNameStr}\n{argumentsStr}\n{blockStr}";
         }
     }
+    //public class AstComma : AstNode
+    //{
+    //    public AstComma(Token token, AstNode left = null, AstNode right = null) : base(token, left, right) { }
+
+    //}
 
 }
 

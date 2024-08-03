@@ -7,7 +7,7 @@ namespace BoomifyCS.Objects
     public class BifyObject
     {
         public Token Token;
-
+        public int ExpectedArgCount;
         public BifyObject(Token token)
         {
             this.Token = token;

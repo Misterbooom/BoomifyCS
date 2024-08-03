@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BoomifyCS.Ast;
 using BoomifyCS.Objects;
 using BoomifyCS.Interpreter.VM;
+using BoomifyCS.Lexer;
 namespace BoomifyCS.Interpreter
 {
     public class MyCompiler
@@ -39,7 +40,10 @@ namespace BoomifyCS.Interpreter
             {
                 Visit(astBinaryOp.Left);
                 Visit(astBinaryOp.Right);
-                if (ByteCodeConfig.BinaryOperators.TryGetValue(astBinaryOp.Token.Type, out ByteType byteType))
+                if (astBinaryOp.Token.Type == TokenType.COMMA) { 
+                
+                }
+                else if (ByteCodeConfig.BinaryOperators.TryGetValue(astBinaryOp.Token.Type, out ByteType byteType))
                 {
                     ByteInstruction instruction = new ByteInstruction(byteType, _lineCount);
                     instructions.Add(instruction);
@@ -85,14 +89,18 @@ namespace BoomifyCS.Interpreter
             else if (node is AstElse astElse)
             {
                 Visit(astElse.BlockNode);
-            }
+            } 
             else if (node is AstCall astCall)
             {
                 Visit(astCall.ArgumentsNode);
-                ByteInstruction instruction = new ByteInstruction(ByteType.CALL,astCall.CallableName.Token.Value,_lineCount);
+                int expectedArgCount = astCall.ArgumentsNode.Len();
+                Console.WriteLine($"Excepected arg count - {expectedArgCount}");
+                ByteInstruction instruction = new ByteInstruction(ByteType.CALL,new List<object> { astCall.CallableName.Token.Value, expectedArgCount },_lineCount);
                 instructions.Add(instruction);
+                
 
             }
+            
             
 
 

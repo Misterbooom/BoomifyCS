@@ -15,6 +15,8 @@ namespace BoomifyCS.BuiltIn.Function
         {
             Name = name;
             returnObject = new BifyNull(new Token(TokenType.NULL,"null") );
+            ExpectedArgCount = -1;
+
         }
         public override BifyObject Call(List<BifyObject> arguments)
         {

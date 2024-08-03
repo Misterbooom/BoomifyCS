@@ -45,16 +45,16 @@ namespace BoomifyCS.Interpreter
     public class ByteInstruction
     {
         public ByteType Type;
-        public List<Object> Value;
+        public List<object> Value;
         public int IndexOfInstruction;
-        public ByteInstruction(ByteType type, Object value, int indexOfInstruction)
+        public ByteInstruction(ByteType type, object value, int indexOfInstruction)
         {
             Type = type;
             Value = new List<Object> { value };
             this.IndexOfInstruction = indexOfInstruction;
         }
 
-        public ByteInstruction(ByteType type, List<Object> value,int indexOfInstruction)
+        public ByteInstruction(ByteType type, List<object> value,int indexOfInstruction)
         {
             Type = type;
             Value = value;

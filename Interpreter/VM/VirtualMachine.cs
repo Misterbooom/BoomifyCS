@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using BoomifyCS.BuiltIn.Function;
 using BoomifyCS.Objects;
 
 namespace BoomifyCS.Interpreter.VM
@@ -87,11 +88,35 @@ namespace BoomifyCS.Interpreter.VM
                 else if (instruction.Type== ByteType.CALL)
                 {
                     List<BifyObject> arguments = new List<BifyObject>();
-                    while (_stackManager.Count() > 0)
+                   
+                    BifyFunction function = (BifyFunction)_varManager.GetVariable((string)instruction.Value[0]);
+                    int expectedArgCount = (int)instruction.Value[1];
+                    if (expectedArgCount != function.ExpectedArgCount && function.ExpectedArgCount != -1) 
+                    {
+                        if (arguments.Count < function.ExpectedArgCount)
+                        {
+                            throw new BifyArgumentError($"Function '{function.Name}' called with too few arguments. Expected {function.ExpectedArgCount}, but got {arguments.Count}.",
+                                SourceCode[instruction.IndexOfInstruction - 1],
+                                SourceCode[instruction.IndexOfInstruction - 1],
+                                instruction.IndexOfInstruction
+
+                                );
+                        }
+                        else 
+                        {
+                            throw new BifyArgumentError($"Function '{function.Name}' called with too many arguments. Expected {function.ExpectedArgCount}, but got {arguments.Count}.",
+                                SourceCode[instruction.IndexOfInstruction - 1],
+                                SourceCode[instruction.IndexOfInstruction - 1],
+                                instruction.IndexOfInstruction
+
+                                );
+                        }
+
+                    }
+                    for (int i = 0; i < expectedArgCount;i++)
                     {
                         arguments.Add(_stackManager.Pop());
                     }
-                    BifyObject function = _varManager.GetVariable((string)instruction.Value[0]);
                     BifyObject functionReturn = function.Call(arguments);
                     _stackManager.Push(functionReturn);
                 }

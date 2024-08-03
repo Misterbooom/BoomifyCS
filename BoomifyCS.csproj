@@ -50,8 +50,9 @@
     <Compile Include="Ast\AstConfig.cs" />
     <Compile Include="Ast\AstTree.cs" />
     <Compile Include="Ast\Node.cs" />
-    <Compile Include="BuiltIn\Function\BifyFunction.cs" />
+    <Compile Include="Objects\BifyFunction.cs" />
     <Compile Include="BuiltIn\Function\Explode.cs" />
+    <Compile Include="BuiltIn\Function\Ignite.cs" />
     <Compile Include="exceptions.cs" />
     <Compile Include="Interpreter\VM\ByteCode.cs" />
     <Compile Include="Interpreter\Compiler.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="Parser\ListExtensions.cs" />
     <Compile Include="Parser\NodeParser.cs" />
     <Compile Include="Parser\StatementParser.cs" />
+    <Compile Include="Parser\StringParser.cs" />
     <Compile Include="Parser\TokensParser.cs" />
     <Compile Include="Lexer\Lexer.cs" />
     <Compile Include="Lexer\Token.cs" />

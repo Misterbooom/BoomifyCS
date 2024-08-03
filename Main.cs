@@ -22,6 +22,7 @@ namespace BoomifyCS
 
             }
             MyLexer lexer = new MyLexer(code);
+
             try
             {
                 List<Token> tokens = lexer.Tokenize();
