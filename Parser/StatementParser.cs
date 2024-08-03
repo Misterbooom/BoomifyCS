@@ -186,13 +186,15 @@ namespace BoomifyCS.Parser
             try
             {
                 var (argumentsTokens, argumentsEnd) = FindTokensInBracketsSafe(tokens,currentPos);
-                currentPos = argumentsEnd + 1;
+                //argumentsTokens.WriteTokensWithoutWhiteSpace();
+                currentPos = argumentsEnd;
                 AstNode identifierNode = NodeParser.TokenToNode(token);
                 AstNode argumentsNode = astParser.BuildAstTree(argumentsTokens);
                 Token callToken = new Token(TokenType.CALL, token.Value + "(" + argumentsTokens.ToCustomString() + ")");
                 return (new AstCall(callToken,identifierNode,argumentsNode),currentPos);
             }
-            catch (BifySyntaxError)
+            
+            catch (BifyParsingError)
             {
                 return (NodeParser.TokenToNode(token), currentPos);
             }
@@ -227,7 +229,7 @@ namespace BoomifyCS.Parser
             }
             catch (NullReferenceException)
             {
-                throw new BifySyntaxError("Tokens in brackets not found", tokens, tokens, 0);
+                throw new BifyParsingError("Tokens in brackets not found", tokens, tokens, 0);
             }
         }
         

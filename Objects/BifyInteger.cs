@@ -6,9 +6,14 @@ namespace BoomifyCS.Objects
     public class BifyInteger : BifyObject
     {
         public int Value;
-
         public BifyInteger(Token token, int value) : base(token)
         {
+            this.Value = value;
+        }
+        
+        
+        public BifyInteger(int value) : base(new Token(TokenType.NUMBER, value.ToString())) 
+            {
             this.Value = value;
         }
 
@@ -17,7 +22,7 @@ namespace BoomifyCS.Objects
             return $"{Value}";
         }
 
-        public string Repr()
+        public override string Repr()
         {
             return $"BifyInteger({Value})";
         }
@@ -274,8 +279,10 @@ namespace BoomifyCS.Objects
         public override BifyBoolean Bool()
         {
             return new BifyBoolean(Value != 0);
-            
-            
+        }
+        public override BifyObject Int()
+        {
+            return this;
         }
     }
 }

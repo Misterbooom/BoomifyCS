@@ -17,7 +17,7 @@ namespace BoomifyCS.Objects
             return $"{Value}";
         }
 
-        public string Repr()
+        public override string Repr()
         {
             return $"BifyFloat({Value})";
         }
@@ -139,6 +139,9 @@ namespace BoomifyCS.Objects
                 return new BifyBoolean(true);
             }
         }
-
+        public override BifyObject Int()
+        {
+            return new BifyInteger(Token, (int)this.Value);
+        }
     }
 }

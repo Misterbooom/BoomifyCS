@@ -98,7 +98,7 @@ namespace BoomifyCS.Interpreter.VM
 
             foreach (var item in stackToPrint)
             {
-                Console.WriteLine(item);
+                Console.WriteLine(item.Repr());
             }
         }
     }

@@ -13,13 +13,18 @@ namespace BoomifyCS.Objects
         {
             this.Value = value;
         }
+        public BifyString(string value) : base(new Token(TokenType.STRING,value))
+        {
+            this.Value = value;
+        }
+
 
         public override string ToString()
         {
             return $"{Value}";
         }
 
-        public string Repr()
+        public override string Repr()
         {
             return $"BifyString({Value})";
         }
@@ -75,6 +80,30 @@ namespace BoomifyCS.Objects
             return new BifyBoolean(true);
 
         }
+        public override BifyObject Int()
+        {
+            try
+            {
+                return new BifyInteger(int.Parse(Value));
+            }
+            catch (FormatException ex)
+            {
+                throw new BifyCastError($"The value '{Value}' is not in a correct format for an integer. {ex.Message}");
+            }
+            catch (OverflowException ex)
+            {
+                throw new BifyCastError($"The value '{Value}' is too large or too small for an integer. {ex.Message}");
+            }
+            catch (ArgumentException ex)
+            {
+                throw new BifyCastError($"An argument exception occurred while parsing '{Value}': {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                throw new BifyCastError($"An unexpected error occurred while parsing '{Value}': {ex.Message}");
+            }
+        }
+
     }
 }
 

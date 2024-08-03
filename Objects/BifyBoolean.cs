@@ -21,7 +21,7 @@ namespace BoomifyCS.Objects
             return $"{Value}";
         }
 
-        public string Repr()
+        public override string Repr()
         {
             return $"BifyBoolean({Value})";
         }
@@ -43,7 +43,7 @@ namespace BoomifyCS.Objects
             {
                 return new BifyBoolean(this.Token, this.Value || otherBool.Value);
             }
-            return new BifyBoolean(false);               
+            return new BifyBoolean(false);
         }
 
         // Logical NOT operator (!)
@@ -72,5 +72,22 @@ namespace BoomifyCS.Objects
             }
             return new BifyBoolean(false);
         }
+        public override BifyBoolean Bool()
+        {
+            return this;
+        }
+        public override BifyObject Int()
+        {
+            if (Value == false)
+            {
+                return new BifyInteger(0);
+
+            }
+            else
+            {
+                return new BifyInteger(1);
+            }
+        }
+       
     }
 }

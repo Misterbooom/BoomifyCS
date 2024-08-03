@@ -50,6 +50,7 @@
     <Compile Include="Ast\AstConfig.cs" />
     <Compile Include="Ast\AstTree.cs" />
     <Compile Include="Ast\Node.cs" />
+    <Compile Include="BuiltIn\Function\Parse.cs" />
     <Compile Include="Objects\BifyFunction.cs" />
     <Compile Include="BuiltIn\Function\Explode.cs" />
     <Compile Include="BuiltIn\Function\Ignite.cs" />

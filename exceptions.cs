@@ -364,4 +364,9 @@ namespace BoomifyCS
         public BifyArgumentError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
         public BifyArgumentError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
+    public class BifyCastError : BifyException
+    {
+        public BifyCastError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
+        public BifyCastError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
+    }
 }

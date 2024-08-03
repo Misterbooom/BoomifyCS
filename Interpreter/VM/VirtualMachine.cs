@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using BoomifyCS.BuiltIn.Function;
 using BoomifyCS.Objects;
 
@@ -117,6 +118,7 @@ namespace BoomifyCS.Interpreter.VM
                     {
                         arguments.Add(_stackManager.Pop());
                     }
+                    arguments.Reverse();
                     BifyObject functionReturn = function.Call(arguments);
                     _stackManager.Push(functionReturn);
                 }

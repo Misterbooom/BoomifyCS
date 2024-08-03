@@ -26,7 +26,7 @@ namespace BoomifyCS
             try
             {
                 List<Token> tokens = lexer.Tokenize();
-                tokens.WriteTokensWithoutWhiteSpace();
+                //tokens.WriteTokensWithoutWhiteSpace();
                 string[] codeByLine = code.Split('\n');
                 //for (int i = 0;i < codeByLine.Length;i++) {
                 //    Console.WriteLine($"{i}:{codeByLine[i]}");  

@@ -22,5 +22,9 @@ namespace BoomifyCS.BuiltIn.Function
         {
             return returnObject;
         }
+        public override string Repr()
+        {
+            return $"<{Name} Function>";
+        }
     }
 }

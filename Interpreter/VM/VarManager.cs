@@ -15,6 +15,7 @@ namespace BoomifyCS.Interpreter.VM
             { "globals", new Dictionary<string, BifyObject>{
                 { "explode",new Explode()},
                 { "ignite",new Ignite()},
+                { "parse", new Parse()}
 
 
         } }
@@ -70,7 +71,7 @@ namespace BoomifyCS.Interpreter.VM
 
             foreach (var kvp in variablesToPrint)
             {
-                Console.WriteLine($"{kvp.Key}: {kvp.Value}");
+                Console.WriteLine($"{kvp.Key}: {kvp.Value.Repr()}");
             }
         }
 

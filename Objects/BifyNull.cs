@@ -20,7 +20,7 @@ namespace BoomifyCS.Objects
             return $"null";
         }
 
-        public string Repr()
+        public override string Repr()
         {
             return $"BifyNull({Value})";
         }
@@ -45,6 +45,10 @@ namespace BoomifyCS.Objects
         public override BifyBoolean Bool()
         {
             return new BifyBoolean(false);
+        }
+        public override BifyObject Int()
+        {
+            return new BifyInteger(0);
         }
     }
 }

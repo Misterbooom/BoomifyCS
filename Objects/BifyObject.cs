@@ -12,7 +12,10 @@ namespace BoomifyCS.Objects
         {
             this.Token = token;
         }
-
+        public virtual string Repr()
+        {
+            throw new BifyUnknownError($"Repr operation not supported for {GetType().Name}.");
+        }
         // Addition operator (+)
         public virtual BifyObject Add(BifyObject other)
         {
@@ -152,6 +155,12 @@ namespace BoomifyCS.Objects
         {
             throw new BifyOperationError($"Call operation not supported for {GetType().Name}.");
         }
+        public virtual BifyObject Int()
+        {
+            throw new BifyOperationError($"Integer conversion not supported for {GetType().Name}.");
+
+        }
+
 
     }
 }

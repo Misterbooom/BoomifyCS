@@ -40,10 +40,8 @@ namespace BoomifyCS.Interpreter
             {
                 Visit(astBinaryOp.Left);
                 Visit(astBinaryOp.Right);
-                if (astBinaryOp.Token.Type == TokenType.COMMA) { 
                 
-                }
-                else if (ByteCodeConfig.BinaryOperators.TryGetValue(astBinaryOp.Token.Type, out ByteType byteType))
+                if (ByteCodeConfig.BinaryOperators.TryGetValue(astBinaryOp.Token.Type, out ByteType byteType))
                 {
                     ByteInstruction instruction = new ByteInstruction(byteType, _lineCount);
                     instructions.Add(instruction);
