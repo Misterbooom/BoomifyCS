@@ -8,12 +8,13 @@ using System.Threading.Tasks;
 using BoomifyCS.Ast;
 using BoomifyCS.Lexer;
 using BoomifyCS.Objects;
+using BoomifyCS.Exceptions;
 
 namespace BoomifyCS.Parser
 {
     public class NodeParser
     {
-        public static AstNode TokenToNode(Token token)
+        public static AstNode TokenToNode(Token token,AstTree astTree = null)
         {
             if (TokensParser.IsOperator(token.Type))
             {
@@ -49,9 +50,9 @@ namespace BoomifyCS.Parser
             {
                 return new AstBracket(token);
             }
-            else if (token.Type == TokenType.OBJECT)
+            else if (token.Type == TokenType.OBJECT && astTree != null)
             {
-                AstNode node = TokenToAst(token.Tokens);
+                AstNode node = astTree.BuildAstTree(token.Tokens);
                 return new AstBlock(node);
             }
             else if (token.Type == TokenType.ASSIGN)
@@ -61,12 +62,12 @@ namespace BoomifyCS.Parser
             throw new Exception("Unsupported token - " + token.Type);
         }
 
-        public static (AstNode, int) MultiTokenStatement(Token token, List<Token> tokens,int currentPos,AstTree astParser)
+        public static (AstNode, int) MultiTokenStatement(Token token, List<Token> tokens, int currentPos, AstTree astParser)
         {
 
             if (token.Type == TokenType.VARDECL)
             {
-                return StatementParser.ParseVarDecl(token, tokens, currentPos,astParser);
+                return StatementParser.ParseVarDecl(token, tokens, currentPos, astParser);
             }
             else if (token.Type == TokenType.IF)
             {
@@ -74,27 +75,27 @@ namespace BoomifyCS.Parser
             }
             else if (token.Type == TokenType.ELSE)
             {
-                return StatementParser.ParseElse(token, tokens, currentPos,astParser);
+                return StatementParser.ParseElse(token, tokens, currentPos, astParser);
             }
             else if (token.Type == TokenType.WHILE)
             {
-                return StatementParser.ParseWhile(token, tokens, currentPos,astParser);
+                return StatementParser.ParseWhile(token, tokens, currentPos, astParser);
             }
             else if (token.Type == TokenType.FOR)
             {
-                return StatementParser.ParseFor(token, tokens, currentPos,astParser);
+                return StatementParser.ParseFor(token, tokens, currentPos, astParser);
             }
             else if (token.Type == TokenType.INCREMENT || token.Type == TokenType.DECREMENT)
             {
-                return StatementParser.ParseUnaryOp(token, tokens, currentPos,astParser);
+                return StatementParser.ParseUnaryOp(token, tokens, currentPos, astParser);
             }
             else if (token.Type == TokenType.FUNCTIONDECL)
             {
-                return StatementParser.ParseFunctionDecl(token, tokens, currentPos,astParser);
+                return StatementParser.ParseFunctionDecl(token, tokens, currentPos, astParser);
             }
             else if (token.Type == TokenType.IDENTIFIER)
             {
-                return StatementParser.ParseIdentifier(token, tokens, currentPos,astParser);
+                return StatementParser.ParseIdentifier(token, tokens, currentPos, astParser);
             }
             throw new NotImplementedException($"Not implemented token to parse multitoken statement - {token.Type}");
         }
@@ -118,24 +119,24 @@ namespace BoomifyCS.Parser
             return operandStack.First();
         }
 
-        public static AstNode TokenToAst(List<Token> tokens)
+        public static AstNode TokenToAst(List<Token> tokens,string modulePath)
         {
-            AstTree ast = new AstTree();
+            AstTree ast = new AstTree(modulePath);
             return ast.ParseTokens(tokens);
         }
-        public static AstNode TokenToAst(Token token)
+        public static AstNode TokenToAst(Token token, string modulePath)
         {
-            AstTree ast = new AstTree();
-            return ast.ParseTokens(new List<Token> {token});
+            AstTree ast = new AstTree(modulePath);
+            return ast.ParseTokens(new List<Token> { token });
         }
-        public static AstNode BuiltTokensToAst(Token token)
+        public static AstNode BuiltTokensToAst(Token token,string modulePath)
         {
-            AstTree ast = new AstTree();
-            return ast.BuildAstTree(new List<Token> {token});
+            AstTree ast = new AstTree(modulePath);
+            return ast.BuildAstTree(new List<Token> { token });
         }
-        public static AstNode BuiltTokensToAst(List<Token> tokens)
+        public static AstNode BuiltTokensToAst(List<Token> tokens, string modulePath)
         {
-            AstTree ast = new AstTree();
+            AstTree ast = new AstTree(modulePath);
             return ast.BuildAstTree(tokens);
         }
         public static AstNode SetMaxRightNode(AstNode node, AstNode setNode)
@@ -153,6 +154,19 @@ namespace BoomifyCS.Parser
 
             return node;
         }
+        public static int CountCommaNode(AstNode node)
+        {
+            int count = 0;
+            while (node != null)
+            {
+                if (node is AstBinaryOp binaryOp && binaryOp.Token.Type == TokenType.COMMA)
+                {
+                    count++;
+                }
+                node = node.Right;
+            }
+            return count;
 
+        }
     }
 }

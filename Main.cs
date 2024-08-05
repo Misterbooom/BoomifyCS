@@ -9,16 +9,30 @@ using BoomifyCS.Lexer;
 using BoomifyCS.Parser;
 using BoomifyCS.Interpreter;
 using BoomifyCS.Objects;
+using BoomifyCS.Exceptions;
+using BoomifyCS.Tests;
 namespace BoomifyCS 
 {                   
     internal class Program
     {
         static void Main(string[] args)
         {
+            runInterpreter();
+            //runTests();
+            //astParser.ParseTokens(tokens);
+        }
+        static void runTests()
+        {
+            ExceptionTest.CallStackTest();
+        }
+        static void runInterpreter()
+        {
+            Console.OutputEncoding = Encoding.UTF8;
             string code;
-            using (StreamReader reader = new StreamReader("C:/BoomifyCS/test.bify"))
+            string file = "C:/BoomifyCS/test.bify";
+            using (StreamReader reader = new StreamReader(file))
             {
-               code = reader.ReadToEnd();
+                code = reader.ReadToEnd();
 
             }
             MyLexer lexer = new MyLexer(code);
@@ -31,15 +45,12 @@ namespace BoomifyCS
                 //for (int i = 0;i < codeByLine.Length;i++) {
                 //    Console.WriteLine($"{i}:{codeByLine[i]}");  
                 //}
-
-                AstTree astParser = new AstTree(codeByLine);
-                astParser.runFrom = "main";
-                string[] callStack = { "Main" };
-
+                
+                AstTree astParser = new AstTree(file,codeByLine);
                 AstNode node = astParser.ParseTokens(tokens);
                 //Console.WriteLine(AstParser.SimpleEval(node));
                 Console.WriteLine(node);
-                Console.WriteLine(string.Join("\n",codeByLine));
+                Console.WriteLine(string.Join("\n", codeByLine));
                 MyCompiler interpreter = new MyCompiler(codeByLine);
                 interpreter.runVM(node);
 
@@ -47,16 +58,12 @@ namespace BoomifyCS
                 BifyInteger b = new BifyInteger(new Token(TokenType.IDENTIFIER, "1"), 1);
 
             }
-            catch (BifyException e) 
+            catch (BifyError e)
             {
                 e.PrintException();
                 Environment.Exit(1);
             }
-
-            
-            //astParser.ParseTokens(tokens);
         }
-
 
     }
 }

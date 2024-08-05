@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using BoomifyCS.Ast;
 using BoomifyCS.Lexer;
 using BoomifyCS.Objects;
+using BoomifyCS.Exceptions;
+
 namespace BoomifyCS.Parser
 {
     public static class StatementParser
@@ -116,12 +118,12 @@ namespace BoomifyCS.Parser
             {
                 var (conditionTokens, conditionEnd) = FindTokensInBracketsSafe(tokens, currentPos);
                 currentPos = conditionEnd + 1;
-                AstNode conditionNode = NodeParser.TokenToAst(conditionTokens);
+                AstNode conditionNode = astParser.BuildAstTree(conditionTokens);
 
                 var (blockToken, blockEnd) = FindTokenSafe(TokenType.OBJECT, tokens, currentPos);
                 currentPos = blockEnd;
                 List<Token> blockTokens = new List<Token> { blockToken };
-                AstNode blockNode = NodeParser.TokenToAst(blockTokens);
+                AstNode blockNode = astParser.BuildAstTree(blockTokens);
 
                 AstWhile astWhile = new AstWhile(token, (AstBlock)blockNode, conditionNode);
                 return (astWhile, currentPos);
@@ -143,7 +145,7 @@ namespace BoomifyCS.Parser
 
             var (blockToken, blockTokenEnd) = FindTokenSafe(TokenType.OBJECT, tokens, currentPos);
             currentPos += blockTokenEnd;
-            AstNode blockNode = NodeParser.TokenToAst(blockToken);
+            AstNode blockNode = astParser.BuildAstTree(new List<Token> { blockToken });
             return (new AstFor(token, (AstBlock)blockNode, conditionNode, incrementNode, initNode), currentPos);
         }
         public static (AstNode, int) ParseUnaryOp(Token token, List<Token> tokens, int currentPos,AstTree astParser)
@@ -152,14 +154,14 @@ namespace BoomifyCS.Parser
             currentPos += tokenEnd;
             if (token.Type == TokenType.INCREMENT)
             {
-                AstUnaryOperator unaryOperator = new AstUnaryOperator(token, NodeParser.TokenToNode(identifierToken), 1);
+                AstUnaryOperator unaryOperator = new AstUnaryOperator(token, astParser.BuildAstTree(new List<Token> { identifierToken }), 1);
                 return (unaryOperator, currentPos);
 
 
             }
             else
             {
-                AstUnaryOperator unaryOperator = new AstUnaryOperator(token, NodeParser.TokenToNode(identifierToken), -1);
+                AstUnaryOperator unaryOperator = new AstUnaryOperator(token, astParser.BuildAstTree(new List<Token> { identifierToken }), -1);
                 return (unaryOperator, currentPos);
 
 
@@ -170,12 +172,12 @@ namespace BoomifyCS.Parser
             var (identifierToken, tokenEnd) = FindTokenSafe(TokenType.IDENTIFIER, tokens, currentPos);
             currentPos = tokenEnd + 1;
             var (argumentsTokens, argumentsEnd) = FindTokensInBracketsSafe(tokens, currentPos);
-            AstNode identifierNode = NodeParser.TokenToNode(identifierToken);
+            AstNode identifierNode = astParser.BuildAstTree(new List<Token> { identifierToken });
             currentPos = argumentsEnd + 1;
             AstNode argumentsNode = astParser.BuildAstTree(argumentsTokens);
             var (blockToken, blockEnd) = FindTokenSafe(TokenType.OBJECT, tokens, currentPos);
             currentPos = blockEnd;
-            AstNode blockNode = NodeParser.TokenToNode(blockToken);
+            AstNode blockNode = astParser.BuildAstTree(new List<Token> { blockToken });
             AstFunctionDecl astFunctionDecl = new AstFunctionDecl(token, (AstIdentifier)identifierNode, argumentsNode, (AstBlock)blockNode);
             return (astFunctionDecl, currentPos);
 
@@ -188,7 +190,7 @@ namespace BoomifyCS.Parser
                 var (argumentsTokens, argumentsEnd) = FindTokensInBracketsSafe(tokens,currentPos);
                 //argumentsTokens.WriteTokensWithoutWhiteSpace();
                 currentPos = argumentsEnd;
-                AstNode identifierNode = NodeParser.TokenToNode(token);
+                AstNode identifierNode = astParser.BuildAstTree(new List<Token> { token }   );
                 AstNode argumentsNode = astParser.BuildAstTree(argumentsTokens);
                 Token callToken = new Token(TokenType.CALL, token.Value + "(" + argumentsTokens.ToCustomString() + ")");
                 return (new AstCall(callToken,identifierNode,argumentsNode),currentPos);
@@ -196,7 +198,7 @@ namespace BoomifyCS.Parser
             
             catch (BifyParsingError)
             {
-                return (NodeParser.TokenToNode(token), currentPos);
+                return   (NodeParser.TokenToNode(token ), currentPos);
             }
         }
         private static (Token, int) FindTokenSafe(TokenType tokenType, List<Token> tokens, int currentPos)
@@ -223,7 +225,7 @@ namespace BoomifyCS.Parser
                 var (conditionTokens, conditionEnd) = TokensParser.TokensInBrackets(tokens, currentPos);
                 if (conditionTokens == null || conditionTokens.Count == 0)
                 {
-                    throw new NullReferenceException();
+                    throw new NullReferenceException("Can not find token in brackets");
                 }
                 return (conditionTokens, conditionEnd);
             }

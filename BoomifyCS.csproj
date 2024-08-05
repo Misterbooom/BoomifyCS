@@ -51,10 +51,12 @@
     <Compile Include="Ast\AstTree.cs" />
     <Compile Include="Ast\Node.cs" />
     <Compile Include="BuiltIn\Function\Parse.cs" />
+    <Compile Include="Exceptions\BifyException.cs" />
+    <Compile Include="Exceptions\CallStackFrame.cs" />
     <Compile Include="Objects\BifyFunction.cs" />
     <Compile Include="BuiltIn\Function\Explode.cs" />
     <Compile Include="BuiltIn\Function\Ignite.cs" />
-    <Compile Include="exceptions.cs" />
+    <Compile Include="Exceptions\Exceptions.cs" />
     <Compile Include="Interpreter\VM\ByteCode.cs" />
     <Compile Include="Interpreter\Compiler.cs" />
     <Compile Include="Interpreter\VM\StackManager.cs" />
@@ -78,6 +80,7 @@
     <Compile Include="Objects\BifyInteger.cs" />
     <Compile Include="Objects\BifyObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tests\ExceptionTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

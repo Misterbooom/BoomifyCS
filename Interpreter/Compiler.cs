@@ -7,6 +7,7 @@ using BoomifyCS.Ast;
 using BoomifyCS.Objects;
 using BoomifyCS.Interpreter.VM;
 using BoomifyCS.Lexer;
+using BoomifyCS.Parser;
 namespace BoomifyCS.Interpreter
 {
     public class MyCompiler
@@ -91,13 +92,16 @@ namespace BoomifyCS.Interpreter
             else if (node is AstCall astCall)
             {
                 Visit(astCall.ArgumentsNode);
-                int expectedArgCount = astCall.ArgumentsNode.Len();
-                Console.WriteLine($"Excepected arg count - {expectedArgCount}");
+                int expectedArgCount = NodeParser.CountCommaNode(astCall.ArgumentsNode) + 1;
                 ByteInstruction instruction = new ByteInstruction(ByteType.CALL,new List<object> { astCall.CallableName.Token.Value, expectedArgCount },_lineCount);
                 instructions.Add(instruction);
-                
-
             }
+            else if (node is AstModule astModule)
+            {
+                ByteInstruction instruction = new ByteInstruction(ByteType.MODULE, new List<object>{astModule.ModuleName,astModule.ModulePath},_lineCount);
+                instructions.Add(instruction);
+                Visit(astModule.ChildNode);
+            } 
             
             
 
@@ -143,5 +147,5 @@ namespace BoomifyCS.Interpreter
 
             instructions[jumpToEndIndex].SetValue(instructions.Count);
         }
-
+        
     }}

@@ -1,6 +1,7 @@
 ﻿using BoomifyCS.Lexer;
 using System;
 using System.Collections.Generic;
+using BoomifyCS.Exceptions;
 
 namespace BoomifyCS.Objects
 {

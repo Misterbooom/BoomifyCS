@@ -153,7 +153,8 @@ namespace BoomifyCS.Ast
     public class AstVar : AstConstant
     {
 
-        public AstVar(Token token,BifyVar bifyVar):base(token) {
+        public AstVar(Token token, BifyVar bifyVar) : base(token)
+        {
             this.BifyValue = bifyVar;
         }
     }
@@ -170,7 +171,7 @@ namespace BoomifyCS.Ast
 
             string leftStr = Left.StrHelper(level, "Var name: ");
             string rightStr = Right.StrHelper(level, "Var Value: ");
-            
+
 
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{leftStr}\n{rightStr}";
         }
@@ -272,11 +273,11 @@ namespace BoomifyCS.Ast
                 elseStr = ElseNode.StrHelper(level + 1, "else: ");
             }
             string elseIfNodes = "";
-            foreach(AstElseIf astElseIf in ElseIfNodes)
+            foreach (AstElseIf astElseIf in ElseIfNodes)
             {
                 elseIfNodes += astElseIf.StrHelper(level + 1, "else if: ");
             }
-            
+
 
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{conditionStr}\n{blockStr}\n{elseStr}\n{elseIfNodes}";
         }
@@ -409,18 +410,33 @@ namespace BoomifyCS.Ast
         }
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
-            string baseStr = base.StrHelper(level, note,false);
+            string baseStr = base.StrHelper(level, note, false);
             string functionNameStr = functionNameNode.StrHelper(level + 1, "Name: ");
             string argumentsStr = argumentsNode.StrHelper(level + 1, "Arguments: ");
             string blockStr = blockNode.StrHelper(level + 1, "Block: ");
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{functionNameStr}\n{argumentsStr}\n{blockStr}";
         }
     }
-    //public class AstComma : AstNode
-    //{
-    //    public AstComma(Token token, AstNode left = null, AstNode right = null) : base(token, left, right) { }
+    public class AstModule : AstNode
+    {
+        public AstNode ChildNode;
+        public string ModuleName;
+        public string ModulePath;
+        public AstModule(Token token, string moduleName, string modulePath, AstNode childNode = null) : base(token)
+        {
+            this.ModuleName = moduleName;
+            this.ModulePath = modulePath;
+            this.ChildNode = childNode;
+        }
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
+        {
+            string baseStr = base.StrHelper(level, note, false);
+            string childStr = ChildNode.StrHelper(level + 1,"Child: ");
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{childStr}";
 
-    //}
+        }
 
+
+    }
 }
 

@@ -40,7 +40,8 @@ namespace BoomifyCS.Interpreter
         JUMP,
         JUMP_IF_TRUE,
         JUMP_IF_FALSE,
-        CALL
+        CALL,
+        MODULE,
     }
     public class ByteInstruction
     {

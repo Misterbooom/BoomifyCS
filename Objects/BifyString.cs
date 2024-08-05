@@ -2,7 +2,7 @@
 using System.Text;
 using BoomifyCS.Ast;
 using BoomifyCS.Lexer;
-
+using BoomifyCS.Exceptions;
 namespace BoomifyCS.Objects
 {
     public class BifyString : BifyObject
@@ -86,21 +86,21 @@ namespace BoomifyCS.Objects
             {
                 return new BifyInteger(int.Parse(Value));
             }
-            catch (FormatException ex)
+            catch (FormatException )
             {
-                throw new BifyCastError($"The value '{Value}' is not in a correct format for an integer. {ex.Message}");
+                throw new BifyCastError($"The value '{Value}' is not in a correct format for an integer. ");
             }
-            catch (OverflowException ex)
+            catch (OverflowException)
             {
-                throw new BifyCastError($"The value '{Value}' is too large or too small for an integer. {ex.Message}");
+                throw new BifyCastError($"The value '{Value}' is too large or too small for an integer.");
             }
-            catch (ArgumentException ex)
+            catch (ArgumentException)
             {
-                throw new BifyCastError($"An argument exception occurred while parsing '{Value}': {ex.Message}");
+                throw new BifyCastError($"An argument exception occurred while parsing '{Value}'.");
             }
-            catch (Exception ex)
+            catch (Exception )
             {
-                throw new BifyCastError($"An unexpected error occurred while parsing '{Value}': {ex.Message}");
+                throw new BifyCastError($"An unexpected error occurred while parsing '{Value}'.");
             }
         }
 

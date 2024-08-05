@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using BoomifyCS.Lexer;
 using BoomifyCS.Parser;
+using BoomifyCS.Exceptions;
+using System.IO;
 
 namespace BoomifyCS.Ast
 {
@@ -13,13 +15,15 @@ namespace BoomifyCS.Ast
     {
         private int _codeTokenPosition = 0;
         public int lineCount = 0;
-        public string runFrom = "";
         private List<Token> _codeTokens = new List<Token>();
         private List<Token> _lineTokens = new List<Token>();
         private string[] _sourceCode;
-        public AstTree(string[] sourcecode = null) {
-            _sourceCode = sourcecode ?? new string[] { "1" };
-
+        private string _modulePath;
+        private string _moduleName;
+        public AstTree(string modulePath, string[] sourcecode = null) {
+            _sourceCode = sourcecode ?? new string[] { "" };
+            _modulePath = modulePath;
+            _moduleName = Path.GetFileName(_modulePath);
         }
         /// <summary>
         /// Parses a list of tokens, processing them line by line.
@@ -47,7 +51,7 @@ namespace BoomifyCS.Ast
             }
             if (nodes.Count == 1)
             {
-                return new AstLine(nodes[0]);
+                return new AstModule(new Token(TokenType.IDENTIFIER, _moduleName), _moduleName, _modulePath, new AstLine(nodes[0]));
             }
             while (nodes.Count > 1)
             {
@@ -58,7 +62,7 @@ namespace BoomifyCS.Ast
             }
             if (nodes.Count > 0)
             {
-                return nodes[0];
+                return new AstModule(new Token(TokenType.IDENTIFIER,_moduleName),_moduleName,_modulePath,nodes[0]);
 
             }
             return new AstEOL(new Token(TokenType.EOL,""));
@@ -167,7 +171,7 @@ namespace BoomifyCS.Ast
                         operatorStack.Push(result.Item1);
 
                     }
-                    catch (BifyException e)
+                    catch (BifyError e)
                     {
                         e.CurrentLine = lineCount;
                         throw e;
@@ -180,7 +184,7 @@ namespace BoomifyCS.Ast
                 }
                 else if (currentToken.Type == TokenType.LPAREN)
                 {
-                    operatorStack.Push(NodeParser.TokenToNode(currentToken));
+                    operatorStack.Push(NodeParser.TokenToNode(currentToken,this));
                 }
                 else if (currentToken.Type == TokenType.RPAREN)
                 {
@@ -205,7 +209,7 @@ namespace BoomifyCS.Ast
                 }
                 else
                 {
-                    operandStack.Push(NodeParser.TokenToNode(currentToken));
+                    operandStack.Push(NodeParser.TokenToNode(currentToken,this));
                 }
 
                 lineTokenPosition++;
@@ -280,7 +284,7 @@ namespace BoomifyCS.Ast
             }
             if (currentToken.Type != TokenType.EOL)
             {
-                operatorStack.Push(NodeParser.TokenToNode(currentToken));
+                operatorStack.Push(NodeParser.TokenToNode(currentToken, this));
 
             }
         }

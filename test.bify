@@ -1,2 +1,1 @@
-﻿var a = parse(ignite("Write first number: "),"int");
-
+﻿var a = ignite(2);
