@@ -435,8 +435,26 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{childStr}";
 
         }
+    }
+    public class AstAssignmentOperator : AstNode 
+    {
+        public AstIdentifier IdentifierNode;
+        public AstNode ValueNode;
+        public AstAssignmentOperator(Token token, AstIdentifier identifierNode, AstNode valueNode) : base(token)
+        {
+            this.IdentifierNode = identifierNode;
+            this.ValueNode = valueNode;
+        }
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
+        {
+            string baseStr = base.StrHelper(level, note, false);
 
+            string identifierStr = IdentifierNode.StrHelper(level + 1, "Identifier: ");
+            string valueStr = ValueNode.StrHelper(level + 1, "Value: ");
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{identifierStr}\n{valueStr}";
+        }
 
     }
+
 }
 

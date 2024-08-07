@@ -16,6 +16,7 @@ namespace BoomifyCS.Interpreter.VM
         private string[] SourceCode;
         private string _moduleName;
         private string _modulePath;
+        private int _line;
         public VirtualMachine(string[] sourceCode) {
             this.SourceCode = sourceCode;
         }
@@ -30,6 +31,8 @@ namespace BoomifyCS.Interpreter.VM
             {
                 e.FileName = _modulePath;
                 e.CallStack = _callStack;
+                e.LineTokensString = SourceCode[_line - 1];
+                e.CurrentLine = _line;
                 e.PrintException();
                 Environment.Exit(1);
             }
@@ -42,7 +45,7 @@ namespace BoomifyCS.Interpreter.VM
             while (instructionIndex < _instructions.Count)
             {
                 ByteInstruction instruction = _instructions[instructionIndex];
-
+                _line = instruction.IndexOfInstruction;
                 switch (instruction.Type)
                 {
                     case ByteType.LOAD_CONST:
@@ -61,9 +64,9 @@ namespace BoomifyCS.Interpreter.VM
                         {
                             throw new BifyUndefinedError(
                                 $"Undefined variable - {varName}",
-                                SourceCode[instruction.IndexOfInstruction - 1],
+                                SourceCode[_line - 1],
                                 varName,
-                                instruction.IndexOfInstruction
+                                _line
                             );
                         }
                         break;
@@ -77,9 +80,9 @@ namespace BoomifyCS.Interpreter.VM
                         {
                             throw new BifyInitializationError(
                                 "Variable initialized incorrectly. Make sure to assign a value when declaring the variable.",
-                                SourceCode[instruction.IndexOfInstruction - 1],
-                                SourceCode[instruction.IndexOfInstruction - 1],
-                                instruction.IndexOfInstruction
+                                SourceCode[_line - 1],
+                                SourceCode[_line - 1],
+                                _line
                             );
                         }
 
@@ -115,7 +118,7 @@ namespace BoomifyCS.Interpreter.VM
                         List<BifyObject> arguments = new List<BifyObject>();
                         BifyFunction function = (BifyFunction)_varManager.GetVariable((string)instruction.Value[0]);
                         int expectedArgCount = (int)instruction.Value[1];
-                        _callStack.Add(new CallStackFrame((string)instruction.Value[0], instructionIndex, _modulePath, SourceCode[instruction.IndexOfInstruction - 1]));
+                        _callStack.Add(new CallStackFrame((string)instruction.Value[0], instructionIndex, _modulePath, SourceCode[_line - 1]));
 
                         if (expectedArgCount != function.ExpectedArgCount && function.ExpectedArgCount != -1)
                         {
@@ -123,18 +126,18 @@ namespace BoomifyCS.Interpreter.VM
                             {
                                 throw new BifyArgumentError(
                                     $"Function '{function.Name}' called with too few arguments. Expected {function.ExpectedArgCount}, but got {arguments.Count}.",
-                                    SourceCode[instruction.IndexOfInstruction - 1],
-                                    SourceCode[instruction.IndexOfInstruction - 1],
-                                    instruction.IndexOfInstruction
+                                    SourceCode[_line - 1],
+                                    SourceCode[_line - 1],
+                                    _line
                                 );
                             }
                             else
                             {
                                 throw new BifyArgumentError(
                                     $"Function '{function.Name}' called with too many arguments. Expected {function.ExpectedArgCount}, but got {arguments.Count}.",
-                                    SourceCode[instruction.IndexOfInstruction - 1],
-                                    SourceCode[instruction.IndexOfInstruction - 1],
-                                    instruction.IndexOfInstruction
+                                    SourceCode[_line - 1],
+                                    SourceCode[_line - 1],
+                                    _line
                                 );
                             }
                         }
@@ -179,8 +182,8 @@ namespace BoomifyCS.Interpreter.VM
                 catch (BifyError e)
                 {
                     ByteCodeConfig.byteToString.TryGetValue(instruction.Type,out string operatorChar);
-                    e.CurrentLine = instruction.IndexOfInstruction;
-                    e.LineTokensString = SourceCode[instruction.IndexOfInstruction - 1];
+                    e.CurrentLine = _line;
+                    e.LineTokensString = SourceCode[_line - 1];
                     e.InvalidTokensString = operatorChar;
                     //Console.WriteLine(e.LineTokensString);
                     throw e;

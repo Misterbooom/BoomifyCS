@@ -61,12 +61,7 @@ namespace BoomifyCS.Lexer
                     _position++;
                     continue;
                 }
-                else if (currentChar == ' ')
-                {
-                    tokens.Add(new Token(TokenType.WHITESPACE, " "));
-                    _position++;
-                    continue;
-                }
+                
                 
 
                 if (currentChar == ';')

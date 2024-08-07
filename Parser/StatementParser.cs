@@ -9,7 +9,7 @@ namespace BoomifyCS.Parser
 {
     public static class StatementParser
     {
-        public static (AstNode, int) ParseVarDecl(Token token, List<Token> tokens, int currentPos,AstTree astParser)
+        public static (AstNode, int) ParseVarDecl(Token token, List<Token> tokens, int currentPos, AstTree astParser)
         {
             try
             {
@@ -57,7 +57,7 @@ namespace BoomifyCS.Parser
             }
         }
 
-        public static (AstNode, int) ParseElse(Token token, List<Token> tokens, int currentPos,AstTree astParser)
+        public static (AstNode, int) ParseElse(Token token, List<Token> tokens, int currentPos, AstTree astParser)
         {
             try
             {
@@ -91,7 +91,7 @@ namespace BoomifyCS.Parser
             }
         }
 
-        public static (AstNode, int) ParseElseIf(Token token, List<Token> tokens, int currentPos,AstTree astParser)
+        public static (AstNode, int) ParseElseIf(Token token, List<Token> tokens, int currentPos, AstTree astParser)
         {
             try
             {
@@ -112,7 +112,7 @@ namespace BoomifyCS.Parser
                 throw new BifySyntaxError("Failed to parse else-if statement", tokens, new List<Token> { token }, 0);
             }
         }
-        public static (AstNode, int) ParseWhile(Token token, List<Token> tokens, int currentPos,AstTree astParser)
+        public static (AstNode, int) ParseWhile(Token token, List<Token> tokens, int currentPos, AstTree astParser)
         {
             try
             {
@@ -133,7 +133,7 @@ namespace BoomifyCS.Parser
                 throw new BifySyntaxError("Failed to parse while statement", tokens, new List<Token> { token }, 0);
             }
         }
-        public static (AstNode, int) ParseFor(Token token, List<Token> tokens, int currentPos,AstTree astParser)
+        public static (AstNode, int) ParseFor(Token token, List<Token> tokens, int currentPos, AstTree astParser)
         {
             var (tokensInBrackets, bracketEnd) = FindTokensInBracketsSafe(tokens, currentPos);
             currentPos = bracketEnd + 1;
@@ -148,7 +148,7 @@ namespace BoomifyCS.Parser
             AstNode blockNode = astParser.BuildAstTree(new List<Token> { blockToken });
             return (new AstFor(token, (AstBlock)blockNode, conditionNode, incrementNode, initNode), currentPos);
         }
-        public static (AstNode, int) ParseUnaryOp(Token token, List<Token> tokens, int currentPos,AstTree astParser)
+        public static (AstNode, int) ParseUnaryOp(Token token, List<Token> tokens, int currentPos, AstTree astParser)
         {
             var (identifierToken, tokenEnd) = FindTokenSafe(TokenType.IDENTIFIER, tokens, currentPos - 1);
             currentPos += tokenEnd;
@@ -167,7 +167,7 @@ namespace BoomifyCS.Parser
 
             }
         }
-        public static (AstNode, int) ParseFunctionDecl(Token token, List<Token> tokens, int currentPos,AstTree astParser)
+        public static (AstNode, int) ParseFunctionDecl(Token token, List<Token> tokens, int currentPos, AstTree astParser)
         {
             var (identifierToken, tokenEnd) = FindTokenSafe(TokenType.IDENTIFIER, tokens, currentPos);
             currentPos = tokenEnd + 1;
@@ -183,23 +183,46 @@ namespace BoomifyCS.Parser
 
 
         }
-        public static (AstNode, int) ParseIdentifier(Token token, List<Token> tokens, int currentPos,AstTree astParser)
+        public static (AstNode, int) ParseIdentifier(Token token, List<Token> tokens, int currentPos, AstTree astParser)
         {
             try
             {
-                var (argumentsTokens, argumentsEnd) = FindTokensInBracketsSafe(tokens,currentPos);
+                var (argumentsTokens, argumentsEnd) = FindTokensInBracketsSafe(tokens, currentPos);
                 //argumentsTokens.WriteTokensWithoutWhiteSpace();
                 currentPos = argumentsEnd;
-                AstNode identifierNode = astParser.BuildAstTree(new List<Token> { token }   );
+                AstNode identifierNode = astParser.BuildAstTree(new List<Token> { token });
                 AstNode argumentsNode = astParser.BuildAstTree(argumentsTokens);
                 Token callToken = new Token(TokenType.CALL, token.Value + "(" + argumentsTokens.ToCustomString() + ")");
-                return (new AstCall(callToken,identifierNode,argumentsNode),currentPos);
+                return (new AstCall(callToken, identifierNode, argumentsNode), currentPos);
             }
-            
+
             catch (BifyParsingError)
             {
-                return   (NodeParser.TokenToNode(token ), currentPos);
+                return (NodeConverter.TokenToNode(token), currentPos);
             }
+        }
+        public static (AstNode, int) ParseAssignmentOperator(Token token, List<Token> tokens, int currentPos, AstTree astParser)
+        {
+            if (currentPos - 1 < 0)
+            {
+                throw new BifySyntaxError($"Expected identifier token", tokens, tokens, currentPos - 1);
+
+            }
+            Token identifierToken = tokens[currentPos - 1];
+            if (identifierToken.Type != TokenType.IDENTIFIER)
+            {
+                throw new BifySyntaxError($"Expected identifier token but found {identifierToken.Type}", tokens, tokens, currentPos - 1);
+            }
+            AstNode identifierNode = NodeConverter.TokenToNode(identifierToken);
+            var (valueTokens,endOfValue) = TokensParser.AllTokensToEol(tokens,currentPos + 1);
+            if (valueTokens.Count == 0)
+            {
+                throw new BifySyntaxError("Expected value after assignment operator", tokens, tokens, currentPos);
+            }
+            currentPos = endOfValue + 1;
+            AstNode valueNode = astParser.BuildAstTree(valueTokens);
+            return (new AstAssignmentOperator(token,(AstIdentifier)identifierNode,valueNode),currentPos);
+
         }
         private static (Token, int) FindTokenSafe(TokenType tokenType, List<Token> tokens, int currentPos)
         {

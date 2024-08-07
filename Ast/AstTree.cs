@@ -20,7 +20,8 @@ namespace BoomifyCS.Ast
         private string[] _sourceCode;
         private string _modulePath;
         private string _moduleName;
-        public AstTree(string modulePath, string[] sourcecode = null) {
+        public AstTree(string modulePath, string[] sourcecode = null)
+        {
             _sourceCode = sourcecode ?? new string[] { "" };
             _modulePath = modulePath;
             _moduleName = Path.GetFileName(_modulePath);
@@ -62,10 +63,10 @@ namespace BoomifyCS.Ast
             }
             if (nodes.Count > 0)
             {
-                return new AstModule(new Token(TokenType.IDENTIFIER,_moduleName),_moduleName,_modulePath,nodes[0]);
+                return new AstModule(new Token(TokenType.IDENTIFIER, _moduleName), _moduleName, _modulePath, nodes[0]);
 
             }
-            return new AstEOL(new Token(TokenType.EOL,""));
+            return new AstEOL(new Token(TokenType.EOL, ""));
 
         }
         /// <summary>
@@ -88,7 +89,7 @@ namespace BoomifyCS.Ast
                     lineTokenPosition++;
                     continue;
                 }
-                else if (currentToken.Type  == TokenType.NEXTLINE)
+                else if (currentToken.Type == TokenType.NEXTLINE)
                 {
                     lineTokenPosition++;
                     lineCount++;
@@ -103,7 +104,7 @@ namespace BoomifyCS.Ast
                 {
                     try
                     {
-                        (AstNode, int) result = NodeParser.MultiTokenStatement(currentToken, tokens, lineTokenPosition,this);
+                        (AstNode, int) result = MultiTokenHandler.ProcessMultiTokenStatement(currentToken, tokens, lineTokenPosition, this);
                         lineTokenPosition = result.Item2;
                         if (result.Item1 is AstElse)
                         {
@@ -116,7 +117,7 @@ namespace BoomifyCS.Ast
                                     lineTokenPosition++;
                                     continue;
                                 }
-                                
+
                                 else
                                 {
                                     throw new BifySyntaxError($"Unexpected else, last token - {operatorStack.Peek().Token.Type}", _sourceCode[lineCount], _sourceCode[lineCount], lineCount + 1); ;
@@ -128,7 +129,7 @@ namespace BoomifyCS.Ast
 
                             }
                         }
-                        else if (result.Item1 is AstElseIf astElseIf) 
+                        else if (result.Item1 is AstElseIf astElseIf)
                         {
                             try
                             {
@@ -160,15 +161,21 @@ namespace BoomifyCS.Ast
                             lineTokenPosition++;
                             continue;
                         }
-                        
+
                         else if (result.Item1 is AstUnaryOperator)
                         {
                             operandStack.Pop();
                             lineTokenPosition++;
+                            operandStack.Push(result.Item1);
                             continue;
                         }
+                        else if (result.Item1 is AstAssignmentOperator)
+                        {
+                            operandStack.Pop();
 
-                        operatorStack.Push(result.Item1);
+                        }
+
+                            operatorStack.Push(result.Item1);
 
                     }
                     catch (BifyError e)
@@ -184,7 +191,7 @@ namespace BoomifyCS.Ast
                 }
                 else if (currentToken.Type == TokenType.LPAREN)
                 {
-                    operatorStack.Push(NodeParser.TokenToNode(currentToken,this));
+                    operatorStack.Push(NodeConverter.TokenToNode(currentToken, this));
                 }
                 else if (currentToken.Type == TokenType.RPAREN)
                 {
@@ -193,7 +200,7 @@ namespace BoomifyCS.Ast
                         AstNode op = operatorStack.Pop();
                         if (operandStack.Count < 2)
                         {
-                            throw new BifyParsingError( $"Not enough operands for operator - '{op.Token.Value}'", _sourceCode[lineCount],op.Token.Value,lineCount);
+                            throw new BifyParsingError($"Not enough operands for operator - '{op.Token.Value}'", _sourceCode[lineCount], op.Token.Value, lineCount);
                         }
                         AstNode right = operandStack.Pop();
                         AstNode left = operandStack.Pop();
@@ -209,7 +216,7 @@ namespace BoomifyCS.Ast
                 }
                 else
                 {
-                    operandStack.Push(NodeParser.TokenToNode(currentToken,this));
+                    operandStack.Push(NodeConverter.TokenToNode(currentToken, this));
                 }
 
                 lineTokenPosition++;
@@ -218,7 +225,7 @@ namespace BoomifyCS.Ast
             {
                 return operatorStack.Peek();
             }
-            
+
             while (operatorStack.Count > 0)
             {
                 AstNode op = operatorStack.Pop();
@@ -238,10 +245,11 @@ namespace BoomifyCS.Ast
             {
                 try
                 {
-                    NodeParser.ConnectNodes(operatorStack, operandStack);
+                    AstNodeConnector.ConnectNodes(operatorStack, operandStack);
 
                 }
-                catch (BifySyntaxError e) {
+                catch (BifySyntaxError e)
+                {
                     e.CurrentLine = lineCount;
                     e.LineTokensString = _sourceCode[lineCount];
                     e.InvalidTokensString = _sourceCode[lineCount];
@@ -279,18 +287,18 @@ namespace BoomifyCS.Ast
 
 
 
-               
-                
+
+
             }
             if (currentToken.Type != TokenType.EOL)
             {
-                operatorStack.Push(NodeParser.TokenToNode(currentToken, this));
+                operatorStack.Push(NodeConverter.TokenToNode(currentToken, this));
 
             }
         }
 
 
-      
+
 
 
 

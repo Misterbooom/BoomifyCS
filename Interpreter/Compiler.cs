@@ -92,7 +92,7 @@ namespace BoomifyCS.Interpreter
             else if (node is AstCall astCall)
             {
                 Visit(astCall.ArgumentsNode);
-                int expectedArgCount = NodeParser.CountCommaNode(astCall.ArgumentsNode) + 1;
+                int expectedArgCount = AstNodeConnector.CountCommaNode(astCall.ArgumentsNode) + 1;
                 ByteInstruction instruction = new ByteInstruction(ByteType.CALL,new List<object> { astCall.CallableName.Token.Value, expectedArgCount },_lineCount);
                 instructions.Add(instruction);
             }
