@@ -28,8 +28,8 @@ namespace BoomifyCS.Lexer
             { "//=", TokenType.FLOORDIVE },
             { "**=", TokenType.POWE },
             { "==", TokenType.EQ },
-            { "--", TokenType.INCREMENT },
-            { "++",TokenType.DECREMENT},
+            { "--", TokenType.DECREMENT},
+            { "++",TokenType.INCREMENT },
             { "!=", TokenType.NEQ },
             { "&&", TokenType.AND },
 
@@ -116,8 +116,8 @@ namespace BoomifyCS.Lexer
             { "/=", TokenType.DIVE },
             { "//=", TokenType.FLOORDIVE },
             { "**=", TokenType.POWE },
-            { "--", TokenType.INCREMENT },
-            { "++",TokenType.DECREMENT},
+            { "--", TokenType.DECREMENT},
+            { "++",TokenType.INCREMENT},
             { "identifier", TokenType.IDENTIFIER },
         };
     }

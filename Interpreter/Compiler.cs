@@ -69,13 +69,30 @@ namespace BoomifyCS.Interpreter
                     throw new InvalidOperationException($"Invalid assignment operator: {node.Token.Value}");
                 }
 
-                instructions.Add(new ByteInstruction(byteType,astAssignmentOperator.IdentifierNode.Token.Value,_lineCount));
+                instructions.Add(new ByteInstruction(byteType, astAssignmentOperator.IdentifierNode.Token.Value, _lineCount));
+            }
+            else if (node is AstUnaryOperator astUnaryOperator)
+            {
+                instructions.Add(new ByteInstruction(ByteType.LOAD_CONST, new BifyInteger(1), _lineCount));
+
+                if (node.Token.Type == TokenType.INCREMENT)
+                {
+
+                    ByteInstruction instruction = new(ByteType.ADDE, astUnaryOperator.value.Token.Value, _lineCount);
+                    instructions.Add(instruction);
+
+                }
+                else if (node.Token.Type == TokenType.DECREMENT)
+                {
+                    ByteInstruction instruction = new(ByteType.SUBE, astUnaryOperator.value.Token.Value, _lineCount);
+                    instructions.Add(instruction);
+                }
             }
             else if (node is AstBinaryOp astBinaryOp)
             {
                 Visit(astBinaryOp.Left);
                 Visit(astBinaryOp.Right);
-                
+
                 if (ByteCodeConfig.BinaryOperators.TryGetValue(astBinaryOp.Token.Type, out ByteType byteType))
                 {
                     ByteInstruction instruction = new(byteType, _lineCount);
@@ -96,7 +113,7 @@ namespace BoomifyCS.Interpreter
             }
             else if (node is AstIdentifier astIdentifier)
             {
-                ByteInstruction instruction = new(ByteType.LOAD,astIdentifier.Token.Value,_lineCount);
+                ByteInstruction instruction = new(ByteType.LOAD, astIdentifier.Token.Value, _lineCount);
                 instructions.Add(instruction);
             }
             else if (node is AstAssignment astAssignment)
@@ -122,17 +139,17 @@ namespace BoomifyCS.Interpreter
             else if (node is AstElse astElse)
             {
                 Visit(astElse.BlockNode);
-            } 
+            }
             else if (node is AstCall astCall)
             {
                 Visit(astCall.ArgumentsNode);
                 int expectedArgCount = AstNodeConnector.CountCommaNode(astCall.ArgumentsNode) + 1;
-                ByteInstruction instruction = new(ByteType.CALL,[astCall.CallableName.Token.Value, expectedArgCount],_lineCount);
+                ByteInstruction instruction = new(ByteType.CALL, [astCall.CallableName.Token.Value, expectedArgCount], _lineCount);
                 instructions.Add(instruction);
             }
             else if (node is AstModule astModule)
             {
-                ByteInstruction instruction = new(ByteType.MODULE, [astModule.ModuleName,astModule.ModulePath],_lineCount);
+                ByteInstruction instruction = new(ByteType.MODULE, [astModule.ModuleName, astModule.ModulePath], _lineCount);
                 instructions.Add(instruction);
                 Visit(astModule.ChildNode);
             } 

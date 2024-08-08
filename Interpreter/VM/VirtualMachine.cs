@@ -73,21 +73,34 @@ namespace BoomifyCS.Interpreter.VM
                         break;
                     case var _ when ByteCodeConfig.AssignmentOperators.ContainsValue(instruction.Type):
                         string identifier = (string)instruction.Value[0];
-                        BifyObject varValue = _varManager.GetVariable(identifier);
-                        Console.WriteLine(varValue.Repr());
-                        _stackManager.Print();
-                        varValue = instruction.Type switch
+                        try
                         {
-                            ByteType.ADDE => varValue.Add(_stackManager.Pop()),
-                            ByteType.SUBE => varValue.Sub(_stackManager.Pop()),
-                            ByteType.MULE => varValue.Mul(_stackManager.Pop()),
-                            ByteType.DIVE => varValue.Div(_stackManager.Pop()),
-                            ByteType.FLOORDIV => varValue.FloorDiv(_stackManager.Pop()),
-                            ByteType.POWE => varValue.Pow(_stackManager.Pop()),
-                            _ => throw new NotImplementedException($"Bytecode - {instruction.Type} not implemented in unary op"),
-                        };
-                        Console.WriteLine(varValue.Repr());
-                        _varManager.DefineVariable(identifier,varValue);
+                            BifyObject varValue = _varManager.GetVariable(identifier);
+                            Console.WriteLine(varValue.Repr());
+                            _stackManager.Print();
+                            varValue = instruction.Type switch
+                            {
+                                ByteType.ADDE => varValue.Add(_stackManager.Pop()),
+                                ByteType.SUBE => varValue.Sub(_stackManager.Pop()),
+                                ByteType.MULE => varValue.Mul(_stackManager.Pop()),
+                                ByteType.DIVE => varValue.Div(_stackManager.Pop()),
+                                ByteType.FLOORDIV => varValue.FloorDiv(_stackManager.Pop()),
+                                ByteType.POWE => varValue.Pow(_stackManager.Pop()),
+                                _ => throw new NotImplementedException($"Bytecode - {instruction.Type} not implemented in unary op"),
+                            };
+                            Console.WriteLine(varValue.Repr());
+                            _varManager.DefineVariable(identifier, varValue);
+                        }
+                        catch (KeyNotFoundException)
+                        {
+                            throw new BifyUndefinedError(
+                                $"Undefined variable - {identifier}",
+                                SourceCode[_line - 1],
+                                identifier,
+                                _line
+                            );
+                        }
+      
                         break;
 
 
