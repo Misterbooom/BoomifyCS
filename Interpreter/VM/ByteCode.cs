@@ -42,6 +42,12 @@ namespace BoomifyCS.Interpreter
         JUMP_IF_FALSE,
         CALL,
         MODULE,
+        ADDE,
+        SUBE,
+        MULE,
+        DIVE,
+        FLOORDIVE,
+        POWE,
     }
     public class ByteInstruction
     {
@@ -119,6 +125,15 @@ namespace BoomifyCS.Interpreter
             {TokenType.BITNOT, ByteType.BITNOT}, 
             {TokenType.LSHIFT, ByteType.LSHIFT},
             {TokenType.RSHIFT, ByteType.RSHIFT},
+        };
+        public static Dictionary<TokenType, ByteType> UnaryOperators = new Dictionary<TokenType, ByteType>()
+        {
+            {TokenType.ADDE, ByteType.ADDE},
+            {TokenType.SUBE, ByteType.SUBE},
+            {TokenType.DIVE, ByteType.DIVE},
+            {TokenType.DIV, ByteType.DIVE},
+            {TokenType.POWE, ByteType.POWE},
+            {TokenType.FLOORDIVE, ByteType.FLOORDIVE},
         };
         public static Dictionary<ByteType, string> byteToString = new Dictionary<ByteType, string>
         {

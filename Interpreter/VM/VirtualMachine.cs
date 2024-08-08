@@ -57,8 +57,8 @@ namespace BoomifyCS.Interpreter.VM
                         var varName = (string)instruction.Value[0];
                         try
                         {
-                            BifyObject varValue = _varManager.GetVariable(varName);
-                            _stackManager.Push(varValue);
+                            BifyObject instrvalue = _varManager.GetVariable(varName);
+                            _stackManager.Push(instrvalue);
                         }
                         catch (KeyNotFoundException)
                         {
@@ -74,6 +74,38 @@ namespace BoomifyCS.Interpreter.VM
                     case var _ when ByteCodeConfig.BinaryOperators.ContainsValue(instruction.Type):
                         _ProcessOperator(instruction);
                         break;
+                    case var _ when ByteCodeConfig.UnaryOperators.ContainsValue(instruction.Type):
+                        string identifier = (string)instruction.Value[0];
+                        BifyObject varValue = _varManager.GetVariable(identifier);
+                        Console.WriteLine(varValue.Repr());
+                        _stackManager.Print();
+                        switch (instruction.Type)
+                        {
+                            case ByteType.ADDE:
+                                varValue = varValue.Add(_stackManager.Pop());
+                                break;
+                            case ByteType.SUBE:
+                                varValue = varValue.Sub(_stackManager.Pop());
+                                break;
+                            case ByteType.MULE:
+                                varValue = varValue.Mul(_stackManager.Pop());
+                                break;
+                            case ByteType.DIVE:
+                                varValue = varValue.Div(_stackManager.Pop());
+                                break;
+                            case ByteType.FLOORDIV:
+                                varValue = varValue.FloorDiv(_stackManager.Pop());
+                                break;
+                            case ByteType.POWE:
+                                varValue = varValue.Pow(_stackManager.Pop());
+                                break;
+                            default:
+                                throw new NotImplementedException($"Bytecode - {instruction.Type} not implemented in unary op");
+                        }
+                        Console.WriteLine(varValue.Repr());
+                        _varManager.DefineVariable(identifier,varValue);
+                        break;
+
 
                     case ByteType.STORE:
                         if (_stackManager.Count() == 0)

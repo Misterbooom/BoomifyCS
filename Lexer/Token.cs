@@ -35,7 +35,7 @@ namespace BoomifyCS.Lexer
         ADDE,
         SUBE,
         MULE,
-        IDIV,
+        DIVE,
         FLOORDIVE,
         POWE,
         LPAREN,

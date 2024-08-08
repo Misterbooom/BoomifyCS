@@ -37,7 +37,43 @@ namespace BoomifyCS.Interpreter
                 Visit(astLine.Right);
                 _lineCount++;
             }
-            if (node is AstBinaryOp astBinaryOp)
+            else if (node is AstAssignmentOperator astAssignmentOperator)
+            {
+                ByteInstruction instruction;
+                Visit(astAssignmentOperator.ValueNode);
+                ByteType byteType;
+                if (node.Token.Type == TokenType.ADDE)
+                {
+                    byteType = ByteType.ADDE;
+                }
+                else if (node.Token.Type == TokenType.SUBE)
+                {
+                    byteType = ByteType.SUBE;
+                }
+                else if (node.Token.Type == TokenType.MULE)
+                {
+                    byteType = ByteType.MULE;
+                }
+                else if (node.Token.Type == TokenType.DIVE)
+                {
+                    byteType = ByteType.DIVE;
+                }
+                else if (node.Token.Type == TokenType.FLOORDIVE)
+                {
+                    byteType = ByteType.FLOORDIVE;
+                }
+                else if (node.Token.Type == TokenType.POW)
+                {
+                    byteType = ByteType.POWE;
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Invalid assignment operator: {node.Token.Value}");
+                }
+
+                instructions.Add(new ByteInstruction(byteType,astAssignmentOperator.IdentifierNode.Token.Value,_lineCount));
+            }
+            else if (node is AstBinaryOp astBinaryOp)
             {
                 Visit(astBinaryOp.Left);
                 Visit(astBinaryOp.Right);
