@@ -6,20 +6,12 @@ using System.Threading.Tasks;
 
 namespace BoomifyCS.Exceptions
 {
-    public class CallStackFrame
+    public class CallStackFrame(string functionName, int lineNumber, string filePath, string codeLine)
     {
-        public string FunctionName { get; }
-        public int LineNumber { get; }
-        public string FilePath { get; }
-        public string CodeLine { get; }
-
-        public CallStackFrame(string functionName, int lineNumber, string filePath, string codeLine)
-        {
-            FunctionName = functionName;
-            LineNumber = lineNumber;
-            FilePath = filePath;
-            CodeLine = codeLine;
-        }
+        public string FunctionName { get; } = functionName;
+        public int LineNumber { get; } = lineNumber;
+        public string FilePath { get; } = filePath;
+        public string CodeLine { get; } = codeLine;
 
         public override string ToString()
         {

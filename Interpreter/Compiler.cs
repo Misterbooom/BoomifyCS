@@ -10,15 +10,13 @@ using BoomifyCS.Lexer;
 using BoomifyCS.Parser;
 namespace BoomifyCS.Interpreter
 {
-    public class MyCompiler
+    public class MyCompiler(string[] sourcecode)
     {
-        List<ByteInstruction> instructions = new List<ByteInstruction>();
-        private VirtualMachine VM;
+        readonly List<ByteInstruction> instructions = [];
+        private readonly VirtualMachine VM = new(sourcecode);
         private int _lineCount = 1;
-        public MyCompiler(string[] sourcecode) {
-            VM = new VirtualMachine(sourcecode);
-        }
-        public void runVM(AstNode root)
+
+        public void RunVM(AstNode root)
         {
             Visit(root);
             instructions.WriteBytes();
@@ -80,7 +78,7 @@ namespace BoomifyCS.Interpreter
                 
                 if (ByteCodeConfig.BinaryOperators.TryGetValue(astBinaryOp.Token.Type, out ByteType byteType))
                 {
-                    ByteInstruction instruction = new ByteInstruction(byteType, _lineCount);
+                    ByteInstruction instruction = new(byteType, _lineCount);
                     instructions.Add(instruction);
                     return instruction;
                 }
@@ -98,7 +96,7 @@ namespace BoomifyCS.Interpreter
             }
             else if (node is AstIdentifier astIdentifier)
             {
-                ByteInstruction instruction = new ByteInstruction(ByteType.LOAD,astIdentifier.Token.Value,_lineCount);
+                ByteInstruction instruction = new(ByteType.LOAD,astIdentifier.Token.Value,_lineCount);
                 instructions.Add(instruction);
             }
             else if (node is AstAssignment astAssignment)
@@ -114,7 +112,7 @@ namespace BoomifyCS.Interpreter
             }
             else if (node is AstIf astIf)
             {
-                _CompileIfStatement(astIf);
+                CompileIfStatement(astIf);
             }
             else if (node is AstBlock astBlock)
             {
@@ -129,12 +127,12 @@ namespace BoomifyCS.Interpreter
             {
                 Visit(astCall.ArgumentsNode);
                 int expectedArgCount = AstNodeConnector.CountCommaNode(astCall.ArgumentsNode) + 1;
-                ByteInstruction instruction = new ByteInstruction(ByteType.CALL,new List<object> { astCall.CallableName.Token.Value, expectedArgCount },_lineCount);
+                ByteInstruction instruction = new(ByteType.CALL,[astCall.CallableName.Token.Value, expectedArgCount],_lineCount);
                 instructions.Add(instruction);
             }
             else if (node is AstModule astModule)
             {
-                ByteInstruction instruction = new ByteInstruction(ByteType.MODULE, new List<object>{astModule.ModuleName,astModule.ModulePath},_lineCount);
+                ByteInstruction instruction = new(ByteType.MODULE, [astModule.ModuleName,astModule.ModulePath],_lineCount);
                 instructions.Add(instruction);
                 Visit(astModule.ChildNode);
             } 
@@ -144,7 +142,7 @@ namespace BoomifyCS.Interpreter
 
             return null;
         }
-        private void _CompileIfStatement(AstIf ifNode)
+        private void CompileIfStatement(AstIf ifNode)
         {
             Visit(ifNode.ConditionNode);
 

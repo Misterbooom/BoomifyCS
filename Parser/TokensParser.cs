@@ -19,7 +19,7 @@ namespace BoomifyCS.Parser
         /// </returns>
         public static Tuple<List<Token>, int> SplitTokensByLine(List<Token> tokens, int tokenPosition)
         {
-            List<Token> lineTokens = new List<Token>();
+            List<Token> lineTokens = [];
             Token currentToken = tokens[tokenPosition];
             
             while (tokenPosition < tokens.Count && currentToken.Type != TokenType.EOL)
@@ -61,7 +61,7 @@ namespace BoomifyCS.Parser
         }
         public static (List<Token>,int) AllTokensToEol(List<Token> tokens,int start = 0)
         {
-            List<Token> result = new List<Token>();
+            List<Token> result = [];
             for (int i = start; i < tokens.Count; i++)
             {
                 Token token = tokens[i];
@@ -76,7 +76,7 @@ namespace BoomifyCS.Parser
 
         public static Tuple<List<Token>, int> TokensInBrackets(List<Token> tokens, int start = 0)
         {
-            List<Token> result = new List<Token>();
+            List<Token> result = [];
             int bracketCounter = 0;
             bool insideBrackets = false;
 
@@ -126,7 +126,7 @@ namespace BoomifyCS.Parser
         }
         public static List<List<Token>> SplitTokensByTT(List<Token> tokens, TokenType tokenType, int start = 0)
         {
-            List<List<Token>> result = new List<List<Token>>();
+            List<List<Token>> result = [];
             int lastTokenIndex = start;
 
             for (int i = start; i < tokens.Count; i++)

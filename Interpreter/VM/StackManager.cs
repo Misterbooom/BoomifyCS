@@ -9,8 +9,8 @@ namespace BoomifyCS.Interpreter.VM
 {
     public class StackManager
     {
-        private Stack<BifyObject> globalStack = new Stack<BifyObject>();
-        private Stack<BifyObject> localStack = new Stack<BifyObject>();
+        private readonly Stack<BifyObject> globalStack = new();
+        private readonly Stack<BifyObject> localStack = new();
         private string context = "global";
 
         public StackManager() { }

@@ -9,7 +9,7 @@ namespace BoomifyCS.Interpreter.VM
 {
     public class VarManager
     {
-        private Dictionary<string, Dictionary<string, BifyObject>> variables = new Dictionary<string, Dictionary<string, BifyObject>>
+        private readonly Dictionary<string, Dictionary<string, BifyObject>> variables = new()
         {
             { "locals", new Dictionary<string, BifyObject>() },
             { "globals", new Dictionary<string, BifyObject>{
@@ -59,13 +59,13 @@ namespace BoomifyCS.Interpreter.VM
         }
         public void Print()
         {
-            if (!variables.ContainsKey(context))
+            if (!variables.TryGetValue(context, out Dictionary<string, BifyObject> value))
             {
                 Console.WriteLine($"Context '{context}' does not exist.");
                 return;
             }
 
-            var variablesToPrint = variables[context];
+            var variablesToPrint = value;
 
             Console.WriteLine($"Contents of the {context} context:");
 

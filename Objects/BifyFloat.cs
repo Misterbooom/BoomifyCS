@@ -4,14 +4,9 @@ using BoomifyCS.Exceptions;
 
 namespace BoomifyCS.Objects
 {
-    public class BifyFloat : BifyObject
+    public class BifyFloat(Token token, double value) : BifyObject(token)
     {
-        public double Value;
-
-        public BifyFloat(Token token, double value) : base(token)
-        {
-            this.Value = value;
-        }
+        public double Value = value;
 
         public override string ToString()
         {

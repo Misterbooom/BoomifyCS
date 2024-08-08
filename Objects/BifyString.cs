@@ -32,7 +32,7 @@ namespace BoomifyCS.Objects
         {
             if (other is BifyInteger otherInt)
             {
-                StringBuilder builder = new StringBuilder();
+                StringBuilder builder = new();
                 for (int i = 0; i < otherInt.Value; i++)
                 {
                     builder.Append(Value);

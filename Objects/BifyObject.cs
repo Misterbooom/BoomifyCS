@@ -5,14 +5,11 @@ using BoomifyCS.Exceptions;
 
 namespace BoomifyCS.Objects
 {
-    public class BifyObject
+    public class BifyObject(Token token)
     {
-        public Token Token;
+        public Token Token = token;
         public int ExpectedArgCount;
-        public BifyObject(Token token)
-        {
-            this.Token = token;
-        }
+
         public virtual string Repr()
         {
             throw new BifyUnknownError($"Repr operation not supported for {GetType().Name}.");

@@ -12,7 +12,7 @@ namespace BoomifyCS.Exceptions
     public class BifyError : Exception
     {
         public int CurrentLine { get; set; }
-        public List<CallStackFrame> CallStack { get; set; } = new List<CallStackFrame>();
+        public List<CallStackFrame> CallStack { get; set; } = [];
         public List<Token> LineTokens { get; set; }
         public string LineTokensString { get; set; }
         public List<Token> InvalidTokens { get; set; }
@@ -103,7 +103,7 @@ namespace BoomifyCS.Exceptions
 
         public void WriteLineTokens(List<Token> tokens, int indentInt)
         {
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
             for (int i = 0; i < indentInt; i++)
             {
                 builder.Append(' ');

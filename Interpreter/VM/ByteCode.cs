@@ -57,7 +57,7 @@ namespace BoomifyCS.Interpreter
         public ByteInstruction(ByteType type, object value, int indexOfInstruction)
         {
             Type = type;
-            Value = new List<Object> { value };
+            Value = [value];
             this.IndexOfInstruction = indexOfInstruction;
         }
 
@@ -95,13 +95,13 @@ namespace BoomifyCS.Interpreter
             }
             else
             {
-                Value = new List<object> { value };
+                Value = [value];
             }
         }
     }
     public static class ByteCodeConfig
     {
-        public static Dictionary<TokenType, ByteType> BinaryOperators = new Dictionary<TokenType, ByteType>
+        public readonly static Dictionary<TokenType, ByteType> BinaryOperators = new()
         {
             {TokenType.ADD, ByteType.ADD},
             {TokenType.SUB, ByteType.SUB},
@@ -126,7 +126,7 @@ namespace BoomifyCS.Interpreter
             {TokenType.LSHIFT, ByteType.LSHIFT},
             {TokenType.RSHIFT, ByteType.RSHIFT},
         };
-        public static Dictionary<TokenType, ByteType> UnaryOperators = new Dictionary<TokenType, ByteType>()
+        public readonly static Dictionary<TokenType, ByteType> AssignmentOperators = new()
         {
             {TokenType.ADDE, ByteType.ADDE},
             {TokenType.SUBE, ByteType.SUBE},
@@ -135,7 +135,7 @@ namespace BoomifyCS.Interpreter
             {TokenType.POWE, ByteType.POWE},
             {TokenType.FLOORDIVE, ByteType.FLOORDIVE},
         };
-        public static Dictionary<ByteType, string> byteToString = new Dictionary<ByteType, string>
+        public readonly static Dictionary<ByteType, string> byteToString = new()
         {
             { ByteType.ADD, "+" },
             { ByteType.SUB, "-" },

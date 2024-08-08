@@ -11,15 +11,15 @@ namespace BoomifyCS.Lexer
     public class MyLexer
     {
         private int _position;
-        private string _code;
-        private string _currentLine;
+        private readonly string _code;
+        private readonly string _currentLine;
         private int _lineCount = 0;
-        private string[] _lines;
+        private readonly string[] _lines;
         public MyLexer(string code)
         {
             this._code = code;
 
-            List<string> tempLines = new List<string>();
+            List<string> tempLines = [];
 
             string[] linesArray = Regex.Split(code, "\r?\n");
 
@@ -45,8 +45,8 @@ namespace BoomifyCS.Lexer
 
         public List<Token> Tokenize()
         {
-            List<Token> tokens = new List<Token>();
-            List<int> bracketsStack = new List<int>();
+            List<Token> tokens = [];
+            List<int> bracketsStack = [];
             while (_position < _code.Length)
             {
 
@@ -97,14 +97,14 @@ namespace BoomifyCS.Lexer
                 if (currentChar == '"' || currentChar.ToString() == "'")
                 {
                     string str = GenerateString();
-                    Token token = new Token(TokenType.STRING, str);
+                    Token token = new(TokenType.STRING, str);
                     tokens.Add(token);
                 }
                 else if (currentChar == '[')
                 {
                     _position++;
                     string array = GenerateArray();
-                    Token token = new Token(TokenType.ARRAY, array);
+                    Token token = new(TokenType.ARRAY, array);
                     tokens.Add(token);
                 }
                 else if (currentChar == '{')
@@ -118,25 +118,25 @@ namespace BoomifyCS.Lexer
                 else if (char.IsDigit(currentChar))
                 {
                     string digit = GenerateDigit();
-                    Token token = new Token(TokenType.NUMBER, digit);
+                    Token token = new(TokenType.NUMBER, digit);
                     tokens.Add(token);
                 }
 
                 else if (multichar.Key != " ")
                 {
 
-                    Token token = new Token(multichar.Value, multichar.Key);
+                    Token token = new(multichar.Value, multichar.Key);
                     tokens.Add(token);
                 }
                 else if (TokenConfig.singleCharTokens.TryGetValue(currentChar, out TokenType tokenType))
                 {
-                    Token token = new Token(tokenType, currentChar.ToString());
+                    Token token = new(tokenType, currentChar.ToString());
                     tokens.Add(token);
                 }
                 else if (IsIdentifier(currentChar))
                 {
                     string identifier = GenerateIdentifier();
-                    Token token = new Token(TokenType.IDENTIFIER, identifier);
+                    Token token = new(TokenType.IDENTIFIER, identifier);
                     tokens.Add(token);
                 }
 
@@ -317,7 +317,7 @@ namespace BoomifyCS.Lexer
         public Token GenerateObject()
         {
             int counter = 0;
-            StringBuilder block = new StringBuilder();
+            StringBuilder block = new();
             int start = _position;
             while (_position < _code.Length)
             {
@@ -355,7 +355,7 @@ namespace BoomifyCS.Lexer
             }
             string block_string = _code.Substring(start, _position - start);
 
-            MyLexer lexer = new MyLexer(block.ToString());
+            MyLexer lexer = new(block.ToString());
             List<Token> tokens = lexer.Tokenize();
             _position -= 2;
             return new Token(TokenType.OBJECT, block_string, tokens);

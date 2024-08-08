@@ -85,17 +85,12 @@ namespace BoomifyCS.Lexer
         BITNOT,
 
     }
-    public class Token
+    public class Token(TokenType type, string value, List<Token> tokens = null)
     {
-        public TokenType Type;
-        public string Value;
-        public List<Token> Tokens;
-        public Token(TokenType type, string value, List<Token> tokens = null)
-        {
-            this.Type = type;
-            this.Value = value;
-            this.Tokens = tokens;
-        }
+        public TokenType Type = type;
+        public string Value = value;
+        public List<Token> Tokens = tokens;
+
         public override string ToString()
         {
             if (Tokens != null)

@@ -15,27 +15,27 @@ namespace BoomifyCS
 {                   
     internal class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            runInterpreter();
+            RunInterpreter();
             //runTests();
             //astParser.ParseTokens(tokens);
         }
-        static void runTests()
+        static void RunTests()
         {
             ExceptionTest.CallStackTest();
         }
-        static void runInterpreter()
+        static void RunInterpreter()
         {
             Console.OutputEncoding = Encoding.UTF8;
             string code;
             string file = "C:/BoomifyCS/test.bify";
-            using (StreamReader reader = new StreamReader(file))
+            using (StreamReader reader = new(file))
             {
                 code = reader.ReadToEnd();
 
             }
-            MyLexer lexer = new MyLexer(code);
+            MyLexer lexer = new(code);
 
             try
             {
@@ -46,16 +46,16 @@ namespace BoomifyCS
                 //    Console.WriteLine($"{i}:{codeByLine[i]}");  
                 //}
                 
-                AstTree astParser = new AstTree(file,codeByLine);
+                AstTree astParser = new(file,codeByLine);
                 AstNode node = astParser.ParseTokens(tokens);
                 //Console.WriteLine(AstParser.SimpleEval(node));
                 Console.WriteLine(node);
                 Console.WriteLine(string.Join("\n", codeByLine));
-                MyCompiler interpreter = new MyCompiler(codeByLine);
-                interpreter.runVM(node);
+                MyCompiler interpreter = new(codeByLine);
+                interpreter.RunVM(node);
 
-                BifyInteger a = new BifyInteger(new Token(TokenType.IDENTIFIER, "1"), 1);
-                BifyInteger b = new BifyInteger(new Token(TokenType.IDENTIFIER, "1"), 1);
+                BifyInteger a = new(new Token(TokenType.IDENTIFIER, "1"), 1);
+                BifyInteger b = new(new Token(TokenType.IDENTIFIER, "1"), 1);
 
             }
             catch (BifyError e)

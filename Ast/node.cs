@@ -6,18 +6,11 @@ using BoomifyCS.Parser;
 
 namespace BoomifyCS.Ast
 {
-    public class AstNode
+    public class AstNode(Token token, AstNode left = null, AstNode right = null)
     {
-        public Token Token { get; set; }
-        public AstNode Left { get; set; }
-        public AstNode Right { get; set; }
-
-        public AstNode(Token token, AstNode left = null, AstNode right = null)
-        {
-            Token = token;
-            Left = left;
-            Right = right;
-        }
+        public Token Token { get; set; } = token;
+        public AstNode Left { get; set; } = left;
+        public AstNode Right { get; set; } = right;
 
         public override string ToString()
         {
@@ -26,7 +19,7 @@ namespace BoomifyCS.Ast
 
         public virtual string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
-            string indent = new String(' ', 4 * level);
+            string indent = new(' ', 4 * level);
             string branch = isLeft ? "|- " : "|- ";
             string treeStr = $"{indent}{branch}{note}{GetType().Name}({Token.Value})\n";
 
@@ -52,12 +45,8 @@ namespace BoomifyCS.Ast
     }
 
 
-    public class AstBinaryOp : AstNode
+    public class AstBinaryOp(Token token, AstNode left = null, AstNode right = null) : AstNode(token, left, right)
     {
-        public AstBinaryOp(Token token, AstNode left = null, AstNode right = null) : base(token, left, right)
-        {
-        }
-
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
@@ -69,12 +58,9 @@ namespace BoomifyCS.Ast
         }
     }
 
-    public class AstConstant : AstNode
+    public class AstConstant(Token token) : AstNode(token)
     {
         public BifyObject BifyValue;
-        public AstConstant(Token token) : base(token)
-        {
-        }
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -159,12 +145,8 @@ namespace BoomifyCS.Ast
         }
     }
 
-    public class AstAssignment : AstNode
+    public class AstAssignment(Token token, AstNode left = null, AstNode right = null) : AstNode(token, left, right)
     {
-        public AstAssignment(Token token, AstNode left = null, AstNode right = null) : base(token, left, right)
-        {
-        }
-
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = "";
@@ -181,13 +163,9 @@ namespace BoomifyCS.Ast
         }
     }
 
-    public class AstVarDecl : AstNode
+    public class AstVarDecl(Token token, AstAssignment assignmentNode, AstNode left = null, AstNode right = null) : AstNode(token, left, right)
     {
-        public AstAssignment AssignmentNode;
-        public AstVarDecl(Token token, AstAssignment assignmentNode, AstNode left = null, AstNode right = null) : base(token, left, right)
-        {
-            AssignmentNode = assignmentNode;
-        }
+        public AstAssignment AssignmentNode = assignmentNode;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -200,43 +178,29 @@ namespace BoomifyCS.Ast
             return StrHelper();
         }
     }
-    public class AstLine : AstNode
+    public class AstLine(AstNode left = null, AstNode right = null) : AstNode(new Token(TokenType.EOL, ";"), left, right)
     {
-        public AstLine(AstNode left = null, AstNode right = null) : base(new Token(TokenType.EOL, ";"), left, right)
-        {
-        }
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             return base.StrHelper(level, note, isLeft);
         }
 
     }
-    public class AstIdentifier : AstNode
+    public class AstIdentifier(Token token, string name) : AstNode(token)
     {
-        public string Name;
-        public AstIdentifier(Token token, string name) : base(token)
-        {
-            this.Name = name;
-        }
+        public string Name = name;
     }
-    public class AstBracket : AstNode
+    public class AstBracket(Token token) : AstNode(token)
     {
-        public AstBracket(Token token) : base(token)
-        {
-        }
     }
-    public class AstEOL : AstNode
+    public class AstEOL(Token token) : AstNode(token)
     {
-        public AstEOL(Token token) : base(token) { }
     }
-    public class AstBlock : AstNode
+    public class AstBlock(AstNode statementsNode) : AstNode(new Token(TokenType.BLOCK, "Block"))
     {
 
-        public AstNode StatementsNode;
-        public AstBlock(AstNode statementsNode) : base(new Token(TokenType.BLOCK, "Block"))
-        {
-            this.StatementsNode = statementsNode;
-        }
+        public AstNode StatementsNode = statementsNode;
+
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
@@ -244,18 +208,13 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{statementsStr}";
         }
     }
-    public class AstIf : AstNode
+    public class AstIf(Token token, AstNode conditionNode, AstBlock blockNode, AstElse elseNode = null) : AstNode(token)
     {
-        public AstNode ConditionNode;
-        public AstBlock BlockNode;
-        public AstElse ElseNode;
-        public List<AstElseIf> ElseIfNodes = new List<AstElseIf>();
-        public AstIf(Token token, AstNode conditionNode, AstBlock blockNode, AstElse elseNode = null) : base(token)
-        {
-            this.ElseNode = elseNode;
-            this.ConditionNode = conditionNode;
-            this.BlockNode = blockNode;
-        }
+        public AstNode ConditionNode = conditionNode;
+        public AstBlock BlockNode = blockNode;
+        public AstElse ElseNode = elseNode;
+        public List<AstElseIf> ElseIfNodes = [];
+
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
@@ -291,13 +250,10 @@ namespace BoomifyCS.Ast
             ElseIfNodes.Add(astElseIf);
         }
     }
-    public class AstElse : AstNode
+    public class AstElse(Token token, AstBlock blockNode) : AstNode(token, blockNode)
     {
-        public AstBlock BlockNode;
-        public AstElse(Token token, AstBlock blockNode) : base(token, blockNode)
-        {
-            this.BlockNode = blockNode;
-        }
+        public AstBlock BlockNode = blockNode;
+
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
@@ -305,15 +261,11 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{blockStr}";
         }
     }
-    public class AstElseIf : AstNode
+    public class AstElseIf(Token token, AstBlock blockNode, AstNode conditionNode) : AstNode(token)
     {
-        public AstBlock BlockNode;
-        public AstNode ConditionNode;
-        public AstElseIf(Token token, AstBlock blockNode, AstNode conditionNode) : base(token)
-        {
-            this.BlockNode = blockNode;
-            this.ConditionNode = conditionNode;
-        }
+        public AstBlock BlockNode = blockNode;
+        public AstNode ConditionNode = conditionNode;
+
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
@@ -323,15 +275,11 @@ namespace BoomifyCS.Ast
 
         }
     }
-    public class AstWhile : AstNode
+    public class AstWhile(Token token, AstBlock blockNode, AstNode conditionNode) : AstNode(token)
     {
-        public AstBlock BlockNode;
-        public AstNode ConditionNode;
-        public AstWhile(Token token, AstBlock blockNode, AstNode conditionNode) : base(token)
-        {
-            this.BlockNode = blockNode;
-            this.ConditionNode = conditionNode;
-        }
+        public AstBlock BlockNode = blockNode;
+        public AstNode ConditionNode = conditionNode;
+
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
@@ -341,19 +289,13 @@ namespace BoomifyCS.Ast
 
         }
     }
-    public class AstFor : AstNode
+    public class AstFor(Token token, AstBlock blockNode, AstNode conditionNode, AstNode incrementNode, AstNode initNode) : AstNode(token)
     {
-        public AstBlock BlockNode;
-        public AstNode ConditionNode;
-        public AstNode IncrementNode;
-        public AstNode InitNode;
-        public AstFor(Token token, AstBlock blockNode, AstNode conditionNode, AstNode incrementNode, AstNode initNode) : base(token)
-        {
-            this.BlockNode = blockNode;
-            this.ConditionNode = conditionNode;
-            this.IncrementNode = incrementNode;
-            this.InitNode = initNode;
-        }
+        public AstBlock BlockNode = blockNode;
+        public AstNode ConditionNode = conditionNode;
+        public AstNode IncrementNode = incrementNode;
+        public AstNode InitNode = initNode;
+
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
@@ -363,15 +305,11 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{conditionStr}\n{incrementStr}\n{blockStr}";
         }
     }
-    public class AstCall : AstNode
+    public class AstCall(Token token, AstNode callableName, AstNode argumentsNode = null, AstNode returnNode = null) : AstNode(token)
     {
-        public AstNode CallableName;
-        public AstNode ArgumentsNode;
-        public AstCall(Token token, AstNode callableName, AstNode argumentsNode = null, AstNode returnNode = null) : base(token)
-        {
-            this.CallableName = callableName;
-            this.ArgumentsNode = argumentsNode;
-        }
+        public AstNode CallableName = callableName;
+        public AstNode ArgumentsNode = argumentsNode;
+
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
@@ -381,15 +319,11 @@ namespace BoomifyCS.Ast
 
         }
     }
-    public class AstUnaryOperator : AstNode
+    public class AstUnaryOperator(Token token, AstNode value, int increment) : AstNode(token)
     {
-        public AstNode value;
-        public int increment;
-        public AstUnaryOperator(Token token, AstNode value, int increment) : base(token)
-        {
-            this.value = value;
-            this.increment = increment;
-        }
+        public AstNode value = value;
+        public int increment = increment;
+
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
@@ -397,17 +331,12 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{valueStr}";
         }
     }
-    public class AstFunctionDecl : AstNode
+    public class AstFunctionDecl(Token token, AstIdentifier functionNameNode, AstNode argumentsNode, AstBlock blockNode) : AstNode(token)
     {
-        public AstNode argumentsNode;
-        public AstIdentifier functionNameNode;
-        public AstBlock blockNode;
-        public AstFunctionDecl(Token token, AstIdentifier functionNameNode, AstNode argumentsNode, AstBlock blockNode) : base(token)
-        {
-            this.functionNameNode = functionNameNode;
-            this.argumentsNode = argumentsNode;
-            this.blockNode = blockNode;
-        }
+        public AstNode argumentsNode = argumentsNode;
+        public AstIdentifier functionNameNode = functionNameNode;
+        public AstBlock blockNode = blockNode;
+
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note, false);
@@ -417,17 +346,12 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{functionNameStr}\n{argumentsStr}\n{blockStr}";
         }
     }
-    public class AstModule : AstNode
+    public class AstModule(Token token, string moduleName, string modulePath, AstNode childNode = null) : AstNode(token)
     {
-        public AstNode ChildNode;
-        public string ModuleName;
-        public string ModulePath;
-        public AstModule(Token token, string moduleName, string modulePath, AstNode childNode = null) : base(token)
-        {
-            this.ModuleName = moduleName;
-            this.ModulePath = modulePath;
-            this.ChildNode = childNode;
-        }
+        public AstNode ChildNode = childNode;
+        public string ModuleName = moduleName;
+        public string ModulePath = modulePath;
+
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note, false);
@@ -436,15 +360,11 @@ namespace BoomifyCS.Ast
 
         }
     }
-    public class AstAssignmentOperator : AstNode 
+    public class AstAssignmentOperator(Token token, AstIdentifier identifierNode, AstNode valueNode) : AstNode(token) 
     {
-        public AstIdentifier IdentifierNode;
-        public AstNode ValueNode;
-        public AstAssignmentOperator(Token token, AstIdentifier identifierNode, AstNode valueNode) : base(token)
-        {
-            this.IdentifierNode = identifierNode;
-            this.ValueNode = valueNode;
-        }
+        public AstIdentifier IdentifierNode = identifierNode;
+        public AstNode ValueNode = valueNode;
+
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note, false);

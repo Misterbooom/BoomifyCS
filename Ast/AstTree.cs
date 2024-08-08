@@ -8,6 +8,7 @@ using BoomifyCS.Lexer;
 using BoomifyCS.Parser;
 using BoomifyCS.Exceptions;
 using System.IO;
+using BoomifyCS.Parser.NodeParser;
 
 namespace BoomifyCS.Ast
 {
@@ -15,23 +16,20 @@ namespace BoomifyCS.Ast
     {
         private int _codeTokenPosition = 0;
         public int lineCount = 0;
-        private List<Token> _codeTokens = new List<Token>();
-        private List<Token> _lineTokens = new List<Token>();
-        private string[] _sourceCode;
-        private string _modulePath;
-        private string _moduleName;
+        private readonly string[] _sourceCode;
+        private readonly string _modulePath;
+        private readonly string _moduleName;
 
         public AstTree(string modulePath, string[] sourcecode = null)
         {
-            _sourceCode = sourcecode ?? new string[] { "" };
+            _sourceCode = sourcecode ?? [""];
             _modulePath = modulePath;
             _moduleName = Path.GetFileName(_modulePath);
         }
 
         public AstNode ParseTokens(List<Token> tokens)
         {
-            _codeTokens = tokens;
-            List<AstNode> nodes = new List<AstNode>();
+            List<AstNode> nodes = [];
 
             while (_codeTokenPosition < tokens.Count)
             {
@@ -45,7 +43,6 @@ namespace BoomifyCS.Ast
         {
             var (lineTokens, newTokenPosition) = TokensParser.SplitTokensByLine(tokens, _codeTokenPosition);
             _codeTokenPosition = newTokenPosition;
-            _lineTokens = lineTokens;
             AstNode node = BuildAstTree(lineTokens);
             nodes.Add(node);
         }
@@ -61,7 +58,8 @@ namespace BoomifyCS.Ast
             {
                 AstNode right = nodes.Pop();
                 AstNode left = nodes.Pop();
-                AstLine line = new AstLine(left, right);
+                AstLine astLine = new(left, right);
+                AstLine line = astLine;
                 nodes.Add(line);
             }
 
@@ -75,8 +73,8 @@ namespace BoomifyCS.Ast
 
         public AstNode BuildAstTree(List<Token> tokens)
         {
-            Stack<AstNode> operandStack = new Stack<AstNode>();
-            Stack<AstNode> operatorStack = new Stack<AstNode>();
+            Stack<AstNode> operandStack = new();
+            Stack<AstNode> operatorStack = new();
             int lineTokenPosition = 0;
 
             while (lineTokenPosition < tokens.Count)

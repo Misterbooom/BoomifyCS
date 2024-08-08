@@ -24,7 +24,7 @@ namespace BoomifyCS.BuiltIn.Function
             }
             Console.Write(arguments[0]);
             string userInput = Console.ReadLine();
-            BifyString input = new BifyString(new Token(TokenType.STRING, userInput), userInput);
+            BifyString input = new(new Token(TokenType.STRING, userInput), userInput);
             return input;
         }
     }

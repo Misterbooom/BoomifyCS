@@ -6,20 +6,17 @@ using BoomifyCS.Objects;
 using BoomifyCS.Exceptions;
 namespace BoomifyCS.Interpreter.VM
 {
-    public class VirtualMachine
+    public class VirtualMachine(string[] sourceCode)
     {
-        private VarManager _varManager = new VarManager();
-        private StackManager _stackManager = new StackManager();
+        private readonly VarManager _varManager = new();
+        private readonly StackManager _stackManager = new();
 
-        private List<CallStackFrame> _callStack = new List<CallStackFrame>();
+        private readonly List<CallStackFrame> _callStack = [];
         private List<ByteInstruction> _instructions;
-        private string[] SourceCode;
+        private readonly string[] SourceCode = sourceCode;
         private string _moduleName;
         private string _modulePath;
         private int _line;
-        public VirtualMachine(string[] sourceCode) {
-            this.SourceCode = sourceCode;
-        }
 
         public void Run(List<ByteInstruction> instructions)
         {
@@ -72,36 +69,23 @@ namespace BoomifyCS.Interpreter.VM
                         break;
 
                     case var _ when ByteCodeConfig.BinaryOperators.ContainsValue(instruction.Type):
-                        _ProcessOperator(instruction);
+                        ProcessOperator(instruction);
                         break;
-                    case var _ when ByteCodeConfig.UnaryOperators.ContainsValue(instruction.Type):
+                    case var _ when ByteCodeConfig.AssignmentOperators.ContainsValue(instruction.Type):
                         string identifier = (string)instruction.Value[0];
                         BifyObject varValue = _varManager.GetVariable(identifier);
                         Console.WriteLine(varValue.Repr());
                         _stackManager.Print();
-                        switch (instruction.Type)
+                        varValue = instruction.Type switch
                         {
-                            case ByteType.ADDE:
-                                varValue = varValue.Add(_stackManager.Pop());
-                                break;
-                            case ByteType.SUBE:
-                                varValue = varValue.Sub(_stackManager.Pop());
-                                break;
-                            case ByteType.MULE:
-                                varValue = varValue.Mul(_stackManager.Pop());
-                                break;
-                            case ByteType.DIVE:
-                                varValue = varValue.Div(_stackManager.Pop());
-                                break;
-                            case ByteType.FLOORDIV:
-                                varValue = varValue.FloorDiv(_stackManager.Pop());
-                                break;
-                            case ByteType.POWE:
-                                varValue = varValue.Pow(_stackManager.Pop());
-                                break;
-                            default:
-                                throw new NotImplementedException($"Bytecode - {instruction.Type} not implemented in unary op");
-                        }
+                            ByteType.ADDE => varValue.Add(_stackManager.Pop()),
+                            ByteType.SUBE => varValue.Sub(_stackManager.Pop()),
+                            ByteType.MULE => varValue.Mul(_stackManager.Pop()),
+                            ByteType.DIVE => varValue.Div(_stackManager.Pop()),
+                            ByteType.FLOORDIV => varValue.FloorDiv(_stackManager.Pop()),
+                            ByteType.POWE => varValue.Pow(_stackManager.Pop()),
+                            _ => throw new NotImplementedException($"Bytecode - {instruction.Type} not implemented in unary op"),
+                        };
                         Console.WriteLine(varValue.Repr());
                         _varManager.DefineVariable(identifier,varValue);
                         break;
@@ -147,7 +131,7 @@ namespace BoomifyCS.Interpreter.VM
                         break;
 
                     case ByteType.CALL:
-                        List<BifyObject> arguments = new List<BifyObject>();
+                        List<BifyObject> arguments = [];
                         BifyFunction function = (BifyFunction)_varManager.GetVariable((string)instruction.Value[0]);
                         int expectedArgCount = (int)instruction.Value[1];
                         _callStack.Add(new CallStackFrame((string)instruction.Value[0], instructionIndex, _modulePath, SourceCode[_line - 1]));
@@ -199,7 +183,7 @@ namespace BoomifyCS.Interpreter.VM
         }
 
 
-        private void _ProcessOperator(ByteInstruction instruction)
+        private void ProcessOperator(ByteInstruction instruction)
         {
             if (ByteCodeConfig.BinaryOperators.ContainsValue(instruction.Type))
             {
@@ -224,57 +208,34 @@ namespace BoomifyCS.Interpreter.VM
 
         }
 
-        private BifyObject PerformBinaryOperation(BifyObject a, BifyObject b, ByteType operatorType)
+        private static BifyObject PerformBinaryOperation(BifyObject a, BifyObject b, ByteType operatorType)
         {
-            switch (operatorType)
+            return operatorType switch
             {
-                case ByteType.ADD:
-                    return a.Add(b);
-                case ByteType.SUB:
-                    return a.Sub(b);
-                case ByteType.MUL:
-                    return a.Mul(b);
-                case ByteType.DIV:
-                    return a.Div(b);
-                case ByteType.MOD:
-                    return a.Mod(b);
-                case ByteType.POW:
-                    return a.Pow(b);
-                case ByteType.FLOORDIV:
-                    return a.FloorDiv(b);
-                case ByteType.EQ:
-                    return a.Eq(b);
-                case ByteType.LT:
-                    return a.Lt(b);
-                case ByteType.GT:
-                    return a.Gt(b);
-                case ByteType.LTE:
-                    return a.Lte(b);
-                case ByteType.GTE:
-                    return a.Gte(b);
-                case ByteType.AND:
-                    return a.Bool().And(b.Bool());
-                case ByteType.OR:
-                    return a.Bool().Or(b.Bool());
-                case ByteType.NEQ:
-                    return a.Neq(b);
-                case ByteType.NOT:
-                    return a.Bool().Not();
-                case ByteType.BITAND:
-                    return a.BitAnd(b);
-                case ByteType.BITOR:
-                    return a.BitOr(b);
-                case ByteType.BITXOR:
-                    return a.BitXor(b);
-                case ByteType.BITNOT:
-                    return a.BitNot();
-                case ByteType.LSHIFT:
-                    return a.LeftShift(b);
-                case ByteType.RSHIFT:
-                    return a.RightShift(b);
-                default:
-                    throw new NotImplementedException($"{operatorType} is not implemented in PerformBinaryOperation");
-            }
+                ByteType.ADD => a.Add(b),
+                ByteType.SUB => a.Sub(b),
+                ByteType.MUL => a.Mul(b),
+                ByteType.DIV => a.Div(b),
+                ByteType.MOD => a.Mod(b),
+                ByteType.POW => a.Pow(b),
+                ByteType.FLOORDIV => a.FloorDiv(b),
+                ByteType.EQ => a.Eq(b),
+                ByteType.LT => a.Lt(b),
+                ByteType.GT => a.Gt(b),
+                ByteType.LTE => a.Lte(b),
+                ByteType.GTE => a.Gte(b),
+                ByteType.AND => a.Bool().And(b.Bool()),
+                ByteType.OR => a.Bool().Or(b.Bool()),
+                ByteType.NEQ => a.Neq(b),
+                ByteType.NOT => a.Bool().Not(),
+                ByteType.BITAND => a.BitAnd(b),
+                ByteType.BITOR => a.BitOr(b),
+                ByteType.BITXOR => a.BitXor(b),
+                ByteType.BITNOT => a.BitNot(),
+                ByteType.LSHIFT => a.LeftShift(b),
+                ByteType.RSHIFT => a.RightShift(b),
+                _ => throw new NotImplementedException($"{operatorType} is not implemented in PerformBinaryOperation"),
+            };
         }
 
     }

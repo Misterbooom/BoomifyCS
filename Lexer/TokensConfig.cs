@@ -4,7 +4,7 @@ namespace BoomifyCS.Lexer
 {
     public class TokenConfig
     {
-        public static Dictionary<string, TokenType> multiCharTokens = new Dictionary<string, TokenType>
+        public readonly static Dictionary<string, TokenType> multiCharTokens = new()
         {
             { "if", TokenType.IF },
 
@@ -36,7 +36,7 @@ namespace BoomifyCS.Lexer
 
         };
 
-        public static Dictionary<char, TokenType> singleCharTokens = new Dictionary<char, TokenType>
+        public readonly static Dictionary<char, TokenType> singleCharTokens = new()
         {
             { '=', TokenType.ASSIGN },
             { ';', TokenType.SEMICOLON },
@@ -56,7 +56,7 @@ namespace BoomifyCS.Lexer
             { '>', TokenType.GT },
             { '!', TokenType.NEQ },
         };
-        public static Dictionary<string, TokenType> binaryOperators = new Dictionary<string, TokenType>
+        public readonly static Dictionary<string, TokenType> binaryOperators = new()
         {
             { "+", TokenType.ADD },
             { "-", TokenType.SUB },
@@ -84,13 +84,13 @@ namespace BoomifyCS.Lexer
             { ",", TokenType.COMMA }
         };
 
-        public static Dictionary<string, TokenType> comparisonOperators = new Dictionary<string, TokenType>
+        public readonly static Dictionary<string, TokenType> comparisonOperators = new()
         {
             { "==", TokenType.EQ },
             { "!=", TokenType.NEQ },
         };
 
-        public static Dictionary<string, TokenType> assignmentOperators = new Dictionary<string, TokenType>
+        public readonly static Dictionary<string, TokenType> assignmentOperators = new()
         {
             { "=", TokenType.ASSIGN },
             { "+=", TokenType.ADDE },
@@ -99,10 +99,9 @@ namespace BoomifyCS.Lexer
             { "/=", TokenType.DIVE },
             { "//=", TokenType.FLOORDIVE },
             { "**=", TokenType.POWE },
-            { "--", TokenType.INCREMENT },
-            { "++",TokenType.DECREMENT},
+  
         };
-        public static Dictionary<string, TokenType> multiTokenStatements = new Dictionary<string, TokenType>
+        public readonly static Dictionary<string, TokenType> multiTokenStatements = new()
         {
             { "if", TokenType.IF },
             { "else", TokenType.ELSE },
