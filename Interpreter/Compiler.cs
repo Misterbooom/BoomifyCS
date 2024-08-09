@@ -153,6 +153,10 @@ namespace BoomifyCS.Interpreter
                 instructions.Add(instruction);
                 Visit(astModule.ChildNode);
             } 
+            else if (node is AstFor)
+            {
+
+            }
             
             
 

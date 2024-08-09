@@ -63,6 +63,11 @@ namespace BoomifyCS
                 e.PrintException();
                 Environment.Exit(1);
             }
+            catch (Exception e)
+            {
+                
+                ExceptionExtension.ParseError(e.StackTrace,e.Message);
+            }
         }
 
     }

@@ -75,7 +75,7 @@ namespace BoomifyCS.Exceptions
 
         private void PrintCallStack()
         {
-            if (CallStack != null && CallStack.Any())
+            if (CallStack != null && CallStack.Count != 0)
             {
 
                 foreach (var frame in CallStack)
@@ -148,7 +148,7 @@ namespace BoomifyCS.Exceptions
             Console.Write("\n");
         }
 
-        private void WriteToken(Token token, Color color, int indentInt = 0)
+        private static void WriteToken(Token token, Color color, int indentInt = 0)
         {
             if (token.Type == TokenType.OBJECT)
             {

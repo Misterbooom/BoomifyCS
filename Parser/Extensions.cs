@@ -6,7 +6,7 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Collections;
 using BoomifyCS.Interpreter;
-public static class ListExtensions
+public static class Extensions
 {
     public static T Pop<T>(this List<T> list)
     {

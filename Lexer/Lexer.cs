@@ -318,7 +318,7 @@ namespace BoomifyCS.Lexer
         {
             int counter = 0;
             StringBuilder block = new();
-            int start = _position;
+            int start = _position + 1;
             while (_position < _code.Length)
             {
                 char currentChar = _code[_position];
@@ -357,6 +357,8 @@ namespace BoomifyCS.Lexer
 
             MyLexer lexer = new(block.ToString());
             List<Token> tokens = lexer.Tokenize();
+            tokens.WriteTokens();
+            Console.WriteLine(block_string);
             _position -= 2;
             return new Token(TokenType.OBJECT, block_string, tokens);
 

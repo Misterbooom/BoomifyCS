@@ -36,7 +36,10 @@ public static class NodeConverter
                 return new AstBracket(token);
 
             case TokenType.OBJECT when astTree != null:
-                var node = (AstModule)astTree.ParseTokens(token.Tokens);
+                var result = astTree.ParseTokens(token.Tokens);
+                Console.WriteLine(result.ToString());
+                var node = (AstModule)result;
+                
                 return new AstBlock(node.ChildNode);
 
             case TokenType.ASSIGN:
