@@ -16,15 +16,15 @@ namespace BoomifyCS.Ast
     {
         private int _codeTokenPosition = 0;
         public int lineCount = 0;
-        private readonly string[] _sourceCode;
-        private readonly string _modulePath;
+        public readonly string[] sourceCode;
+        public readonly string modulePath;
         private readonly string _moduleName;
 
         public AstTree(string modulePath, string[] sourcecode = null)
         {
-            _sourceCode = sourcecode ?? [""];
-            _modulePath = modulePath;
-            _moduleName = Path.GetFileName(_modulePath);
+            sourceCode = sourcecode ?? [""];
+            this.modulePath = modulePath;
+            _moduleName = Path.GetFileName(this.modulePath);
         }
 
         public AstNode ParseTokens(List<Token> tokens)
@@ -33,7 +33,9 @@ namespace BoomifyCS.Ast
 
             while (_codeTokenPosition < tokens.Count)
             {
+                
                 ParseSingleLine(tokens, nodes);
+                
             }
 
             return GenerateFinalAstNode(nodes);
@@ -51,7 +53,7 @@ namespace BoomifyCS.Ast
         {
             if (nodes.Count == 1)
             {
-                return new AstModule(new Token(TokenType.IDENTIFIER, _moduleName), _moduleName, _modulePath, new AstLine(nodes[0]));
+                return new AstModule(new Token(TokenType.IDENTIFIER, _moduleName), _moduleName, modulePath, new AstLine(nodes[0]));
             }
 
             while (nodes.Count > 1)
@@ -65,10 +67,9 @@ namespace BoomifyCS.Ast
 
             if (nodes.Count > 0)
             {
-                return new AstModule(new Token(TokenType.IDENTIFIER, _moduleName), _moduleName, _modulePath, nodes[0]);
+                return new AstModule(new Token(TokenType.IDENTIFIER, _moduleName), _moduleName, modulePath, nodes[0]);
             }
-
-            return new AstEOL(new Token(TokenType.EOL, ""));
+            return new AstModule(new Token(TokenType.IDENTIFIER, _moduleName), _moduleName, modulePath, new AstEOL(new Token(TokenType.EOL, "")));
         }
 
         public AstNode BuildAstTree(List<Token> tokens)
@@ -160,8 +161,6 @@ namespace BoomifyCS.Ast
                 else if (result.Item1 is AstAssignmentOperator)
                 {
                     operandStack.Pop();
-                    operatorStack.WriteNodes();
-                    operandStack.WriteNodes();
                     operatorStack.Push(result.Item1);
 
                     return;
@@ -203,12 +202,12 @@ namespace BoomifyCS.Ast
                 }
                 else
                 {
-                    throw new BifySyntaxError($"Unexpected else, last token - {operatorStack.Peek().Token.Type}", _sourceCode[lineCount], _sourceCode[lineCount], lineCount + 1);
+                    throw new BifySyntaxError($"Unexpected else, last token - {operatorStack.Peek().Token.Type}", sourceCode[lineCount], sourceCode[lineCount], lineCount + 1);
                 }
             }
             catch (InvalidOperationException)
             {
-                throw new BifySyntaxError("Unexpected else", _sourceCode[lineCount], _sourceCode[lineCount], lineCount + 1);
+                throw new BifySyntaxError("Unexpected else", sourceCode[lineCount], sourceCode[lineCount], lineCount + 1);
             }
         }
 
@@ -220,18 +219,18 @@ namespace BoomifyCS.Ast
                 {
                     if (astIf.ElseNode != null)
                     {
-                        throw new BifySyntaxError("Else-if used after else statement", _sourceCode[lineCount - 1], _sourceCode[lineCount - 1], lineCount);
+                        throw new BifySyntaxError("Else-if used after else statement", sourceCode[lineCount - 1], sourceCode[lineCount - 1], lineCount);
                     }
                     astIf.SetElseIfNode(astElseIf);
                 }
                 else
                 {
-                    throw new BifySyntaxError($"Unexpected else-if, last token - {operatorStack.Peek().Token.Type}", _sourceCode[lineCount - 1],_sourceCode[lineCount - 1], lineCount);
+                    throw new BifySyntaxError($"Unexpected else-if, last token - {operatorStack.Peek().Token.Type}", sourceCode[lineCount - 1],sourceCode[lineCount - 1], lineCount);
                 }
             }
             catch (InvalidOperationException)
             {
-                throw new BifySyntaxError("Unexpected else if", _sourceCode[lineCount - 1], _sourceCode[lineCount - 1], lineCount);
+                throw new BifySyntaxError("Unexpected else if", sourceCode[lineCount - 1], sourceCode[lineCount - 1], lineCount);
             }
         }
 
@@ -258,8 +257,7 @@ namespace BoomifyCS.Ast
         {
             if (operandStack.Count < 2)
             {
-                
-                throw new BifyParsingError($"Not enough operands for operator - '{op.Token.Value}'", _sourceCode[lineCount], op.Token.Value, lineCount);
+                throw new BifySyntaxError($"Not enough operands for operator - '{op.Token.Value}'");
             }
         }
 
@@ -269,7 +267,6 @@ namespace BoomifyCS.Ast
             {
                 return operatorStack.Peek();
             }
-
             while (operatorStack.Count > 0)
             {
                 AstNode op = operatorStack.Pop();

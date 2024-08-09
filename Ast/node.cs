@@ -305,7 +305,7 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{conditionStr}\n{incrementStr}\n{blockStr}";
         }
     }
-    public class AstCall(Token token, AstNode callableName, AstNode argumentsNode = null, AstNode returnNode = null) : AstNode(token)
+    public class AstCall(Token token, AstNode callableName, AstNode argumentsNode = null) : AstNode(token)
     {
         public AstNode CallableName = callableName;
         public AstNode ArgumentsNode = argumentsNode;
@@ -314,7 +314,7 @@ namespace BoomifyCS.Ast
         {
             string baseStr = base.StrHelper(level, note);
             string callableStr = CallableName.StrHelper(level + 1, "Name: ");
-            string argumentsStr = ArgumentsNode.StrHelper(level + 2, "Arguments: ");
+            string argumentsStr = ArgumentsNode != null ? ArgumentsNode.StrHelper(level + 2, "Arguments: "): "";
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{callableStr}\n{argumentsStr}";
 
         }

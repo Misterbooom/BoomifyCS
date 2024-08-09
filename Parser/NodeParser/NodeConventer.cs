@@ -1,4 +1,5 @@
 ﻿using BoomifyCS.Ast;
+using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 using BoomifyCS.Objects;
 using BoomifyCS.Parser;
@@ -36,11 +37,19 @@ public static class NodeConverter
                 return new AstBracket(token);
 
             case TokenType.OBJECT when astTree != null:
-                var result = astTree.ParseTokens(token.Tokens);
-                Console.WriteLine(result.ToString());
-                var node = (AstModule)result;
-                
-                return new AstBlock(node.ChildNode);
+                try
+                {
+                    var result = AstBuilder.TokenToAst(token.Tokens, astTree.modulePath);
+                    var node = (AstModule)result;
+
+                    return new AstBlock(node.ChildNode);
+                }
+                catch (BifyError e)
+                {
+                    e.CurrentLine += astTree.lineCount + 1;
+                    e.LineTokensString = astTree.sourceCode[e.CurrentLine - 1];
+                    throw e;
+                }
 
             case TokenType.ASSIGN:
                 return new AstAssignment(token);

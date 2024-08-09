@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Exceptions
 {
- 
+
 
     public class BifySyntaxError : BifyError
     {

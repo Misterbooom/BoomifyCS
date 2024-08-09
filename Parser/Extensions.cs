@@ -75,7 +75,7 @@ public static class Extensions
     }
     public static void WriteNodes<T>(this Stack<T> list) where T : AstNode
     {
-        Console.Write('[');
+        Console.Write("[\n");
         foreach (var node in list)
         {
             if (node != null)
@@ -84,7 +84,7 @@ public static class Extensions
 
             }
         }
-        Console.Write(']');
+        Console.Write("\n]");
 
     }
     public static string ToCustomString(this Hashtable table)

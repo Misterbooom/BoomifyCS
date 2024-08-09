@@ -188,8 +188,7 @@ namespace BoomifyCS.Parser
             try
             {
                 var (argumentsTokens, argumentsEnd) = FindTokensInBracketsSafe(tokens, currentPos);
-                //argumentsTokens.WriteTokensWithoutWhiteSpace();
-                currentPos = argumentsEnd;
+                currentPos = argumentsEnd + 1;
                 AstNode identifierNode = astParser.BuildAstTree([token]);
                 AstNode argumentsNode = astParser.BuildAstTree(argumentsTokens);
                 Token callToken = new(TokenType.CALL, token.Value + "(" + argumentsTokens.ToCustomString() + ")");

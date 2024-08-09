@@ -353,14 +353,12 @@ namespace BoomifyCS.Lexer
             {
                 throw new InvalidOperationException("Unmatched '{' found.");
             }
-            string block_string = _code.Substring(start, _position - start);
-
+            string blockString = _code.Substring(start, _position - start);
             MyLexer lexer = new(block.ToString());
             List<Token> tokens = lexer.Tokenize();
-            tokens.WriteTokens();
-            Console.WriteLine(block_string);
-            _position -= 2;
-            return new Token(TokenType.OBJECT, block_string, tokens);
+            int length = _code.Length - _position;
+            _position += 1;
+            return new Token(TokenType.OBJECT, blockString, tokens);
 
 
             

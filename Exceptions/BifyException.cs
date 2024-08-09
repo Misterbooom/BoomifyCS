@@ -111,39 +111,18 @@ namespace BoomifyCS.Exceptions
 
             Console.Write(builder.ToString());
 
-            if (tokens != null)
+            foreach (char token in LineTokensString)
             {
-                foreach (Token token in tokens)
+                if (InvalidTokensString.Contains(token.ToString()))
                 {
-                    if (token.Type == TokenType.NEXTLINE)
-                    {
-                        break;
-                    }
-
-                    if (InvalidTokens.Contains(token))
-                    {
-                        WriteToken(token, Color.Red, indentInt);
-                    }
-                    else
-                    {
-                        WriteToken(token, Color.White, indentInt);
-                    }
+                    ColorConsole.Write(token, Color.Red);
+                }
+                else
+                {
+                    ColorConsole.Write(token, Color.White);
                 }
             }
-            else
-            {
-                foreach (char token in LineTokensString)
-                {
-                    if (InvalidTokensString.Contains(token.ToString()))
-                    {
-                        ColorConsole.Write(token, Color.Red);
-                    }
-                    else
-                    {
-                        ColorConsole.Write(token, Color.White);
-                    }
-                }
-            }
+            
 
             Console.Write("\n");
         }
