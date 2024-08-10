@@ -19,8 +19,8 @@ namespace BoomifyCS.Lexer
             { "return", TokenType.RETURN },
             { "function",TokenType.FUNCTIONDECL },
             {"**", TokenType.POW},
-            { "<=", TokenType.LTE },
-            { ">=", TokenType.GTE },
+            { "<=", TokenType.LTEQ },
+            { ">=", TokenType.GTEQ },
             { "+=", TokenType.ADDE },
             { "-=", TokenType.SUBE },
             { "*=", TokenType.MULE },
@@ -119,6 +119,7 @@ namespace BoomifyCS.Lexer
             { "--", TokenType.DECREMENT},
             { "++",TokenType.INCREMENT},
             { "identifier", TokenType.IDENTIFIER },
+            {"=", TokenType.ASSIGN},
         };
     }
 }

@@ -36,7 +36,7 @@ public static class NodeConverter
             case TokenType.RPAREN:
                 return new AstBracket(token);
 
-            case TokenType.OBJECT when astTree != null:
+            case TokenType.BLOCK when astTree != null:
                 try
                 {
                     var result = AstBuilder.TokenToAst(token.Tokens, astTree.modulePath);

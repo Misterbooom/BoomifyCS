@@ -29,12 +29,12 @@ public static class Extensions
 
     public static void WriteTokens<T>(this List<T> list) where T : Token
     {
-        string result = "";
+        string result = "[\n";
         foreach (var token in list)
         {
             result += token.ToString() + "\n";
         }
-        Console.WriteLine(result);
+        Console.WriteLine(result + "\n]");
     }
     public static string TokensToString<T>(this List<T> list) where T : Token
     {

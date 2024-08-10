@@ -358,7 +358,7 @@ namespace BoomifyCS.Lexer
             List<Token> tokens = lexer.Tokenize();
             int length = _code.Length - _position;
             _position += 1;
-            return new Token(TokenType.OBJECT, blockString, tokens);
+            return new Token(TokenType.BLOCK, blockString, tokens);
 
 
             

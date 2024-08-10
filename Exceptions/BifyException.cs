@@ -14,7 +14,7 @@ namespace BoomifyCS.Exceptions
         public int CurrentLine { get; set; }
         public List<CallStackFrame> CallStack { get; set; } = [];
         public List<Token> LineTokens { get; set; }
-        public string LineTokensString { get; set; }
+        public string LineTokensString { get; set; } = "";
         public List<Token> InvalidTokens { get; set; }
         public string InvalidTokensString { get; set; }
         public string FileName { get; set; }
@@ -129,7 +129,7 @@ namespace BoomifyCS.Exceptions
 
         private static void WriteToken(Token token, Color color, int indentInt = 0)
         {
-            if (token.Type == TokenType.OBJECT)
+            if (token.Type == TokenType.BLOCK)
             {
                 string[] lines = token.Value.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             }

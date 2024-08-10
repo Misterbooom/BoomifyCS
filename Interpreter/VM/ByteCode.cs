@@ -27,6 +27,7 @@ namespace BoomifyCS.Interpreter
         OR,
         LOAD_CONST,
         LOAD,
+        DEFINE,
         STORE,
         POP,
         NEQ, 
@@ -81,7 +82,7 @@ namespace BoomifyCS.Interpreter
             {
                 foreach (Object value in Value)
                 {
-                    arguments += value.ToString();
+                    arguments += " " + value.ToString();
                 }
             }
             
@@ -112,8 +113,8 @@ namespace BoomifyCS.Interpreter
             {TokenType.FLOORDIV, ByteType.FLOORDIV},
             {TokenType.LT, ByteType.LT},
             {TokenType.GT, ByteType.GT},
-            {TokenType.LTE, ByteType.LTE},
-            {TokenType.GTE, ByteType.GTE},
+            {TokenType.LTEQ, ByteType.LTE},
+            {TokenType.GTEQ, ByteType.GTE},
             {TokenType.AND, ByteType.AND},
             {TokenType.OR, ByteType.OR},
             {TokenType.EQ, ByteType.EQ},
@@ -153,7 +154,7 @@ namespace BoomifyCS.Interpreter
             { ByteType.OR, "||" },
             { ByteType.LOAD_CONST, "LOAD_CONST" },
             { ByteType.LOAD, "LOAD" },
-            { ByteType.STORE, "STORE" },
+            { ByteType.DEFINE, "DEFINE" },
             { ByteType.POP, "POP" },
             { ByteType.NEQ, "!=" },
             { ByteType.NOT, "!" }, 

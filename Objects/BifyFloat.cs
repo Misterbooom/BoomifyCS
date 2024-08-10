@@ -4,9 +4,14 @@ using BoomifyCS.Exceptions;
 
 namespace BoomifyCS.Objects
 {
-    public class BifyFloat(Token token, double value) : BifyObject(token)
+    public class BifyFloat : BifyObject
     {
-        public double Value = value;
+        public double Value;
+
+        public BifyFloat(Token token, double value) : base(token)
+        {
+            Value = value;
+        }
 
         public override string ToString()
         {
@@ -124,20 +129,43 @@ namespace BoomifyCS.Objects
             }
             throw new BifyTypeError($"Invalid type for FloorDiv operation: {GetType().Name} and {other.GetType().Name}");
         }
+
         public override BifyBoolean Bool()
         {
-            if (this.Value == 0)
-            {
-                return new BifyBoolean(false);
-            }
-            else
-            {
-                return new BifyBoolean(true);
-            }
+            return new BifyBoolean(this.Value != 0);
         }
+
         public override BifyObject Int()
         {
-            return new BifyInteger(Token, (int)this.Value);
+            return new BifyInteger(this.Token, (int)this.Value);
+        }
+
+        // Add the LTE (less than or equal to) operator
+        public override BifyObject Lte(BifyObject other)
+        {
+            if (other is BifyFloat otherFloat)
+            {
+                return new BifyBoolean(this.Value <= otherFloat.Value);
+            }
+            if (other is BifyInteger otherInt)
+            {
+                return new BifyBoolean(this.Value <= otherInt.Value);
+            }
+            throw new BifyTypeError($"Invalid type for Lte operation: {GetType().Name} and {other.GetType().Name}");
+        }
+
+        // Add the GTE (greater than or equal to) operator
+        public override BifyObject Gte(BifyObject other)
+        {
+            if (other is BifyFloat otherFloat)
+            {
+                return new BifyBoolean(this.Value >= otherFloat.Value);
+            }
+            if (other is BifyInteger otherInt)
+            {
+                return new BifyBoolean(this.Value >= otherInt.Value);
+            }
+            throw new BifyTypeError($"Invalid type for Gte operation: {GetType().Name} and {other.GetType().Name}");
         }
     }
 }

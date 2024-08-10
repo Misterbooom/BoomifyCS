@@ -8,10 +8,10 @@ namespace BoomifyCS.Parser
 {
     public static class ExceptionExtension
     {
-        public static void ParseError(string stackTrace,string message)
+        public static void ParseError(string name,string stackTrace,string message)
         {
             var lines = stackTrace.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-            ColorConsole.WriteLine(message,Color.Aqua);
+            ColorConsole.WriteLine($"{name}:{message}",Color.Aqua);
             foreach (var line in lines)
             {
                 var parsedLine = ParseLine(line);

@@ -41,6 +41,14 @@ namespace BoomifyCS.Interpreter.VM
         {
             variables[context][name] = value;
         }
+        public void Store(string name, BifyObject value)
+        {
+            variables[context][name] = value;
+        }
+        public bool HasVariable(string name)
+        {
+            return variables[context].ContainsKey(name);
+        }
 
         public BifyObject GetVariable(string name)
         {

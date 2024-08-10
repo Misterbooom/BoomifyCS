@@ -22,7 +22,7 @@ namespace BoomifyCS.Parser
             List<Token> lineTokens = [];
             Token currentToken = tokens[tokenPosition];
             
-            while (tokenPosition < tokens.Count && currentToken.Type != TokenType.EOL)
+            while (tokenPosition < tokens.Count && currentToken.Type != TokenType.EOL && currentToken.Type != TokenType.BLOCK)
             {
                 currentToken = tokens[tokenPosition];
                 lineTokens.Add(currentToken);
@@ -46,17 +46,17 @@ namespace BoomifyCS.Parser
 
             return TokenConfig.binaryOperators.ContainsValue(type);
         }
-        public static Tuple<Token,int> FindTokenByTT(TokenType tokenType,List<Token> tokens,int start = 0)
+        public static (Token,int) FindTokenByTT(TokenType tokenType,List<Token> tokens,int start = 0)
         {
             for (int i = start; i < tokens.Count;i++)
             {
                 Token token = tokens[i];
                 if (token.Type == tokenType)
                 {
-                    return new Tuple<Token, int>(token, i);
+                    return (token, i);
                 }
             }
-            return null;
+            return (null,1);
 
         }
         public static (List<Token>,int) AllTokensToEol(List<Token> tokens,int start = 0)
@@ -74,12 +74,11 @@ namespace BoomifyCS.Parser
             return (result,tokens.Count);
         }
 
-        public static Tuple<List<Token>, int> TokensInBrackets(List<Token> tokens, int start = 0)
+        public static (List<Token>, int) TokensInBrackets(List<Token> tokens, int start = 0)
         {
             List<Token> result = [];
             int bracketCounter = 0;
             bool insideBrackets = false;
-
             for (int i = start; i < tokens.Count; i++)
             {
                 Token token = tokens[i];
@@ -101,7 +100,7 @@ namespace BoomifyCS.Parser
                     bracketCounter--;
                     if (bracketCounter == 0)
                     {
-                        return new Tuple<List<Token>, int>(result, i);
+                        return (result, i);
                     }
                     else
                     {
@@ -122,7 +121,7 @@ namespace BoomifyCS.Parser
                 throw new InvalidOperationException("Unmatched parentheses in token list.");
             }
 
-            return new Tuple<List<Token>, int>(result, tokens.Count);
+            return (result, tokens.Count);
         }
         public static List<List<Token>> SplitTokensByTT(List<Token> tokens, TokenType tokenType, int start = 0)
         {

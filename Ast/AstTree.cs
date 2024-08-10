@@ -44,9 +44,11 @@ namespace BoomifyCS.Ast
         private void ParseSingleLine(List<Token> tokens, List<AstNode> nodes)
         {
             var (lineTokens, newTokenPosition) = TokensParser.SplitTokensByLine(tokens, _codeTokenPosition);
+            lineTokens.WriteTokens();
+
             _codeTokenPosition = newTokenPosition;
             AstNode node = BuildAstTree(lineTokens);
-            nodes.Add(node);
+            nodes.Add(new AstLine(node));
         }
 
         private AstNode GenerateFinalAstNode(List<AstNode> nodes)
@@ -60,15 +62,18 @@ namespace BoomifyCS.Ast
             {
                 AstNode right = nodes.Pop();
                 AstNode left = nodes.Pop();
-                AstLine astLine = new(left, right);
-                AstLine line = astLine;
-                nodes.Add(line);
+
+                AstNode combinedNode = new AstNode(new Token(TokenType.NEXTLINE,"Parent"),left, right); 
+
+                nodes.Add(combinedNode);
             }
+
 
             if (nodes.Count > 0)
             {
                 return new AstModule(new Token(TokenType.IDENTIFIER, _moduleName), _moduleName, modulePath, nodes[0]);
             }
+
             return new AstModule(new Token(TokenType.IDENTIFIER, _moduleName), _moduleName, modulePath, new AstEOL(new Token(TokenType.EOL, "")));
         }
 

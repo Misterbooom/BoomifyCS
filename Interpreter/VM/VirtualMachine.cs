@@ -55,6 +55,7 @@ namespace BoomifyCS.Interpreter.VM
                         try
                         {
                             BifyObject instrvalue = _varManager.GetVariable(varName);
+
                             _stackManager.Push(instrvalue);
                         }
                         catch (KeyNotFoundException)
@@ -73,38 +74,25 @@ namespace BoomifyCS.Interpreter.VM
                         break;
                     case var _ when ByteCodeConfig.AssignmentOperators.ContainsValue(instruction.Type):
                         string identifier = (string)instruction.Value[0];
-                        try
+                        BifyObject varValue = _varManager.GetVariable(identifier);
+                        varValue = instruction.Type switch
                         {
-                            BifyObject varValue = _varManager.GetVariable(identifier);
-                            Console.WriteLine(varValue.Repr());
-                            _stackManager.Print();
-                            varValue = instruction.Type switch
-                            {
-                                ByteType.ADDE => varValue.Add(_stackManager.Pop()),
-                                ByteType.SUBE => varValue.Sub(_stackManager.Pop()),
-                                ByteType.MULE => varValue.Mul(_stackManager.Pop()),
-                                ByteType.DIVE => varValue.Div(_stackManager.Pop()),
-                                ByteType.FLOORDIV => varValue.FloorDiv(_stackManager.Pop()),
-                                ByteType.POWE => varValue.Pow(_stackManager.Pop()),
-                                _ => throw new NotImplementedException($"Bytecode - {instruction.Type} not implemented in unary op"),
-                            };
-                            Console.WriteLine(varValue.Repr());
-                            _varManager.DefineVariable(identifier, varValue);
-                        }
-                        catch (KeyNotFoundException)
-                        {
-                            throw new BifyUndefinedError(
-                                $"Undefined variable - {identifier}",
-                                SourceCode[_line - 1],
-                                identifier,
-                                _line
-                            );
-                        }
-      
+                            ByteType.ADDE => varValue.Add(_stackManager.Pop()),
+                            ByteType.SUBE => varValue.Sub(_stackManager.Pop()),
+                            ByteType.MULE => varValue.Mul(_stackManager.Pop()),
+                            ByteType.DIVE => varValue.Div(_stackManager.Pop()),
+                            ByteType.FLOORDIV => varValue.FloorDiv(_stackManager.Pop()),
+                            ByteType.POWE => varValue.Pow(_stackManager.Pop()),
+                            _ => throw new NotImplementedException($"Bytecode - {instruction.Type} not implemented in unary op"),
+                        };
+                        StoreVariable(varValue,identifier);
+
+
+
                         break;
 
 
-                    case ByteType.STORE:
+                    case ByteType.DEFINE:
                         if (_stackManager.Count() == 0)
                         {
                             throw new BifyInitializationError(
@@ -121,31 +109,51 @@ namespace BoomifyCS.Interpreter.VM
                         break;
 
                     case ByteType.JUMP_IF_FALSE:
+
                         int jumpIndexFalse = (int)instruction.Value[0];
-                        if (_stackManager.Peek().Bool().Value == false)
+                        if (_stackManager.Pop().Bool().Value == false)
                         {
-                            instructionIndex = jumpIndexFalse - 1;
+                            instructionIndex = jumpIndexFalse;
+
+                            if (instructionIndex > instructions.Count)
+                            {
+
+                                break;
+                            }
+                            continue;
                         }
-                        _stackManager.Pop();
+                        
+
                         break;
+
 
                     case ByteType.JUMP_IF_TRUE:
                         int jumpIndexTrue = (int)instruction.Value[0];
-                        if (_stackManager.Peek().Bool().Value == true)
+                        if (_stackManager.Pop().Bool().Value == true)
                         {
                             instructionIndex = jumpIndexTrue;
+
+                            if (instructionIndex > instructions.Count)
+                            {
+                                break;
+                            }
+                            continue;
+
                         }
-                        _stackManager.Pop();
                         break;
 
                     case ByteType.JUMP:
                         int jumpIndex = (int)instruction.Value[0];
                         instructionIndex = jumpIndex;
-                        break;
+                        continue;
+
 
                     case ByteType.CALL:
                         List<BifyObject> arguments = [];
-                        BifyFunction function = (BifyFunction)_varManager.GetVariable((string)instruction.Value[0]);
+                        
+                        BifyFunction function = (BifyFunction)GetVariable((string)instruction.Value[0]);
+
+                       
                         int expectedArgCount = (int)instruction.Value[1];
                         _callStack.Add(new CallStackFrame((string)instruction.Value[0], instructionIndex, _modulePath, SourceCode[_line - 1]));
 
@@ -176,6 +184,7 @@ namespace BoomifyCS.Interpreter.VM
                             arguments.Add(_stackManager.Pop());
                         }
                         arguments.Reverse();
+                   
                         BifyObject functionReturn = function.Call(arguments);
                         _stackManager.Push(functionReturn);
                         break;
@@ -183,9 +192,13 @@ namespace BoomifyCS.Interpreter.VM
                         _moduleName = (string)instruction.Value[0];
                         _modulePath = (string)instruction.Value[1];
                         break;
-
+                    case ByteType.STORE:
+                        StoreVariable(_stackManager.Pop(), (string)instruction.Value[0]);
+                        break;
                     default:
                         throw new InvalidOperationException($"Unknown instruction type: {instruction.Type}");
+
+
                 }
 
                 instructionIndex++;
@@ -220,7 +233,40 @@ namespace BoomifyCS.Interpreter.VM
             }
 
         }
+        private void StoreVariable(BifyObject varValue,string varName)
+        {
+            if (_varManager.HasVariable(varName))
+            {
+                _varManager.Store(varName, varValue);
 
+            }
+            else
+            {
+                throw new BifyUndefinedError(
+                    $"Undefined variable - {varName}",
+                    SourceCode[_line - 1],
+                    varName,
+                    _line
+                );
+            }
+
+        }
+        private BifyObject GetVariable(string name)
+        {
+            try
+            {
+                return _varManager.GetVariable(name);
+            }
+            catch (KeyNotFoundException)
+            {
+                throw new BifyUndefinedError(
+                    $"Undefined variable - {name}",
+                    SourceCode[_line - 1],
+                    name,
+                    _line
+                );
+            }
+        }
         private static BifyObject PerformBinaryOperation(BifyObject a, BifyObject b, ByteType operatorType)
         {
             return operatorType switch

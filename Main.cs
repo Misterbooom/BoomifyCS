@@ -40,6 +40,7 @@ namespace BoomifyCS
             try
             {
                 List<Token> tokens = lexer.Tokenize();
+                //tokens.WriteTokens();
                 //tokens.WriteTokensWithoutWhiteSpace();
                 string[] codeByLine = code.Split('\n');
                 //for (int i = 0;i < codeByLine.Length;i++) {
@@ -50,7 +51,7 @@ namespace BoomifyCS
                 AstNode node = astParser.ParseTokens(tokens);
                 //Console.WriteLine(AstParser.SimpleEval(node));
                 Console.WriteLine(node);
-                Console.WriteLine(string.Join("\n", codeByLine));
+                //Console.WriteLine(string.Join("\n", codeByLine))
                 MyCompiler interpreter = new(codeByLine);
                 interpreter.RunVM(node);
 
@@ -66,7 +67,7 @@ namespace BoomifyCS
             catch (Exception e)
             {
                 
-                ExceptionExtension.ParseError(e.StackTrace,e.Message);
+                ExceptionExtension.ParseError(e.GetType().Name,e.StackTrace,e.Message);
             }
         }
 

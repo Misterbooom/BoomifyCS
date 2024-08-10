@@ -167,6 +167,7 @@ namespace BoomifyCS.Ast
     {
         public AstAssignment AssignmentNode = assignmentNode;
 
+
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
@@ -178,11 +179,20 @@ namespace BoomifyCS.Ast
             return StrHelper();
         }
     }
-    public class AstLine(AstNode left = null, AstNode right = null) : AstNode(new Token(TokenType.EOL, ";"), left, right)
+    public class AstLine : AstNode
     {
+        public AstNode Child;
+
+        public AstLine(AstNode child) : base(new Token(TokenType.EOL, ";")) {
+            Child = child;
+        }
+
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
-            return base.StrHelper(level, note, isLeft);
+            string baseStr = base.StrHelper(level, note, isLeft);
+            string childStr = Child?.StrHelper(level + 1, "Child: ");
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{childStr}";
+
         }
 
     }
@@ -301,8 +311,9 @@ namespace BoomifyCS.Ast
             string baseStr = base.StrHelper(level, note);
             string conditionStr = ConditionNode.StrHelper(level + 1, "Condition: ");
             string incrementStr = IncrementNode.StrHelper(level + 1, "Increment: ");
+            string initNode = InitNode.StrHelper(level + 1, "Init: ");
             string blockStr = BlockNode.StrHelper(level + 1, "Block");
-            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{conditionStr}\n{incrementStr}\n{blockStr}";
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{initNode}\n{conditionStr}\n{incrementStr}\n{blockStr}";
         }
     }
     public class AstCall(Token token, AstNode callableName, AstNode argumentsNode = null) : AstNode(token)

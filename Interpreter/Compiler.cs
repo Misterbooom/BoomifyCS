@@ -31,38 +31,45 @@ namespace BoomifyCS.Interpreter
             }
             if (node is AstLine astLine)
             {
+                Visit(astLine.Child);
                 Visit(astLine.Left);
                 Visit(astLine.Right);
                 _lineCount++;
             }
             else if (node is AstAssignmentOperator astAssignmentOperator)
             {
-                ByteInstruction instruction;
                 Visit(astAssignmentOperator.ValueNode);
                 ByteType byteType;
-                if (node.Token.Type == TokenType.ADDE)
+                if (astAssignmentOperator.Token.Type == TokenType.ADDE)
                 {
                     byteType = ByteType.ADDE;
                 }
-                else if (node.Token.Type == TokenType.SUBE)
+                else if (astAssignmentOperator.Token.Type == TokenType.SUBE)
                 {
                     byteType = ByteType.SUBE;
                 }
-                else if (node.Token.Type == TokenType.MULE)
+                else if (astAssignmentOperator.Token.Type == TokenType.MULE)
                 {
                     byteType = ByteType.MULE;
                 }
-                else if (node.Token.Type == TokenType.DIVE)
+                else if (astAssignmentOperator.Token.Type == TokenType.DIVE)
                 {
                     byteType = ByteType.DIVE;
                 }
-                else if (node.Token.Type == TokenType.FLOORDIVE)
+                else if (astAssignmentOperator.Token.Type == TokenType.FLOORDIVE)
                 {
                     byteType = ByteType.FLOORDIVE;
                 }
-                else if (node.Token.Type == TokenType.POW)
+                else if (astAssignmentOperator.Token.Type == TokenType.POWE)
                 {
                     byteType = ByteType.POWE;
+                }
+                else if (astAssignmentOperator.Token.Type == TokenType.ASSIGN)
+                {
+
+                    ByteInstruction instruction = new(ByteType.STORE,astAssignmentOperator.IdentifierNode.Token.Value,_lineCount);
+                    instructions.Add(instruction);
+                    return null;
                 }
                 else
                 {
@@ -97,7 +104,6 @@ namespace BoomifyCS.Interpreter
                 {
                     ByteInstruction instruction = new(byteType, _lineCount);
                     instructions.Add(instruction);
-                    return instruction;
                 }
 
             }
@@ -123,7 +129,7 @@ namespace BoomifyCS.Interpreter
                 if (astAssignment.Left is AstVar astVar)
                 {
                     BifyVar bifyVar = (BifyVar)astVar.BifyValue;
-                    instructions.Add(new ByteInstruction(ByteType.STORE, bifyVar, _lineCount));
+                    instructions.Add(new ByteInstruction(ByteType.DEFINE, bifyVar, _lineCount));
                 }
 
             }
@@ -152,13 +158,35 @@ namespace BoomifyCS.Interpreter
                 ByteInstruction instruction = new(ByteType.MODULE, [astModule.ModuleName, astModule.ModulePath], _lineCount);
                 instructions.Add(instruction);
                 Visit(astModule.ChildNode);
-            } 
-            else if (node is AstFor)
+            }
+            else if (node is AstFor astFor)
             {
+                Visit(astFor.InitNode);
+                int startLoopIndex = instructions.Count; 
+                Visit(astFor.ConditionNode);
+
+                ByteInstruction jumpIfFalse = new(ByteType.JUMP_IF_FALSE, 0, _lineCount);
+                instructions.Add(jumpIfFalse);
+
+                Visit(astFor.BlockNode);
+                Visit(astFor.IncrementNode); 
+
+                ByteInstruction jump = new(ByteType.JUMP, startLoopIndex, _lineCount);
+                instructions.Add(jump);
+                jumpIfFalse.Value[0] = instructions.Count;
+
+
+
 
             }
-            
-            
+            else
+            {
+                Visit(node.Left);
+                Visit(node.Right);
+            }
+
+
+
 
 
             return null;
