@@ -15,7 +15,7 @@ namespace BoomifyCS.Ast
     public class AstTree
     {
         private int _codeTokenPosition = 0;
-        public int lineCount = 0;
+        public int lineCount = 1;
         public readonly string[] sourceCode;
         public readonly string modulePath;
         private readonly string _moduleName;
@@ -40,6 +40,11 @@ namespace BoomifyCS.Ast
 
             return GenerateFinalAstNode(nodes);
         }
+        public void PushOperand(AstNode node)
+        {
+            node.LineNumber = lineCount;
+            
+        }
 
         private void ParseSingleLine(List<Token> tokens, List<AstNode> nodes)
         {
@@ -55,7 +60,7 @@ namespace BoomifyCS.Ast
         {
             if (nodes.Count == 1)
             {
-                return new AstModule(new Token(TokenType.IDENTIFIER, _moduleName), _moduleName, modulePath, new AstLine(nodes[0]));
+                return new AstModule(new Token(TokenType.IDENTIFIER, _moduleName), _moduleName, modulePath, nodes[0]);
             }
 
             while (nodes.Count > 1)
@@ -94,10 +99,15 @@ namespace BoomifyCS.Ast
         private void ProcessSingleToken(List<Token> tokens, Stack<AstNode> operandStack, Stack<AstNode> operatorStack, ref int lineTokenPosition)
         {
             Token currentToken = tokens[lineTokenPosition];
-
-            if (currentToken.Type == TokenType.WHITESPACE || currentToken.Type == TokenType.NEXTLINE)
+            if (currentToken.Type == TokenType.WHITESPACE || currentToken.Type == TokenType.NEXTLINE || currentToken.Type == TokenType.EOL)
             {
-                SkipWhitespaceOrNewline(ref lineTokenPosition, currentToken);
+                if (currentToken.Type == TokenType.NEXTLINE || currentToken.Type == TokenType.EOL)
+                {
+                    lineCount += 1;
+                    Console.WriteLine(lineCount);
+                }
+                lineTokenPosition++;
+
                 return;
             }
 
@@ -130,14 +140,7 @@ namespace BoomifyCS.Ast
             lineTokenPosition++;
         }
 
-        private void SkipWhitespaceOrNewline(ref int lineTokenPosition, Token currentToken)
-        {
-            lineTokenPosition++;
-            if (currentToken.Type == TokenType.NEXTLINE)
-            {
-                lineCount++;
-            }
-        }
+        
 
         private void HandleMultiTokenStatements(List<Token> tokens, Stack<AstNode> operandStack, Stack<AstNode> operatorStack, ref int lineTokenPosition, Token currentToken)
         {
@@ -145,7 +148,7 @@ namespace BoomifyCS.Ast
             {
                 var result = MultiTokenHandler.ProcessMultiTokenStatement(currentToken, tokens, lineTokenPosition, this);
                 lineTokenPosition = result.Item2;
-
+                result.Item1.LineNumber = lineCount;
                 if (HandleSpecialMultiTokenCases(result.Item1, operatorStack))
                 {
                     lineTokenPosition++;
@@ -262,7 +265,7 @@ namespace BoomifyCS.Ast
         {
             if (operandStack.Count < 2)
             {
-                throw new BifySyntaxError($"Not enough operands for operator - '{op.Token.Value}'");
+                throw new BifySyntaxError($"Not enough operands for operator - '{op.Token.Value}'", sourceCode[lineCount - 1],op.Token.Value);
             }
         }
 
@@ -280,6 +283,7 @@ namespace BoomifyCS.Ast
                 AstNode left = operandStack.Pop();
                 op.Left = left;
                 op.Right = right;
+                op.LineNumber = lineCount;
                 operandStack.Push(op);
             }
 
@@ -300,6 +304,7 @@ namespace BoomifyCS.Ast
                 AstNode left = operandStack.Pop();
                 op.Left = left;
                 op.Right = right;
+                op.LineNumber = lineCount;
                 operandStack.Push(op);
             }
 

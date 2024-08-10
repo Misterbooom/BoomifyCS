@@ -31,12 +31,19 @@ namespace BoomifyCS.Interpreter
             }
             if (node is AstLine astLine)
             {
+
                 Visit(astLine.Child);
                 Visit(astLine.Left);
                 Visit(astLine.Right);
-                _lineCount++;
             }
-            else if (node is AstAssignmentOperator astAssignmentOperator)
+            if (node.LineNumber != 0)
+            {
+                _lineCount = node.LineNumber;
+                Console.WriteLine(_lineCount);
+            }
+
+
+            if (node is AstAssignmentOperator astAssignmentOperator)
             {
                 Visit(astAssignmentOperator.ValueNode);
                 ByteType byteType;

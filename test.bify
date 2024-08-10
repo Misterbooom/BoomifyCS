@@ -6,4 +6,5 @@ for (var i = 1; i <= n; i++) {
     explode(i);
 };
 
-explode("Final factorial of ", n,"is: ",factorial);
+explode("Final factorial of ","is: ",factorial);
+var a = 5 + " 2";

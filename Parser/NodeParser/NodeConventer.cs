@@ -9,40 +9,62 @@ public static class NodeConverter
 {
     public static AstNode TokenToNode(Token token, AstTree astTree = null)
     {
+        // Проверка на допустимые типы токенов
+        if (token == null )
+        {
+            throw new ArgumentNullException(nameof(token), "Token cannot be null or empty.");
+        }
+
+        AstNode returnNode = null;
+
+        // Используем switch с pattern matching для определения типа токена
         switch (token.Type)
         {
             case var type when TokensParser.IsOperator(type):
-                return new AstBinaryOp(token);
+                returnNode = new AstBinaryOp(token);
+                break;
 
             case TokenType.NUMBER:
-                return new AstInt(token, new BifyInteger(token, int.Parse(token.Value)));
+                if (!int.TryParse(token.Value, out int parsedValue))
+                {
+                    throw new FormatException($"Token value '{token.Value}' is not a valid integer.");
+                }
+                returnNode = new AstInt(token, new BifyInteger(token, parsedValue));
+                break;
 
             case TokenType.STRING:
-                return new AstString(token, new BifyString(token, token.Value));
+                returnNode = new AstString(token, new BifyString(token, token.Value));
+                break;
 
             case TokenType.TRUE:
-                return new AstBoolean(token, new BifyBoolean(token, true));
+                returnNode = new AstBoolean(token, new BifyBoolean(token, true));
+                break;
 
             case TokenType.FALSE:
-                return new AstBoolean(token, new BifyBoolean(token, false));
+                returnNode = new AstBoolean(token, new BifyBoolean(token, false));
+                break;
 
             case TokenType.NULL:
-                return new AstNull(token);
+                returnNode = new AstNull(token);
+                break;
 
             case TokenType.IDENTIFIER:
-                return new AstIdentifier(token, token.Value);
+                returnNode = new AstIdentifier(token, token.Value);
+                break;
 
             case TokenType.LPAREN:
             case TokenType.RPAREN:
-                return new AstBracket(token);
+                returnNode = new AstBracket(token);
+                break;
 
             case TokenType.BLOCK when astTree != null:
                 try
                 {
-                    var result = AstBuilder.TokenToAst(token.Tokens, astTree.modulePath);
+                    var result = AstBuilder.TokenToAst(token.Tokens, astTree.modulePath,ref astTree.lineCount);
+
                     var node = (AstModule)result;
 
-                    return new AstBlock(node.ChildNode);
+                    returnNode = new AstBlock(node.ChildNode);
                 }
                 catch (BifyError e)
                 {
@@ -50,12 +72,23 @@ public static class NodeConverter
                     e.LineTokensString = astTree.sourceCode[e.CurrentLine - 1];
                     throw e;
                 }
+                break;
 
             case TokenType.ASSIGN:
-                return new AstAssignment(token);
+                returnNode = new AstAssignment(token);
+                break;
 
             default:
-                throw new Exception("Unsupported token - " + token.Type);
+                throw new NotSupportedException($"Unsupported token type: {token.Type}");
         }
+
+        if (returnNode != null)
+        {
+            returnNode.LineNumber = astTree?.lineCount ?? 0;
+            return returnNode;
+        }
+
+        throw new Exception("Unsupported token - " + token.Type);
     }
+
 }

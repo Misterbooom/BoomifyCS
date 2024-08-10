@@ -11,6 +11,7 @@ namespace BoomifyCS.Ast
         public Token Token { get; set; } = token;
         public AstNode Left { get; set; } = left;
         public AstNode Right { get; set; } = right;
+        public int LineNumber;
 
         public override string ToString()
         {
@@ -21,7 +22,7 @@ namespace BoomifyCS.Ast
         {
             string indent = new(' ', 4 * level);
             string branch = isLeft ? "|- " : "|- ";
-            string treeStr = $"{indent}{branch}{note}{GetType().Name}({Token.Value})\n";
+            string treeStr = $"{indent}{branch}{note}{GetType().Name}({Token.Value},line - {LineNumber})\n";
 
             if (Left != null)
             {
@@ -179,13 +180,9 @@ namespace BoomifyCS.Ast
             return StrHelper();
         }
     }
-    public class AstLine : AstNode
+    public class AstLine(AstNode child) : AstNode(new Token(TokenType.EOL, ";"))
     {
-        public AstNode Child;
-
-        public AstLine(AstNode child) : base(new Token(TokenType.EOL, ";")) {
-            Child = child;
-        }
+        public AstNode Child = child;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {

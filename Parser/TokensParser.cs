@@ -28,10 +28,7 @@ namespace BoomifyCS.Parser
                 lineTokens.Add(currentToken);
                 tokenPosition++;
             }
-            if (currentToken .Type == TokenType.EOL)
-            {
-                tokenPosition++;
-            }
+            
             return new Tuple<List<Token>, int>(lineTokens, tokenPosition);
         }
 
