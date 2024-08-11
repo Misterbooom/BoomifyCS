@@ -77,6 +77,12 @@ public static class NodeConverter
             case TokenType.ASSIGN:
                 returnNode = new AstAssignment(token);
                 break;
+            case TokenType.BREAK: 
+                returnNode = new AstBreak(token);
+                break;
+            case TokenType.CONTINUE: 
+                returnNode = new AstContinue(token);
+                break;
 
             default:
                 throw new NotSupportedException($"Unsupported token type: {token.Type}");

@@ -82,7 +82,12 @@ namespace BoomifyCS.Lexer
         BITOR,
         BITXOR,
         BITNOT,
-
+        BREAK,
+        CONTINUE,
+        TRY,
+        CATCH,
+        FINALLY,
+        THROW,
     }
     public class Token(TokenType type, string value, List<Token> tokens = null)
     {

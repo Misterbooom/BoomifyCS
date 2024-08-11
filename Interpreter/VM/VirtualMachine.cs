@@ -42,6 +42,7 @@ namespace BoomifyCS.Interpreter.VM
             while (instructionIndex < _instructions.Count)
             {
                 ByteInstruction instruction = _instructions[instructionIndex];
+                //Console.WriteLine($"{instruction.IndexOfInstruction}:{instruction}");
                 line = instruction.IndexOfInstruction;
                 switch (instruction.Type)
                 {

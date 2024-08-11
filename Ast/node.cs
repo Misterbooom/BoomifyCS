@@ -383,6 +383,7 @@ namespace BoomifyCS.Ast
         }
 
     }
-
+    public class AstBreak(Token token):AstNode(token) { }
+    public class AstContinue(Token token) : AstNode(token) { }
 }
 

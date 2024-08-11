@@ -8,9 +8,9 @@ public static class AstBuilder
     {
         var ast = new AstTree(modulePath);
         ast.lineCount = lineCount;
-        var resultTokens = ast.ParseTokens(tokens);
+        var resultNode = ast.ParseTokens(tokens);
         lineCount = ast.lineCount;
-        return resultTokens;
+        return resultNode;
 
     }
 

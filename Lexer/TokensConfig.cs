@@ -11,6 +11,8 @@ namespace BoomifyCS.Lexer
             { "else", TokenType.ELSE },
             { "while", TokenType.WHILE },
             { "for", TokenType.FOR },
+            { "break", TokenType.BREAK },
+            { "continue", TokenType.CONTINUE },
             { "var", TokenType.VARDECL },
             { "//", TokenType.FLOORDIV },
             {"null", TokenType.NULL},
