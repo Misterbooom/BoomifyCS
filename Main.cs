@@ -17,13 +17,15 @@ namespace BoomifyCS
     {
         static void Main()
         {
-            RunInterpreter();
-            //runTests();
+            //RunInterpreter();
+            RunTests();
             //astParser.ParseTokens(tokens);
         }
         static void RunTests()
         {
-            ExceptionTest.CallStackTest();
+            //ExceptionTest.CallStackTest();
+            CodeTest codeTest = new();
+            codeTest.SyntaxTest();
         }
         static void RunInterpreter()
         {
@@ -40,23 +42,15 @@ namespace BoomifyCS
             try
             {
                 List<Token> tokens = lexer.Tokenize();
-                //tokens.WriteTokens();
-                //tokens.WriteTokensWithoutWhiteSpace();
                 string[] codeByLine = code.Split('\n');
-                //for (int i = 0;i < codeByLine.Length;i++) {
-                //    Console.WriteLine($"{i}:{codeByLine[i]}");  
-                //}
                 
                 AstTree astParser = new(file,codeByLine);
                 AstNode node = astParser.ParseTokens(tokens);
-                //Console.WriteLine(AstParser.SimpleEval(node));
                 Console.WriteLine(node);
-                //Console.WriteLine(string.Join("\n", codeByLine))
                 MyCompiler interpreter = new(codeByLine);
-                interpreter.RunVM(node);
+                //interpreter.RunVM(node);
 
-                BifyInteger a = new(new Token(TokenType.IDENTIFIER, "1"), 1);
-                BifyInteger b = new(new Token(TokenType.IDENTIFIER, "1"), 1);
+              
 
             }
             catch (BifyError e)
@@ -66,8 +60,8 @@ namespace BoomifyCS
             }
             catch (Exception e)
             {
-                
-                ExceptionExtension.ParseError(e.GetType().Name,e.StackTrace,e.Message);
+
+                ExceptionExtension.ParseError(e.GetType().Name, e.StackTrace, e.Message);
             }
         }
 

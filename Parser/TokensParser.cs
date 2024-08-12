@@ -19,18 +19,54 @@ namespace BoomifyCS.Parser
         /// </returns>
         public static Tuple<List<Token>, int> SplitTokensByLine(List<Token> tokens, int tokenPosition)
         {
-            List<Token> lineTokens = [];
+            List<Token> lineTokens = []; // Initialize the list properly
             Token currentToken = tokens[tokenPosition];
-            
-            while (tokenPosition < tokens.Count && currentToken.Type != TokenType.EOL && currentToken.Type != TokenType.BLOCK)
+            List<TokenType> canBeAfterBlock = [TokenType.IF, TokenType.ELSEIF, TokenType.ELSE,TokenType.BLOCK];
+
+            while (tokenPosition < tokens.Count)
             {
-                currentToken = tokens[tokenPosition];
-                lineTokens.Add(currentToken);
+                // Handle the case where the current token type is BLOCK
+                if (currentToken.Type == TokenType.BLOCK)
+                {
+                    lineTokens.Add(currentToken);
+                    // Check if there is a next token and if it's in canBeAfterBlock
+                    if (tokenPosition + 1 < tokens.Count)
+                    {
+                        if (!NextTokenIs(tokens,tokenPosition,canBeAfterBlock))
+                        {
+                            break; 
+                        }
+                    }
+                }
+
+                if (currentToken.Type == TokenType.EOL )
+                {
+                    tokenPosition++;
+                    break;
+                }
                 tokenPosition++;
+
+                lineTokens.Add(currentToken);
+                if (tokenPosition < tokens.Count)
+                {
+                    currentToken = tokens[tokenPosition];
+                }
             }
-            
+            //lineTokens.WriteTokens();
             return new Tuple<List<Token>, int>(lineTokens, tokenPosition);
         }
+
+        public static bool NextTokenIs(List<Token> tokens, int tokenPosition, List<TokenType> expectedTypes)
+        {
+            while (tokenPosition < tokens.Count && tokens[tokenPosition].Type == TokenType.NEXTLINE)
+            {
+                tokenPosition++;
+            }
+
+            return expectedTypes.Contains(tokens[tokenPosition].Type);
+        }
+
+
 
         public static bool IsOperator(string key)
         {

@@ -17,7 +17,7 @@ namespace BoomifyCS.BuiltIn.Function
         {
             foreach (BifyObject bifyObject in arguments)
             {
-                Console.Write($"{bifyObject.ToString()} ");
+                Console.Write($"{bifyObject} ");
             }
             Console.WriteLine();
             return new BifyNull();

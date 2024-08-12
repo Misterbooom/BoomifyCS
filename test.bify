@@ -1,8 +1,8 @@
-﻿var i = 1;
-while (i <= 10){
-	if (i == 5){
-		break;
-	}
-	explode(i);
-	i++;
-}
+﻿if (x > 0) {
+    ignite(""First block"");
+} else {
+    ignite(""Else block"");
+} else if (x < 0) {
+    Test;
+}    
+                   

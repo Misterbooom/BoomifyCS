@@ -40,8 +40,7 @@ namespace BoomifyCS.Parser
         private static void WriteLineOfStack((string Method, string Path, int LineNumber) parsedLine)
         {
             var (method, path, lineNumber) = parsedLine;
-            string codeLine = null;
-
+            string codeLine;
             try
             {
                 // Read the specified line from the file

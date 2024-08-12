@@ -5,10 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using BoomifyCS.Exceptions;
+using NUnit.Framework.Constraints;
 
 namespace BoomifyCS.Lexer
 {
-    public class MyLexer
+    public partial class MyLexer
     {
         private int _position;
         private readonly string _code;
@@ -21,7 +22,7 @@ namespace BoomifyCS.Lexer
 
             List<string> tempLines = [];
 
-            string[] linesArray = Regex.Split(code, "\r?\n");
+            string[] linesArray = MyRegex().Split(code);
 
             foreach (string line in linesArray)
             {
@@ -29,7 +30,7 @@ namespace BoomifyCS.Lexer
                 
             }
 
-            _lines = tempLines.ToArray();
+            _lines = [.. tempLines];
  
             if (_lines.Length > 1)
             {
@@ -90,6 +91,11 @@ namespace BoomifyCS.Lexer
                     }
                     bracketsStack.Pop();
                 }
+                else if (currentChar == '}')
+                {
+                    throw new BifySyntaxError("Unmatched '}': missing '{'.", _lines[_lineCount], "}", _lineCount);
+
+                }
 
 
                 KeyValuePair<string, TokenType> multichar = GenerateMultiChar();
@@ -144,13 +150,13 @@ namespace BoomifyCS.Lexer
             }
             if (bracketsStack.Count > 0)
             {
-                int line = bracketsStack[bracketsStack.Count - 1];
+                int line = bracketsStack[^1];
                 throw new BifySyntaxError("Unmatched '(': missing ')'.",_lines[line], "(",line);
             }
 
             return tokens;
         }
-        public bool IsIdentifier(char identifier)
+        public static bool IsIdentifier(char identifier)
         {
             return identifier == '_' || char.IsLetter(identifier);
         }
@@ -196,17 +202,13 @@ namespace BoomifyCS.Lexer
         }
         public KeyValuePair<string, TokenType> GenerateMultiChar()
         {
-            string multiChar = "";
-            string match = "";
-
             foreach (KeyValuePair<string, TokenType> kvp in TokenConfig.multiCharTokens)
             {
                 if (_position + kvp.Key.Length <= _code.Length)
                 {
-                    match = _code.Substring(_position, kvp.Key.Length);
+                    string match = _code.Substring(_position, kvp.Key.Length);
                     if (match == kvp.Key)
                     {
-                        multiChar = match;
                         _position += match.Length - 1;
                         return kvp;
                     }
@@ -332,13 +334,17 @@ namespace BoomifyCS.Lexer
                     counter--;
                     if (counter < 0)
                     {
-                        throw new InvalidOperationException("Unmatched '}' found.");
+                        throw new BifySyntaxError("Unmatched '}': missing '{'.", _lines[_lineCount], "}", _lineCount);
+
                     }
                     else if (counter == 0)
                     {
                         block[0] = ' ';
                         break;
+
                     }
+                       
+                    
                 }
                 else if (currentChar == '\n')
                 {
@@ -351,12 +357,12 @@ namespace BoomifyCS.Lexer
 
             if (counter != 0)
             {
-                throw new InvalidOperationException("Unmatched '{' found.");
+                throw new BifySyntaxError("Unmatched '{': missing '}'.", _lines[_lineCount], "{", _lineCount);
+
             }
-            string blockString = _code.Substring(start, _position - start);
+            string blockString = _code[start.._position];
             MyLexer lexer = new(block.ToString());
             List<Token> tokens = lexer.Tokenize();
-            int length = _code.Length - _position;
             _position += 1;
             return new Token(TokenType.BLOCK, blockString, tokens);
 
@@ -365,5 +371,7 @@ namespace BoomifyCS.Lexer
             
         }
 
+        [GeneratedRegex("\r?\n")]
+        private static partial Regex MyRegex();
     }
 }

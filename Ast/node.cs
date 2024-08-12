@@ -26,12 +26,12 @@ namespace BoomifyCS.Ast
 
             if (Left != null)
             {
-                treeStr += Left.StrHelper(level + 1, "left:", true);
+                treeStr += Left?.StrHelper(level + 1, "left:", true);
             }
 
             if (Right != null)
             {
-                treeStr += Right.StrHelper(level + 1, "right:", false);
+                treeStr += Right?.StrHelper(level + 1, "right:", false);
             }
 
             return treeStr;
@@ -152,8 +152,8 @@ namespace BoomifyCS.Ast
         {
             string baseStr = "";
 
-            string leftStr = Left.StrHelper(level, "Var name: ");
-            string rightStr = Right.StrHelper(level, "Var Value: ");
+            string leftStr = Left?.StrHelper(level, "Var name: ");
+            string rightStr = Right?.StrHelper(level, "Var Value: ");
 
 
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{leftStr}\n{rightStr}";
@@ -225,23 +225,23 @@ namespace BoomifyCS.Ast
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
-            string conditionStr = ConditionNode.StrHelper(level + 1, "condition: ");
+            string conditionStr = ConditionNode?.StrHelper(level + 1, "condition: ");
 
             string blockStr = "";
             if (BlockNode != null)
             {
-                blockStr = BlockNode.StrHelper(level + 1, "block: ");
+                blockStr = BlockNode?.StrHelper(level + 1, "block: ");
             }
 
             string elseStr = "";
             if (ElseNode != null)
             {
-                elseStr = ElseNode.StrHelper(level + 1, "else: ");
+                elseStr = ElseNode?.StrHelper(level + 1, "else: ");
             }
             string elseIfNodes = "";
             foreach (AstElseIf astElseIf in ElseIfNodes)
             {
-                elseIfNodes += astElseIf.StrHelper(level + 1, "else if: ");
+                elseIfNodes += astElseIf?.StrHelper(level + 1, "else if: ");
             }
 
 
@@ -264,7 +264,7 @@ namespace BoomifyCS.Ast
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
-            string blockStr = BlockNode.StrHelper(level + 1, "block: ");
+            string blockStr = BlockNode?.StrHelper(level + 1, "block: ");
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{blockStr}";
         }
     }
@@ -276,8 +276,8 @@ namespace BoomifyCS.Ast
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
-            string conditionStr = ConditionNode.StrHelper(level + 1, "Condition: ");
-            string blockStr = BlockNode.StrHelper(level + 1, "Block: ");
+            string conditionStr = ConditionNode?.StrHelper(level + 1, "Condition: ");
+            string blockStr = BlockNode?.StrHelper(level + 1, "Block: ");
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{conditionStr}\n{blockStr}";
 
         }
@@ -290,8 +290,8 @@ namespace BoomifyCS.Ast
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
-            string conditionStr = ConditionNode.StrHelper(level + 1, "Condition: ");
-            string blockStr = BlockNode.StrHelper(level + 1, "Block: ");
+            string conditionStr = ConditionNode?.StrHelper(level + 1, "Condition: ");
+            string blockStr = BlockNode?.StrHelper(level + 1, "Block: ");
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{conditionStr}\n{blockStr}";
 
         }
@@ -306,10 +306,10 @@ namespace BoomifyCS.Ast
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
-            string conditionStr = ConditionNode.StrHelper(level + 1, "Condition: ");
-            string incrementStr = IncrementNode.StrHelper(level + 1, "Increment: ");
-            string initNode = InitNode.StrHelper(level + 1, "Init: ");
-            string blockStr = BlockNode.StrHelper(level + 1, "Block");
+            string conditionStr = ConditionNode?.StrHelper(level + 1, "Condition: ");
+            string incrementStr = IncrementNode?.StrHelper(level + 1, "Increment: ");
+            string initNode = InitNode?.StrHelper(level + 1, "Init: ");
+            string blockStr = BlockNode?.StrHelper(level + 1, "Block");
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{initNode}\n{conditionStr}\n{incrementStr}\n{blockStr}";
         }
     }
@@ -321,8 +321,8 @@ namespace BoomifyCS.Ast
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
-            string callableStr = CallableName.StrHelper(level + 1, "Name: ");
-            string argumentsStr = ArgumentsNode != null ? ArgumentsNode.StrHelper(level + 2, "Arguments: "): "";
+            string callableStr = CallableName?.StrHelper(level + 1, "Name: ");
+            string argumentsStr = ArgumentsNode != null ? ArgumentsNode?.StrHelper(level + 2, "Arguments: "): "";
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{callableStr}\n{argumentsStr}";
 
         }
@@ -335,7 +335,7 @@ namespace BoomifyCS.Ast
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
-            string valueStr = value.StrHelper(level + 1, "Value: ");
+            string valueStr = value?.StrHelper(level + 1, "Value: ");
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{valueStr}";
         }
     }
@@ -348,9 +348,9 @@ namespace BoomifyCS.Ast
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note, false);
-            string functionNameStr = functionNameNode.StrHelper(level + 1, "Name: ");
-            string argumentsStr = argumentsNode.StrHelper(level + 1, "Arguments: ");
-            string blockStr = blockNode.StrHelper(level + 1, "Block: ");
+            string functionNameStr = functionNameNode?.StrHelper(level + 1, "Name: ");
+            string argumentsStr = argumentsNode?.StrHelper(level + 1, "Arguments: ");
+            string blockStr = blockNode?.StrHelper(level + 1, "Block: ");
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{functionNameStr}\n{argumentsStr}\n{blockStr}";
         }
     }
@@ -363,7 +363,7 @@ namespace BoomifyCS.Ast
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note, false);
-            string childStr = ChildNode.StrHelper(level + 1,"Child: ");
+            string childStr = ChildNode?.StrHelper(level + 1,"Child: ");
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{childStr}";
 
         }
@@ -377,8 +377,8 @@ namespace BoomifyCS.Ast
         {
             string baseStr = base.StrHelper(level, note, false);
 
-            string identifierStr = IdentifierNode.StrHelper(level + 1, "Identifier: ");
-            string valueStr = ValueNode.StrHelper(level + 1, "Value: ");
+            string identifierStr = IdentifierNode?.StrHelper(level + 1, "Identifier: ");
+            string valueStr = ValueNode?.StrHelper(level + 1, "Value: ");
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{identifierStr}\n{valueStr}";
         }
 

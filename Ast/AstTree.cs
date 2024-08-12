@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
+using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 using BoomifyCS.Parser;
-using BoomifyCS.Exceptions;
-using System.IO;
 using BoomifyCS.Parser.NodeParser;
 
 namespace BoomifyCS.Ast
@@ -33,30 +29,24 @@ namespace BoomifyCS.Ast
 
             while (_codeTokenPosition < tokens.Count)
             {
-                
+
                 ParseSingleLine(tokens, nodes);
-                
+
             }
 
             return GenerateFinalAstNode(nodes);
         }
-        public void PushOperand(AstNode node)
-        {
-            node.LineNumber = lineCount;
-            
-        }
+
 
         private void ParseSingleLine(List<Token> tokens, List<AstNode> nodes)
         {
             var (lineTokens, newTokenPosition) = TokensParser.SplitTokensByLine(tokens, _codeTokenPosition);
-            lineTokens.WriteTokens();
-
             _codeTokenPosition = newTokenPosition;
             AstNode node = BuildAstTree(lineTokens);
             nodes.Add(new AstLine(node));
         }
 
-        private AstNode GenerateFinalAstNode(List<AstNode> nodes)
+        private AstModule GenerateFinalAstNode(List<AstNode> nodes)
         {
             if (nodes.Count == 1)
             {
@@ -68,7 +58,7 @@ namespace BoomifyCS.Ast
                 AstNode right = nodes.Pop();
                 AstNode left = nodes.Pop();
 
-                AstNode combinedNode = new AstNode(new Token(TokenType.NEXTLINE,"Parent"),left, right); 
+                AstNode combinedNode = new(new Token(TokenType.NEXTLINE, "Parent"), left, right);
 
                 nodes.Add(combinedNode);
             }
@@ -104,7 +94,6 @@ namespace BoomifyCS.Ast
                 if (currentToken.Type == TokenType.NEXTLINE || currentToken.Type == TokenType.EOL)
                 {
                     lineCount += 1;
-                    Console.WriteLine(lineCount);
                 }
                 lineTokenPosition++;
 
@@ -140,53 +129,65 @@ namespace BoomifyCS.Ast
             lineTokenPosition++;
         }
 
-        
+
 
         private void HandleMultiTokenStatements(List<Token> tokens, Stack<AstNode> operandStack, Stack<AstNode> operatorStack, ref int lineTokenPosition, Token currentToken)
         {
+            (AstNode, int) result;
             try
             {
-                var result = MultiTokenHandler.ProcessMultiTokenStatement(currentToken, tokens, lineTokenPosition, this);
-                lineTokenPosition = result.Item2;
-                result.Item1.LineNumber = lineCount;
-                if (HandleSpecialMultiTokenCases(result.Item1, operatorStack))
-                {
-                    lineTokenPosition++;
-                    return;
-                }
-
-                else if (result.Item1 is AstCall || result.Item1 is AstIdentifier)
-                {
-                    operandStack.Push(result.Item1);
-                    return;
-                }
-                else if (result.Item1 is AstUnaryOperator)
-                {
-                    operandStack.Pop();
-                    operandStack.Push(result.Item1);
-                    return;
-                }
-                else if (result.Item1 is AstAssignmentOperator)
-                {
-                    operandStack.Pop();
-                    operatorStack.Push(result.Item1);
-
-                    return;
-                }
-
-                operatorStack.Push(result.Item1);
+                result = MultiTokenHandler.ProcessMultiTokenStatement(currentToken, tokens, lineTokenPosition, this);
             }
             catch (BifyError e)
             {
                 e.CurrentLine = lineCount;
                 throw e;
             }
+            lineTokenPosition = result.Item2;
+            if (result.Item1.LineNumber == 0)
+            {
+                result.Item1.LineNumber = lineCount;
+            }
+            else
+            {
+            }
+            if (HandleSpecialMultiTokenCases(result.Item1, operatorStack))
+            {
+
+                return;
+            }
+            else if (result.Item1 is AstCall || result.Item1 is AstIdentifier)
+            {
+                operandStack.Push(result.Item1);
+                return;
+            }
+            else if (result.Item1 is AstUnaryOperator)
+            {
+                operandStack.Pop();
+                operandStack.Push(result.Item1);
+                return;
+            }
+            else if (result.Item1 is AstAssignmentOperator)
+            {
+                operandStack.Pop();
+                operatorStack.Push(result.Item1);
+
+                return;
+            }
+            else if (result.Item1 is AstIf astIf)
+            {
+                result.Item1.LineNumber -= astIf.BlockNode.LineNumber - 1;
+            }
+
+            operatorStack.Push(result.Item1);
+
         }
 
         private bool HandleSpecialMultiTokenCases(AstNode node, Stack<AstNode> operatorStack)
         {
-            if (node is AstElse)
+            if (node is AstElse astElse)
             {
+                astElse.LineNumber -= astElse.BlockNode.LineNumber - 1;
                 HandleElseStatement(operatorStack, node);
                 return true;
             }
@@ -210,12 +211,12 @@ namespace BoomifyCS.Ast
                 }
                 else
                 {
-                    throw new BifySyntaxError($"Unexpected else, last token - {operatorStack.Peek().Token.Type}", sourceCode[lineCount], sourceCode[lineCount], lineCount + 1);
+                    throw new BifySyntaxError($"'else' without matching 'if'.", sourceCode[node.LineNumber], sourceCode[node.LineNumber], node.LineNumber);
                 }
             }
             catch (InvalidOperationException)
             {
-                throw new BifySyntaxError("Unexpected else", sourceCode[lineCount], sourceCode[lineCount], lineCount + 1);
+                throw new BifySyntaxError("'else' without matching 'if'.", sourceCode[node.LineNumber % (sourceCode.Length - 1) - 1], sourceCode[node.LineNumber % (sourceCode.Length - 1) - 1], node.LineNumber);
             }
         }
 
@@ -227,18 +228,18 @@ namespace BoomifyCS.Ast
                 {
                     if (astIf.ElseNode != null)
                     {
-                        throw new BifySyntaxError("Else-if used after else statement", sourceCode[lineCount - 1], sourceCode[lineCount - 1], lineCount);
+                        throw new BifySyntaxError("'else if' cannot follow 'else' directly.", sourceCode[astElseIf.LineNumber - 1], sourceCode[astElseIf.LineNumber - 1], astElseIf.LineNumber);
                     }
                     astIf.SetElseIfNode(astElseIf);
                 }
                 else
                 {
-                    throw new BifySyntaxError($"Unexpected else-if, last token - {operatorStack.Peek().Token.Type}", sourceCode[lineCount - 1],sourceCode[lineCount - 1], lineCount);
+                    throw new BifySyntaxError($"'else if' without matching 'if'.", sourceCode[astElseIf.LineNumber - 1], sourceCode[astElseIf.LineNumber - 1], astElseIf.LineNumber);
                 }
             }
             catch (InvalidOperationException)
             {
-                throw new BifySyntaxError("Unexpected else if", sourceCode[lineCount - 1], sourceCode[lineCount - 1], lineCount);
+                throw new BifySyntaxError("'else if' without matching 'if'.", sourceCode[astElseIf.LineNumber - 1], sourceCode[astElseIf.LineNumber - 1], astElseIf.LineNumber);
             }
         }
 
@@ -265,7 +266,7 @@ namespace BoomifyCS.Ast
         {
             if (operandStack.Count < 2)
             {
-                throw new BifySyntaxError($"Not enough operands for operator - '{op.Token.Value}'", sourceCode[lineCount - 1],op.Token.Value);
+                throw new BifySyntaxError($"Not enough operands for operator - '{op.Token.Value}'", sourceCode[op.LineNumber - 1], op.Token.Value);
             }
         }
 
