@@ -15,14 +15,14 @@ namespace BoomifyCS.Objects
         {
             this.Value = null;
         }
-        public override string ToString()
+        public override BifyString ObjectToString()
         {
-            return $"null";
+            return new BifyString($"{Value}");
         }
 
-        public override string Repr()
+        public override BifyString Repr()
         {
-            return $"BifyNull({Value})";
+            return new BifyString($"BifyNull({Value})");
         }
 
         public override BifyObject Eq(BifyObject other)

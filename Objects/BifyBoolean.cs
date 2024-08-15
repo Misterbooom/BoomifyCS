@@ -16,14 +16,14 @@ namespace BoomifyCS.Objects
             this.Value = value;
         }
 
-        public override string ToString()
+        public override BifyString ObjectToString()
         {
-            return $"{Value}";
+            return new BifyString($"{Value}");
         }
 
-        public override string Repr()
+        public override BifyString Repr()
         {
-            return $"BifyBoolean({Value})";
+            return new BifyString($"BifyBoolean({Value})");
         }
 
         // Logical AND operator (&&)

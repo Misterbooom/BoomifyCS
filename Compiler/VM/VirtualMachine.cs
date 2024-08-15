@@ -196,6 +196,16 @@ namespace BoomifyCS.Interpreter.VM
                     case ByteType.STORE:
                         StoreVariable(_stackManager.Pop(), (string)instruction.Value[0]);
                         break;
+                    case ByteType.NEW_ARRAY:
+                        int arrayLength = (int)instruction.Value[0];
+                        List<BifyObject> array = [];
+                        for (int i = 0; i < arrayLength; i++)
+                        {
+                            array.Add(_stackManager.Pop());
+                        }
+                        array.Reverse();
+                        _stackManager.Push(new BifyArray(array));
+                        break;
                     default:
                         throw new InvalidOperationException($"Unknown instruction type: {instruction.Type}");
 
@@ -229,7 +239,7 @@ namespace BoomifyCS.Interpreter.VM
                     e.LineTokensString = SourceCode[line - 1];
                     e.InvalidTokensString = operatorChar;
                     //Console.WriteLine(e.LineTokensString);
-                    throw e;
+                    throw;
                 }
             }
 

@@ -18,14 +18,14 @@ namespace BoomifyCS.Objects
             this.Value = value;
         }
 
-        public override string ToString()
+        public override BifyString ObjectToString()
         {
-            return $"{Value}";
+            return new BifyString($"{Value}");
         }
 
-        public override string Repr()
+        public override BifyString Repr()
         {
-            return $"BifyInteger({Value})";
+            return new BifyString($"BifyInteger({Value})");
         }
 
         public override BifyObject Add(BifyObject other)

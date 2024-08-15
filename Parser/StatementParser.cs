@@ -21,7 +21,6 @@ namespace BoomifyCS.Parser
 
             AstNode varNameNode = new AstVar(varNameToken, new BifyVar(varNameToken.Value));
             AstNode varValueNode = astParser.BuildAstTree(varValueTokens);
-            Console.WriteLine(varValueNode);
             AstAssignment assignmentNode = new(assignmentToken)
             {
                 Left = varNameNode,

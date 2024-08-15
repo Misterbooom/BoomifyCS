@@ -146,4 +146,5 @@ namespace BoomifyCS.Exceptions
     public class BifyCastError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
     }
+    public class BifyNullError(string message, string tokens = "", string invalidTokens = "",int currentLine = 0): BifyError(message,tokens, invalidTokens, currentLine) { } 
 }

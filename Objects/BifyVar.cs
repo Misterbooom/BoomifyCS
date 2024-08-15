@@ -10,9 +10,9 @@ namespace BoomifyCS.Objects
     {
         public string Name { get; set; } = name;
 
-        public override string ToString()
+        public override BifyString ObjectToString()
         {
-            return Name;
+            return new BifyString($"{Name}");
         }
 
     }

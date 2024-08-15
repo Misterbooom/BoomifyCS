@@ -142,7 +142,7 @@ namespace BoomifyCS.Ast
             {
                 e.CurrentLine = lineCount;
                 e.LineTokensString = sourceCode[e.CurrentLine - 1];
-                throw e;
+                throw;
             }
             lineTokenPosition = result.Item2;
             if (result.Item1.LineNumber == 0)
@@ -177,6 +177,11 @@ namespace BoomifyCS.Ast
             else if (result.Item1 is AstIf astIf)
             {
                 result.Item1.LineNumber -= astIf.BlockNode.LineNumber - 1;
+            }
+            else if (result.Item1 is AstArray)
+            {
+                operandStack.Push(result.Item1);
+                return;
             }
 
             operatorStack.Push(result.Item1);

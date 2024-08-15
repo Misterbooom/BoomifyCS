@@ -8,14 +8,14 @@ namespace BoomifyCS.Objects
     {
         public double Value = value;
 
-        public override string ToString()
+        public override BifyString ObjectToString()
         {
-            return $"{Value}";
+            return new BifyString($"{Value}");
         }
 
-        public override string Repr()
+        public override BifyString Repr()
         {
-            return $"BifyFloat({Value})";
+            return new BifyString($"BifyFloat({Value})");
         }
 
         public override BifyObject Add(BifyObject other)

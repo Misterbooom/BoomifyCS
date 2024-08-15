@@ -49,6 +49,7 @@ namespace BoomifyCS.Interpreter
         DIVE,
         FLOORDIVE,
         POWE,
+        NEW_ARRAY,
     }
     public class ByteInstruction
     {

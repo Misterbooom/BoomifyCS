@@ -9,50 +9,21 @@ using ColorConsole = Colorful.Console;
 
 namespace BoomifyCS.Exceptions
 {
-    public class BifyError : Exception
+    public abstract class BifyError : Exception
     {
         public int CurrentLine { get; set; }
         public List<CallStackFrame> CallStack { get; set; } = [];
-        public List<Token> LineTokens { get; set; }
         public string LineTokensString { get; set; } = "";
-        public List<Token> InvalidTokens { get; set; }
         public string InvalidTokensString { get; set; }
         public string FileName { get; set; }
 
-        public BifyError() : base() => FileName = "0";
+        protected BifyError() : base() => FileName = "0";
 
-        public BifyError(string message) : base(message) => FileName = "0";
+        protected BifyError(string message) : base(message) => FileName = "0";
 
-        public BifyError(string message, Exception innerException) : base(message, innerException) => FileName = "0";
 
-        public BifyError(string message, int currentLine, string[] callStack, List<Token> lineTokens, List<Token> invalidTokens, string fileName = "0")
-            : base(message)
-        {
-            CurrentLine = currentLine;
-            LineTokens = lineTokens;
-            InvalidTokens = invalidTokens;
-            FileName = fileName;
-            CallStack = callStack.Select(c => new CallStackFrame(c, currentLine, fileName, LineTokensString)).ToList();
-        }
 
-        public BifyError(string message, Exception innerException, int currentLine, string[] callStack, List<Token> lineTokens, List<Token> invalidTokens, string fileName = "0")
-            : base(message, innerException)
-        {
-            CurrentLine = currentLine;
-            LineTokens = lineTokens;
-            InvalidTokens = invalidTokens;
-            FileName = fileName;
-            CallStack = callStack.Select(c => new CallStackFrame(c, currentLine, fileName, LineTokensString)).ToList();
-        }
-
-        public BifyError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message)
-        {
-            InvalidTokens = invalidTokens;
-            LineTokens = tokens;
-            CurrentLine = currentLine;
-        }
-
-        public BifyError(string message, string tokens, string invalidTokens, int currentLine = 1) : base(message)
+        protected BifyError(string message, string tokens, string invalidTokens, int currentLine = 1) : base(message)
         {
             InvalidTokensString = invalidTokens;
             LineTokensString = tokens;
@@ -67,7 +38,7 @@ namespace BoomifyCS.Exceptions
             ColorConsole.WriteLine(exceptionInfo, Color.IndianRed);
             ColorConsole.WriteLine(fileInfo, Color.OrangeRed);
 
-            WriteLineTokens(LineTokens, 10);
+            WriteLineTokens(10);
 
 
             PrintCallStack();
@@ -101,7 +72,7 @@ namespace BoomifyCS.Exceptions
 
 
 
-        public void WriteLineTokens(List<Token> tokens, int indentInt)
+        public void WriteLineTokens(int indentInt)
         {
             StringBuilder builder = new();
             for (int i = 0; i < indentInt; i++)
@@ -127,21 +98,7 @@ namespace BoomifyCS.Exceptions
             Console.Write("\n");
         }
 
-        private static void WriteToken(Token token, Color color, int indentInt = 0)
-        {
-            if (token.Type == TokenType.BLOCK)
-            {
-                string[] lines = token.Value.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-            }
-            else if (token.Type == TokenType.NEXTLINE)
-            {
-                Console.Write($"{new String(' ', indentInt)}\n");
-            }
-            else
-            {
-                ColorConsole.Write(token.Value, color);
-            }
-        }
+       
     }
 
 

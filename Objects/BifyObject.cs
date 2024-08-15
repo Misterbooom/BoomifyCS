@@ -10,9 +10,13 @@ namespace BoomifyCS.Objects
         public Token Token = token;
         public int ExpectedArgCount;
 
-        public virtual string Repr()
+        public virtual BifyString Repr()
         {
             throw new BifyUnknownError($"Repr operation not supported for {GetType().Name}.");
+        }
+        public virtual BifyString ObjectToString()
+        {
+            throw new BifyOperationError($"ToString operation not supported for {GetType().Name}");
         }
         // Addition operator (+)
         public virtual BifyObject Add(BifyObject other)
