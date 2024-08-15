@@ -73,7 +73,7 @@ namespace BoomifyCS.Lexer
             { "|", TokenType.BIT_OR },
             { "^", TokenType.BIT_XOR },
             { "==", TokenType.EQ },
-            { "!=", TokenType.NEQ },  
+            { "!=", TokenType.NEQ },
             { "<", TokenType.LT },
             { ">", TokenType.GT },
             { "<=", TokenType.LTEQ },
@@ -101,7 +101,7 @@ namespace BoomifyCS.Lexer
             { "/=", TokenType.DIVE },
             { "//=", TokenType.FLOORDIVE },
             { "**=", TokenType.POWE },
-  
+
         };
         public readonly static Dictionary<string, TokenType> multiTokenStatements = new()
         {
@@ -121,7 +121,8 @@ namespace BoomifyCS.Lexer
             { "--", TokenType.DECREMENT},
             { "++",TokenType.INCREMENT},
             { "identifier", TokenType.IDENTIFIER },
-            {"=", TokenType.ASSIGN},
+            { "=", TokenType.ASSIGN},
+            { "[",TokenType.LBRACKET },
         };
     }
 }

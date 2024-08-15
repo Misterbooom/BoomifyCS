@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using BoomifyCS.Lexer;
 using BoomifyCS.Objects;
-using BoomifyCS.Parser;
 
 namespace BoomifyCS.Ast
 {
@@ -22,7 +21,7 @@ namespace BoomifyCS.Ast
         {
             string indent = new(' ', 4 * level);
             string branch = isLeft ? "|- " : "|- ";
-            string treeStr = $"{indent}{branch}{note}{GetType().Name}({Token.Value},line - {LineNumber})\n";
+            string treeStr = $"{indent}{branch}{note}{GetType().Name}('{Token.Value}',line - {LineNumber})\n";
 
             if (Left != null)
             {
@@ -322,7 +321,7 @@ namespace BoomifyCS.Ast
         {
             string baseStr = base.StrHelper(level, note);
             string callableStr = CallableName?.StrHelper(level + 1, "Name: ");
-            string argumentsStr = ArgumentsNode != null ? ArgumentsNode?.StrHelper(level + 2, "Arguments: "): "";
+            string argumentsStr = ArgumentsNode != null ? ArgumentsNode?.StrHelper(level + 2, "Arguments: ") : "";
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{callableStr}\n{argumentsStr}";
 
         }
@@ -363,12 +362,12 @@ namespace BoomifyCS.Ast
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note, false);
-            string childStr = ChildNode?.StrHelper(level + 1,"Child: ");
+            string childStr = ChildNode?.StrHelper(level + 1, "Child: ");
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{childStr}";
 
         }
     }
-    public class AstAssignmentOperator(Token token, AstIdentifier identifierNode, AstNode valueNode) : AstNode(token) 
+    public class AstAssignmentOperator(Token token, AstIdentifier identifierNode, AstNode valueNode) : AstNode(token)
     {
         public AstIdentifier IdentifierNode = identifierNode;
         public AstNode ValueNode = valueNode;
@@ -383,7 +382,17 @@ namespace BoomifyCS.Ast
         }
 
     }
-    public class AstBreak(Token token):AstNode(token) { }
+    public class AstBreak(Token token) : AstNode(token) { }
     public class AstContinue(Token token) : AstNode(token) { }
+    public class AstArray(Token token, AstNode argumentsNode) : AstNode(token)
+    {
+        public AstNode ArgumentsNode = argumentsNode;
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
+        {
+            string baseStr = base.StrHelper(level, note, false);
+            string argumentsStr = ArgumentsNode?.StrHelper(level + 1, "Arguments: ");
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{argumentsStr}";
+        }
+    }
 }
 

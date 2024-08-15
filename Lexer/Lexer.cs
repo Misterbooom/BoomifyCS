@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using BoomifyCS.Exceptions;
 using NUnit.Framework.Constraints;
+using BoomifyCS.Parser;
 
 namespace BoomifyCS.Lexer
 {

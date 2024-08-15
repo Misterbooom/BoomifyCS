@@ -99,7 +99,7 @@ namespace BoomifyCS.Lexer
         {
             //if (Tokens != null)
             //{
-            //    return $"Token(type = '{Type}',value = '{Value} tokens - {Tokens.TokensToString()}')";
+            //    return $"Token(type = '{Type}',value = '{Value} tokens - {Tokens.ToString()}')";
 
             //}
             return $"Token(type = '{Type}',value = '{Value}')";

@@ -22,7 +22,7 @@ namespace BoomifyCS.Interpreter
         public void RunVM(AstNode root)
         {
             Visit(root);
-            instructions.WriteBytes();
+            instructions.WriteInstructions();
             VM.Run(instructions);
 
         }
