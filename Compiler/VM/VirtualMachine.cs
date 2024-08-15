@@ -4,6 +4,7 @@ using System.Linq;
 using BoomifyCS.BuiltIn.Function;
 using BoomifyCS.Objects;
 using BoomifyCS.Exceptions;
+using BoomifyCS.Parser;
 namespace BoomifyCS.Interpreter.VM
 {
     public class VirtualMachine(string[] sourceCode)
@@ -188,6 +189,7 @@ namespace BoomifyCS.Interpreter.VM
                    
                         BifyObject functionReturn = function.Call(arguments);
                         _stackManager.Push(functionReturn);
+                        _callStack.Pop();
                         break;
                     case ByteType.MODULE:
                         _moduleName = (string)instruction.Value[0];
@@ -269,17 +271,9 @@ namespace BoomifyCS.Interpreter.VM
         }
         private void GetIndexAndPush(BifyInteger index,BifyObject bifyObject)
         {
-            try
-            {
-                _stackManager.Push(bifyObject.Index(index));
+            _stackManager.Push(bifyObject.Index(index));
 
-            }
-            catch (BifyError e)
-            {
-                e.CurrentLine = line;
-                e.LineTokensString = SourceCode[line - 1];
-                throw;
-            }
+            
         }
         private BifyObject GetVariable(string name)
         {

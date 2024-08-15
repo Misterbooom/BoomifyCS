@@ -10,32 +10,13 @@ namespace BoomifyCS.Lexer
         private int _position;
         private readonly string _code;
         private readonly string _currentLine;
-        private int _lineCount = 0;
+        private int _lineCount = 1;
         private readonly string[] _lines;
         public MyLexer(string code)
         {
             this._code = code;
 
-            List<string> tempLines = [];
-
-            string[] linesArray = MyRegex().Split(code);
-
-            foreach (string line in linesArray)
-            {
-                tempLines.Add(line);
-
-            }
-
-            _lines = [.. tempLines];
-
-            if (_lines.Length > 1)
-            {
-                _currentLine = _lines[1];
-            }
-            else
-            {
-                _currentLine = _lines[0];
-            }
+            _lines = _code.Split("\n");
             _position = 0;
         }
 
@@ -103,12 +84,8 @@ namespace BoomifyCS.Lexer
                     squareBracketsStack.Pop();
                 }
 
-                // Handle curly braces
-                if (currentChar == '{')
-                {
-                    curlyBracesStack.Push(_lineCount);
-                }
-                else if (currentChar == '}')
+
+                if (currentChar == '}')
                 {
                     if (curlyBracesStack.Count == 0)
                     {
@@ -127,6 +104,8 @@ namespace BoomifyCS.Lexer
                 else if (currentChar == '{')
                 {
                     tokens.Add(GenerateObject());
+
+
                 }
                 else if (currentChar == '-' && char.IsDigit(_code[_position + 1]))
                 {
@@ -159,19 +138,19 @@ namespace BoomifyCS.Lexer
             if (parenthesesStack.Count > 0)
             {
                 int line = parenthesesStack.Pop();
-                throw new BifySyntaxError(ErrorMessage.UnmatchedOpeningParenthesis(), _lines[line], "(", line);
+                throw new BifySyntaxError(ErrorMessage.UnmatchedOpeningParenthesis(), _lines[line - 1], "(", line);
             }
 
             if (squareBracketsStack.Count > 0)
             {
                 int line = squareBracketsStack.Pop();
-                throw new BifySyntaxError(ErrorMessage.UnmatchedOpeningBracket(), _lines[line], "[", line);
+                throw new BifySyntaxError(ErrorMessage.UnmatchedOpeningBracket(), _lines[line - 1], "[", line);
             }
 
             if (curlyBracesStack.Count > 0)
             {
                 int line = curlyBracesStack.Pop();
-                throw new BifySyntaxError(ErrorMessage.UnmatchedOpeningBrace(), _lines[line], "{", line);
+                throw new BifySyntaxError(ErrorMessage.UnmatchedOpeningBrace(), _lines[line - 1], "{", line);
             }
 
             return tokens;
@@ -275,7 +254,7 @@ namespace BoomifyCS.Lexer
                     ErrorMessage.MissingCloseQuotationMark(),
                     _currentLine,
                     _currentLine,
-                    _lineCount
+                    _lineCount - 1
                 );
 
             }
@@ -343,7 +322,7 @@ namespace BoomifyCS.Lexer
 
             if (counter != 0)
             {
-                throw new BifySyntaxError(ErrorMessage.UnmatchedOpeningBrace(), _lines[_lineCount], "{", _lineCount);
+                throw new BifySyntaxError(ErrorMessage.UnmatchedOpeningBrace(), _lines[_lineCount], "{", _lineCount - 1);
 
             }
             string blockString = _code[start.._position];

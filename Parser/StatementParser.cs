@@ -273,7 +273,7 @@ namespace BoomifyCS.Parser
         private static (AstNode, int) HandleIdentifierWithoutArguments(Token token, List<Token> tokens, ref int currentPos)
         {
 
-            if (tokens.Count < currentPos + 1)
+            if (tokens.Count < currentPos + 2)
             {
                 return (NodeConverter.TokenToNode(token), currentPos);
             }
@@ -281,7 +281,7 @@ namespace BoomifyCS.Parser
             var nextToken = tokens[currentPos + 1];
             if (nextToken.Type == TokenType.INCREMENT || nextToken.Type == TokenType.DECREMENT)
             {
-                AstUnaryOperator unaryOperator = new(token, NodeConverter.TokenToNode(token), 1);
+                AstUnaryOperator unaryOperator = new(nextToken, NodeConverter.TokenToNode(token), 1);
                 return (unaryOperator, currentPos + 1);
             }
 

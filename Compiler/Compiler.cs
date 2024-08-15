@@ -14,7 +14,7 @@ namespace BoomifyCS.Interpreter
         private readonly VirtualMachine _vm = new(sourcecode);
         private readonly Stack<ByteInstruction> _breakJumps = new();
         private readonly Stack<ByteInstruction> _continueJumps = new();
-        private readonly int _lineCount = 1;
+        private int _lineCount = 1;
         public void RunVM(AstNode root)
         {
             Visit(root);
@@ -25,7 +25,10 @@ namespace BoomifyCS.Interpreter
         private void Visit(AstNode node)
         {
             if (node == null) return;
-
+            if (node.LineNumber != 0)
+            {
+                _lineCount = node.LineNumber;
+            }
             switch (node)
             {
                 case AstLine astLine:

@@ -1,2 +1,4 @@
 ﻿var a = [5,3,"Hello World!"];
-var b = a[-1];
+for (var i = 0; i < 3;i++){
+	explode(a[i]);
+}
