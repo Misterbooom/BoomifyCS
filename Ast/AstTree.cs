@@ -141,6 +141,7 @@ namespace BoomifyCS.Ast
             catch (BifyError e)
             {
                 e.CurrentLine = lineCount;
+                e.LineTokensString = sourceCode[e.CurrentLine - 1];
                 throw e;
             }
             lineTokenPosition = result.Item2;
@@ -163,7 +164,6 @@ namespace BoomifyCS.Ast
             }
             else if (result.Item1 is AstUnaryOperator)
             {
-                operandStack.Pop();
                 operandStack.Push(result.Item1);
                 return;
             }
@@ -211,12 +211,12 @@ namespace BoomifyCS.Ast
                 }
                 else
                 {
-                    throw new BifySyntaxError($"'else' without matching 'if'.", sourceCode[node.LineNumber], sourceCode[node.LineNumber], node.LineNumber);
+                    throw new BifySyntaxError(ErrorMessage.ElseWithoutMatchingIf(), sourceCode[node.LineNumber], sourceCode[node.LineNumber], node.LineNumber);
                 }
             }
             catch (InvalidOperationException)
             {
-                throw new BifySyntaxError("'else' without matching 'if'.", sourceCode[node.LineNumber % (sourceCode.Length - 1) - 1], sourceCode[node.LineNumber % (sourceCode.Length - 1) - 1], node.LineNumber);
+                throw new BifySyntaxError(ErrorMessage.ElseWithoutMatchingIf(), sourceCode[node.LineNumber % (sourceCode.Length - 1) - 1], sourceCode[node.LineNumber % (sourceCode.Length - 1) - 1], node.LineNumber);
             }
         }
 
@@ -228,18 +228,18 @@ namespace BoomifyCS.Ast
                 {
                     if (astIf.ElseNode != null)
                     {
-                        throw new BifySyntaxError("'else if' cannot follow 'else' directly.", sourceCode[astElseIf.LineNumber - 1], sourceCode[astElseIf.LineNumber - 1], astElseIf.LineNumber);
+                        throw new BifySyntaxError(ErrorMessage.ElseIfCannotFollowElseDirectly(), sourceCode[astElseIf.LineNumber - 1], sourceCode[astElseIf.LineNumber - 1], astElseIf.LineNumber);
                     }
                     astIf.SetElseIfNode(astElseIf);
                 }
                 else
                 {
-                    throw new BifySyntaxError($"'else if' without matching 'if'.", sourceCode[astElseIf.LineNumber - 1], sourceCode[astElseIf.LineNumber - 1], astElseIf.LineNumber);
+                    throw new BifySyntaxError(ErrorMessage.ElseIfWithoutMatchingIf(), sourceCode[astElseIf.LineNumber - 1], sourceCode[astElseIf.LineNumber - 1], astElseIf.LineNumber);
                 }
             }
             catch (InvalidOperationException)
             {
-                throw new BifySyntaxError("'else if' without matching 'if'.", sourceCode[astElseIf.LineNumber - 1], sourceCode[astElseIf.LineNumber - 1], astElseIf.LineNumber);
+                throw new BifySyntaxError(ErrorMessage.ElseIfWithoutMatchingIf(), sourceCode[astElseIf.LineNumber - 1], sourceCode[astElseIf.LineNumber - 1], astElseIf.LineNumber);
             }
         }
 
@@ -266,7 +266,7 @@ namespace BoomifyCS.Ast
         {
             if (operandStack.Count < 2)
             {
-                throw new BifySyntaxError($"Not enough operands for operator - '{op.Token.Value}'", sourceCode[op.LineNumber - 1], op.Token.Value);
+                throw new BifySyntaxError(ErrorMessage.NotEnoughOperands(op.Token.Value), sourceCode[op.LineNumber - 1], op.Token.Value);
             }
         }
 

@@ -1,8 +1,1 @@
-﻿if (x > 0) {
-    ignite(""First block"");
-} else {
-    ignite(""Else block"");
-} else if (x < 0) {
-    Test;
-}    
-                   
+﻿

@@ -86,14 +86,14 @@ namespace BoomifyCS.Lexer
                 {
                     if (bracketsStack.Count == 0) 
                     { 
-                        throw new BifySyntaxError("Unmatched ')': missing '('.",_lines[_lineCount], ")", _lineCount);
+                        throw new BifySyntaxError(ErrorMessage.UnmatchedClosingParenthesis(),_lines[_lineCount], ")", _lineCount);
 
                     }
                     bracketsStack.Pop();
                 }
                 else if (currentChar == '}')
                 {
-                    throw new BifySyntaxError("Unmatched '}': missing '{'.", _lines[_lineCount], "}", _lineCount);
+                    throw new BifySyntaxError(ErrorMessage.UnmatchedClosingBrace(), _lines[_lineCount], "}", _lineCount);
 
                 }
 
@@ -104,13 +104,6 @@ namespace BoomifyCS.Lexer
                 {
                     string str = GenerateString();
                     Token token = new(TokenType.STRING, str);
-                    tokens.Add(token);
-                }
-                else if (currentChar == '[')
-                {
-                    _position++;
-                    string array = GenerateArray();
-                    Token token = new(TokenType.ARRAY, array);
                     tokens.Add(token);
                 }
                 else if (currentChar == '{')
@@ -151,7 +144,7 @@ namespace BoomifyCS.Lexer
             if (bracketsStack.Count > 0)
             {
                 int line = bracketsStack[^1];
-                throw new BifySyntaxError("Unmatched '(': missing ')'.",_lines[line], "(",line);
+                throw new BifySyntaxError(ErrorMessage.UnmatchedOpeningParenthesis(),_lines[line], "(",line);
             }
 
             return tokens;
@@ -251,7 +244,7 @@ namespace BoomifyCS.Lexer
             if (counter > 0)
             {
                 throw new BifySyntaxError(
-                    "Syntax Error: You forgot to close a quotation mark.",
+                    ErrorMessage.MissingCloseQuotationMark(),
                     _currentLine, 
                     _currentLine, 
                     _lineCount
@@ -261,42 +254,7 @@ namespace BoomifyCS.Lexer
             return str;
 
         }
-        public string GenerateArray()
-        {
-            string array = "";
-            int counter = 0;
-            while (_position < _code.Length)
-            {
-                char currentChar = _code[_position];
-                if (currentChar == '[')
-                {
-                    counter++;
-                }
-                else if (currentChar == '['){
-                    counter--;
-                    if (counter == 0)
-                    {
-                        break;
-                    }
-                }
-                else
-                {
-                    array += currentChar;
-                }
-                _position++;
-            }
-            if (counter > 0)
-            {
-                throw new BifySyntaxError(
-                    "Syntax Error: You forgot to close '[' with ']'.",
-                    _currentLine, // This should be a string representing tokens
-                    _currentLine, // This should be a string representing invalid tokens
-                    _lineCount // Line number
-                );
-
-            }
-            return array;
-        }
+        
         public string GenerateIdentifier()
         {
             string identifier = "";
@@ -334,7 +292,7 @@ namespace BoomifyCS.Lexer
                     counter--;
                     if (counter < 0)
                     {
-                        throw new BifySyntaxError("Unmatched '}': missing '{'.", _lines[_lineCount], "}", _lineCount);
+                        throw new BifySyntaxError(ErrorMessage.UnmatchedClosingBrace(), _lines[_lineCount], "}", _lineCount);
 
                     }
                     else if (counter == 0)
@@ -357,7 +315,7 @@ namespace BoomifyCS.Lexer
 
             if (counter != 0)
             {
-                throw new BifySyntaxError("Unmatched '{': missing '}'.", _lines[_lineCount], "{", _lineCount);
+                throw new BifySyntaxError(ErrorMessage.UnmatchedOpeningBrace(), _lines[_lineCount], "{", _lineCount);
 
             }
             string blockString = _code[start.._position];

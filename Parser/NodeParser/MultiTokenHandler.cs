@@ -21,7 +21,6 @@ namespace BoomifyCS.Parser.NodeParser
                 TokenType.ELSE => StatementParser.ParseElse(token, tokens, currentPos, astParser),
                 TokenType.WHILE => StatementParser.ParseWhile(token, tokens, currentPos, astParser),
                 TokenType.FOR => StatementParser.ParseFor(token, tokens, currentPos, astParser),
-                TokenType.INCREMENT or TokenType.DECREMENT => StatementParser.ParseUnaryOp(token, tokens, currentPos, astParser),
                 TokenType.FUNCTIONDECL => StatementParser.ParseFunctionDecl(token, tokens, currentPos, astParser),
                 TokenType.IDENTIFIER => StatementParser.ParseIdentifier(token, tokens, currentPos, astParser),
                 TokenType.ASSIGN => StatementParser.ParseAssignmentOperator(token, tokens, currentPos, astParser),

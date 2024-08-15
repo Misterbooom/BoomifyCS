@@ -17,8 +17,8 @@ namespace BoomifyCS
     {
         static void Main()
         {
-            //RunInterpreter();
-            RunTests();
+            RunInterpreter();
+            //RunTests();
             //astParser.ParseTokens(tokens);
         }
         static void RunTests()
@@ -48,9 +48,9 @@ namespace BoomifyCS
                 AstNode node = astParser.ParseTokens(tokens);
                 Console.WriteLine(node);
                 MyCompiler interpreter = new(codeByLine);
-                //interpreter.RunVM(node);
+                interpreter.RunVM(node);
 
-              
+
 
             }
             catch (BifyError e)

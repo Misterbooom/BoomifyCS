@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
@@ -114,31 +115,62 @@ namespace BoomifyCS.Parser
             var (tokensInBrackets, bracketEnd) = FindTokensInBracketsSafe(tokens, currentPos);
             currentPos = bracketEnd + 1;
             List<List<Token>> bracketTokensSplited = TokensParser.SplitTokensByTT(tokensInBrackets, TokenType.SEMICOLON);
-            bracketTokensSplited[0].Add(new Token(TokenType.EOL, ";"));
+
+            foreach (var item in bracketTokensSplited)
+            {
+                item.WriteTokens();
+            }
+            if (bracketTokensSplited.Count == 2)
+            {
+                throw new BifyInitializationError(ErrorMessage.ForLoopMustHaveIncrement());
+            }
+            else if (bracketTokensSplited.Count != 3)
+            {
+                throw new BifyInitializationError(ErrorMessage.InvalidInitializationStatement());
+            }
+            else if (bracketTokensSplited[0].Count == 0 || bracketTokensSplited[0][0].Type == TokenType.EOL)
+            {
+                throw new BifyInitializationError(ErrorMessage.ForLoopMustHaveInitialization());
+            }
+            else if (bracketTokensSplited[1].Count == 0 || bracketTokensSplited[1][0].Type == TokenType.EOL)
+            {
+                throw new BifyInitializationError(ErrorMessage.ForLoopMustHaveCondition());
+            }
+            else if (bracketTokensSplited[2].Count == 0 || bracketTokensSplited[2][0].Type == TokenType.EOL)
+            {
+                throw new BifyInitializationError(ErrorMessage.ForLoopMustHaveIncrement());
+            }
+
+
             AstNode initNode = astParser.BuildAstTree(bracketTokensSplited[0]);
             AstNode conditionNode = astParser.BuildAstTree(bracketTokensSplited[1]);
             AstNode incrementNode = astParser.BuildAstTree(bracketTokensSplited[2]);
+            Console.WriteLine(initNode);
+            // Validate the increment statement
+            if (incrementNode is not AstAssignmentOperator && incrementNode is not AstUnaryOperator && incrementNode is not AstCall)
+            {
+                Console.WriteLine(incrementNode);
+                throw new BifyInitializationError(ErrorMessage.InvalidIncrementExpression());
+            }
+            else if (initNode is not AstVarDecl)
+            {
+                throw new BifyInitializationError(ErrorMessage.InvalidVariableDeclaration());
+            }
+            else if (conditionNode is not AstBinaryOp)
+            {
+                throw new BifyInitializationError(ErrorMessage.InvalidConditionExpression());
+            }
+
+
             var (blockToken, blockTokenEnd) = FindTokenSafe(TokenType.BLOCK, tokens, currentPos);
             currentPos += blockTokenEnd;
             AstNode blockNode = astParser.BuildAstTree([blockToken]);
+
             return (new AstFor(token, (AstBlock)blockNode, conditionNode, incrementNode, initNode), currentPos);
         }
 
-        public static (AstNode, int) ParseUnaryOp(Token token, List<Token> tokens, int currentPos, AstTree astParser)
-        {
-            var (identifierToken, tokenEnd) = FindTokenSafe(TokenType.IDENTIFIER, tokens, currentPos - 1);
-            currentPos += tokenEnd + 1;
-            if (token.Type == TokenType.INCREMENT)
-            {
-                AstUnaryOperator unaryOperator = new(token, astParser.BuildAstTree([identifierToken]), 1);
-                return (unaryOperator, currentPos);
-            }
-            else
-            {
-                AstUnaryOperator unaryOperator = new(token, astParser.BuildAstTree([identifierToken]), -1);
-                return (unaryOperator, currentPos);
-            }
-        }
+
+        
 
         public static (AstNode, int) ParseFunctionDecl(Token token, List<Token> tokens, int currentPos, AstTree astParser)
         {
@@ -161,8 +193,19 @@ namespace BoomifyCS.Parser
             var (argumentsTokens, argumentsEnd) = FindTokensInBracketsSafe(tokens, currentPos,false);
             if (argumentsTokens == null || argumentsTokens.Count == 0)
             {
-                return (NodeConverter.TokenToNode(token), currentPos + 1);
+                if (tokens.Count < currentPos + 2)
+                {
+                    return (NodeConverter.TokenToNode(token), currentPos + 1);
+
+                }
+                else if (tokens[currentPos + 1].Type == TokenType.INCREMENT || tokens[currentPos + 1].Type == TokenType.INCREMENT)
+                {
+                    AstUnaryOperator unaryOperator = new(token, NodeConverter.TokenToNode(token), 1);
+                    return (unaryOperator, currentPos + 1);
+                }
+
             }
+            
             currentPos = argumentsEnd + 1;
             AstNode identifierNode = NodeConverter.TokenToNode(token);
             AstNode argumentsNode = astParser.BuildAstTree(argumentsTokens);
@@ -174,18 +217,18 @@ namespace BoomifyCS.Parser
         {
             if (currentPos - 1 < 0)
             {
-                throw new BifySyntaxError($"Expected identifier token", tokens, tokens, currentPos - 1);
+                throw new BifySyntaxError($"Expected identifier token");
             }
             Token identifierToken = tokens[currentPos - 1];
             if (identifierToken.Type != TokenType.IDENTIFIER)
             {
-                throw new BifySyntaxError($"Expected identifier token but found {identifierToken.Type}", tokens, tokens, currentPos - 1);
+                throw new BifySyntaxError($"Expected identifier token but found {identifierToken.Type}");
             }
             AstNode identifierNode = NodeConverter.TokenToNode(identifierToken);
             var (valueTokens, endOfValue) = TokensParser.AllTokensToEol(tokens, currentPos + 1);
             if (valueTokens.Count == 0)
             {
-                throw new BifySyntaxError("Expected value after assignment operator", tokens, tokens, currentPos);
+                throw new BifySyntaxError("Expected value after assignment operator");
             }
             currentPos = endOfValue + 1;
             AstNode valueNode = astParser.BuildAstTree(valueTokens);
@@ -208,7 +251,7 @@ namespace BoomifyCS.Parser
             if (conditionTokens == null || conditionTokens.Count == 0)
             {
                 if (throwError)
-                    throw new BifyParsingError("Tokens in brackets not found", tokens, tokens, 0);
+                    throw new BifyParsingError("Tokens in brackets not found");
                 else
                 {
                     return (new List<Token>(), currentPos);

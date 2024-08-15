@@ -58,8 +58,8 @@ namespace BoomifyCS.Parser.NodeParser
 
 
             //Console.WriteLine(string.Join("\n", codeByLine))
-            MyCompiler interpreter = new(codeByLine);
-            interpreter.RunVM(node);
+            //MyCompiler interpreter = new(codeByLine);
+            //interpreter.RunVM(node);
 
 
 

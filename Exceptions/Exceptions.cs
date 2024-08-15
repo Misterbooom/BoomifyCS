@@ -5,222 +5,145 @@ namespace BoomifyCS.Exceptions
 {
 
 
-    public class BifySyntaxError : BifyError
+    public class BifySyntaxError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifySyntaxError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifySyntaxError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyNameError : BifyError
+    public class BifyNameError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyNameError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyNameError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyTypeError : BifyError
+    public class BifyTypeError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyTypeError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyTypeError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyValueError : BifyError
+    public class BifyValueError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyValueError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyValueError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyZeroDivisionError : BifyError
+    public class BifyZeroDivisionError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyZeroDivisionError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyZeroDivisionError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyIndexError : BifyError
+    public class BifyIndexError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyIndexError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyIndexError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyAttributeError : BifyError
+    public class BifyAttributeError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyAttributeError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyAttributeError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyKeyError : BifyError
+    public class BifyKeyError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyKeyError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyKeyError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyAssertionError : BifyError
+    public class BifyAssertionError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyAssertionError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyAssertionError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyImportError : BifyError
+    public class BifyImportError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyImportError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyImportError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyIOError : BifyError
+    public class BifyIOError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyIOError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyIOError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyRuntimeError : BifyError
+    public class BifyRuntimeError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyRuntimeError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyRuntimeError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyOverflowError : BifyError
+    public class BifyOverflowError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyOverflowError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyOverflowError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyIndentationError : BifyError
+    public class BifyIndentationError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyIndentationError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyIndentationError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyMemoryError : BifyError
+    public class BifyMemoryError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyMemoryError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyMemoryError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyRecursionError : BifyError
+    public class BifyRecursionError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyRecursionError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyRecursionError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyTimeoutError : BifyError
+    public class BifyTimeoutError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyTimeoutError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyTimeoutError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyUnboundLocalError : BifyError
+    public class BifyUnboundLocalError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyUnboundLocalError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyUnboundLocalError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyUnknownError : BifyError
+    public class BifyUnknownError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyUnknownError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyUnknownError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    // Additional Exceptions
-    public class BifyStopIterationError : BifyError
+    public class BifyStopIterationError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyStopIterationError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyStopIterationError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyArithmeticError : BifyError
+    public class BifyArithmeticError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyArithmeticError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyArithmeticError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyFileNotFoundError : BifyError
+    public class BifyFileNotFoundError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyFileNotFoundError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyFileNotFoundError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyPermissionError : BifyError
+    public class BifyPermissionError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyPermissionError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyPermissionError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyConnectionError : BifyError
+    public class BifyConnectionError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyConnectionError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public
-
-     BifyConnectionError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyTimeoutExpiredError : BifyError
+    public class BifyTimeoutExpiredError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyTimeoutExpiredError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyTimeoutExpiredError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyBrokenPipeError : BifyError
+    public class BifyBrokenPipeError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyBrokenPipeError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyBrokenPipeError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyModuleNotFoundError : BifyError
+    public class BifyModuleNotFoundError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyModuleNotFoundError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyModuleNotFoundError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyEOFError : BifyError
+    public class BifyEOFError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyEOFError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyEOFError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifySyntaxWarning : BifyError
+    public class BifySyntaxWarning(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifySyntaxWarning(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifySyntaxWarning(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyDeprecationWarning : BifyError
+    public class BifyDeprecationWarning(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyDeprecationWarning(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyDeprecationWarning(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 
-    public class BifyResourceWarning : BifyError
+    public class BifyResourceWarning(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyResourceWarning(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyResourceWarning(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
-    public class BifyOperationError : BifyError
+    public class BifyOperationError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyOperationError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyOperationError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
-    public class BifyParsingError : BifyError
+    public class BifyParsingError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyParsingError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyParsingError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
-    public class BifyInitializationError : BifyError
+    public class BifyInitializationError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyInitializationError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyInitializationError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
-    public class BifyUndefinedError : BifyError
+    public class BifyUndefinedError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyUndefinedError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyUndefinedError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
-    public class BifyArgumentError : BifyError
+    public class BifyArgumentError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyArgumentError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyArgumentError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
-    public class BifyCastError : BifyError
+    public class BifyCastError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
-        public BifyCastError(string message, List<Token> tokens, List<Token> invalidTokens, int currentLine) : base(message, tokens, invalidTokens, currentLine) { }
-        public BifyCastError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : base(message, tokens, invalidTokens, currentLine) { }
     }
 }
