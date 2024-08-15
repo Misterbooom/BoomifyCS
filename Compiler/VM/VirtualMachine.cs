@@ -231,10 +231,17 @@ namespace BoomifyCS.Interpreter.VM
         {
             if (ByteCodeConfig.BinaryOperators.ContainsValue(instruction.Type))
             {
-                BifyObject right = _stackManager.Pop();
-                BifyObject left = _stackManager.Pop();
+                if (instruction.Type == ByteType.NOT)
+                {
+                    BifyObject bifyObject = _stackManager.Pop();
+                    _stackManager.Push(new BifyBoolean(!bifyObject.Bool().Value));
+                    return;
+                }
+                
                 try
                 {
+                    BifyObject right = _stackManager.Pop();
+                    BifyObject left = _stackManager.Pop();
                     BifyObject result = PerformBinaryOperation(left, right, instruction.Type);
                     _stackManager.Push(result);
 

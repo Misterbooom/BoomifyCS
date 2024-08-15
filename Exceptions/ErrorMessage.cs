@@ -112,5 +112,9 @@ namespace BoomifyCS.Exceptions
         {
             return $"Invalid array index '{index}'. Array length is {length}.";
         }
+        public static string UnexpectedToken(string token)
+        {
+            return $"Unexpected token '{token}'";
+        }
     }
 }

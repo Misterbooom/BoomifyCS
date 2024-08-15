@@ -31,9 +31,13 @@ namespace BoomifyCS.Lexer
             while (_position < _code.Length)
             {
                 char currentChar = _code[_position];
-
-                // Handle newline
-                if (currentChar == '\n')
+                KeyValuePair<string, TokenType> multichar = GenerateMultiChar();
+                if (currentChar == ' ')
+                {
+                    _position++;
+                    continue;
+                }
+                else if (currentChar == '\n')
                 {
                     tokens.Add(new Token(TokenType.NEXTLINE, "\n"));
                     _lineCount++;
@@ -41,8 +45,7 @@ namespace BoomifyCS.Lexer
                     continue;
                 }
 
-                // Handle semicolons
-                if (currentChar == ';')
+                else if (currentChar == ';')
                 {
                     if (parenthesesStack.Count == 0 && squareBracketsStack.Count == 0 && curlyBracesStack.Count == 0)
                     {
@@ -57,7 +60,7 @@ namespace BoomifyCS.Lexer
                 }
 
                 // Handle parentheses
-                if (currentChar == '(')
+                else if (currentChar == '(')
                 {
                     parenthesesStack.Push(_lineCount);
                 }
@@ -71,7 +74,7 @@ namespace BoomifyCS.Lexer
                 }
 
                 // Handle square brackets
-                if (currentChar == '[')
+                else if (currentChar == '[')
                 {
                     squareBracketsStack.Push(_lineCount);
                 }
@@ -85,7 +88,7 @@ namespace BoomifyCS.Lexer
                 }
 
 
-                if (currentChar == '}')
+                else if (currentChar == '}')
                 {
                     if (curlyBracesStack.Count == 0)
                     {
@@ -94,9 +97,7 @@ namespace BoomifyCS.Lexer
                     curlyBracesStack.Pop();
                 }
 
-                // Handle multi-character tokens
-                KeyValuePair<string, TokenType> multichar = GenerateMultiChar();
-                if (currentChar == '"' || currentChar == '\'')
+                else if (currentChar == '"' || currentChar == '\'')
                 {
                     string str = GenerateString();
                     tokens.Add(new Token(TokenType.STRING, str));
@@ -117,8 +118,13 @@ namespace BoomifyCS.Lexer
                     string digit = GenerateDigit();
                     tokens.Add(new Token(TokenType.NUMBER, digit));
                 }
+                
                 else if (multichar.Key != " ")
                 {
+                    if (multichar.Value == TokenType.COMMENT) {
+                        SkipComment();
+                        continue;
+                    }
                     tokens.Add(new Token(multichar.Value, multichar.Key));
                 }
                 else if (TokenConfig.singleCharTokens.TryGetValue(currentChar, out TokenType tokenType))
@@ -130,7 +136,10 @@ namespace BoomifyCS.Lexer
                     string identifier = GenerateIdentifier();
                     tokens.Add(new Token(TokenType.IDENTIFIER, identifier));
                 }
-
+                else
+                {
+                    throw new BifySyntaxError(ErrorMessage.UnexpectedToken(_code[_position].ToString()), _lines[_lineCount - 1], _code[_position].ToString(), _lineCount);
+                }
                 _position++;
             }
 
@@ -159,6 +168,13 @@ namespace BoomifyCS.Lexer
         public static bool IsIdentifier(char identifier)
         {
             return identifier == '_' || char.IsLetter(identifier);
+        }
+        public void SkipComment()
+        {
+            while (_position < _code.Length && _code[_position] != '\n')
+            {
+                _position++;
+            }
         }
         public string GenerateDigit()
         {

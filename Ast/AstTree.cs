@@ -109,6 +109,23 @@ namespace BoomifyCS.Ast
             {
                 HandleMultiTokenStatements(tokens, operandStack, operatorStack, ref lineTokenPosition, currentToken);
             }
+            else if (currentToken.Type == TokenType.NOT)
+            {
+                try
+                {
+                    operandStack.Push(
+                    new AstBinaryOp(currentToken, NodeConverter.TokenToNode(
+                        tokens[lineTokenPosition + 1], this
+                    ))
+                    );
+                }
+                catch (ArgumentOutOfRangeException e)
+                {
+                    throw new BifySyntaxError(ErrorMessage.NotEnoughOperands(currentToken.Value), sourceCode[lineCount - 1],currentToken.Value);
+                }
+                
+                lineTokenPosition++;
+            }
             else if (TokensParser.IsOperator(currentToken.Type))
             {
                 ProcessOperator(operatorStack, operandStack, currentToken);
@@ -121,6 +138,7 @@ namespace BoomifyCS.Ast
             {
                 HandleClosingParenthesis(operatorStack, operandStack);
             }
+            
             else
             {
                 operandStack.Push(NodeConverter.TokenToNode(currentToken, this));
@@ -145,7 +163,7 @@ namespace BoomifyCS.Ast
                 e.LineTokensString = sourceCode[e.CurrentLine - 1];
                 throw;
             }
-            
+
             lineTokenPosition = result.Item2;
             if (result.Item1.LineNumber == 0)
             {
@@ -186,7 +204,7 @@ namespace BoomifyCS.Ast
                 operandStack.Push(result.Item1);
                 return;
             }
-            
+
 
             operatorStack.Push(result.Item1);
 
@@ -275,6 +293,7 @@ namespace BoomifyCS.Ast
         {
             if (operandStack.Count < 2)
             {
+
                 throw new BifySyntaxError(ErrorMessage.NotEnoughOperands(op.Token.Value), sourceCode[op.LineNumber - 1], op.Token.Value);
             }
         }

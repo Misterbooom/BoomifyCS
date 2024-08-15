@@ -88,6 +88,7 @@ namespace BoomifyCS.Lexer
         CATCH,
         FINALLY,
         THROW,
+        COMMENT
     }
     public class Token(TokenType type, string value, List<Token> tokens = null)
     {

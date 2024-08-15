@@ -1,4 +1,1 @@
-﻿var a = [5,3,"Hello World!"];
-for (var i = 0; i < 3;i++){
-	explode(a[i]);
-}
+﻿var a = 12; !! Hello World

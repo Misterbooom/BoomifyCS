@@ -34,6 +34,8 @@ namespace BoomifyCS.Lexer
             { "++",TokenType.INCREMENT },
             { "!=", TokenType.NEQ },
             { "&&", TokenType.AND },
+            { "||", TokenType.OR},
+            { "!!",TokenType.COMMENT}
 
 
         };
@@ -56,7 +58,7 @@ namespace BoomifyCS.Lexer
             { '%', TokenType.MOD },
             { '<', TokenType.LT },
             { '>', TokenType.GT },
-            { '!', TokenType.NEQ },
+            { '!', TokenType.NOT },
         };
         public readonly static Dictionary<string, TokenType> binaryOperators = new()
         {
