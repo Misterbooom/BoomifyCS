@@ -1,2 +1,2 @@
 ﻿var a = [5,3,"Hello World!"];
-var b = a[1];
+var b = a[-1];

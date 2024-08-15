@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using BoomifyCS.Exceptions;
-using NUnit.Framework.Constraints;
-using BoomifyCS.Parser;
 
 namespace BoomifyCS.Lexer
 {
@@ -27,35 +22,36 @@ namespace BoomifyCS.Lexer
 
             foreach (string line in linesArray)
             {
-                tempLines.Add(line); 
-                
+                tempLines.Add(line);
+
             }
 
             _lines = [.. tempLines];
- 
+
             if (_lines.Length > 1)
             {
-                _currentLine = _lines[1]; 
+                _currentLine = _lines[1];
             }
             else
             {
-                _currentLine = _lines[0]; 
+                _currentLine = _lines[0];
             }
-            _position = 0; 
+            _position = 0;
         }
-    
+
 
         public List<Token> Tokenize()
         {
             List<Token> tokens = [];
-            List<int> bracketsStack = [];
+            Stack<int> parenthesesStack = new();
+            Stack<int> squareBracketsStack = new();
+            Stack<int> curlyBracesStack = new();
+
             while (_position < _code.Length)
             {
-
                 char currentChar = _code[_position];
 
-
-                
+                // Handle newline
                 if (currentChar == '\n')
                 {
                     tokens.Add(new Token(TokenType.NEXTLINE, "\n"));
@@ -63,93 +59,124 @@ namespace BoomifyCS.Lexer
                     _position++;
                     continue;
                 }
-                
-                
 
+                // Handle semicolons
                 if (currentChar == ';')
                 {
-                    if (bracketsStack.Count == 0)
+                    if (parenthesesStack.Count == 0 && squareBracketsStack.Count == 0 && curlyBracesStack.Count == 0)
                     {
                         tokens.Add(new Token(TokenType.EOL, ";"));
                     }
                     else
                     {
-                        tokens.Add(new Token(TokenType.SEMICOLON,";"));
+                        tokens.Add(new Token(TokenType.SEMICOLON, ";"));
                     }
                     _position++;
                     continue;
                 }
+
+                // Handle parentheses
                 if (currentChar == '(')
                 {
-                    bracketsStack.Add(_lineCount);
+                    parenthesesStack.Push(_lineCount);
                 }
-                else if (currentChar == ')') 
+                else if (currentChar == ')')
                 {
-                    if (bracketsStack.Count == 0) 
-                    { 
-                        throw new BifySyntaxError(ErrorMessage.UnmatchedClosingParenthesis(),_lines[_lineCount], ")", _lineCount);
-
+                    if (parenthesesStack.Count == 0)
+                    {
+                        throw new BifySyntaxError(ErrorMessage.UnmatchedClosingParenthesis(), _lines[_lineCount], ")", _lineCount);
                     }
-                    bracketsStack.Pop();
+                    parenthesesStack.Pop();
+                }
+
+                // Handle square brackets
+                if (currentChar == '[')
+                {
+                    squareBracketsStack.Push(_lineCount);
+                }
+                else if (currentChar == ']')
+                {
+                    if (squareBracketsStack.Count == 0)
+                    {
+                        throw new BifySyntaxError(ErrorMessage.UnmatchedClosingBracket(), _lines[_lineCount], "]", _lineCount);
+                    }
+                    squareBracketsStack.Pop();
+                }
+
+                // Handle curly braces
+                if (currentChar == '{')
+                {
+                    curlyBracesStack.Push(_lineCount);
                 }
                 else if (currentChar == '}')
                 {
-                    throw new BifySyntaxError(ErrorMessage.UnmatchedClosingBrace(), _lines[_lineCount], "}", _lineCount);
-
+                    if (curlyBracesStack.Count == 0)
+                    {
+                        throw new BifySyntaxError(ErrorMessage.UnmatchedClosingBrace(), _lines[_lineCount], "}", _lineCount);
+                    }
+                    curlyBracesStack.Pop();
                 }
 
-
+                // Handle multi-character tokens
                 KeyValuePair<string, TokenType> multichar = GenerateMultiChar();
-                  
-                if (currentChar == '"' || currentChar.ToString() == "'")
+                if (currentChar == '"' || currentChar == '\'')
                 {
                     string str = GenerateString();
-                    Token token = new(TokenType.STRING, str);
-                    tokens.Add(token);
+                    tokens.Add(new Token(TokenType.STRING, str));
                 }
                 else if (currentChar == '{')
                 {
-                    Token token = GenerateObject();
-
-                    tokens.Add(token);
-
+                    tokens.Add(GenerateObject());
                 }
-
+                else if (currentChar == '-' && char.IsDigit(_code[_position + 1]))
+                {
+                    string digit = GenerateDigit();
+                    tokens.Add(new Token(TokenType.NUMBER, digit));
+                }
                 else if (char.IsDigit(currentChar))
                 {
                     string digit = GenerateDigit();
-                    Token token = new(TokenType.NUMBER, digit);
-                    tokens.Add(token);
+                    tokens.Add(new Token(TokenType.NUMBER, digit));
                 }
-
                 else if (multichar.Key != " ")
                 {
-
-                    Token token = new(multichar.Value, multichar.Key);
-                    tokens.Add(token);
+                    tokens.Add(new Token(multichar.Value, multichar.Key));
                 }
                 else if (TokenConfig.singleCharTokens.TryGetValue(currentChar, out TokenType tokenType))
                 {
-                    Token token = new(tokenType, currentChar.ToString());
-                    tokens.Add(token);
+                    tokens.Add(new Token(tokenType, currentChar.ToString()));
                 }
                 else if (IsIdentifier(currentChar))
                 {
                     string identifier = GenerateIdentifier();
-                    Token token = new(TokenType.IDENTIFIER, identifier);
-                    tokens.Add(token);
+                    tokens.Add(new Token(TokenType.IDENTIFIER, identifier));
                 }
 
                 _position++;
             }
-            if (bracketsStack.Count > 0)
+
+            // Check for unmatched opening brackets
+            if (parenthesesStack.Count > 0)
             {
-                int line = bracketsStack[^1];
-                throw new BifySyntaxError(ErrorMessage.UnmatchedOpeningParenthesis(),_lines[line], "(",line);
+                int line = parenthesesStack.Pop();
+                throw new BifySyntaxError(ErrorMessage.UnmatchedOpeningParenthesis(), _lines[line], "(", line);
+            }
+
+            if (squareBracketsStack.Count > 0)
+            {
+                int line = squareBracketsStack.Pop();
+                throw new BifySyntaxError(ErrorMessage.UnmatchedOpeningBracket(), _lines[line], "[", line);
+            }
+
+            if (curlyBracesStack.Count > 0)
+            {
+                int line = curlyBracesStack.Pop();
+                throw new BifySyntaxError(ErrorMessage.UnmatchedOpeningBrace(), _lines[line], "{", line);
             }
 
             return tokens;
         }
+
         public static bool IsIdentifier(char identifier)
         {
             return identifier == '_' || char.IsLetter(identifier);
@@ -174,7 +201,7 @@ namespace BoomifyCS.Lexer
                     break;
                 }
 
-                if (currentChar != '.' && !char.IsDigit(currentChar))
+                if (currentChar != '.' && !char.IsDigit(currentChar) && currentChar != '-')
                 {
                     break;
                 }
@@ -246,8 +273,8 @@ namespace BoomifyCS.Lexer
             {
                 throw new BifySyntaxError(
                     ErrorMessage.MissingCloseQuotationMark(),
-                    _currentLine, 
-                    _currentLine, 
+                    _currentLine,
+                    _currentLine,
                     _lineCount
                 );
 
@@ -255,7 +282,7 @@ namespace BoomifyCS.Lexer
             return str;
 
         }
-        
+
         public string GenerateIdentifier()
         {
             string identifier = "";
@@ -272,7 +299,7 @@ namespace BoomifyCS.Lexer
                     break;
                 }
             }
-            _position--;    
+            _position--;
             return identifier;
         }
         public Token GenerateObject()
@@ -302,8 +329,8 @@ namespace BoomifyCS.Lexer
                         break;
 
                     }
-                       
-                    
+
+
                 }
                 else if (currentChar == '\n')
                 {
@@ -326,8 +353,8 @@ namespace BoomifyCS.Lexer
             return new Token(TokenType.BLOCK, blockString, tokens);
 
 
-            
-            
+
+
         }
 
         [GeneratedRegex("\r?\n")]

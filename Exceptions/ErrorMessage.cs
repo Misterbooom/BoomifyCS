@@ -22,7 +22,14 @@ namespace BoomifyCS.Exceptions
         {
             return "Unmatched '}'. Expected opening brace '{'.";
         }
-
+        public static string UnmatchedOpeningBracket()
+        {
+            return "Unmatched '['. Expected closing bracket ']'.";
+        }
+        public static string UnmatchedClosingBracket()
+        {
+            return "Unmatched ']'. Expected opening bracket '['.";
+        }
         public static string ElseWithoutMatchingIf()
         {
             return "'else' statement without a matching 'if' statement.";

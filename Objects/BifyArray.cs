@@ -57,7 +57,7 @@ namespace BoomifyCS.Objects
             }
             if (other.Value < 0)
             {
-                return _bifyObjects[^other.Value];
+                return _bifyObjects[^Math.Abs(other.Value)];
             }
             return _bifyObjects[other.Value];
         }

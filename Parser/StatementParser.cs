@@ -141,6 +141,8 @@ namespace BoomifyCS.Parser
         private static (AstNode, int) ParseIndexOperator(List<Token> argumentsTokens, int currentPos, AstTree astParser)
         {
             AstNode indexValue = astParser.BuildAstTree(argumentsTokens);
+            argumentsTokens.WriteTokens();
+            Console.WriteLine(indexValue);
             if (indexValue is not AstConstant && indexValue is not AstBinaryOp && indexValue is not AstIdentifier)
             {
                 throw new BifyTypeError(ErrorMessage.IndexOfArrayTypeError());
