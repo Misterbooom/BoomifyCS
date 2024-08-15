@@ -14,6 +14,9 @@ namespace BoomifyCS.Objects
         {
             return new BifyString($"{Name}");
         }
-
+        public override string ToString()
+        {
+            return ObjectToString().Value;
+        }
     }
 }

@@ -46,9 +46,13 @@ namespace BoomifyCS.Objects
         {
             return new BifyBoolean(false);
         }
-        public override BifyObject Int()
+        public override BifyInteger Int()
         {
             return new BifyInteger(0);
+        }
+        public override string ToString()
+        {
+            return ObjectToString().Value;
         }
     }
 }

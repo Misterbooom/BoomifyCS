@@ -15,10 +15,11 @@ namespace BoomifyCS.Parser
             var varNameToken = FindRequiredToken(TokenType.IDENTIFIER, tokens, ref currentPos);
             var assignmentToken = FindRequiredToken(TokenType.ASSIGN, tokens, ref currentPos);
 
-            currentPos++;  // Move past the assignment token
+            currentPos++;  
             var (varValueTokens, tokensProcessed) = TokensParser.AllTokensToEol(tokens, currentPos);
-            currentPos += tokensProcessed;
-
+            //varValueTokens.WriteTokens();
+            currentPos = tokensProcessed + 1;
+            //varValueTokens.WriteTokens();
             AstNode varNameNode = new AstVar(varNameToken, new BifyVar(varNameToken.Value));
             AstNode varValueNode = astParser.BuildAstTree(varValueTokens);
             AstAssignment assignmentNode = new(assignmentToken)
@@ -88,7 +89,7 @@ namespace BoomifyCS.Parser
             var (identifierToken, tokenEnd) = FindTokenSafe(TokenType.IDENTIFIER, tokens, currentPos);
             currentPos = tokenEnd + 1;
             var (argumentsTokens, argumentsEnd) = FindTokensInBracketsSafe(tokens, currentPos);
-            AstNode identifierNode = astParser.BuildAstTree([identifierToken]);
+            AstNode identifierNode = NodeConverter.TokenToNode(identifierToken);
             currentPos = argumentsEnd + 1;
             AstNode argumentsNode = astParser.BuildAstTree(argumentsTokens);
             var (blockToken, blockEnd) = FindTokenSafe(TokenType.BLOCK, tokens, currentPos);
@@ -132,17 +133,27 @@ namespace BoomifyCS.Parser
             argumentsTokens = argumentsTokens[..^1];
             if (argumentsTokens.ContainsTokenType(TokenType.COMMA))
             {
-                AstNode argumentsNode = astParser.BuildAstTree(argumentsTokens);
-                Console.WriteLine(argumentsNode.ToString());
-                AstArray astArray = new(argumentsTokens.TokensToString().StringToToken(), argumentsNode);
-                return (astArray,currentPos);
+                return ParseArray(argumentsTokens,currentPos,astParser);
             }
 
-            Console.Read();
-            return (null, 0);
+            return ParseIndexOperator(argumentsTokens, currentPos, astParser);
         }
-        
-        // Helper methods for repeated logic
+        private static (AstNode, int) ParseIndexOperator(List<Token> argumentsTokens, int currentPos, AstTree astParser)
+        {
+            AstNode indexValue = astParser.BuildAstTree(argumentsTokens);
+            if (indexValue is not AstConstant && indexValue is not AstBinaryOp && indexValue is not AstIdentifier)
+            {
+                throw new BifyTypeError(ErrorMessage.IndexOfArrayTypeError());
+            }
+            return (new AstIndexOperator(indexValue,null),currentPos);
+        }
+        private static (AstNode, int) ParseArray(List<Token> argumentsTokens,int currentPos,AstTree astParser)
+        {
+            AstNode argumentsNode = astParser.BuildAstTree(argumentsTokens);
+            AstArray astArray = new(argumentsTokens.TokensToString().StringToToken(), argumentsNode);
+            return (astArray, currentPos);
+        }
+
         private static Token FindRequiredToken(TokenType tokenType, List<Token> tokens, ref int currentPos)
         {
             var (token, index) = TokensParser.FindTokenByTT(tokenType, tokens, currentPos);
@@ -259,9 +270,10 @@ namespace BoomifyCS.Parser
 
         private static (AstNode, int) HandleIdentifierWithoutArguments(Token token, List<Token> tokens, ref int currentPos)
         {
-            if (tokens.Count < currentPos + 2)
+
+            if (tokens.Count < currentPos + 1)
             {
-                return (NodeConverter.TokenToNode(token), currentPos + 1);
+                return (NodeConverter.TokenToNode(token), currentPos);
             }
 
             var nextToken = tokens[currentPos + 1];
@@ -271,7 +283,7 @@ namespace BoomifyCS.Parser
                 return (unaryOperator, currentPos + 1);
             }
 
-            return (NodeConverter.TokenToNode(token), currentPos + 1);
+            return (NodeConverter.TokenToNode(token), currentPos);
         }
 
         private static (AstNode, int) ParseFunctionCall(Token token, List<Token> argumentsTokens, ref int currentPos, AstTree astParser)

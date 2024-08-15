@@ -134,6 +134,7 @@ namespace BoomifyCS.Ast
         private void HandleMultiTokenStatements(List<Token> tokens, Stack<AstNode> operandStack, Stack<AstNode> operatorStack, ref int lineTokenPosition, Token currentToken)
         {
             (AstNode, int) result;
+
             try
             {
                 result = MultiTokenHandler.ProcessMultiTokenStatement(currentToken, tokens, lineTokenPosition, this);
@@ -144,6 +145,7 @@ namespace BoomifyCS.Ast
                 e.LineTokensString = sourceCode[e.CurrentLine - 1];
                 throw;
             }
+            
             lineTokenPosition = result.Item2;
             if (result.Item1.LineNumber == 0)
             {
@@ -157,7 +159,7 @@ namespace BoomifyCS.Ast
 
                 return;
             }
-            else if (result.Item1 is AstCall || result.Item1 is AstIdentifier)
+            else if (result.Item1 is AstCall || result.Item1 is AstIdentifier || result.Item1 is AstArray)
             {
                 operandStack.Push(result.Item1);
                 return;
@@ -178,11 +180,13 @@ namespace BoomifyCS.Ast
             {
                 result.Item1.LineNumber -= astIf.BlockNode.LineNumber - 1;
             }
-            else if (result.Item1 is AstArray)
+            else if (result.Item1 is AstIndexOperator astIndexOperator)
             {
+                astIndexOperator.OperandNode = operandStack.Pop();
                 operandStack.Push(result.Item1);
                 return;
             }
+            
 
             operatorStack.Push(result.Item1);
 

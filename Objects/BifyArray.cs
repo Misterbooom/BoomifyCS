@@ -27,7 +27,7 @@ namespace BoomifyCS.Objects
             _bifyObjects.Add(item);
         }
 
-        public int Count => _bifyObjects.Count;
+        public BifyInteger Count => new(_bifyObjects.Count);
 
         public override BifyString ObjectToString()
         {
@@ -45,9 +45,30 @@ namespace BoomifyCS.Objects
             return new BifyString(sb.ToString());
 
         }
+        public override BifyObject Index(BifyInteger other)
+        {
+            if (_bifyObjects.Count == 0)
+            {
+                throw new BifyNullError(ErrorMessage.ArrayIsEmpty());
+            }
+            if (other.Value >= _bifyObjects.Count)
+            {
+                throw new BifyIndexError(ErrorMessage.InvalidIndex(other.Value, _bifyObjects.Count));
+            }
+            if (other.Value < 0)
+            {
+                return _bifyObjects[^other.Value];
+            }
+            return _bifyObjects[other.Value];
+        }
+
         public override BifyString Repr()
         {
             return new BifyString($"BifyArray({ToString()})");
+        }
+        public override string ToString()
+        {
+            return ObjectToString().Value;
         }
 
     }

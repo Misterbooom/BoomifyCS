@@ -28,7 +28,7 @@ namespace BoomifyCS.Objects
             {
                 return new BifyFloat(this.Token, this.Value + otherInt.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Add", GetType().Name, other.GetType().Name));
+            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Add", GetName(), other.GetName()));
         }
 
         public override BifyObject Sub(BifyObject other)
@@ -41,7 +41,7 @@ namespace BoomifyCS.Objects
             {
                 return new BifyFloat(this.Token, this.Value - otherInt.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Sub", GetType().Name, other.GetType().Name));
+            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Sub", GetName(), other.GetName()));
         }
 
         public override BifyObject Mul(BifyObject other)
@@ -54,7 +54,7 @@ namespace BoomifyCS.Objects
             {
                 return new BifyFloat(this.Token, this.Value * otherInt.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Mul", GetType().Name, other.GetType().Name));
+            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Mul", GetName(), other.GetName()));
         }
 
         public override BifyObject Div(BifyObject other)
@@ -75,7 +75,7 @@ namespace BoomifyCS.Objects
                 }
                 return new BifyFloat(this.Token, this.Value / otherInt.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Div", GetType().Name, other.GetType().Name));
+            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Div", GetName(), other.GetName()));
         }
 
         public override BifyObject Mod(BifyObject other)
@@ -88,7 +88,7 @@ namespace BoomifyCS.Objects
             {
                 return new BifyFloat(this.Token, this.Value % otherInt.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Mod", GetType().Name, other.GetType().Name));
+            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Mod", GetName(), other.GetName()));
         }
 
         public override BifyObject Pow(BifyObject other)
@@ -101,7 +101,7 @@ namespace BoomifyCS.Objects
             {
                 return new BifyFloat(this.Token, Math.Pow(this.Value, otherInt.Value));
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Pow", GetType().Name, other.GetType().Name));
+            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Pow", GetName(), other.GetName()));
         }
 
         public override BifyObject FloorDiv(BifyObject other)
@@ -122,7 +122,7 @@ namespace BoomifyCS.Objects
                 }
                 return new BifyFloat(this.Token, Math.Floor(this.Value / otherInt.Value));
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("FloorDiv", GetType().Name, other.GetType().Name));
+            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("FloorDiv", GetName(), other.GetName()));
         }
 
         public override BifyBoolean Bool()
@@ -130,7 +130,7 @@ namespace BoomifyCS.Objects
             return new BifyBoolean(this.Value != 0);
         }
 
-        public override BifyObject Int()
+        public override BifyInteger Int()
         {
             return new BifyInteger(this.Token, (int)this.Value);
         }
@@ -145,7 +145,7 @@ namespace BoomifyCS.Objects
             {
                 return new BifyBoolean(this.Value <= otherInt.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Lte", GetType().Name, other.GetType().Name));
+            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Lte", GetName(), other.GetName()));
         }
 
         public override BifyObject Gte(BifyObject other)
@@ -158,7 +158,11 @@ namespace BoomifyCS.Objects
             {
                 return new BifyBoolean(this.Value >= otherInt.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Gte", GetType().Name, other.GetType().Name));
+            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Gte", GetName(), other.GetName()));
+        }
+        public override string ToString()
+        {
+            return ObjectToString().Value;
         }
     }
 }

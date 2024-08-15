@@ -76,7 +76,7 @@ namespace BoomifyCS.Objects
         {
             return this;
         }
-        public override BifyObject Int()
+        public override BifyInteger Int()
         {
             if (Value == false)
             {
@@ -88,6 +88,10 @@ namespace BoomifyCS.Objects
                 return new BifyInteger(1);
             }
         }
-       
+        public override string ToString()
+        {
+            return ObjectToString().Value;
+        }
+
     }
 }

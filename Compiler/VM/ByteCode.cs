@@ -50,6 +50,8 @@ namespace BoomifyCS.Interpreter
         FLOORDIVE,
         POWE,
         NEW_ARRAY,
+        STORE_LOCAL,
+        LOAD_ARRAY
     }
     public class ByteInstruction
     {
@@ -81,9 +83,17 @@ namespace BoomifyCS.Interpreter
             string arguments = "";
             if (Value != null)
             {
-                foreach (Object value in Value)
+                foreach (var value in Value)
                 {
-                    arguments += " " + value.ToString();
+                    if (value is BifyObject bifyObject)
+                    {
+                        arguments += " " + bifyObject.ToString();
+
+                    }
+                    else
+                    {
+                        arguments += " " + value.ToString();
+                    }
                 }
             }
             

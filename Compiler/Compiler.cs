@@ -84,6 +84,9 @@ namespace BoomifyCS.Interpreter
                 case AstArray astArray:
                     HandleArray(astArray);
                     break;
+                case AstIndexOperator astIndexOperator:
+                    HandleIndexOperator(astIndexOperator);
+                    break;
                 default:
                     Visit(node.Left);
                     Visit(node.Right);
@@ -117,6 +120,15 @@ namespace BoomifyCS.Interpreter
                 _instructions.Add(new ByteInstruction(byteType, astAssignmentOperator.IdentifierNode.Token.Value, _lineCount));
             }
         }
+        private void HandleIndexOperator(AstIndexOperator astIndexOperator)
+        {
+            Visit(astIndexOperator.OperandNode);
+
+            Visit(astIndexOperator.IndexNode);
+
+            _instructions.Add(new ByteInstruction(ByteType.LOAD_ARRAY, _lineCount));
+        }
+
         private void HandleArray(AstArray array)
         {
 

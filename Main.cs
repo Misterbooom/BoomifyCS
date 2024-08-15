@@ -61,7 +61,7 @@ namespace BoomifyCS
             catch (Exception e)
             {
 
-                ExceptionExtension.ParseError(e.GetType().Name, e.StackTrace, e.Message);
+                ExceptionExtension.ParseError(e.GetType().Name, e.StackTrace, e.Message); ;
             }
         }
 

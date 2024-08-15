@@ -80,7 +80,7 @@ namespace BoomifyCS.Objects
             return new BifyBoolean(true);
 
         }
-        public override BifyObject Int()
+        public override BifyInteger Int()
         {
             try
             {
@@ -102,6 +102,10 @@ namespace BoomifyCS.Objects
             {
                 throw new BifyCastError($"An unexpected error occurred while parsing '{Value}'.");
             }
+        }
+        public override string ToString()
+        {
+            return ObjectToString().Value;
         }
 
     }

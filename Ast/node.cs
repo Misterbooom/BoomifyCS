@@ -394,5 +394,17 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{argumentsStr}";
         }
     }
+    public class AstIndexOperator(AstNode nodeIndex,AstNode operandNode) : AstNode(new Token(TokenType.NUMBER,"UNKNOWN"))
+    {
+        public AstNode IndexNode = nodeIndex;
+        public AstNode OperandNode = operandNode;
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
+        {
+            string baseStr = base.StrHelper(level, note, isLeft);
+            string nodeIndexStr = IndexNode?.StrHelper(level + 1, "Index: ");
+            string operandStr = OperandNode?.StrHelper(level + 1, "Operand: ");
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{nodeIndexStr}\n{operandStr}";
+        }
+    }
 }
 

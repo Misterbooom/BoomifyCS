@@ -26,5 +26,9 @@ namespace BoomifyCS.BuiltIn.Function
         {
             return new BifyString($"<{Name} Function>");
         }
+        public override string ToString()
+        {
+            return ObjectToString().Value;
+        }
     }
 }

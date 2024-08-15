@@ -206,6 +206,11 @@ namespace BoomifyCS.Interpreter.VM
                         array.Reverse();
                         _stackManager.Push(new BifyArray(array));
                         break;
+                    case ByteType.LOAD_ARRAY:
+                        BifyInteger index = _stackManager.Pop().Int();
+                        BifyObject bifyObject = _stackManager.Pop();
+                        GetIndexAndPush(index,bifyObject);
+                        break;
                     default:
                         throw new InvalidOperationException($"Unknown instruction type: {instruction.Type}");
 
@@ -261,6 +266,20 @@ namespace BoomifyCS.Interpreter.VM
                 );
             }
 
+        }
+        private void GetIndexAndPush(BifyInteger index,BifyObject bifyObject)
+        {
+            try
+            {
+                _stackManager.Push(bifyObject.Index(index));
+
+            }
+            catch (BifyError e)
+            {
+                e.CurrentLine = line;
+                e.LineTokensString = SourceCode[line - 1];
+                throw;
+            }
         }
         private BifyObject GetVariable(string name)
         {

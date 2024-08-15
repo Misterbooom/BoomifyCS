@@ -35,57 +35,75 @@ namespace BoomifyCS.Exceptions
 
         public static string ElseIfCannotFollowElseDirectly()
         {
-            return "'else if' cannot directly follow an 'else' statement. It must follow an 'if' or another 'else if'.";
+            return "'else if' cannot follow an 'else' statement directly. It must follow an 'if' or another 'else if'.";
         }
 
         public static string ForLoopMustHaveInitialization()
         {
-            return "The 'for' loop is missing an initialization statement. A 'for' loop must begin with an initialization.";
+            return "The 'for' loop must include an initialization statement.";
         }
 
         public static string ForLoopMustHaveCondition()
         {
-            return "The 'for' loop is missing a condition statement. A 'for' loop must include a condition to determine when to exit the loop.";
+            return "The 'for' loop must include a condition statement.";
         }
 
         public static string ForLoopMustHaveIncrement()
         {
-            return "The 'for' loop is missing an increment statement. A 'for' loop must include an increment statement to update the loop counter.";
+            return "The 'for' loop must include an increment statement.";
         }
 
         public static string InvalidIncrementExpression()
         {
-            return "Invalid increment expression in 'for' loop. The increment statement must be an assignment operation (e.g., i = i + 1), a unary operator (e.g., i++), or a function call.";
+            return "Invalid increment expression in 'for' loop. The increment must be an assignment, a unary operation, or a function call.";
         }
 
         public static string InvalidVariableDeclaration()
         {
-            return "The first statement in 'for' loop must be a variable initialization. Ensure that variables are properly declared and initialized.";
+            return "The first statement in the 'for' loop must be a variable initialization.";
         }
 
         public static string InvalidConditionExpression()
         {
-            return "Invalid condition expression. The condition in a 'for' loop must be a binary expression (e.g., i < 10).";
+            return "The condition in a 'for' loop must be a valid expression.";
         }
 
         public static string InvalidInitializationStatement()
         {
-            return "Incorrect number of semicolon-separated statements in 'for' loop. A 'for' loop must have exactly three semicolon-separated statements: initialization, condition, and increment.";
+            return "Incorrect number of semicolon-separated statements in 'for' loop. There should be exactly three: initialization, condition, and increment.";
         }
+
         public static string MissingCloseQuotationMark()
         {
-            return "You forgot to close a quotation mark.";
+            return "Missing closing quotation mark.";
         }
+
         public static string NotEnoughOperands(string op)
         {
-            return $"Not enough operands for operator - '{op}'";
+            return $"Not enough operands for operator '{op}'.";
         }
+
         public static string InvalidTypeForOperation(string op, string left, string right)
         {
             return $"Invalid type for operation '{op}' between '{left}' and '{right}'.";
         }
-        public static string DivisionByZero() {
-            return "Cannot Divide by zero.";
+
+        public static string DivisionByZero()
+        {
+            return "Division by zero is not allowed.";
+        }
+
+        public static string IndexOfArrayTypeError()
+        {
+            return "Array index must be an integer.";
+        }
+        public static string ArrayIsEmpty()
+        {
+            return "Array is Empty";
+        }
+        public static string InvalidIndex(int index, int length)
+        {
+            return $"Invalid array index '{index}'. Array length is {length}.";
         }
     }
 }
