@@ -5,6 +5,7 @@ using BoomifyCS.Exceptions;
 using BoomifyCS.Interpreter.VM;
 using BoomifyCS.Interpreter;
 using System.Diagnostics.Metrics;
+using BoomifyCS.Parser.StatementParser;
 
 namespace BoomifyCS.Parser.NodeParser
 {
@@ -39,7 +40,7 @@ namespace BoomifyCS.Parser.NodeParser
             var ast = new AstTree(modulePath);
             return ((AstModule)ast.ParseTokens(tokens)).ChildNode;
         }
-        public static void BuildString(string str)
+        public static void BuildFromStringAndRunVM(string str)
         {
 
             MyLexer lexer = new(str);
@@ -58,14 +59,26 @@ namespace BoomifyCS.Parser.NodeParser
 
 
             //Console.WriteLine(string.Join("\n", codeByLine))
-            //MyCompiler interpreter = new(codeByLine);
-            //interpreter.RunVM(node);
+            MyCompiler interpreter = new(codeByLine);
+            interpreter.RunVM(node);
 
 
 
 
 
 
+        }
+        public static AstNode ParseBlock(List<Token> tokens, ref int currentPos, AstTree astParser)
+        {
+            var (blockToken, blockEnd) = TokenFinder.FindTokenSafe(TokenType.BLOCK, tokens, currentPos);
+            currentPos = blockEnd + 1;
+            return astParser.BuildAstTree([blockToken]);
+        }
+        public static AstNode ParseCondition(List<Token> tokens, ref int currentPos, AstTree astParser)
+        {
+            var (conditionTokens, conditionEnd) = TokenFinder.FindTokensInBracketsSafe(tokens, currentPos);
+            currentPos = conditionEnd + 1;
+            return astParser.BuildAstTree(conditionTokens);
         }
     }
 }

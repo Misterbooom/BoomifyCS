@@ -9,7 +9,6 @@ namespace BoomifyCS.Lexer
     {
         private int _position;
         private readonly string _code;
-        private readonly string _currentLine;
         private int _lineCount = 1;
         private readonly string[] _lines;
         public MyLexer(string code)
@@ -37,6 +36,43 @@ namespace BoomifyCS.Lexer
                     _position++;
                     continue;
                 }
+                // Handle parentheses
+                if (currentChar == '(')
+                {
+                    parenthesesStack.Push(_lineCount);
+                }
+                else if (currentChar == ')')
+                {
+                    if (parenthesesStack.Count == 0)
+                    {
+                        throw new BifySyntaxError(ErrorMessage.UnmatchedClosingParenthesis(), _lines[_lineCount], ")", _lineCount);
+                    }
+                    parenthesesStack.Pop();
+                }
+
+                // Handle square brackets
+                if (currentChar == '[')
+                {
+                    squareBracketsStack.Push(_lineCount);
+                }
+                if (currentChar == ']')
+                {
+                    if (squareBracketsStack.Count == 0)
+                    {
+                        throw new BifySyntaxError(ErrorMessage.UnmatchedClosingBracket(), _lines[_lineCount], "]", _lineCount);
+                    }
+                    squareBracketsStack.Pop();
+                }
+
+
+                if (currentChar == '}')
+                {
+                    if (curlyBracesStack.Count == 0)
+                    {
+                        throw new BifySyntaxError(ErrorMessage.UnmatchedClosingBrace(), _lines[_lineCount], "}", _lineCount);
+                    }
+                    curlyBracesStack.Pop();
+                }
                 else if (currentChar == '\n')
                 {
                     tokens.Add(new Token(TokenType.NEXTLINE, "\n"));
@@ -59,43 +95,7 @@ namespace BoomifyCS.Lexer
                     continue;
                 }
 
-                // Handle parentheses
-                else if (currentChar == '(')
-                {
-                    parenthesesStack.Push(_lineCount);
-                }
-                else if (currentChar == ')')
-                {
-                    if (parenthesesStack.Count == 0)
-                    {
-                        throw new BifySyntaxError(ErrorMessage.UnmatchedClosingParenthesis(), _lines[_lineCount], ")", _lineCount);
-                    }
-                    parenthesesStack.Pop();
-                }
-
-                // Handle square brackets
-                else if (currentChar == '[')
-                {
-                    squareBracketsStack.Push(_lineCount);
-                }
-                else if (currentChar == ']')
-                {
-                    if (squareBracketsStack.Count == 0)
-                    {
-                        throw new BifySyntaxError(ErrorMessage.UnmatchedClosingBracket(), _lines[_lineCount], "]", _lineCount);
-                    }
-                    squareBracketsStack.Pop();
-                }
-
-
-                else if (currentChar == '}')
-                {
-                    if (curlyBracesStack.Count == 0)
-                    {
-                        throw new BifySyntaxError(ErrorMessage.UnmatchedClosingBrace(), _lines[_lineCount], "}", _lineCount);
-                    }
-                    curlyBracesStack.Pop();
-                }
+            
 
                 else if (currentChar == '"' || currentChar == '\'')
                 {
@@ -138,7 +138,8 @@ namespace BoomifyCS.Lexer
                 }
                 else
                 {
-                    throw new BifySyntaxError(ErrorMessage.UnexpectedToken(_code[_position].ToString()), _lines[_lineCount - 1], _code[_position].ToString(), _lineCount);
+                    if (!char.IsWhiteSpace(currentChar))
+                        throw new BifySyntaxError(ErrorMessage.UnexpectedToken(currentChar.ToString()), _lines[_lineCount - 1], _code[_position].ToString(), _lineCount);
                 }
                 _position++;
             }
@@ -268,9 +269,9 @@ namespace BoomifyCS.Lexer
             {
                 throw new BifySyntaxError(
                     ErrorMessage.MissingCloseQuotationMark(),
-                    _currentLine,
-                    _currentLine,
-                    _lineCount - 1
+                    _lines[_lineCount - 1],
+                    stringChar.ToString(),
+                    _lineCount
                 );
 
             }
@@ -315,7 +316,7 @@ namespace BoomifyCS.Lexer
                     counter--;
                     if (counter < 0)
                     {
-                        throw new BifySyntaxError(ErrorMessage.UnmatchedClosingBrace(), _lines[_lineCount], "}", _lineCount);
+                        throw new BifySyntaxError(ErrorMessage.UnmatchedClosingBrace(), _lines[_lineCount - 1], "}", _lineCount);
 
                     }
                     else if (counter == 0)
@@ -338,7 +339,7 @@ namespace BoomifyCS.Lexer
 
             if (counter != 0)
             {
-                throw new BifySyntaxError(ErrorMessage.UnmatchedOpeningBrace(), _lines[_lineCount], "{", _lineCount - 1);
+                throw new BifySyntaxError(ErrorMessage.UnmatchedOpeningBrace(), _lines[_lineCount - 1], "{", _lineCount - 1);
 
             }
             string blockString = _code[start.._position];

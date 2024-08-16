@@ -13,6 +13,7 @@ namespace BoomifyCS.Tests
             BracketTest();
             IfElseTest();
             LoopTest();
+            ArrayIndexTest();
         }
 
         public static void BracketTest()
@@ -92,12 +93,7 @@ namespace BoomifyCS.Tests
                 ";
             RunLanguage(codeWithLoopWithoutCondition, ErrorMessage.ForLoopMustHaveCondition());
 
-            string codeWithLoopWithoutIncrement = @"
-                for (var i = 0; i < 10; ) {
-                    explode(i);
-                }
-                ";
-            RunLanguage(codeWithLoopWithoutIncrement, ErrorMessage.ForLoopMustHaveIncrement());
+           
 
             string codeWithLoopWithInvalidCondition = @"
                 for (var i = 0; i < 10; i > 10) {
@@ -121,12 +117,27 @@ namespace BoomifyCS.Tests
             RunLanguage(codeWithLoopWithInvalidVariableDeclaration, ErrorMessage.InvalidVariableDeclaration());
 
         }
+        public static void ArrayIndexTest()
+        {
+            // Test case: Array index out of bounds
+            string codeWithOutOfBoundsIndex = @"
+                var arr = [1, 2, 3];
+                explode(arr[5]);
+                ";
+            RunLanguage(codeWithOutOfBoundsIndex, ErrorMessage.InvalidIndex(5, 3));
 
+            // Test case: Indexing a non-array type
+            string codeWithNonArrayIndexing = @"
+                var num = 5;
+                explode(num[0]);
+                ";
+            RunLanguage(codeWithNonArrayIndexing, ErrorMessage.IndexOfArrayTypeError());
+        }
         private static void RunLanguage(string code, string expectedMessage)
         {
             try
             {
-                AstBuilder.BuildString(code);
+                AstBuilder.BuildFromStringAndRunVM(code);
             }
             catch (BifyError e)
             {

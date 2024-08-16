@@ -31,8 +31,7 @@ namespace BoomifyCS.Interpreter.VM
                 e.CallStack = _callStack;
                 e.LineTokensString = SourceCode[line - 1];
                 e.CurrentLine = line;
-                e.PrintException();
-                Environment.Exit(1);
+                throw;
             }
         }
         public void ProccesInstructions(List<ByteInstruction> instructions)

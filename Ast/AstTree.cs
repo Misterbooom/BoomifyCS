@@ -255,7 +255,7 @@ namespace BoomifyCS.Ast
                 {
                     if (astIf.ElseNode != null)
                     {
-                        throw new BifySyntaxError(ErrorMessage.ElseIfCannotFollowElseDirectly(), sourceCode[astElseIf.LineNumber - 1], sourceCode[astElseIf.LineNumber - 1], astElseIf.LineNumber);
+                        throw new BifySyntaxError(ErrorMessage.ElseIfCannotFollowElseDirectly(), sourceCode[astElseIf.LineNumber % sourceCode.Length], sourceCode[astElseIf.LineNumber % sourceCode.Length], astElseIf.LineNumber);
                     }
                     astIf.SetElseIfNode(astElseIf);
                 }
