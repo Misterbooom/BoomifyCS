@@ -76,7 +76,7 @@ namespace BoomifyCS.Parser.NodeParser
         }
         public static AstNode ParseCondition(List<Token> tokens, ref int currentPos, AstTree astParser)
         {
-            var (conditionTokens, conditionEnd) = TokenFinder.FindTokensInBracketsSafe(tokens, currentPos);
+            var (conditionTokens, conditionEnd) = TokenFinder.FindTokensInBracketsSafe(tokens, currentPos,ErrorMessage.ConditionIsRequired());
             currentPos = conditionEnd + 1;
             return astParser.BuildAstTree(conditionTokens);
         }

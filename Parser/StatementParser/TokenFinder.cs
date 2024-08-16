@@ -15,19 +15,19 @@ namespace BoomifyCS.Parser.StatementParser
             var (token, index) = TokensParser.FindTokenByTT(tokenType, tokens, currentPos);
             if (token == null)
             {
-                throw new BifySyntaxError($"Expected token of type {tokenType} not found");
+                throw new BifySyntaxError(ErrorMessage.ExpectedTokenNotFound(tokenType.ToString()));
             }
             return (token, index);
         }
 
-        public static (List<Token>, int) FindTokensInBracketsSafe(List<Token> tokens, int currentPos, bool throwError = true)
+        public static (List<Token>, int) FindTokensInBracketsSafe(List<Token> tokens, int currentPos, string message,bool throwError = true)
         {
             var (conditionTokens, conditionEnd) = TokensParser.TokensInBrackets(tokens, currentPos);
-            if (conditionTokens == null || conditionTokens.Count == 0)
+            if (conditionTokens == null)
             {
                 if (throwError)
-                    throw new BifyParsingError("Tokens in brackets not found");
-                return (new List<Token>(), currentPos);
+                    throw new BifyParsingError(message);
+                return (null, currentPos);
             }
             return (conditionTokens, conditionEnd);
         }
@@ -36,7 +36,7 @@ namespace BoomifyCS.Parser.StatementParser
             var (token, index) = TokensParser.FindTokenByTT(tokenType, tokens, currentPos);
             if (token == null)
             {
-                throw new BifySyntaxError($"Expected token of type {tokenType} not found");
+                throw new BifySyntaxError(ErrorMessage.ExpectedTokenNotFound(tokenType.ToString()));
             }
             currentPos = index;
             return token;
@@ -54,10 +54,10 @@ namespace BoomifyCS.Parser.StatementParser
 
             return tokens[currentPos - 1];
         }
-        public static List<Token> ParseOptionalArguments(List<Token> tokens, ref int currentPos)
+        public static List<Token> ParseOptionalArguments(List<Token> tokens, ref int currentPos,string message)
         {
-            var (argumentsTokens, argumentsEnd) = TokenFinder.FindTokensInBracketsSafe(tokens, currentPos, false);
-            if (argumentsTokens.Count == 0)
+            var (argumentsTokens, argumentsEnd) = TokenFinder.FindTokensInBracketsSafe(tokens, currentPos, message, false);
+            if (argumentsTokens == null)
             {
                 return null;
             }

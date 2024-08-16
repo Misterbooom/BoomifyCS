@@ -1,4 +1,5 @@
 ﻿using System;
+using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Exceptions
 {
@@ -115,6 +116,26 @@ namespace BoomifyCS.Exceptions
         public static string UnexpectedToken(string token)
         {
             return $"Unexpected token '{token}'";
+        }
+        public static string ExpectedValueAfterAssignment()
+        {
+            return "Expected a value after assignment operator.";
+        }
+        public static string ExpectedTokenNotFound(string tokenType)
+        {
+            return $"Expected token of type {tokenType} not found";
+        }
+        public static string ConditionIsRequired()
+        {
+            return "Condition is required";
+        }
+        public static string InvalidFunctionDeclaration()
+        {
+            return "Invalid function declaration syntax\r\n";
+        }
+        public static string OperationNotSupported(string operation,string objectName)
+        {
+            return $"{operation} not supported for {objectName}.";
         }
     }
 }

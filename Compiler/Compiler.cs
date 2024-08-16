@@ -197,8 +197,22 @@ namespace BoomifyCS.Interpreter
         private void HandleCall(AstCall astCall)
         {
             Visit(astCall.ArgumentsNode);
-            int expectedArgCount = AstNodeConnector.CountCommaNode(astCall.ArgumentsNode) + 1;
-            _instructions.Add(new ByteInstruction(ByteType.CALL, [astCall.CallableName.Token.Value, expectedArgCount], _lineCount));
+
+            int expectedArgCount = -1;
+            if (astCall.ArgumentsNode is AstBinaryOp astBinaryOp && astBinaryOp.Token.Type == TokenType.COMMA)
+            {
+                expectedArgCount = AstNodeConnector.CountCommaNode(astCall.ArgumentsNode) + 1;
+            }
+            else if (astCall.ArgumentsNode == null)
+            {
+                expectedArgCount = 0;
+            }
+            else
+            {
+                expectedArgCount = 1;
+            }
+            Visit(astCall.CallableName);
+            _instructions.Add(new ByteInstruction(ByteType.CALL, expectedArgCount, _lineCount));
         }
 
         private void HandleModule(AstModule astModule)

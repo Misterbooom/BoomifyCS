@@ -152,11 +152,11 @@ namespace BoomifyCS.Interpreter.VM
                     case ByteType.CALL:
                         List<BifyObject> arguments = [];
                         
-                        BifyFunction function = (BifyFunction)GetVariable((string)instruction.Value[0]);
+                        BifyFunction function = (BifyFunction)_stackManager.Pop();
 
                        
-                        int expectedArgCount = (int)instruction.Value[1];
-                        _callStack.Add(new CallStackFrame((string)instruction.Value[0], line, _modulePath, SourceCode[line - 1]));
+                        int expectedArgCount = (int)instruction.Value[0];
+                        _callStack.Add(new CallStackFrame(function.Name, line, _modulePath, SourceCode[line - 1]));
 
                         if (expectedArgCount != function.ExpectedArgCount && function.ExpectedArgCount != -1)
                         {

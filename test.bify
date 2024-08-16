@@ -1,1 +1,4 @@
-﻿var a = 5;
+﻿var a = ignite("");
+var b = ignite("");
+var c = a + " " + b;
+explode(c);

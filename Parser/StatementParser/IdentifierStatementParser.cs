@@ -13,13 +13,13 @@ namespace BoomifyCS.Parser.StatementParser
     {
         public static (AstNode, int) ParseIdentifier(Token token, List<Token> tokens, int currentPos, AstTree astParser)
         {
-            var argumentsTokens = TokenFinder.ParseOptionalArguments(tokens, ref currentPos);
 
-            if (argumentsTokens == null || argumentsTokens.Count == 0)
+            var argumentsTokens = TokenFinder.ParseOptionalArguments(tokens, ref currentPos,"");
+            
+            if (argumentsTokens == null)
             {
                 return HandleIdentifierWithoutArguments(token, tokens, ref currentPos);
             }
-
             return ParseCall(token, argumentsTokens, ref currentPos, astParser);
         }
 

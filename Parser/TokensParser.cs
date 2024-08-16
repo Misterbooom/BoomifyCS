@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Numerics;
 using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Parser
@@ -112,12 +113,14 @@ namespace BoomifyCS.Parser
             List<Token> result = [];
             int bracketCounter = 0;
             bool insideBrackets = false;
+            bool bracketFound = false;
             for (int i = start; i < tokens.Count; i++)
             {
                 Token token = tokens[i];
 
                 if (token.Type == TokenType.LPAREN)
                 {
+                    bracketFound = true;
                     bracketCounter++;
                     if (!insideBrackets)
                     {
@@ -153,8 +156,12 @@ namespace BoomifyCS.Parser
             {
                 throw new InvalidOperationException("Unmatched parentheses in token list.");
             }
+            if (bracketFound)
+            {
+                return (result, tokens.Count);
 
-            return (result, tokens.Count);
+            }
+            return (null, tokens.Count);
         }
         public static List<List<Token>> SplitTokensByTT(List<Token> tokens, TokenType tokenType, int start = 0)
         {

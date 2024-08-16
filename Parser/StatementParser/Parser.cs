@@ -45,7 +45,7 @@ namespace BoomifyCS.Parser.StatementParser
         {
             var (identifierToken, tokenEnd) = TokenFinder.FindTokenSafe(TokenType.IDENTIFIER, tokens, currentPos);
             currentPos = tokenEnd + 1;
-            var (argumentsTokens, argumentsEnd) = TokenFinder.FindTokensInBracketsSafe(tokens, currentPos);
+            var (argumentsTokens, argumentsEnd) = TokenFinder.FindTokensInBracketsSafe(tokens, currentPos,ErrorMessage.InvalidFunctionDeclaration());
             AstNode identifierNode = NodeConverter.TokenToNode(identifierToken);
             currentPos = argumentsEnd + 1;
             AstNode argumentsNode = astParser.BuildAstTree(argumentsTokens);
@@ -66,7 +66,7 @@ namespace BoomifyCS.Parser.StatementParser
             var (valueTokens, endOfValue) = TokensParser.AllTokensToEol(tokens, currentPos + 1);
             if (valueTokens.Count == 0)
             {
-                throw new BifySyntaxError("Expected value after assignment operator");
+                throw new BifySyntaxError(ErrorMessage.ExpectedValueAfterAssignment());
             }
 
             currentPos = endOfValue + 1;

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BoomifyCS.Ast;
+using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 using BoomifyCS.Parser.NodeParser;
 
@@ -32,7 +33,7 @@ namespace BoomifyCS.Parser.StatementParser
         }
         private static (AstNode, AstNode, AstNode) ParseForLoopHeader(List<Token> tokens, ref int currentPos, AstTree astParser)
         {
-            var (tokensInBrackets, bracketEnd) = TokenFinder.FindTokensInBracketsSafe(tokens, currentPos);
+            var (tokensInBrackets, bracketEnd) = TokenFinder.FindTokensInBracketsSafe(tokens, currentPos,ErrorMessage.InvalidInitializationStatement());
             currentPos = bracketEnd + 1;
             List<List<Token>> bracketTokensSplit = TokensParser.SplitTokensByTT(tokensInBrackets, TokenType.SEMICOLON);
 
