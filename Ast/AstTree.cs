@@ -82,7 +82,8 @@ namespace BoomifyCS.Ast
             {
                 ProcessSingleToken(tokens, operandStack, operatorStack, ref lineTokenPosition);
             }
-
+            operandStack.WriteNodes();
+            operatorStack.WriteNodes();
             return GenerateAstNodeFromStacks(operandStack, operatorStack);
         }
 
@@ -337,10 +338,8 @@ namespace BoomifyCS.Ast
                 operandStack.Push(op);
             }
 
-            if (currentToken.Type != TokenType.EOL)
-            {
+           
                 operatorStack.Push(NodeConverter.TokenToNode(currentToken, this));
-            }
         }
     }
 }

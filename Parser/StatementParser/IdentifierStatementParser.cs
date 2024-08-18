@@ -13,6 +13,7 @@ namespace BoomifyCS.Parser.StatementParser
     {
         public static (AstNode, int) ParseIdentifier(Token token, List<Token> tokens, int currentPos, AstTree astParser)
         {
+      
 
             var argumentsTokens = TokenFinder.ParseOptionalArguments(tokens, ref currentPos,"");
             
@@ -42,12 +43,15 @@ namespace BoomifyCS.Parser.StatementParser
             return (NodeConverter.TokenToNode(token), currentPos);
         }
 
-        private static (AstNode, int) ParseCall(Token token, List<Token> argumentsTokens, ref int currentPos, AstTree astParser)
+        private static (AstCall, int) ParseCall(Token token, List<Token> argumentsTokens, ref int currentPos, AstTree astParser)
         {
+            //argumentsTokens.WriteTokens();
             AstNode identifierNode = NodeConverter.TokenToNode(token);
             AstNode argumentsNode = astParser.BuildAstTree(argumentsTokens);
-            Token callToken = new(TokenType.CALL, token.Value + "(" + argumentsTokens.ToString() + ")");
-            return (new AstCall(callToken, identifierNode, argumentsNode), currentPos);
+            Token callToken = new(TokenType.CALL, token.Value + "(" + argumentsTokens.TokensToString() + ")");
+            AstCall callNode = new(callToken, identifierNode, argumentsNode);
+
+            return (callNode, currentPos - 1);
         }
 
     }

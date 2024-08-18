@@ -23,7 +23,7 @@ namespace BoomifyCS.Interpreter.VM
         {
             try
             {
-                ProccesInstructions(instructions);
+                ProcessInstructions(instructions);
             }
             catch (BifyError e)
             {
@@ -34,7 +34,7 @@ namespace BoomifyCS.Interpreter.VM
                 throw;
             }
         }
-        public void ProccesInstructions(List<ByteInstruction> instructions)
+        public void ProcessInstructions(List<ByteInstruction> instructions)
         {
             _instructions = instructions;
             int instructionIndex = 0;
