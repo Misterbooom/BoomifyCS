@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using BoomifyCS.Ast;
-using BoomifyCS.Interpreter.VM;
+using BoomifyCS.Compiler.VM;
 using BoomifyCS.Lexer;
 using BoomifyCS.Objects;
 using BoomifyCS.Parser;
 
-namespace BoomifyCS.Interpreter
+namespace BoomifyCS.Compiler
 {
     public class MyCompiler(string[] sourcecode)
     {
@@ -299,8 +299,39 @@ namespace BoomifyCS.Interpreter
             Visit(ifNode.ConditionNode);
             ByteInstruction jumpIfFalse = new(ByteType.JUMP_IF_FALSE, -1, _lineCount);
             _instructions.Add(jumpIfFalse);
+
             Visit(ifNode.BlockNode);
+
+            ByteInstruction jumpToEnd = new(ByteType.JUMP, -1, _lineCount);
+            _instructions.Add(jumpToEnd);
+
             jumpIfFalse.Value[0] = _instructions.Count;
+
+            foreach (var elseIfNode in ifNode.ElseIfNodes)
+            {
+                Visit(elseIfNode.ConditionNode);
+                ByteInstruction jumpIfFalseElseIf = new(ByteType.JUMP_IF_FALSE, -1, _lineCount);
+                _instructions.Add(jumpIfFalseElseIf);
+
+                Visit(elseIfNode.BlockNode);
+
+                jumpToEnd.Value[0] = _instructions.Count;
+
+                jumpToEnd = new(ByteType.JUMP, -1, _lineCount);
+                _instructions.Add(jumpToEnd);
+
+                jumpIfFalseElseIf.Value[0] = _instructions.Count;
+            }
+
+            if (ifNode.ElseNode != null)
+            {
+                Visit(ifNode.ElseNode);
+            }
+
+            jumpToEnd.Value[0] = _instructions.Count;
         }
+
+
+
     }
 }

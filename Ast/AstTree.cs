@@ -32,6 +32,7 @@ namespace BoomifyCS.Ast
 
                 ParseSingleLine(tokens, nodes);
 
+
             }
 
             return GenerateFinalAstNode(nodes);
@@ -41,6 +42,7 @@ namespace BoomifyCS.Ast
         private void ParseSingleLine(List<Token> tokens, List<AstNode> nodes)
         {
             var (lineTokens, newTokenPosition) = TokensParser.SplitTokensByLine(tokens, _codeTokenPosition);
+            //lineTokens.WriteTokens();
             _codeTokenPosition = newTokenPosition;
             AstNode node = BuildAstTree(lineTokens);
             nodes.Add(new AstLine(node));
@@ -82,14 +84,14 @@ namespace BoomifyCS.Ast
             {
                 ProcessSingleToken(tokens, operandStack, operatorStack, ref lineTokenPosition);
             }
-            operandStack.WriteNodes();
-            operatorStack.WriteNodes();
             return GenerateAstNodeFromStacks(operandStack, operatorStack);
         }
 
         private void ProcessSingleToken(List<Token> tokens, Stack<AstNode> operandStack, Stack<AstNode> operatorStack, ref int lineTokenPosition)
         {
             Token currentToken = tokens[lineTokenPosition];
+            //Console.WriteLine(currentToken);
+
             if (currentToken.Type == TokenType.WHITESPACE || currentToken.Type == TokenType.NEXTLINE || currentToken.Type == TokenType.EOL)
             {
                 if (currentToken.Type == TokenType.NEXTLINE || currentToken.Type == TokenType.EOL)
@@ -120,7 +122,7 @@ namespace BoomifyCS.Ast
                     ))
                     );
                 }
-                catch (ArgumentOutOfRangeException e)
+                catch (ArgumentOutOfRangeException)
                 {
                     throw new BifySyntaxError(ErrorMessage.NotEnoughOperands(currentToken.Value), sourceCode[lineCount - 1],currentToken.Value);
                 }
@@ -144,7 +146,6 @@ namespace BoomifyCS.Ast
             {
                 operandStack.Push(NodeConverter.TokenToNode(currentToken, this));
             }
-
             lineTokenPosition++;
         }
 
@@ -166,12 +167,14 @@ namespace BoomifyCS.Ast
             }
 
             lineTokenPosition = result.Item2;
+
             if (result.Item1.LineNumber == 0)
             {
                 result.Item1.LineNumber = lineCount;
             }
             else
             {
+
             }
             if (HandleSpecialMultiTokenCases(result.Item1, operatorStack))
             {
@@ -294,13 +297,31 @@ namespace BoomifyCS.Ast
         {
             if (operandStack.Count < 2)
             {
-
                 throw new BifySyntaxError(ErrorMessage.NotEnoughOperands(op.Token.Value), sourceCode[op.LineNumber - 1], op.Token.Value);
             }
         }
 
         private AstNode GenerateAstNodeFromStacks(Stack<AstNode> operandStack, Stack<AstNode> operatorStack)
         {
+            if (operandStack.Count == 0)
+            {
+                while (operatorStack.Count > 1)
+                {
+                    AstConditionStatement op = new();
+                    AstNode right = operatorStack.Pop();
+                    AstNode left = operatorStack.Pop();
+                    if (right is not AstIf || left is not AstIf)
+                    {
+                        EnsureEnoughOperands(operandStack,right);
+                    }
+                    op.Left = left;
+                    op.Right = right;
+                    op.LineNumber = lineCount;
+                    operatorStack.Push(op);
+                }
+                return operatorStack.Count == 1 ? operatorStack.Pop() : null;
+
+            }
             if (operatorStack.Count == 1 && operandStack.Count == 0)
             {
                 return operatorStack.Peek();
@@ -316,6 +337,7 @@ namespace BoomifyCS.Ast
                 op.LineNumber = lineCount;
                 operandStack.Push(op);
             }
+
 
             return operandStack.Count == 1 ? operandStack.Pop() : null;
         }

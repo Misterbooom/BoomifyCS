@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using BoomifyCS.Ast;
 using BoomifyCS.Lexer;
 using BoomifyCS.Parser;
-using BoomifyCS.Interpreter;
+using BoomifyCS.Compiler;
 using BoomifyCS.Objects;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Tests;
@@ -25,7 +25,8 @@ namespace BoomifyCS
         {
             //ExceptionTest.CallStackTest();
             CodeTest codeTest = new();
-            codeTest.SyntaxTest();
+            //codeTest.SyntaxTest();
+            codeTest.RealTest();
         }
         static void RunInterpreter()
         {
@@ -57,7 +58,10 @@ namespace BoomifyCS
             catch (BifyError e)
             {
                 e.PrintException();
-                Environment.Exit(1);
+                //Environment.Exit(1);
+                ExceptionExtension.ParseError(e.GetType().Name, e.StackTrace, e.Message); ;
+
+                //throw;
             }
             catch (Exception e)
             {

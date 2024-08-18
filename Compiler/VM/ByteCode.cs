@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using BoomifyCS.Lexer;
 using BoomifyCS.Objects;
 
-namespace BoomifyCS.Interpreter
+namespace BoomifyCS.Compiler
 {
     public enum ByteType
     {

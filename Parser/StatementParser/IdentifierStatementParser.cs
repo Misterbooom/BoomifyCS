@@ -45,7 +45,8 @@ namespace BoomifyCS.Parser.StatementParser
 
         private static (AstCall, int) ParseCall(Token token, List<Token> argumentsTokens, ref int currentPos, AstTree astParser)
         {
-            //argumentsTokens.WriteTokens();
+            
+
             AstNode identifierNode = NodeConverter.TokenToNode(token);
             AstNode argumentsNode = astParser.BuildAstTree(argumentsTokens);
             Token callToken = new(TokenType.CALL, token.Value + "(" + argumentsTokens.TokensToString() + ")");

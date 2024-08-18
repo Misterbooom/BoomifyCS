@@ -19,7 +19,6 @@ namespace BoomifyCS.BuiltIn.Function
         {
             BifyObject value = arguments[0];
             string type = ((BifyString)arguments[1]).Value;
-            Console.WriteLine($"Type - {type} Value - {value}");
             if (type == "string") {
                 return new BifyString(value.ToString());
             }

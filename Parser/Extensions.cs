@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using BoomifyCS.Ast;
-using BoomifyCS.Interpreter;
+using BoomifyCS.Compiler;
 using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Parser

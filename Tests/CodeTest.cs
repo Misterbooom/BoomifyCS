@@ -15,7 +15,20 @@ namespace BoomifyCS.Tests
             LoopTest();
             ArrayIndexTest();
         }
+        public void RealTest()
+        {
+            Calculator();
+        }
+        private void Calculator()
+        {
+            string calculatorCode = @"
 
+
+}   
+
+            ";
+            RunLanguage(calculatorCode,expectError:false);
+        }
         public static void BracketTest()
         {
             string codeWithMissingBracket = @"
@@ -133,21 +146,33 @@ namespace BoomifyCS.Tests
                 ";
             RunLanguage(codeWithNonArrayIndexing, ErrorMessage.IndexOfArrayTypeError());
         }
-        private static void RunLanguage(string code, string expectedMessage)
+        private static void RunLanguage(string code, string expectedMessage = "", bool expectError = true)
         {
+          
             try
             {
                 AstBuilder.BuildFromStringAndRunVM(code);
             }
             catch (BifyError e)
             {
+                if (!expectError)
+                {
+                    e.PrintException();
+                    Assert.Fail($"Test failed - {code}");
+                    return;
+                }
                 string message = e.Message;
+                
                 Assert.That(message, Is.EqualTo(expectedMessage),
                     $"Expected error message: '{expectedMessage}', but got: '{e.Message}'");
                 Console.WriteLine($"Test completed - `{code}`");
                 return;
             }
-
+            if (!expectError)
+            {
+                Console.WriteLine($"Test completed - `{code}`");
+                return;
+            }
             Assert.Fail($"Expected BifyError, but got nothing - `{code}`");
         }
     }

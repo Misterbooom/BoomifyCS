@@ -24,14 +24,14 @@ namespace BoomifyCS.Parser.StatementParser
 
             if (TokenFinder.IsNextToken(tokens, currentPos,TokenType.IF))
             {
-                elseNode = ParseElseIf(token, tokens, currentPos, astParser).Item1;
+
+                elseNode = ParseElseIf(token, tokens,ref currentPos, astParser).Item1;
             }
             else
             {
                 currentPos--;
                 elseNode = ParseElseBlock(token, tokens, ref currentPos, astParser);
             }
-
             return (elseNode, currentPos);
         }
         private static AstElse ParseElseBlock(Token token, List<Token> tokens, ref int currentPos, AstTree astParser)
@@ -40,9 +40,10 @@ namespace BoomifyCS.Parser.StatementParser
             return new AstElse(token, (AstBlock)blockNode);
         }
 
-        private static (AstNode, int) ParseElseIf(Token token, List<Token> tokens, int currentPos, AstTree astParser)
+        private static (AstNode, int) ParseElseIf(Token token, List<Token> tokens, ref int currentPos, AstTree astParser)
         {
             var conditionNode = AstBuilder.ParseCondition(tokens, ref currentPos, astParser);
+            
             var blockNode = AstBuilder.ParseBlock(tokens, ref currentPos, astParser);
 
             return (new AstElseIf(token, (AstBlock)blockNode, conditionNode), currentPos);

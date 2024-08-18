@@ -2,10 +2,9 @@
 using BoomifyCS.Lexer;
 using System.Collections.Generic;
 using BoomifyCS.Exceptions;
-using BoomifyCS.Interpreter.VM;
-using BoomifyCS.Interpreter;
-using System.Diagnostics.Metrics;
+using BoomifyCS.Compiler;
 using BoomifyCS.Parser.StatementParser;
+using System;
 
 namespace BoomifyCS.Parser.NodeParser
 {
@@ -71,13 +70,14 @@ namespace BoomifyCS.Parser.NodeParser
         public static AstNode ParseBlock(List<Token> tokens, ref int currentPos, AstTree astParser)
         {
             var (blockToken, blockEnd) = TokenFinder.FindTokenSafe(TokenType.BLOCK, tokens, currentPos);
-            currentPos = blockEnd + 1;
+            currentPos = blockEnd + 2;
+
             return astParser.BuildAstTree([blockToken]);
         }
         public static AstNode ParseCondition(List<Token> tokens, ref int currentPos, AstTree astParser)
         {
             var (conditionTokens, conditionEnd) = TokenFinder.FindTokensInBracketsSafe(tokens, currentPos,ErrorMessage.ConditionIsRequired());
-            currentPos = conditionEnd + 1;
+            currentPos = conditionEnd;
             return astParser.BuildAstTree(conditionTokens);
         }
     }

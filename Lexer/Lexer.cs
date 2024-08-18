@@ -168,7 +168,7 @@ namespace BoomifyCS.Lexer
 
         public static bool IsIdentifier(char identifier)
         {
-            return identifier == '_' || char.IsLetter(identifier);
+            return identifier == '_' || char.IsLetter(identifier) || char.IsDigit(identifier);
         }
         public void SkipComment()
         {
@@ -188,8 +188,7 @@ namespace BoomifyCS.Lexer
 
                 if (char.IsWhiteSpace(currentChar))
                 {
-                    _position++;
-                    continue;
+                    break;
                 }
 
                 if (currentChar == '.' && dotCount > 0)

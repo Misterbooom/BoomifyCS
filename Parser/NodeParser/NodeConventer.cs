@@ -72,7 +72,7 @@ namespace BoomifyCS.Parser.NodeParser
                     {
                         e.CurrentLine += astTree.lineCount + 1;
                         e.LineTokensString = astTree.sourceCode[e.CurrentLine - 1];
-                        throw e;
+                        throw;
                     }
                     break;
 

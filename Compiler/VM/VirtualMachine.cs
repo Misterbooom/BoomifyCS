@@ -5,7 +5,7 @@ using BoomifyCS.BuiltIn.Function;
 using BoomifyCS.Objects;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Parser;
-namespace BoomifyCS.Interpreter.VM
+namespace BoomifyCS.Compiler.VM
 {
     public class VirtualMachine(string[] sourceCode)
     {

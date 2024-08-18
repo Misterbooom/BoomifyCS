@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BoomifyCS.BuiltIn.Function;
 using BoomifyCS.Objects;
-namespace BoomifyCS.Interpreter.VM
+namespace BoomifyCS.Compiler.VM
 {
     public class VarManager
     {

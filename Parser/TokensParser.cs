@@ -53,7 +53,6 @@ namespace BoomifyCS.Parser
                     currentToken = tokens[tokenPosition];
                 }
             }
-            //lineTokens.Write();
             return new Tuple<List<Token>, int>(lineTokens, tokenPosition);
         }
 

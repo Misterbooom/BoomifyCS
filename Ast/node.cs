@@ -1,4 +1,4 @@
-﻿using System;
+﻿ using System;
 using System.Collections.Generic;
 using BoomifyCS.Lexer;
 using BoomifyCS.Objects;
@@ -405,6 +405,10 @@ namespace BoomifyCS.Ast
             string operandStr = OperandNode?.StrHelper(level + 1, "Operand: ");
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{nodeIndexStr}\n{operandStr}";
         }
+    }
+    public class AstConditionStatement(AstNode left = null,AstNode right = null) : AstNode(new Token(TokenType.IDENTIFIER, "Condition statement"),left,right)
+    {
+        
     }
 }
 
