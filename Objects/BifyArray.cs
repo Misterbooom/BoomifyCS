@@ -1,14 +1,20 @@
-﻿using System;
+﻿using BoomifyCS.Exceptions;
+using BoomifyCS.Lexer;
 using System.Collections.Generic;
 using System.Text;
-using BoomifyCS.Exceptions;
-using BoomifyCS.Lexer;
+using System;
+using System.Numerics;
+
 namespace BoomifyCS.Objects
 {
-    public class BifyArray(List<BifyObject> bifyObjects) : BifyObject(new Token(TokenType.ARRAY, "array"))
+    public class BifyArray : BifyObject
     {
-        private readonly List<BifyObject> _bifyObjects = bifyObjects ?? throw new ArgumentNullException(nameof(bifyObjects));
+        private readonly List<BifyObject> _bifyObjects;
 
+        // Constructor
+        public BifyArray(List<BifyObject> bifyObjects) : base() => _bifyObjects = bifyObjects ?? throw new ArgumentNullException(nameof(bifyObjects));
+
+        // Get an element by index
         public BifyObject Get(int index)
         {
             if (index < 0 || index >= _bifyObjects.Count)
@@ -18,6 +24,7 @@ namespace BoomifyCS.Objects
             return _bifyObjects[index];
         }
 
+        // Append an item to the array
         public void Append(BifyObject item)
         {
             if (item == null)
@@ -27,8 +34,10 @@ namespace BoomifyCS.Objects
             _bifyObjects.Add(item);
         }
 
+        // Get the count of objects in the array
         public BifyInteger Count => new(_bifyObjects.Count);
 
+        // Convert the array to string
         public override BifyString ObjectToString()
         {
             var sb = new StringBuilder();
@@ -43,33 +52,74 @@ namespace BoomifyCS.Objects
             }
             sb.Append(']');
             return new BifyString(sb.ToString());
-
         }
-        public override BifyObject Index(BifyInteger other)
+
+        // Handle array indexing with support for integers and ranges
+        public override BifyObject Index(BifyObject other)
         {
-            if (_bifyObjects.Count == 0)
+
+            if (other is BifyInteger bifyInteger)
             {
-                throw new BifyNullError(ErrorMessage.ArrayIsEmpty());
+                if (_bifyObjects.Count == 0)
+                {
+                    throw new BifyNullError(ErrorMessage.ArrayIsEmpty());
+                }
+
+                
+
+                int index = bifyInteger.Value < 0 ? _bifyObjects.Count + bifyInteger.Value : bifyInteger.Value;
+                if (!IsInBound(index))
+                {
+                    throw new BifyIndexError(ErrorMessage.InvalidIndex(bifyInteger.Value, _bifyObjects.Count));
+                }
+                if (index < 0 || index >= _bifyObjects.Count)
+                {
+                    throw new BifyIndexError(ErrorMessage.InvalidIndex(bifyInteger.Value, _bifyObjects.Count));
+                }
+
+                return _bifyObjects[index];
             }
-            if (other.Value >= _bifyObjects.Count)
+
+            else if (other is BifyRange bifyRange)
             {
-                throw new BifyIndexError(ErrorMessage.InvalidIndex(other.Value, _bifyObjects.Count));
+                BifyInteger start = bifyRange.First;
+                BifyInteger end = bifyRange.Second;
+
+                int startIndex = start.Value < 0 ? _bifyObjects.Count + start.Value : start.Value;
+                int endIndex = end.Value < 0 ? _bifyObjects.Count + end.Value  : end.Value + 1;
+
+                if (!IsInBound(startIndex))
+                {
+                    throw new BifyIndexError(ErrorMessage.InvalidIndex(start.Value, _bifyObjects.Count));
+                }
+
+                if (!IsInBound(endIndex))
+                {
+                    throw new BifyIndexError(ErrorMessage.InvalidIndex(end.Value, _bifyObjects.Count));
+                }
+                return new BifyArray(_bifyObjects[startIndex..endIndex]);
             }
-            if (other.Value < 0)
-            {
-                return _bifyObjects[^Math.Abs(other.Value)];
-            }
-            return _bifyObjects[other.Value];
+
+
+            return new BifyNull(); 
+        }
+        private bool IsInBound(int value)
+        {
+            return value < _bifyObjects.Count;
+            
         }
 
+        // String representation of the array
         public override BifyString Repr()
         {
             return new BifyString($"BifyArray({ToString()})");
         }
+
+        // Override ToString to use ObjectToString
         public override string ToString()
         {
             return ObjectToString().Value;
         }
-
     }
+
 }

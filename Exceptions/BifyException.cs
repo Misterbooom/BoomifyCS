@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using BoomifyCS.Lexer;
 using ColorConsole = Colorful.Console;
 
@@ -12,7 +10,8 @@ namespace BoomifyCS.Exceptions
     public abstract class BifyError : Exception
     {
         public int CurrentLine { get; set; }
-        public List<CallStackFrame> CallStack { get; set; } = [];
+        public int Column { get; set; } // Added property for column tracking
+        public List<CallStackFrame> CallStack { get; set; } = new();
         public string LineTokensString { get; set; } = "";
         public string InvalidTokensString { get; set; }
         public string FileName { get; set; }
@@ -21,26 +20,24 @@ namespace BoomifyCS.Exceptions
 
         protected BifyError(string message) : base(message) => FileName = "0";
 
-
-
-        protected BifyError(string message, string tokens, string invalidTokens, int currentLine = 1) : base(message)
+        protected BifyError(string message, string tokens, string invalidTokens, int currentLine = 1, int column = 0)
+            : base(message)
         {
             InvalidTokensString = invalidTokens;
             LineTokensString = tokens;
             CurrentLine = currentLine;
+            Column = column;
         }
 
         public void PrintException()
         {
             string exceptionInfo = $"{this.GetType().Name}: {Message}";
-            string fileInfo = $"    File '{FileName}', (line {CurrentLine})";
+            string fileInfo = $"    File '{FileName}', line {CurrentLine}, column {Column}";
 
             ColorConsole.WriteLine(exceptionInfo, Color.IndianRed);
             ColorConsole.WriteLine(fileInfo, Color.OrangeRed);
 
             WriteLineTokens(10);
-
-
             PrintCallStack();
         }
 
@@ -48,7 +45,6 @@ namespace BoomifyCS.Exceptions
         {
             if (CallStack != null && CallStack.Count != 0)
             {
-
                 foreach (var frame in CallStack)
                 {
                     Console.Write(new string(' ', 4));
@@ -70,8 +66,6 @@ namespace BoomifyCS.Exceptions
             }
         }
 
-
-
         public void WriteLineTokens(int indentInt)
         {
             StringBuilder builder = new();
@@ -82,24 +76,22 @@ namespace BoomifyCS.Exceptions
 
             Console.Write(builder.ToString());
 
-            foreach (char token in LineTokensString)
+            for (int i = 0; i < LineTokensString.Length; i++)
             {
-                if (InvalidTokensString.Contains(token.ToString()))
+                if (i == Column - 1)
                 {
-                    ColorConsole.Write(token, Color.Red);
+                    ColorConsole.Write(LineTokensString.Substring(i , InvalidTokensString.Length), Color.Red);
+
+                    i += InvalidTokensString.Length - 1;
                 }
                 else
                 {
-                    ColorConsole.Write(token, Color.White);
+                    ColorConsole.Write(LineTokensString[i], Color.White);
                 }
             }
-            
+
 
             Console.Write("\n");
         }
-
-       
     }
-
-
 }

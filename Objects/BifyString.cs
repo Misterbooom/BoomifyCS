@@ -9,15 +9,9 @@ namespace BoomifyCS.Objects
     {
         public string Value;
 
-        public BifyString(Token token, string value) : base(token)
-        {
-            this.Value = value;
-        }
-        public BifyString(string value) : base(new Token(TokenType.STRING,value))
-        {
-            this.Value = value;
-        }
-            
+        public BifyString(Token token, string value) : base() => this.Value = value;
+        public BifyString(string value) : base() => this.Value = value;
+
 
         public override BifyString ObjectToString()
         {
@@ -37,18 +31,15 @@ namespace BoomifyCS.Objects
                 {
                     builder.Append(Value);
                 }
-                return new BifyString(Token, builder.ToString());
+                return new BifyString( builder.ToString());
             }
-            return new BifyBoolean(this.Token, false);
+            return new BifyBoolean(false);
         }
 
         public override BifyObject Add(BifyObject other)
         {
-            if (other is BifyString otherStr)
-            {
-                return new BifyString(this.Token, this.Value + otherStr.Value);
-            }
-            return new BifyBoolean(this.Token, false);
+            
+            return new BifyString(this.Value + other.ObjectToString().Value);
 
         }
 
@@ -56,9 +47,9 @@ namespace BoomifyCS.Objects
         {
             if (other is BifyString otherStr)
             {
-                return new BifyBoolean(this.Token, this.Value == otherStr.Value);
+                return new BifyBoolean(this.Value == otherStr.Value);
             }
-            return new BifyBoolean(this.Token, false);
+            return new BifyBoolean(false);
 
         }
 
@@ -66,9 +57,9 @@ namespace BoomifyCS.Objects
         {
             if (other is BifyString otherStr)
             {
-                return new BifyBoolean(this.Token, this.Value != otherStr.Value);
+                return new BifyBoolean(this.Value != otherStr.Value);
             }
-            return new BifyBoolean(this.Token, true);
+            return new BifyBoolean(true);
 
         }
         public override BifyBoolean Bool()

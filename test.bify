@@ -1,23 +1,7 @@
-﻿while (true){
-    var num1 = parse(ignite('Write first number: '),'int');
-    var num2 = parse(ignite('Write second number: '),'int');
-    var op = ignite('Write op - (+,-,*,/): ');
-    
-    if (op == '+'){
-        explode(num1,op,num2,"=",num1 + num2);
-    }
-    else if (op == '-'){
-        explode(num1,op,num2,"=",num1 - num2);
-    }
-    else if (op == '*'){
-        explode(num1,op,num2,"=",num1 * num2);
-    }
-    else if (op == "/"){
-        explode(num1,op,num2,"=",num1 / num2);
-    }
-    else{
-        explode('Invalid operation');
-        break;
-    }
-
+﻿var a = false == false;
+if (false == true){
+	explode("Hello World");
+}
+else if (a){
+	explode("Else if detected!");
 }

@@ -5,9 +5,17 @@ namespace BoomifyCS.Exceptions
 {
     public static class ErrorMessage
     {
+        public static string InvalidOperandType(string operand)
+        {
+            return $"Invalid operand type '{operand}'.";
+        }
         public static string UnmatchedOpeningParenthesis()
         {
             return "Unmatched '('. Expected closing parenthesis ')'.";
+        }
+        public static string UnmatchedToken(string open, string close)
+        {
+            return $"Unmatched token: expected a '{close}' to match the '{open}' token.";
         }
         public static string UnmatchedClosingParenthesis()
         {
@@ -70,7 +78,15 @@ namespace BoomifyCS.Exceptions
         {
             return "The first statement in the 'for' loop must be a variable initialization.";
         }
+        public static string InvalidIndexTarget()
+        {
+            return "The target of an index operation must be an array, identifier, or callable.";
+        }
 
+        public static string InvalidIndexExpression()
+        {
+            return "The index of an array or callable must be a number, range, or identifier.";
+        }
         public static string InvalidConditionExpression()
         {
             return "The condition in a 'for' loop must be a valid expression.";
@@ -113,6 +129,15 @@ namespace BoomifyCS.Exceptions
         {
             return $"Invalid array index '{index}'. Array length is {length}.";
         }
+        public static string MissingOperandAfterUnaryOperator(string operatorSymbol)
+        {
+            return $"Missing operand before unary operator '{operatorSymbol}'.";
+        }
+        public static string OperandMustBeIdentifierAfterUnaryOperator(string operatorSymbol)
+        {
+            return $"Operand before unary operator '{operatorSymbol}' must be an identifier.";
+        }
+
         public static string UnexpectedToken(string token)
         {
             return $"Unexpected token '{token}'";
@@ -136,6 +161,25 @@ namespace BoomifyCS.Exceptions
         public static string OperationNotSupported(string operation,string objectName)
         {
             return $"{operation} not supported for {objectName}.";
+        }
+    
+        public static string InvalidVariableName(string var)
+        {
+            return $"Invalid variable name. The variable must be a valid identifier. Not a '{var}'";
+        }
+        public static string EmptyValueAssigned()
+        {
+            return "A value must be assigned after the '=' operator.";
+        }
+        public static string MissingAssignmentOperator()
+        {
+            return "Missing assignment operator (=).";
+        }
+
+
+        public static string InvalidSyntaxInAssignment()
+        {
+            return "Invalid syntax in assignment statement.";
         }
     }
 }

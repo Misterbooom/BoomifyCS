@@ -5,16 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using BoomifyCS.Objects;
 using BoomifyCS.Lexer;
-namespace BoomifyCS.BuiltIn.Function
+namespace BoomifyCS.Objects
 {
     public class BifyFunction : BifyObject
     {
         public  string Name;
         public  BifyObject returnObject;
-        public BifyFunction(string name) : base(new Token(TokenType.CALL,name))
+        public List<string> arguments = [];
+        public BifyFunction(string name) : base()
         {
             Name = name;
-            returnObject = new BifyNull(new Token(TokenType.NULL,"null") );
+            returnObject = new BifyNull();
             ExpectedArgCount = -1;
 
         }
@@ -24,6 +25,10 @@ namespace BoomifyCS.BuiltIn.Function
         }
         public override BifyString Repr()
         {
+            if (arguments.Count > 0)
+            {
+                return new BifyString($"<{Name} Function, Args - [{string.Join(",",arguments)}]>");
+            }
             return new BifyString($"<{Name} Function>");
         }
         public override string ToString()

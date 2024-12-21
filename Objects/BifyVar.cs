@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using BoomifyCS.Lexer;
 namespace BoomifyCS.Objects
 {
-    public class BifyVar(string name) : BifyObject(new Token(TokenType.IDENTIFIER,name))
+    public class BifyVar(string name) : BifyObject()
     {
         public string Name { get; set; } = name;
 

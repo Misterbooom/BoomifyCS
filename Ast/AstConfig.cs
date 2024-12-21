@@ -28,10 +28,13 @@ namespace BoomifyCS.Ast
             { TokenType.BITOR, (int)PrecedenceLevel.BitwiseOr },
             { TokenType.BITXOR, (int)PrecedenceLevel.BitwiseXor },
             { TokenType.BITNOT, (int)PrecedenceLevel.BitwiseNot },
+            { TokenType.NOT, (int)PrecedenceLevel.BitwiseNot }, // Added NOT operator
             { TokenType.LSHIFT, (int)PrecedenceLevel.Shift },
             { TokenType.RSHIFT, (int)PrecedenceLevel.Shift },
             { TokenType.AND, (int)PrecedenceLevel.And },
             { TokenType.OR, (int)PrecedenceLevel.Or },
+            { TokenType.COMMA, (int)PrecedenceLevel.Lowest },
+            { TokenType.RANGE, (int)PrecedenceLevel.Range }
         };
 
         private enum PrecedenceLevel
@@ -41,14 +44,15 @@ namespace BoomifyCS.Ast
             Product = 2,
             Power = 3,
             Shift = 3,
-            BitwiseNot = 3,
+            BitwiseNot = 3, // BitwiseNot and NOT share the same precedence
             BitwiseOr = 4,
             BitwiseXor = 5,
             BitwiseAnd = 5,
             Equality = 6,
             Comparison = 7,
-            And = 8,
-            Or = 9,
+            Range = 8, // Added Range Precedence
+            And = 9,
+            Or = 10,
         }
     }
 }

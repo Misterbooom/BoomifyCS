@@ -7,14 +7,8 @@ namespace BoomifyCS.Objects
     {
         public bool Value;
 
-        public BifyBoolean(Token token, bool value) : base(token)
-        {
-            this.Value = value;
-        }
-        public BifyBoolean(bool value) : base(new Token(TokenType.IDENTIFIER, value.ToString()))
-        {
-            this.Value = value;
-        }
+        public BifyBoolean(Token token, bool value) : base() => this.Value = value;
+        public BifyBoolean(bool value) : base() => this.Value = value;
 
         public override BifyString ObjectToString()
         {
@@ -31,7 +25,7 @@ namespace BoomifyCS.Objects
         {
             if (other is BifyBoolean otherBool)
             {
-                return new BifyBoolean(this.Token, this.Value && otherBool.Value);
+                return new BifyBoolean(this.Value && otherBool.Value);
             }
             return new BifyBoolean(false);
         }
@@ -41,7 +35,7 @@ namespace BoomifyCS.Objects
         {
             if (other is BifyBoolean otherBool)
             {
-                return new BifyBoolean(this.Token, this.Value || otherBool.Value);
+                return new BifyBoolean(this.Value || otherBool.Value);
             }
             return new BifyBoolean(false);
         }
@@ -49,7 +43,7 @@ namespace BoomifyCS.Objects
         // Logical NOT operator (!)
         public override BifyObject Not()
         {
-            return new BifyBoolean(this.Token, !this.Value);
+            return new BifyBoolean(!this.Value);
         }
 
         // Equal to (==)
@@ -57,7 +51,7 @@ namespace BoomifyCS.Objects
         {
             if (other is BifyBoolean otherBool)
             {
-                return new BifyBoolean(this.Token, this.Value == otherBool.Value);
+                return new BifyBoolean(this.Value == otherBool.Value);
             }
             return new BifyBoolean(false);
 
@@ -68,7 +62,7 @@ namespace BoomifyCS.Objects
         {
             if (other is BifyBoolean otherBool)
             {
-                return new BifyBoolean(this.Token, this.Value != otherBool.Value);
+                return new BifyBoolean(this.Value != otherBool.Value);
             }
             return new BifyBoolean(false);
         }

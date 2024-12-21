@@ -17,7 +17,7 @@ namespace BoomifyCS.Parser
                 return string.Empty;
             }
 
-            return str.Substring(index );
+            return str[index..];
         }
     }
 }

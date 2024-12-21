@@ -12,10 +12,7 @@ namespace BoomifyCS.BuiltIn.Function
     public class Ignite : BifyFunction
     {
 
-        public Ignite() : base("ignite")
-        { 
-            ExpectedArgCount = 1;
-        }
+        public Ignite() : base("ignite") => ExpectedArgCount = 1;
         public override BifyObject Call(List<BifyObject> arguments)
         {
             if (!(arguments[0] is BifyString))

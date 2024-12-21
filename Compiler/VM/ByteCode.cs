@@ -51,7 +51,11 @@ namespace BoomifyCS.Compiler
         POWE,
         NEW_ARRAY,
         STORE_LOCAL,
-        LOAD_ARRAY
+        LOAD_ARRAY,
+        DEF_FUNC,
+        END_DEF_FUNC,
+        ADD_ARG,
+        INIT
     }
     public class ByteInstruction
     {

@@ -10,7 +10,6 @@ using BoomifyCS.Parser;
 using BoomifyCS.Compiler;
 using BoomifyCS.Objects;
 using BoomifyCS.Exceptions;
-using BoomifyCS.Tests;
 namespace BoomifyCS 
 {                   
     internal class Program
@@ -18,15 +17,9 @@ namespace BoomifyCS
         static void Main()
         {
             RunInterpreter();
-            //RunTests();
-            //astParser.ParseTokens(tokens);
         }
         static void RunTests()
         {
-            //ExceptionTest.CallStackTest();
-            CodeTest codeTest = new();
-            //codeTest.SyntaxTest();
-            codeTest.RealTest();
         }
         static void RunInterpreter()
         {
@@ -43,31 +36,20 @@ namespace BoomifyCS
             try
             {
                 List<Token> tokens = lexer.Tokenize();
-                //tokens.WriteTokens();
                 string[] codeByLine = code.Split('\n');
-                
-                AstTree astParser = new(file,codeByLine);
+                AstTree astParser = new(codeByLine);
                 AstNode node = astParser.ParseTokens(tokens);
-                Console.WriteLine(node);
+                Console.WriteLine($"Final node:  \n{node.ToString()}");
                 MyCompiler interpreter = new(codeByLine);
                 interpreter.RunVM(node);
-
-
 
             }
             catch (BifyError e)
             {
                 e.PrintException();
-                //Environment.Exit(1);
-                ExceptionExtension.ParseError(e.GetType().Name, e.StackTrace, e.Message); ;
 
-                //throw;
             }
-            catch (Exception e)
-            {
-
-                ExceptionExtension.ParseError(e.GetType().Name, e.StackTrace, e.Message); ;
-            }
+            
         }
 
     }

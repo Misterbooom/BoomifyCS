@@ -5,15 +5,23 @@ using BoomifyCS.Exceptions;
 
 namespace BoomifyCS.Objects
 {
-    public class BifyObject(Token token)
+    public class BifyObject()
     {
-        public Token Token = token;
         public int ExpectedArgCount;
         public string GetName()
         {
             return GetType().Name.Replace("Bify", "");
         }
+        public virtual void Initialize(List<BifyObject> args)
+        {
+            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Initialize", GetName()));
 
+        }
+        public virtual int GetInitializerArgs()
+        {
+            throw new BifyOperationError(ErrorMessage.OperationNotSupported("GetInitializerArgs", GetName()));
+
+        }
         public virtual BifyString Repr()
         {
             throw new BifyOperationError(ErrorMessage.OperationNotSupported("Repr", GetName()));
@@ -172,7 +180,7 @@ namespace BoomifyCS.Objects
             throw new BifyCastError($"Integer conversion not supported for {GetName()}.");
         }
 
-        public virtual BifyObject Index(BifyInteger other)
+        public virtual BifyObject Index(BifyObject other)
         {
             throw new BifyOperationError(ErrorMessage.OperationNotSupported("Index", GetName()));
         }

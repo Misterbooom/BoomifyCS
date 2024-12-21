@@ -18,6 +18,7 @@ namespace BoomifyCS.Compiler
         public void RunVM(AstNode root)
         {
             Visit(root);
+            Console.WriteLine($"Instructions count - {_instructions.Count}");
             _instructions.WriteInstructions();
             _vm.Run(_instructions);
         }
@@ -45,6 +46,7 @@ namespace BoomifyCS.Compiler
                 case AstBinaryOp astBinaryOp:
                     HandleBinaryOp(astBinaryOp);
                     break;
+
                 case AstConstant astConstant:
                     HandleConstant(astConstant);
                     break;
@@ -90,6 +92,9 @@ namespace BoomifyCS.Compiler
                 case AstIndexOperator astIndexOperator:
                     HandleIndexOperator(astIndexOperator);
                     break;
+                case AstFunctionDecl astFunctionDecl:
+                    HandleFunctionDeclaration(astFunctionDecl);
+                    break;
                 default:
                     Visit(node.Left);
                     Visit(node.Right);
@@ -123,6 +128,36 @@ namespace BoomifyCS.Compiler
                 _instructions.Add(new ByteInstruction(byteType, astAssignmentOperator.IdentifierNode.Token.Value, _lineCount));
             }
         }
+        private void HandleFunctionDeclaration(AstFunctionDecl function)
+        {
+            ByteInstruction defFunc = new(ByteType.DEF_FUNC, function.functionNameNode.Name, _lineCount);
+            _instructions.Add(defFunc);
+
+            if (function.argumentsNode != null)
+            {
+                void VisitArgument(AstNode node)
+                {
+                    if (node == null)
+                    {
+                        return;
+                    }
+                    if (node is AstIdentifier identifier)
+                    {
+                        _instructions.Add(new ByteInstruction(ByteType.ADD_ARG, identifier.Token.Value, _lineCount));
+                    }
+
+                    VisitArgument(node.Left);
+                    VisitArgument(node.Right);
+
+                }
+                VisitArgument(function.argumentsNode);
+            }
+            Visit(function.blockNode);
+
+            ByteInstruction endFunc = new(ByteType.END_DEF_FUNC, _lineCount);
+            _instructions.Add(endFunc);
+        }
+
         private void HandleIndexOperator(AstIndexOperator astIndexOperator)
         {
             Visit(astIndexOperator.OperandNode);
@@ -136,9 +171,10 @@ namespace BoomifyCS.Compiler
         {
 
             Visit(array.ArgumentsNode);
-            int argCount = AstNodeConnector.CountCommaNode(array.ArgumentsNode) + 1;
+            int argCount = NodeConventer.CountCommaNode(array.ArgumentsNode) + 1;
 
             _instructions.Add(new ByteInstruction(ByteType.NEW_ARRAY, argCount, _lineCount));
+
         }
 
 
@@ -160,7 +196,12 @@ namespace BoomifyCS.Compiler
         {
             Visit(astBinaryOp.Left);
             Visit(astBinaryOp.Right);
-
+            if (astBinaryOp is AstRangeOperator)
+            {
+                _instructions.Add(new ByteInstruction(ByteType.LOAD_CONST, [new BifyRange()], _lineCount));
+                _instructions.Add(new ByteInstruction(ByteType.INIT, _lineCount));
+                return;
+            }
             if (ByteCodeConfig.BinaryOperators.TryGetValue(astBinaryOp.Token.Type, out ByteType byteType))
             {
                 _instructions.Add(new ByteInstruction(byteType, _lineCount));
@@ -174,7 +215,8 @@ namespace BoomifyCS.Compiler
 
         private void HandleVarDecl(AstVarDecl astVarDecl)
         {
-            Visit(astVarDecl.AssignmentNode);
+            Visit(astVarDecl.AssignmentNode.Right);
+            _instructions.Add(new ByteInstruction(ByteType.DEFINE, [astVarDecl.AssignmentNode.Left.Token.Value], _lineCount));
             Visit(astVarDecl.Right);
         }
 
@@ -201,7 +243,8 @@ namespace BoomifyCS.Compiler
             int expectedArgCount = -1;
             if (astCall.ArgumentsNode is AstBinaryOp astBinaryOp && astBinaryOp.Token.Type == TokenType.COMMA)
             {
-                expectedArgCount = AstNodeConnector.CountCommaNode(astCall.ArgumentsNode) + 1;
+                expectedArgCount = CountCommaNode(astCall.ArgumentsNode) + 1;
+
             }
             else if (astCall.ArgumentsNode == null)
             {
@@ -218,7 +261,10 @@ namespace BoomifyCS.Compiler
         private void HandleModule(AstModule astModule)
         {
             _instructions.Add(new ByteInstruction(ByteType.MODULE, [astModule.ModuleName, astModule.ModulePath], _lineCount));
-            Visit(astModule.ChildNode);
+            foreach (AstNode node in astModule.ChildNodes)
+            {
+                Visit(node);
+            }
         }
 
         private void HandleForLoop(AstFor astFor)
@@ -305,7 +351,7 @@ namespace BoomifyCS.Compiler
             ByteInstruction jumpToEnd = new(ByteType.JUMP, -1, _lineCount);
             _instructions.Add(jumpToEnd);
 
-            jumpIfFalse.Value[0] = _instructions.Count;
+            jumpIfFalse.Value[0] = _instructions.Count - 1;
 
             foreach (var elseIfNode in ifNode.ElseIfNodes)
             {
@@ -330,7 +376,19 @@ namespace BoomifyCS.Compiler
 
             jumpToEnd.Value[0] = _instructions.Count;
         }
+        private static int CountCommaNode(AstNode node)
+        {
+            if (node == null)
+            {
+                return 0;
+            }
+            if (node is AstBinaryOp binaryOp && binaryOp.Token.Type == TokenType.COMMA)
+            {
+                return 1 + CountCommaNode(node.Left) + CountCommaNode(node.Right);
+            }
+            return CountCommaNode(node.Left) + CountCommaNode(node.Right);
 
+        }
 
 
     }

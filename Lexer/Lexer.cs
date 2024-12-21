@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Data.Common;
+using System;
 using System.Text;
 using System.Text.RegularExpressions;
 using BoomifyCS.Exceptions;
@@ -11,18 +13,22 @@ namespace BoomifyCS.Lexer
         private readonly string _code;
         private int _lineCount = 1;
         private readonly string[] _lines;
+        int column = 1; // Initialize column counter
+
+        List<Token> tokens = [];
+
         public MyLexer(string code)
         {
             this._code = code;
 
             _lines = _code.Split("\n");
             _position = 0;
+            
         }
 
 
         public List<Token> Tokenize()
         {
-            List<Token> tokens = [];
             Stack<int> parenthesesStack = new();
             Stack<int> squareBracketsStack = new();
             Stack<int> curlyBracesStack = new();
@@ -31,11 +37,20 @@ namespace BoomifyCS.Lexer
             {
                 char currentChar = _code[_position];
                 KeyValuePair<string, TokenType> multichar = GenerateMultiChar();
-                if (currentChar == ' ')
+                if (currentChar == '\n')
                 {
+                    _lineCount++;
+                    _position++;
+                    ResetColumn(); // Reset column to 1 for the new line
+                    continue;
+                }
+                if (char.IsWhiteSpace(currentChar))
+                {
+                    UpdateColumn(currentChar);
                     _position++;
                     continue;
                 }
+
                 // Handle parentheses
                 if (currentChar == '(')
                 {
@@ -50,121 +65,90 @@ namespace BoomifyCS.Lexer
                     parenthesesStack.Pop();
                 }
 
-                // Handle square brackets
-                if (currentChar == '[')
-                {
-                    squareBracketsStack.Push(_lineCount);
-                }
-                if (currentChar == ']')
-                {
-                    if (squareBracketsStack.Count == 0)
-                    {
-                        throw new BifySyntaxError(ErrorMessage.UnmatchedClosingBracket(), _lines[_lineCount], "]", _lineCount);
-                    }
-                    squareBracketsStack.Pop();
-                }
-
-
-                if (currentChar == '}')
-                {
-                    if (curlyBracesStack.Count == 0)
-                    {
-                        throw new BifySyntaxError(ErrorMessage.UnmatchedClosingBrace(), _lines[_lineCount], "}", _lineCount);
-                    }
-                    curlyBracesStack.Pop();
-                }
-                else if (currentChar == '\n')
-                {
-                    tokens.Add(new Token(TokenType.NEXTLINE, "\n"));
-                    _lineCount++;
-                    _position++;
-                    continue;
-                }
-
+                
                 else if (currentChar == ';')
                 {
                     if (parenthesesStack.Count == 0 && squareBracketsStack.Count == 0 && curlyBracesStack.Count == 0)
                     {
-                        tokens.Add(new Token(TokenType.EOL, ";"));
+                        AddToken(new Token(TokenType.EOL, ";"));
                     }
                     else
                     {
-                        tokens.Add(new Token(TokenType.SEMICOLON, ";"));
+                        AddToken(new Token(TokenType.SEMICOLON, ";"));
                     }
+                    UpdateColumn(currentChar);
                     _position++;
                     continue;
                 }
-
-            
-
-                else if (currentChar == '"' || currentChar == '\'')
+                if (currentChar == '"' || currentChar == '\'')
                 {
                     string str = GenerateString();
-                    tokens.Add(new Token(TokenType.STRING, str));
-                }
-                else if (currentChar == '{')
-                {
-                    tokens.Add(GenerateObject());
-
-
+                    AddToken(new Token(TokenType.STRING, str));
+                    UpdateColumn(str.Length);
                 }
                 else if (currentChar == '-' && char.IsDigit(_code[_position + 1]))
                 {
                     string digit = GenerateDigit();
-                    tokens.Add(new Token(TokenType.NUMBER, digit));
+                    AddToken(new Token(TokenType.NUMBER, digit));
+                    UpdateColumn(digit.Length);
                 }
                 else if (char.IsDigit(currentChar))
                 {
                     string digit = GenerateDigit();
-                    tokens.Add(new Token(TokenType.NUMBER, digit));
+                    AddToken(new Token(TokenType.NUMBER, digit));
+                    UpdateColumn(digit.Length);
                 }
-                
                 else if (multichar.Key != " ")
                 {
-                    if (multichar.Value == TokenType.COMMENT) {
+                    if (multichar.Value == TokenType.COMMENT)
+                    {
                         SkipComment();
                         continue;
                     }
-                    tokens.Add(new Token(multichar.Value, multichar.Key));
+                    AddToken(new Token(multichar.Value, multichar.Key));
+                    UpdateColumn(multichar.Key.Length);
                 }
                 else if (TokenConfig.singleCharTokens.TryGetValue(currentChar, out TokenType tokenType))
                 {
-                    tokens.Add(new Token(tokenType, currentChar.ToString()));
+                    AddToken(new Token(tokenType, currentChar.ToString()));
+                    UpdateColumn(currentChar);
                 }
                 else if (IsIdentifier(currentChar))
                 {
                     string identifier = GenerateIdentifier();
-                    tokens.Add(new Token(TokenType.IDENTIFIER, identifier));
+                    AddToken(new Token(TokenType.IDENTIFIER, identifier));
+                    UpdateColumn(identifier.Length);
                 }
                 else
                 {
                     if (!char.IsWhiteSpace(currentChar))
                         throw new BifySyntaxError(ErrorMessage.UnexpectedToken(currentChar.ToString()), _lines[_lineCount - 1], _code[_position].ToString(), _lineCount);
                 }
+
                 _position++;
             }
-
-            // Check for unmatched opening brackets
-            if (parenthesesStack.Count > 0)
-            {
-                int line = parenthesesStack.Pop();
-                throw new BifySyntaxError(ErrorMessage.UnmatchedOpeningParenthesis(), _lines[line - 1], "(", line);
-            }
-
-            if (squareBracketsStack.Count > 0)
-            {
-                int line = squareBracketsStack.Pop();
-                throw new BifySyntaxError(ErrorMessage.UnmatchedOpeningBracket(), _lines[line - 1], "[", line);
-            }
-
-            if (curlyBracesStack.Count > 0)
-            {
-                int line = curlyBracesStack.Pop();
-                throw new BifySyntaxError(ErrorMessage.UnmatchedOpeningBrace(), _lines[line - 1], "{", line);
-            }
-
             return tokens;
         }
+        private void ResetColumn()
+        {
+            column = 1;
+        }
+        private void UpdateColumn(char currentChar)
+        {
+            column++;
+        }
+        private void UpdateColumn(int length = 1)
+        {
+            column += length;
+        }
+
+        private void AddToken(Token token)
+        {
+            token.Line = _lineCount;
+            token.Column = column;
+            tokens.Add(token);
+        }
+
 
         public static bool IsIdentifier(char identifier)
         {
@@ -193,6 +177,7 @@ namespace BoomifyCS.Lexer
 
                 if (currentChar == '.' && dotCount > 0)
                 {
+                    _position--;
                     break;
                 }
 
@@ -272,7 +257,6 @@ namespace BoomifyCS.Lexer
                     stringChar.ToString(),
                     _lineCount
                 );
-
             }
             return str;
 

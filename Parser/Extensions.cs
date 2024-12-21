@@ -39,10 +39,13 @@ namespace BoomifyCS.Parser
         public static string TokensToString(this List<Token> list)
         {
             var sb = new StringBuilder();
+            sb.Append('[');
             foreach (var token in list)
             {
-                sb.Append(token.Value);
+                sb.Append("   " + token.ToString() + ", \n");
             }
+            sb.Append(']');
+
             return sb.ToString();
         }
 

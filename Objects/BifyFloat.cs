@@ -4,7 +4,7 @@ using BoomifyCS.Exceptions;
 
 namespace BoomifyCS.Objects
 {
-    public class BifyFloat(Token token, double value) : BifyObject(token)
+    public class BifyFloat(double value) : BifyObject
     {
         public double Value = value;
 
@@ -22,11 +22,11 @@ namespace BoomifyCS.Objects
         {
             if (other is BifyFloat otherFloat)
             {
-                return new BifyFloat(this.Token, this.Value + otherFloat.Value);
+                return new BifyFloat(this.Value + otherFloat.Value);
             }
             if (other is BifyInteger otherInt)
             {
-                return new BifyFloat(this.Token, this.Value + otherInt.Value);
+                return new BifyFloat(this.Value + otherInt.Value);
             }
             throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Add", GetName(), other.GetName()));
         }
@@ -35,11 +35,11 @@ namespace BoomifyCS.Objects
         {
             if (other is BifyFloat otherFloat)
             {
-                return new BifyFloat(this.Token, this.Value - otherFloat.Value);
+                return new BifyFloat(this.Value - otherFloat.Value);
             }
             if (other is BifyInteger otherInt)
             {
-                return new BifyFloat(this.Token, this.Value - otherInt.Value);
+                return new BifyFloat(this.Value - otherInt.Value);
             }
             throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Sub", GetName(), other.GetName()));
         }
@@ -48,11 +48,11 @@ namespace BoomifyCS.Objects
         {
             if (other is BifyFloat otherFloat)
             {
-                return new BifyFloat(this.Token, this.Value * otherFloat.Value);
+                return new BifyFloat(this.Value * otherFloat.Value);
             }
             if (other is BifyInteger otherInt)
             {
-                return new BifyFloat(this.Token, this.Value * otherInt.Value);
+                return new BifyFloat(this.Value * otherInt.Value);
             }
             throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Mul", GetName(), other.GetName()));
         }
@@ -65,7 +65,7 @@ namespace BoomifyCS.Objects
                 {
                     throw new BifyZeroDivisionError(ErrorMessage.DivisionByZero());
                 }
-                return new BifyFloat(this.Token, this.Value / otherFloat.Value);
+                return new BifyFloat(this.Value / otherFloat.Value);
             }
             if (other is BifyInteger otherInt)
             {
@@ -73,7 +73,7 @@ namespace BoomifyCS.Objects
                 {
                     throw new BifyZeroDivisionError(ErrorMessage.DivisionByZero());
                 }
-                return new BifyFloat(this.Token, this.Value / otherInt.Value);
+                return new BifyFloat(this.Value / otherInt.Value);
             }
             throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Div", GetName(), other.GetName()));
         }
@@ -82,11 +82,11 @@ namespace BoomifyCS.Objects
         {
             if (other is BifyFloat otherFloat)
             {
-                return new BifyFloat(this.Token, this.Value % otherFloat.Value);
+                return new BifyFloat(this.Value % otherFloat.Value);
             }
             if (other is BifyInteger otherInt)
             {
-                return new BifyFloat(this.Token, this.Value % otherInt.Value);
+                return new BifyFloat(this.Value % otherInt.Value);
             }
             throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Mod", GetName(), other.GetName()));
         }
@@ -95,11 +95,11 @@ namespace BoomifyCS.Objects
         {
             if (other is BifyFloat otherFloat)
             {
-                return new BifyFloat(this.Token, Math.Pow(this.Value, otherFloat.Value));
+                return new BifyFloat(Math.Pow(this.Value, otherFloat.Value));
             }
             if (other is BifyInteger otherInt)
             {
-                return new BifyFloat(this.Token, Math.Pow(this.Value, otherInt.Value));
+                return new BifyFloat(Math.Pow(this.Value, otherInt.Value));
             }
             throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Pow", GetName(), other.GetName()));
         }
@@ -112,7 +112,7 @@ namespace BoomifyCS.Objects
                 {
                     throw new BifyZeroDivisionError(ErrorMessage.DivisionByZero());
                 }
-                return new BifyFloat(this.Token, Math.Floor(this.Value / otherFloat.Value));
+                return new BifyFloat(Math.Floor(this.Value / otherFloat.Value));
             }
             if (other is BifyInteger otherInt)
             {
@@ -120,7 +120,7 @@ namespace BoomifyCS.Objects
                 {
                     throw new BifyZeroDivisionError(ErrorMessage.DivisionByZero());
                 }
-                return new BifyFloat(this.Token, Math.Floor(this.Value / otherInt.Value));
+                return new BifyFloat(Math.Floor(this.Value / otherInt.Value));
             }
             throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("FloorDiv", GetName(), other.GetName()));
         }
@@ -132,7 +132,7 @@ namespace BoomifyCS.Objects
 
         public override BifyInteger Int()
         {
-            return new BifyInteger(this.Token, (int)this.Value);
+            return new BifyInteger((int)this.Value);
         }
 
         public override BifyObject Lte(BifyObject other)

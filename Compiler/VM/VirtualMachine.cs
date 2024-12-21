@@ -5,227 +5,202 @@ using BoomifyCS.BuiltIn.Function;
 using BoomifyCS.Objects;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Parser;
+using BoomifyCS.Ast;
+
 namespace BoomifyCS.Compiler.VM
 {
-    public class VirtualMachine(string[] sourceCode)
+    public class VirtualMachine
     {
-        private readonly VarManager _varManager = new();
-        private readonly StackManager _stackManager = new();
-
+        public VarManager varManager = new();
+        private StackManager _stackManager = new();
         private readonly List<CallStackFrame> _callStack = [];
         private List<ByteInstruction> _instructions;
-        private readonly string[] SourceCode = sourceCode;
+        private readonly string[] _sourceCode;
         private string _moduleName;
         private string _modulePath;
-        public int line;
+        private int _line;
+
+        public VirtualMachine(string[] sourceCode) => _sourceCode = sourceCode;
+        public void LoadInstructions(List<ByteInstruction> instructions)
+        {
+            _instructions = instructions;
+        }
+
+        public void RunWithVarManager(VarManager varManager)
+        {
+            this.varManager = varManager;
+            ProcessInstructions(_instructions);
+        }
+        public BifyObject GetReturnValue()
+        {
+            return _stackManager.Pop();
+        }
 
         public void Run(List<ByteInstruction> instructions)
         {
             try
             {
+                Console.WriteLine("***START VIRTUAL MACHINE***");
                 ProcessInstructions(instructions);
             }
             catch (BifyError e)
             {
                 e.FileName = _modulePath;
                 e.CallStack = _callStack;
-                e.LineTokensString = SourceCode[line - 1];
-                e.CurrentLine = line;
+                e.LineTokensString = _sourceCode[_line - 1];
+                e.CurrentLine = _line;
                 throw;
             }
+            Console.WriteLine("***END VIRTUAL MACHINE***");
+            _stackManager.Print();
+            varManager.Print();
         }
-        public void ProcessInstructions(List<ByteInstruction> instructions)
+
+        private void ProcessInstructions(List<ByteInstruction> instructions)
         {
             _instructions = instructions;
             int instructionIndex = 0;
 
             while (instructionIndex < _instructions.Count)
             {
-                ByteInstruction instruction = _instructions[instructionIndex];
-                //Console.WriteLine($"{instruction.IndexOfInstruction}:{instruction}");
-                line = instruction.IndexOfInstruction;
+                var instruction = _instructions[instructionIndex];
+                _line = instruction.IndexOfInstruction;
+
                 switch (instruction.Type)
                 {
                     case ByteType.LOAD_CONST:
-                        var constant = instruction.Value[0];
-                        _stackManager.Push((BifyObject)constant);
+                        _stackManager.Push((BifyObject)instruction.Value[0]);
                         break;
 
                     case ByteType.LOAD:
-                        var varName = (string)instruction.Value[0];
-                        try
-                        {
-                            BifyObject instrvalue = _varManager.GetVariable(varName);
-
-                            _stackManager.Push(instrvalue);
-                        }
-                        catch (KeyNotFoundException)
-                        {
-                            throw new BifyUndefinedError(
-                                $"Undefined variable - {varName}",
-                                SourceCode[line - 1],
-                                varName,
-                                line
-                            );
-                        }
+                        ProcessLoad(instruction);
                         break;
 
                     case var _ when ByteCodeConfig.BinaryOperators.ContainsValue(instruction.Type):
                         ProcessOperator(instruction);
                         break;
+
                     case var _ when ByteCodeConfig.AssignmentOperators.ContainsValue(instruction.Type):
-                        string identifier = (string)instruction.Value[0];
-                        BifyObject varValue = _varManager.GetVariable(identifier);
-                        varValue = instruction.Type switch
-                        {
-                            ByteType.ADDE => varValue.Add(_stackManager.Pop()),
-                            ByteType.SUBE => varValue.Sub(_stackManager.Pop()),
-                            ByteType.MULE => varValue.Mul(_stackManager.Pop()),
-                            ByteType.DIVE => varValue.Div(_stackManager.Pop()),
-                            ByteType.FLOORDIV => varValue.FloorDiv(_stackManager.Pop()),
-                            ByteType.POWE => varValue.Pow(_stackManager.Pop()),
-                            _ => throw new NotImplementedException($"Bytecode - {instruction.Type} not implemented in unary op"),
-                        };
-                        StoreVariable(varValue,identifier);
-
-
-
+                        ProcessAssignment(instruction);
                         break;
 
-
                     case ByteType.DEFINE:
-                        if (_stackManager.Count() == 0)
-                        {
-                            throw new BifyInitializationError(
-                                "Variable initialized incorrectly. Make sure to assign a value when declaring the variable.",
-                                SourceCode[line - 1],
-                                SourceCode[line - 1],
-                                line
-                            );
-                        }
-
-                        var value = _stackManager.Pop();
-                        var bifyVar = (BifyVar)instruction.Value[0];
-                        _varManager.DefineVariable(bifyVar.Name, value);
+                        ProcessDefine(instruction);
                         break;
 
                     case ByteType.JUMP_IF_FALSE:
-
-                        int jumpIndexFalse = (int)instruction.Value[0];
-                        if (_stackManager.Pop().Bool().Value == false)
-                        {
-                            instructionIndex = jumpIndexFalse;
-
-                            if (instructionIndex > instructions.Count)
-                            {
-
-                                break;
-                            }
-                            continue;
-                        }
-                        
-
-                        break;
-
-
                     case ByteType.JUMP_IF_TRUE:
-                        int jumpIndexTrue = (int)instruction.Value[0];
-                        if (_stackManager.Pop().Bool().Value == true)
-                        {
-                            instructionIndex = jumpIndexTrue;
-
-                            if (instructionIndex > instructions.Count)
-                            {
-                                break;
-                            }
-                            continue;
-
-                        }
-                        break;
-
                     case ByteType.JUMP:
-                        int jumpIndex = (int)instruction.Value[0];
-                        instructionIndex = jumpIndex;
-                        continue;
-
+                        ProcessJump(instruction, ref instructionIndex);
+                        break;
 
                     case ByteType.CALL:
-                        List<BifyObject> arguments = [];
-                        
-                        BifyFunction function = (BifyFunction)_stackManager.Pop();
-
-                       
-                        int expectedArgCount = (int)instruction.Value[0];
-                        _callStack.Add(new CallStackFrame(function.Name, line, _modulePath, SourceCode[line - 1]));
-
-                        if (expectedArgCount != function.ExpectedArgCount && function.ExpectedArgCount != -1)
-                        {
-                            if (arguments.Count < function.ExpectedArgCount)
-                            {
-                                throw new BifyArgumentError(
-                                    $"Function '{function.Name}' called with too few arguments. Expected {function.ExpectedArgCount}, but got {arguments.Count}.",
-                                    SourceCode[line - 1],
-                                    SourceCode[line - 1],
-                                    line
-                                );
-                            }
-                            else
-                            {
-                                throw new BifyArgumentError(
-                                    $"Function '{function.Name}' called with too many arguments. Expected {function.ExpectedArgCount}, but got {arguments.Count}.",
-                                    SourceCode[line - 1],
-                                    SourceCode[line - 1],
-                                    line
-                                );
-                            }
-                        }
-
-                        for (int i = 0; i < expectedArgCount; i++)
-                        {
-                            arguments.Add(_stackManager.Pop());
-                        }
-                        arguments.Reverse();
-                   
-                        BifyObject functionReturn = function.Call(arguments);
-                        _stackManager.Push(functionReturn);
-                        _callStack.Pop();
+                        ProcessCall(instruction);
                         break;
+
                     case ByteType.MODULE:
                         _moduleName = (string)instruction.Value[0];
                         _modulePath = (string)instruction.Value[1];
                         break;
+
                     case ByteType.STORE:
                         StoreVariable(_stackManager.Pop(), (string)instruction.Value[0]);
                         break;
+
                     case ByteType.NEW_ARRAY:
-                        int arrayLength = (int)instruction.Value[0];
-                        List<BifyObject> array = [];
-                        for (int i = 0; i < arrayLength; i++)
-                        {
-                            array.Add(_stackManager.Pop());
-                        }
-                        array.Reverse();
-                        _stackManager.Push(new BifyArray(array));
+                        ProcessNewArray(instruction);
                         break;
+
                     case ByteType.LOAD_ARRAY:
-                        BifyInteger index = _stackManager.Pop().Int();
-                        BifyObject bifyObject = _stackManager.Pop();
-                        GetIndexAndPush(index,bifyObject);
+                        ProcessLoadArray();
+                        break;
+
+                    case ByteType.DEF_FUNC:
+                        ProccesFunctionDefinition(instruction, ref instructionIndex);
+                        break;
+                    case ByteType.INIT:
+                        ProccesInit(instruction);
                         break;
                     default:
                         throw new InvalidOperationException($"Unknown instruction type: {instruction.Type}");
-
-
                 }
 
                 instructionIndex++;
             }
 
-            _stackManager.Print();
-            _varManager.Print();
+          
+        }
+        private void ProccesInit(ByteInstruction instruction)
+        {
+            BifyObject obj = _stackManager.Pop();
+
+            int numArgs = obj.GetInitializerArgs();
+
+            List<BifyObject> arguments = new List<BifyObject>();
+
+            for (int i = 0; i < numArgs; i++)
+            {
+                if (_stackManager.Count() > 0)
+                {
+                    arguments.Add(_stackManager.Pop());
+                }
+                else
+                {
+                    throw new InvalidOperationException("Not enough arguments in the stack for object initialization.");
+                }
+            }
+            arguments.Reverse();
+            obj.Initialize(arguments);
+            _stackManager.Push(obj);
         }
 
 
+        private void ProccesFunctionDefinition(ByteInstruction instruction, ref int instructionIndex)
+        {
+            string name = (string)instruction.Value[0];
+            BifyOwnFunction function = new(name);
+            ProccesFunctionBody(function, ref instructionIndex);
+            _stackManager.Push(function);
+            varManager.DefineVariable(name, function);
+
+
+
+
+        }
+        private void ProccesFunctionBody(BifyOwnFunction function, ref int instructionIndex)
+        {
+            int stack = 0;
+            var currentInstruction = _instructions[0];
+            for (int i = instructionIndex; i < _instructions.Count; i++)
+            {
+                currentInstruction = _instructions[instructionIndex];
+                if (currentInstruction.Type == ByteType.DEF_FUNC)
+                {
+                    stack++;
+                }
+                else if (currentInstruction.Type == ByteType.END_DEF_FUNC)
+                {
+                    stack--;
+                    if (stack <= 0)
+                    {
+                        instructionIndex = i;
+                        break;
+                    }
+                }
+                else if (currentInstruction.Type == ByteType.ADD_ARG)
+                {
+                    function.AddArgument((string)currentInstruction.Value[0]);
+                }
+                else
+                {
+                    function.AddInstruction(currentInstruction);
+                }
+
+                instructionIndex++;
+            }
+
+            function.GetInstructions().WriteInstructions();
+        }
         private void ProcessOperator(ByteInstruction instruction)
         {
             if (ByteCodeConfig.BinaryOperators.ContainsValue(instruction.Type))
@@ -236,7 +211,7 @@ namespace BoomifyCS.Compiler.VM
                     _stackManager.Push(new BifyBoolean(!bifyObject.Bool().Value));
                     return;
                 }
-                
+
                 try
                 {
                     BifyObject right = _stackManager.Pop();
@@ -247,56 +222,161 @@ namespace BoomifyCS.Compiler.VM
                 }
                 catch (BifyError e)
                 {
-                    ByteCodeConfig.byteToString.TryGetValue(instruction.Type,out string operatorChar);
-                    e.CurrentLine = line;
-                    e.LineTokensString = SourceCode[line - 1];
+                    ByteCodeConfig.byteToString.TryGetValue(instruction.Type, out string operatorChar);
+                    e.CurrentLine = _line;
+                    e.LineTokensString = _sourceCode[_line - 1];
                     e.InvalidTokensString = operatorChar;
-                    //Console.WriteLine(e.LineTokensString);
                     throw;
                 }
             }
+        }
+
+        private void ProcessLoad(ByteInstruction instruction)
+        {
+            var varName = (string)instruction.Value[0];
+            try
+            {
+                var value = varManager.GetVariable(varName);
+                _stackManager.Push(value);
+            }
+            catch (KeyNotFoundException)
+            {
+                throw new BifyUndefinedError(
+                    $"Undefined variable - {varName}",
+                    _sourceCode[_line - 1],
+                    varName,
+                    _line
+                );
+            }
+        }
+
+        private void ProcessAssignment(ByteInstruction instruction)
+        {
+            var identifier = (string)instruction.Value[0];
+            var varValue = varManager.GetVariable(identifier);
+
+            varValue = instruction.Type switch
+            {
+                ByteType.ADDE => varValue.Add(_stackManager.Pop()),
+                ByteType.SUBE => varValue.Sub(_stackManager.Pop()),
+                ByteType.MULE => varValue.Mul(_stackManager.Pop()),
+                ByteType.DIVE => varValue.Div(_stackManager.Pop()),
+                ByteType.FLOORDIV => varValue.FloorDiv(_stackManager.Pop()),
+                ByteType.POWE => varValue.Pow(_stackManager.Pop()),
+                _ => throw new NotImplementedException($"Bytecode - {instruction.Type} not implemented in unary op"),
+            };
+
+            StoreVariable(varValue, identifier);
+        }
+
+        private void ProcessDefine(ByteInstruction instruction)
+        {
+            if (_stackManager.Count() == 0)
+            {
+                throw new BifyInitializationError(
+                    "Variable initialized incorrectly. Make sure to assign a value when declaring the variable.",
+                    _sourceCode[_line - 1],
+                    _sourceCode[_line - 1],
+                    _line
+                );
+            }
+
+            var value = _stackManager.Pop();
+            var bifyVar = (string)instruction.Value[0];
+            varManager.DefineVariable(bifyVar, value);
 
         }
-        private void StoreVariable(BifyObject varValue,string varName)
-        {
-            if (_varManager.HasVariable(varName))
-            {
-                _varManager.Store(varName, varValue);
 
+        private void ProcessJump(ByteInstruction instruction, ref int instructionIndex)
+        {
+            var jumpIndex = (int)instruction.Value[0];
+
+            if (instruction.Type == ByteType.JUMP_IF_FALSE && !_stackManager.Pop().Bool().Value ||
+                instruction.Type == ByteType.JUMP_IF_TRUE && _stackManager.Pop().Bool().Value ||
+                instruction.Type == ByteType.JUMP)
+            {
+                instructionIndex = jumpIndex;
+
+                if (instructionIndex >= _instructions.Count)
+                {
+                    instructionIndex = _instructions.Count - 1;
+                }
+            }
+        }
+
+        private void ProcessCall(ByteInstruction instruction)
+        {
+            var arguments = new List<BifyObject>();
+            var function = (BifyFunction)_stackManager.Pop();
+            var expectedArgCount = (int)instruction.Value[0];
+
+            _callStack.Add(new CallStackFrame(function.Name, _line, _modulePath, _sourceCode[_line - 1]));
+
+            if (expectedArgCount != function.ExpectedArgCount && function.ExpectedArgCount != -1)
+            {
+                throw new BifyArgumentError(
+                    $"Function '{function.Name}' called with wrong number of arguments. Expected {function.ExpectedArgCount}, but got {arguments.Count}.",
+                    _sourceCode[_line - 1],
+                    _sourceCode[_line - 1],
+                    _line
+                );
+            }
+
+            for (int i = 0; i < expectedArgCount; i++)
+            {
+                arguments.Add(_stackManager.Pop());
+            }
+            arguments.Reverse();
+            if (function is BifyOwnFunction bifyOwnFunction)
+            {
+                bifyOwnFunction.Call(arguments, this);
+                var functionreturn = _stackManager.Pop();
+                _stackManager.Push(functionreturn);
+                _callStack.Pop();
+                return;
+            }
+            var functionReturn = function.Call(arguments);
+            _stackManager.Push(functionReturn);
+            _callStack.Pop();
+        }
+
+        private void ProcessNewArray(ByteInstruction instruction)
+        {
+            var arrayLength = (int)instruction.Value[0];
+            var array = new List<BifyObject>();
+
+            for (int i = 0; i < arrayLength; i++)
+            {
+                array.Add(_stackManager.Pop());
+            }
+            array.Reverse();
+            _stackManager.Push(new BifyArray(array));
+        }
+
+        private void ProcessLoadArray()
+        {
+            var index = _stackManager.Pop();
+            var bifyObject = _stackManager.Pop();
+            _stackManager.Push(bifyObject.Index(index));
+        }
+
+        private void StoreVariable(BifyObject varValue, string varName)
+        {
+            if (varManager.HasVariable(varName))
+            {
+                varManager.Store(varName, varValue);
             }
             else
             {
                 throw new BifyUndefinedError(
                     $"Undefined variable - {varName}",
-                    SourceCode[line - 1],
+                    _sourceCode[_line - 1],
                     varName,
-                    line
-                );
-            }
-
-        }
-        private void GetIndexAndPush(BifyInteger index,BifyObject bifyObject)
-        {
-            _stackManager.Push(bifyObject.Index(index));
-
-            
-        }
-        private BifyObject GetVariable(string name)
-        {
-            try
-            {
-                return _varManager.GetVariable(name);
-            }
-            catch (KeyNotFoundException)
-            {
-                throw new BifyUndefinedError(
-                    $"Undefined variable - {name}",
-                    SourceCode[line - 1],
-                    name,
-                    line
+                    _line
                 );
             }
         }
+
         private static BifyObject PerformBinaryOperation(BifyObject a, BifyObject b, ByteType operatorType)
         {
             return operatorType switch
@@ -326,6 +406,5 @@ namespace BoomifyCS.Compiler.VM
                 _ => throw new NotImplementedException($"{operatorType} is not implemented in PerformBinaryOperation"),
             };
         }
-
     }
 }

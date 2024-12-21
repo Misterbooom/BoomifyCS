@@ -88,12 +88,16 @@ namespace BoomifyCS.Lexer
         CATCH,
         FINALLY,
         THROW,
-        COMMENT
+        COMMENT,
+        CONCAT,
+        RANGE
     }
     public class Token(TokenType type, string value, List<Token> tokens = null)
     {
         public TokenType Type = type;
         public string Value = value;
+        public int Line;
+        public int Column;
         public List<Token> Tokens = tokens;
 
         public override string ToString()
@@ -103,7 +107,7 @@ namespace BoomifyCS.Lexer
             //    return $"Token(type = '{Type}',value = '{Value} tokens - {Tokens.ToString()}')";
 
             //}
-            return $"Token(type = '{Type}',value = '{Value}')";
+            return $"Token(type = '{Type}', value = '{Value}', line = {Line}' column - '{Column}')";
         }
 
     }

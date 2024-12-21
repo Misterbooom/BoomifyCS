@@ -15,9 +15,6 @@ namespace BoomifyCS.Lexer
             { "continue", TokenType.CONTINUE },
             { "var", TokenType.VARDECL },
             { "//", TokenType.FLOORDIV },
-            {"null", TokenType.NULL},
-            {"true", TokenType.TRUE},
-            {"false", TokenType.FALSE},
             { "return", TokenType.RETURN },
             { "function",TokenType.FUNCTIONDECL },
             {"**", TokenType.POW},
@@ -49,6 +46,10 @@ namespace BoomifyCS.Lexer
             { ')', TokenType.RPAREN },
             { '[', TokenType.LBRACKET },
             { ']', TokenType.RBRACKET },
+            { '{', TokenType.LCUR },
+            { '}', TokenType.RCUR },
+
+
             { ':', TokenType.COLON },
             { '.', TokenType.DOT },
             { '+', TokenType.ADD },
@@ -83,8 +84,6 @@ namespace BoomifyCS.Lexer
             { "&&", TokenType.AND },
             { "||", TokenType.OR },
             { "!", TokenType.NOT },
-            { "--", TokenType.DECREMENT },
-            { "++", TokenType.INCREMENT },
             { ",", TokenType.COMMA }
         };
 
