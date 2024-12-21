@@ -52,7 +52,7 @@ namespace BoomifyCS.Compiler.VM
                 throw;
             }
             Console.WriteLine("***END VIRTUAL MACHINE***");
-            _stackManager.Print();
+            _stackManager.Print();  
             varManager.Print();
         }
 

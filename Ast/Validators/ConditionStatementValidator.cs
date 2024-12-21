@@ -19,6 +19,7 @@ namespace BoomifyCS.Ast.Validators
                 Traceback.Traceback.Instance.ThrowException(error, 0);
             }
         }
+        
         public static void ValidateElseIfStatement(List<Token> conditionTokens, Stack<AstNode> operandStack, AstElseIf astElseIf)
         {
             if (operandStack.Count == 0)

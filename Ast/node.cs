@@ -188,15 +188,21 @@ namespace BoomifyCS.Ast
     public class AstEOL(Token token) : AstNode(token)
     {
     }
-    public class AstBlock(AstNode statementsNode) : AstNode(new Token(TokenType.BLOCK, "Block"))
+    public class AstBlock(List<AstNode> childsNodes) : AstNode(new Token(TokenType.BLOCK, "Block"))
     {
 
-        public AstNode StatementsNode = statementsNode;
+        public List<AstNode> ChildsNodes = childsNodes;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
-            string statementsStr = StatementsNode?.StrHelper(level + 1, "Statements: ") ?? "";
+            string statementsStr = "";
+            foreach (AstNode node in ChildsNodes)
+            {
+                statementsStr += node?.StrHelper(level + 1, "Statement: ") ?? "";
+
+            }
+
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{statementsStr}";
         }
     }
@@ -267,9 +273,9 @@ namespace BoomifyCS.Ast
 
         }
     }
-    public class AstWhile(Token token, AstBlock blockNode, AstNode conditionNode) : AstNode(token)
+    public class AstWhile(Token token, AstNode blockNode, AstNode conditionNode) : AstNode(token)
     {
-        public AstBlock BlockNode = blockNode;
+        public AstNode BlockNode = blockNode;
         public AstNode ConditionNode = conditionNode;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)

@@ -63,7 +63,11 @@ namespace BoomifyCS.Compiler
                     CompileIfStatement(astIf);
                     break;
                 case AstBlock astBlock:
-                    Visit(astBlock.StatementsNode);
+                    foreach (AstNode childNode in astBlock.ChildsNodes)
+                    {
+                        Visit(childNode);
+
+                    }
                     break;
                 case AstElse astElse:
                     Visit(astElse.BlockNode);
@@ -308,7 +312,7 @@ namespace BoomifyCS.Compiler
 
             Visit(astWhile.BlockNode);
 
-            ByteInstruction jump = new(ByteType.JUMP, startLoopIndex, _lineCount);
+            ByteInstruction jump = new(ByteType.JUMP, startLoopIndex - 1, _lineCount);
             _instructions.Add(jump);
 
             if (_continueJumps.Count > 0)

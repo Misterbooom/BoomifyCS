@@ -1,7 +1,3 @@
-﻿var a = false == false;
-if (false == true){
-	explode("Hello World");
-}
-else if (a){
-	explode("Else if detected!");
+﻿while (){
+	explode("Hello! ");
 }
