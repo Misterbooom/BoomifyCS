@@ -10,13 +10,15 @@ using BoomifyCS.Parser;
 using BoomifyCS.Compiler;
 using BoomifyCS.Objects;
 using BoomifyCS.Exceptions;
-namespace BoomifyCS 
-{                   
+
+namespace BoomifyCS
+{
     internal class Program
     {
         static void Main()
         {
             RunInterpreter();
+            //Tests.Tests.RunTests();
         }
         static void RunTests()
         {
@@ -33,23 +35,16 @@ namespace BoomifyCS
             }
             MyLexer lexer = new(code);
 
-            try
-            {
-                List<Token> tokens = lexer.Tokenize();
-                string[] codeByLine = code.Split('\n');
-                AstTree astParser = new(codeByLine);
-                AstNode node = astParser.ParseTokens(tokens);
-                Console.WriteLine($"Final node:  \n{node.ToString()}");
-                MyCompiler interpreter = new(codeByLine);
-                interpreter.RunVM(node);
 
-            }
-            catch (BifyError e)
-            {
-                e.PrintException();
+            List<Token> tokens = lexer.Tokenize();
+            string[] codeByLine = code.Split('\n');
+            AstTree astParser = new(codeByLine);
+            AstNode node = astParser.ParseTokens(tokens);
+            MyCompiler interpreter = new(codeByLine);
+            interpreter.RunVM(node);
 
-            }
-            
+
+
         }
 
     }

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 using BoomifyCS.Parser;
-using BoomifyCS.Traceback;
 namespace BoomifyCS.Ast.Validators
 {
     class VariableDeclarationValidator
@@ -16,7 +15,7 @@ namespace BoomifyCS.Ast.Validators
             if (valueTokens.Count == 0)
             {
                 BifySyntaxError error = new(ErrorMessage.EmptyValueAssigned());
-                Traceback.Traceback.Instance.ThrowException(error,assignmentToken.Column);
+                Traceback.Instance.ThrowException(error,assignmentToken.Column);
 
             }
             if (variableToken != null && variableToken.Type == TokenType.IDENTIFIER)
@@ -28,13 +27,13 @@ namespace BoomifyCS.Ast.Validators
                 else
                 {
                     BifySyntaxError error = new(ErrorMessage.MissingAssignmentOperator());
-                    Traceback.Traceback.Instance.ThrowException(error,variableToken.Column);
+                    Traceback.Instance.ThrowException(error,variableToken.Column);
                 }
             }
             else
             {
                 BifySyntaxError error = new(ErrorMessage.InvalidVariableName(variableToken?.Value));
-                Traceback.Traceback.Instance.ThrowException(error,assignmentToken.Column);
+                Traceback.Instance.ThrowException(error,assignmentToken.Column);
             }
 
             return false;

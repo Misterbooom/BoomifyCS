@@ -29,7 +29,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyFloat(this.Value + otherFloat.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Add", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Add", GetName(), other.GetName())));
+            return null; // will not be reached but is required for the method signature
         }
 
         public override BifyObject Sub(BifyObject other)
@@ -42,7 +43,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyFloat(this.Value - otherFloat.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Sub", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Sub", GetName(), other.GetName())));
+            return null; // will not be reached but is required for the method signature
         }
 
         public override BifyObject Mul(BifyObject other)
@@ -55,7 +57,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyFloat(this.Value * otherFloat.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Mul", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Mul", GetName(), other.GetName())));
+            return null; // will not be reached but is required for the method signature
         }
 
         public override BifyObject Div(BifyObject other)
@@ -64,7 +67,7 @@ namespace BoomifyCS.Objects
             {
                 if (otherInt.Value == 0)
                 {
-                    throw new BifyZeroDivisionError(ErrorMessage.DivisionByZero());
+                    Traceback.Instance.ThrowException(new BifyZeroDivisionError(ErrorMessage.DivisionByZero()));
                 }
                 return new BifyFloat((double)this.Value / otherInt.Value);
             }
@@ -72,11 +75,12 @@ namespace BoomifyCS.Objects
             {
                 if (otherFloat.Value == 0)
                 {
-                    throw new BifyZeroDivisionError(ErrorMessage.DivisionByZero());
+                    Traceback.Instance.ThrowException(new BifyZeroDivisionError(ErrorMessage.DivisionByZero()));
                 }
                 return new BifyFloat(this.Value / otherFloat.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Div", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Div", GetName(), other.GetName())));
+            return null; // will not be reached but is required for the method signature
         }
 
         public override BifyObject Mod(BifyObject other)
@@ -89,7 +93,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyFloat(this.Value % otherFloat.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Mod", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Mod", GetName(), other.GetName())));
+            return null; // will not be reached but is required for the method signature
         }
 
         public override BifyObject Pow(BifyObject other)
@@ -107,7 +112,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyFloat(Math.Pow(this.Value, otherFloat.Value));
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Pow", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Pow", GetName(), other.GetName())));
+            return null; // will not be reached but is required for the method signature
         }
 
         public override BifyObject FloorDiv(BifyObject other)
@@ -116,7 +122,7 @@ namespace BoomifyCS.Objects
             {
                 if (otherInt.Value == 0)
                 {
-                    throw new DivideByZeroException(ErrorMessage.DivisionByZero());
+                    Traceback.Instance.ThrowException(new BifyZeroDivisionError(ErrorMessage.DivisionByZero()));
                 }
                 return new BifyInteger((int)Math.Floor((double)this.Value / otherInt.Value));
             }
@@ -124,11 +130,12 @@ namespace BoomifyCS.Objects
             {
                 if (otherFloat.Value == 0)
                 {
-                    throw new DivideByZeroException(ErrorMessage.DivisionByZero());
+                    Traceback.Instance.ThrowException(new BifyZeroDivisionError(ErrorMessage.DivisionByZero()));
                 }
                 return new BifyFloat(Math.Floor(this.Value / otherFloat.Value));
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("FloorDiv", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("FloorDiv", GetName(), other.GetName())));
+            return null; // will not be reached but is required for the method signature
         }
 
         // Bitwise AND operator (&)
@@ -138,7 +145,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyInteger(this.Value & otherInt.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("BitAnd", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("BitAnd", GetName(), other.GetName())));
+            return null; // will not be reached but is required for the method signature
         }
 
         // Bitwise OR operator (|)
@@ -148,7 +156,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyInteger(this.Value | otherInt.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("BitOr", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("BitOr", GetName(), other.GetName())));
+            return null; // will not be reached but is required for the method signature
         }
 
         // Bitwise XOR operator (^)
@@ -158,7 +167,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyInteger(this.Value ^ otherInt.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("BitXor", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("BitXor", GetName(), other.GetName())));
+            return null; // will not be reached but is required for the method signature
         }
 
         // Bitwise NOT operator (~)
@@ -174,7 +184,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyInteger(this.Value << shiftAmount.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("LeftShift", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("LeftShift", GetName(), other.GetName())));
+            return null; // will not be reached but is required for the method signature
         }
 
         // Right shift operator (>>)
@@ -184,7 +195,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyInteger(this.Value >> shiftAmount.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("RightShift", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("RightShift", GetName(), other.GetName())));
+            return null; // will not be reached but is required for the method signature
         }
 
         // Equality operator (==)
@@ -226,7 +238,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyBoolean(this.Value < otherFloat.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Lt", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Lt", GetName(), other.GetName())));
+            return null; // will not be reached but is required for the method signature
         }
 
         // Greater than operator (>)
@@ -240,7 +253,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyBoolean(this.Value > otherFloat.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Gt", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Gt", GetName(), other.GetName())));
+            return null; // will not be reached but is required for the method signature
         }
 
         public override BifyObject Lte(BifyObject other)
@@ -253,7 +267,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyBoolean(this.Value <= otherFloat.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Lte", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Lte", GetName(), other.GetName())));
+            return null; // will not be reached but is required for the method signature
         }
 
         public override BifyObject Gte(BifyObject other)
@@ -266,19 +281,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyBoolean(this.Value >= otherFloat.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Gte", GetName(), other.GetName()));
-        }
-        public override BifyBoolean Bool()
-        {
-            return new BifyBoolean(Value != 0);
-        }
-        public override BifyInteger Int()
-        {
-            return this;
-        }
-        public override string ToString()
-        {
-            return ObjectToString().Value;
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Gte", GetName(), other.GetName())));
+            return null; // will not be reached but is required for the method signature
         }
     }
 }

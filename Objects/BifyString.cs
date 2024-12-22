@@ -3,6 +3,7 @@ using System.Text;
 using BoomifyCS.Ast;
 using BoomifyCS.Lexer;
 using BoomifyCS.Exceptions;
+
 namespace BoomifyCS.Objects
 {
     public class BifyString : BifyObject
@@ -11,7 +12,6 @@ namespace BoomifyCS.Objects
 
         public BifyString(Token token, string value) : base() => this.Value = value;
         public BifyString(string value) : base() => this.Value = value;
-
 
         public override BifyString ObjectToString()
         {
@@ -22,6 +22,7 @@ namespace BoomifyCS.Objects
         {
             return new BifyString($"BifyString({Value})");
         }
+
         public override BifyObject Mul(BifyObject other)
         {
             if (other is BifyInteger otherInt)
@@ -31,16 +32,14 @@ namespace BoomifyCS.Objects
                 {
                     builder.Append(Value);
                 }
-                return new BifyString( builder.ToString());
+                return new BifyString(builder.ToString());
             }
             return new BifyBoolean(false);
         }
 
         public override BifyObject Add(BifyObject other)
         {
-            
             return new BifyString(this.Value + other.ObjectToString().Value);
-
         }
 
         public override BifyObject Eq(BifyObject other)
@@ -50,7 +49,6 @@ namespace BoomifyCS.Objects
                 return new BifyBoolean(this.Value == otherStr.Value);
             }
             return new BifyBoolean(false);
-
         }
 
         public override BifyObject Neq(BifyObject other)
@@ -60,8 +58,8 @@ namespace BoomifyCS.Objects
                 return new BifyBoolean(this.Value != otherStr.Value);
             }
             return new BifyBoolean(true);
-
         }
+
         public override BifyBoolean Bool()
         {
             if (Value == "")
@@ -69,36 +67,37 @@ namespace BoomifyCS.Objects
                 return new BifyBoolean(false);
             }
             return new BifyBoolean(true);
-
         }
+
         public override BifyInteger Int()
         {
             try
             {
                 return new BifyInteger(int.Parse(Value));
             }
-            catch (FormatException )
+            catch (FormatException)
             {
-                throw new BifyCastError($"The value '{Value}' is not in a correct format for an integer. ");
+                Traceback.Instance.ThrowException(new BifyCastError($"The value '{Value}' is not in a correct format for an integer."));
             }
             catch (OverflowException)
             {
-                throw new BifyCastError($"The value '{Value}' is too large or too small for an integer.");
+                Traceback.Instance.ThrowException(new BifyCastError($"The value '{Value}' is too large or too small for an integer."));
             }
             catch (ArgumentException)
             {
-                throw new BifyCastError($"An argument exception occurred while parsing '{Value}'.");
+                Traceback.Instance.ThrowException(new BifyCastError($"An argument exception occurred while parsing '{Value}'."));
             }
-            catch (Exception )
+            catch (Exception)
             {
-                throw new BifyCastError($"An unexpected error occurred while parsing '{Value}'.");
+                Traceback.Instance.ThrowException(new BifyCastError($"An unexpected error occurred while parsing '{Value}'."));
             }
+
+            return null; // Ensure the method still returns null
         }
+
         public override string ToString()
         {
             return ObjectToString().Value;
         }
-
     }
 }
-

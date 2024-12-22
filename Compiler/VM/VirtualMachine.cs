@@ -38,19 +38,8 @@ namespace BoomifyCS.Compiler.VM
 
         public void Run(List<ByteInstruction> instructions)
         {
-            try
-            {
-                Console.WriteLine("***START VIRTUAL MACHINE***");
-                ProcessInstructions(instructions);
-            }
-            catch (BifyError e)
-            {
-                e.FileName = _modulePath;
-                e.CallStack = _callStack;
-                e.LineTokensString = _sourceCode[_line - 1];
-                e.CurrentLine = _line;
-                throw;
-            }
+            Console.WriteLine("***START VIRTUAL MACHINE***");
+            ProcessInstructions(instructions);
             Console.WriteLine("***END VIRTUAL MACHINE***");
             _stackManager.Print();  
             varManager.Print();
@@ -220,13 +209,13 @@ namespace BoomifyCS.Compiler.VM
                     _stackManager.Push(result);
 
                 }
-                catch (BifyError e)
+                catch (Exception e)
                 {
-                    ByteCodeConfig.byteToString.TryGetValue(instruction.Type, out string operatorChar);
-                    e.CurrentLine = _line;
-                    e.LineTokensString = _sourceCode[_line - 1];
-                    e.InvalidTokensString = operatorChar;
-                    throw;
+                    //ByteCodeConfig.byteToString.TryGetValue(instruction.Type, out string operatorChar);
+                    //e.CurrentLine = _line;
+                    //e.LineTokensString = _sourceCode[_line - 1];
+                    //e.InvalidTokensString = operatorChar;
+                    //throw;
                 }
             }
         }
@@ -241,12 +230,12 @@ namespace BoomifyCS.Compiler.VM
             }
             catch (KeyNotFoundException)
             {
-                throw new BifyUndefinedError(
+                Traceback.Instance.ThrowException( new BifyUndefinedError(
                     $"Undefined variable - {varName}",
                     _sourceCode[_line - 1],
                     varName,
                     _line
-                );
+                ));
             }
         }
 
@@ -273,12 +262,12 @@ namespace BoomifyCS.Compiler.VM
         {
             if (_stackManager.Count() == 0)
             {
-                throw new BifyInitializationError(
+                Traceback.Instance.ThrowException( new BifyInitializationError(
                     "Variable initialized incorrectly. Make sure to assign a value when declaring the variable.",
                     _sourceCode[_line - 1],
                     _sourceCode[_line - 1],
                     _line
-                );
+                ));
             }
 
             var value = _stackManager.Pop();
@@ -314,12 +303,12 @@ namespace BoomifyCS.Compiler.VM
 
             if (expectedArgCount != function.ExpectedArgCount && function.ExpectedArgCount != -1)
             {
-                throw new BifyArgumentError(
+                Traceback.Instance.ThrowException( new BifyArgumentError(
                     $"Function '{function.Name}' called with wrong number of arguments. Expected {function.ExpectedArgCount}, but got {arguments.Count}.",
                     _sourceCode[_line - 1],
                     _sourceCode[_line - 1],
                     _line
-                );
+                ));
             }
 
             for (int i = 0; i < expectedArgCount; i++)
@@ -368,12 +357,12 @@ namespace BoomifyCS.Compiler.VM
             }
             else
             {
-                throw new BifyUndefinedError(
+                Traceback.Instance.ThrowException(new BifyUndefinedError(
                     $"Undefined variable - {varName}",
                     _sourceCode[_line - 1],
                     varName,
                     _line
-                );
+                ));
             }
         }
 

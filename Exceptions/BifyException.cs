@@ -7,7 +7,7 @@ using ColorConsole = Colorful.Console;
 
 namespace BoomifyCS.Exceptions
 {
-    public abstract class BifyError : Exception
+    public abstract class BifyError 
     {
         public int CurrentLine { get; set; }
         public int Column { get; set; } // Added property for column tracking
@@ -15,18 +15,18 @@ namespace BoomifyCS.Exceptions
         public string LineTokensString { get; set; } = "";
         public string InvalidTokensString { get; set; }
         public string FileName { get; set; }
+        public string Message;
 
         protected BifyError() : base() => FileName = "0";
 
-        protected BifyError(string message) : base(message) => FileName = "0";
 
         protected BifyError(string message, string tokens, string invalidTokens, int currentLine = 1, int column = 0)
-            : base(message)
         {
             InvalidTokensString = invalidTokens;
             LineTokensString = tokens;
             CurrentLine = currentLine;
             Column = column;
+            Message = message;
         }
 
         public void PrintException()

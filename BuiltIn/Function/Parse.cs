@@ -33,19 +33,19 @@ namespace BoomifyCS.BuiltIn.Function
                 }
                 catch (FormatException)
                 {
-                    throw new BifyCastError($"The value '{bifyString}' is not in a correct format for an float. ");
+                    Traceback.Instance.ThrowException(new BifyCastError($"The value '{bifyString}' is not in a correct format for an float. "));
                 }
                 catch (OverflowException)
                 {
-                    throw new BifyCastError($"The value '{bifyString}' is too large or too small for an float.");
+                    Traceback.Instance.ThrowException(new BifyCastError($"The value '{bifyString}' is too large or too small for an float."));
                 }
                 catch (ArgumentException)
                 {
-                    throw new BifyCastError($"An argument exception occurred while parsing '{bifyString}'.");
+                    Traceback.Instance.ThrowException(new BifyCastError($"An argument exception occurred while parsing '{bifyString}'."));
                 }
                 catch (Exception)
                 {
-                    throw new BifyCastError($"An unexpected error occurred while parsing '{bifyString}'.");
+                    Traceback.Instance.ThrowException(new BifyCastError($"An unexpected error occurred while parsing '{bifyString}'."));
                 }
             }
             

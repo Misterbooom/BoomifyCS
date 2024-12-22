@@ -19,7 +19,7 @@ namespace BoomifyCS.Objects
         {
             if (index < 0 || index >= _bifyObjects.Count)
             {
-                throw new BifyIndexError("Index is out of range.");
+                Traceback.Instance.ThrowException(new BifyIndexError("Index is out of range."));
             }
             return _bifyObjects[index];
         }
@@ -29,7 +29,7 @@ namespace BoomifyCS.Objects
         {
             if (item == null)
             {
-                throw new BifyNullError(nameof(item));
+                Traceback.Instance.ThrowException(new BifyNullError(nameof(item)));
             }
             _bifyObjects.Add(item);
         }
@@ -62,7 +62,7 @@ namespace BoomifyCS.Objects
             {
                 if (_bifyObjects.Count == 0)
                 {
-                    throw new BifyNullError(ErrorMessage.ArrayIsEmpty());
+                    Traceback.Instance.ThrowException(new BifyNullError(ErrorMessage.ArrayIsEmpty()));
                 }
 
                 
@@ -70,11 +70,11 @@ namespace BoomifyCS.Objects
                 int index = bifyInteger.Value < 0 ? _bifyObjects.Count + bifyInteger.Value : bifyInteger.Value;
                 if (!IsInBound(index))
                 {
-                    throw new BifyIndexError(ErrorMessage.InvalidIndex(bifyInteger.Value, _bifyObjects.Count));
+                    Traceback.Instance.ThrowException(new BifyIndexError(ErrorMessage.InvalidIndex(bifyInteger.Value, _bifyObjects.Count)));
                 }
                 if (index < 0 || index >= _bifyObjects.Count)
                 {
-                    throw new BifyIndexError(ErrorMessage.InvalidIndex(bifyInteger.Value, _bifyObjects.Count));
+                    Traceback.Instance.ThrowException(new BifyIndexError(ErrorMessage.InvalidIndex(bifyInteger.Value, _bifyObjects.Count)));
                 }
 
                 return _bifyObjects[index];
@@ -90,12 +90,12 @@ namespace BoomifyCS.Objects
 
                 if (!IsInBound(startIndex))
                 {
-                    throw new BifyIndexError(ErrorMessage.InvalidIndex(start.Value, _bifyObjects.Count));
+                    Traceback.Instance.ThrowException(new BifyIndexError(ErrorMessage.InvalidIndex(start.Value, _bifyObjects.Count)));
                 }
 
                 if (!IsInBound(endIndex))
                 {
-                    throw new BifyIndexError(ErrorMessage.InvalidIndex(end.Value, _bifyObjects.Count));
+                    Traceback.Instance.ThrowException(new BifyIndexError(ErrorMessage.InvalidIndex(end.Value, _bifyObjects.Count)));
                 }
                 return new BifyArray(_bifyObjects[startIndex..endIndex]);
             }

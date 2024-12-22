@@ -11,14 +11,14 @@ namespace BoomifyCS.Ast.Validators
             if (previousNode == null || !IsIndexableNode(previousNode))
             {
                 BifySyntaxError error = new(ErrorMessage.InvalidIndexTarget(), "" , previousNode.Token.Value);
-                Traceback.Traceback.Instance.ThrowException(error, previousNode.Token.Column);
+                Traceback.Instance.ThrowException(error, previousNode.Token.Column);
             }
 
             if (indexNode == null || !IsValidIndexNode(indexNode))
             {
                 Console.WriteLine(indexNode.ToString());
                 BifySyntaxError error = new(ErrorMessage.InvalidIndexExpression(), "",indexNode.Token.Value);
-                Traceback.Traceback.Instance.ThrowException(error, indexNode.Token.Column);
+                Traceback.Instance.ThrowException(error, indexNode.Token.Column);
             }
 
             return true; // Validation successful

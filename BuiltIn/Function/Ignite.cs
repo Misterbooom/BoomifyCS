@@ -17,7 +17,7 @@ namespace BoomifyCS.BuiltIn.Function
         {
             if (!(arguments[0] is BifyString))
             {
-                throw new BifyArgumentError("Message must be a string");
+                Traceback.Instance.ThrowException(new BifyArgumentError("Message must be a string"));
             }
             Console.Write(arguments[0]);
             string userInput = Console.ReadLine();

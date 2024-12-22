@@ -290,7 +290,7 @@ namespace BoomifyCS.Compiler
 
             Visit(astFor.IncrementNode);
 
-            ByteInstruction jump = new(ByteType.JUMP, startLoopIndex, _lineCount);
+            ByteInstruction jump = new(ByteType.JUMP, startLoopIndex - 1, _lineCount);
             _instructions.Add(jump);
 
             if (_breakJumps.Count > 0)

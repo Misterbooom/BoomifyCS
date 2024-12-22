@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using BoomifyCS.Ast.Handlers;
 using BoomifyCS.Lexer;
 using BoomifyCS.Ast.Validators;
+using BoomifyCS.Exceptions;
 namespace BoomifyCS.Ast
 {
     class IfHandler : TokenHandler
@@ -27,13 +28,13 @@ namespace BoomifyCS.Ast
         public override void HandleToken(Token token)
         {
             Token elseToken = builder.tokens[builder.tokenIndex];
-            int line = Traceback.Traceback.Instance.line;
+            int line = Traceback.Instance.line;
 
             List<Token> blockTokens = builder.GetBlockTokens();
             AstNode blockNode = builder.ParseBlock(blockTokens);
 
             AstElse astElse = new(elseToken, blockNode);
-            Traceback.Traceback.Instance.SetCurrentLine(line);
+            Traceback.Instance.SetCurrentLine(line);
             ConditionStatementValidator.ValidateElseStatement(builder.operandStack, astElse);
 
             AstIf astIf = (AstIf)builder.operandStack.Peek();
@@ -47,7 +48,7 @@ namespace BoomifyCS.Ast
         public override void HandleToken(Token token)
         {
             Token elseToken = builder.tokens[builder.tokenIndex];
-            int line = Traceback.Traceback.Instance.line;
+            int line = Traceback.Instance.line;
 
             List<Token> conditionTokens = builder.GetConditionTokens();
             List<Token> blockTokens = builder.GetBlockTokens();
@@ -55,7 +56,7 @@ namespace BoomifyCS.Ast
             AstNode blockNode = builder.ParseBlock(blockTokens);
 
             AstElseIf astElseIf = new(elseToken, blockNode, conditionNode);
-            Traceback.Traceback.Instance.SetCurrentLine(line);
+            Traceback.Instance.SetCurrentLine(line);
             ConditionStatementValidator.ValidateElseIfStatement(conditionTokens, builder.operandStack, astElseIf);
 
             AstIf astIf = (AstIf)builder.operandStack.Peek();

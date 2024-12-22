@@ -14,175 +14,201 @@ namespace BoomifyCS.Objects
         }
         public virtual void Initialize(List<BifyObject> args)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Initialize", GetName()));
-
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Initialize", GetName())));
         }
         public virtual int GetInitializerArgs()
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("GetInitializerArgs", GetName()));
-
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("GetInitializerArgs", GetName())));
+            return 0;
         }
         public virtual BifyString Repr()
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Repr", GetName()));
-
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Repr", GetName())));
+            return null;
         }
 
         public virtual BifyString ObjectToString()
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("ToString", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("ToString", GetName())));
+            return null;
         }
 
         // Addition operator (+)
         public virtual BifyObject Add(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Addition", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Addition", GetName())));
+            return null;
         }
 
         // Subtraction operator (-)
         public virtual BifyObject Sub(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Subtraction", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Subtraction", GetName())));
+            return null;
         }
 
         // Multiplication operator (*)
         public virtual BifyObject Mul(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Multiplication", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Multiplication", GetName())));
+            return null;
         }
 
         // Division operator (/)
         public virtual BifyObject Div(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Division", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Division", GetName())));
+            return null;
         }
 
         // Modulus operator (%)
         public virtual BifyObject Mod(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Modulus", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Modulus", GetName())));
+            return null;
         }
 
         // Power operator (^)
         public virtual BifyObject Pow(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Power", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Power", GetName())));
+            return null;
         }
 
         // Floor division operator (//)
         public virtual BifyObject FloorDiv(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Floor division", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Floor division", GetName())));
+            return null;
         }
 
         // Equality operator (==)
         public virtual BifyObject Eq(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Equality", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Equality", GetName())));
+            return null;
         }
 
         // Inequality operator (!=)
         public virtual BifyObject Neq(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Inequality", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Inequality", GetName())));
+            return null;
         }
 
         // Less than operator (<)
         public virtual BifyObject Lt(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Less than", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Less than", GetName())));
+            return null;
         }
 
         // Greater than operator (>)
         public virtual BifyObject Gt(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Greater than", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Greater than", GetName())));
+            return null;
         }
 
         // Less than or equal to operator (<=)
         public virtual BifyObject Lte(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Less than or equal to", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Less than or equal to", GetName())));
+            return null;
         }
 
         // Greater than or equal to operator (>=)
         public virtual BifyObject Gte(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Greater than or equal to", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Greater than or equal to", GetName())));
+            return null;
         }
 
         // Logical AND operator (&&)
         public virtual BifyObject And(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Logical AND", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Logical AND", GetName())));
+            return null;
         }
 
         // Logical OR operator (||)
         public virtual BifyObject Or(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Logical OR", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Logical OR", GetName())));
+            return null;
         }
 
         // Bitwise AND operator (&)
         public virtual BifyObject BitAnd(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Bitwise AND", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Bitwise AND", GetName())));
+            return null;
         }
 
         // Bitwise OR operator (|)
         public virtual BifyObject BitOr(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Bitwise OR", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Bitwise OR", GetName())));
+            return null;
         }
 
         // Bitwise XOR operator (^)
         public virtual BifyObject BitXor(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Bitwise XOR", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Bitwise XOR", GetName())));
+            return null;
         }
 
         // Bitwise NOT operator (~)
         public virtual BifyObject BitNot()
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Bitwise NOT", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Bitwise NOT", GetName())));
+            return null;
         }
 
         // Left shift operator (<<)
         public virtual BifyObject LeftShift(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Left shift", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Left shift", GetName())));
+            return null;
         }
 
         // Right shift operator (>>)
         public virtual BifyObject RightShift(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Right shift", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Right shift", GetName())));
+            return null;
         }
 
         // Unary NOT operator (!)
         public virtual BifyObject Not()
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Unary NOT", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Unary NOT", GetName())));
+            return null;
         }
 
         public virtual BifyBoolean Bool()
         {
-            throw new BifyCastError($"Boolean conversion not supported for {GetName()}.");
+            Traceback.Instance.ThrowException(new BifyCastError($"Boolean conversion not supported for {GetName()}."));
+            return null;
         }
 
         public virtual BifyObject Call(List<BifyObject> bifyObjects)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Call", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Call", GetName())));
+            return null;
         }
 
         public virtual BifyInteger Int()
         {
-            throw new BifyCastError($"Integer conversion not supported for {GetName()}.");
+            Traceback.Instance.ThrowException(new BifyCastError($"Integer conversion not supported for {GetName()}."));
+            return null;
         }
 
         public virtual BifyObject Index(BifyObject other)
         {
-            throw new BifyOperationError(ErrorMessage.OperationNotSupported("Index", GetName()));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Index", GetName())));
+            return null;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace BoomifyCS.Ast.Validators
             if (conditionTokens.Count == 0)
             {
                 BifySyntaxError error = new(ErrorMessage.ConditionIsRequired());
-                Traceback.Traceback.Instance.ThrowException(error, 0);
+                Traceback.Instance.ThrowException(error, 0);
             }
         }
         
@@ -44,7 +44,7 @@ namespace BoomifyCS.Ast.Validators
             if (conditionTokens.Count == 0)
             {
                 BifySyntaxError error = new(ErrorMessage.ConditionIsRequired());
-                Traceback.Traceback.Instance.ThrowException(error, astElseIf.Token.Column);
+                Traceback.Instance.ThrowException(error, astElseIf.Token.Column);
             }
         }
         public static void ValidateElseStatement(Stack<AstNode> operandStack,AstElse astElse)
@@ -72,18 +72,18 @@ namespace BoomifyCS.Ast.Validators
         public static void ThrowUnmatchedIfError(AstElse astElse)
         {
             BifySyntaxError error = new(ErrorMessage.ElseWithoutMatchingIf(), "", astElse.Token.Value);
-            Traceback.Traceback.Instance.ThrowException(error, astElse.Token.Column);
+            Traceback.Instance.ThrowException(error, astElse.Token.Column);
         }
         public static void ThrowUnmatchedIfError(AstElseIf astElseIf)
         {
             BifySyntaxError error = new(ErrorMessage.ElseIfWithoutMatchingIf(), "", astElseIf.Token.Value);
-            Traceback.Traceback.Instance.ThrowException(error, astElseIf.Token.Column);
+            Traceback.Instance.ThrowException(error, astElseIf.Token.Column);
         }
 
         public static void ThrowElseIfAfterElseError(AstElseIf astElseIf)
         {
             BifySyntaxError error = new(ErrorMessage.ElseIfCannotFollowElseDirectly(), "", astElseIf.Token.Value);
-            Traceback.Traceback.Instance.ThrowException(error, astElseIf.Token.Column);
+            Traceback.Instance.ThrowException(error, astElseIf.Token.Column);
         }
     }
 }

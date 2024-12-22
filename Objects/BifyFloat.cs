@@ -4,9 +4,11 @@ using BoomifyCS.Exceptions;
 
 namespace BoomifyCS.Objects
 {
-    public class BifyFloat(double value) : BifyObject
+    public class BifyFloat : BifyObject
     {
-        public double Value = value;
+        public double Value;
+
+        public BifyFloat(double value) : base() => this.Value = value;
 
         public override BifyString ObjectToString()
         {
@@ -28,7 +30,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyFloat(this.Value + otherInt.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Add", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Add", GetName(), other.GetName())));
+            return null;
         }
 
         public override BifyObject Sub(BifyObject other)
@@ -41,7 +44,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyFloat(this.Value - otherInt.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Sub", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Sub", GetName(), other.GetName())));
+            return null;
         }
 
         public override BifyObject Mul(BifyObject other)
@@ -54,7 +58,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyFloat(this.Value * otherInt.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Mul", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Mul", GetName(), other.GetName())));
+            return null;
         }
 
         public override BifyObject Div(BifyObject other)
@@ -63,7 +68,7 @@ namespace BoomifyCS.Objects
             {
                 if (otherFloat.Value == 0)
                 {
-                    throw new BifyZeroDivisionError(ErrorMessage.DivisionByZero());
+                    Traceback.Instance.ThrowException(new BifyZeroDivisionError(ErrorMessage.DivisionByZero()));
                 }
                 return new BifyFloat(this.Value / otherFloat.Value);
             }
@@ -71,11 +76,12 @@ namespace BoomifyCS.Objects
             {
                 if (otherInt.Value == 0)
                 {
-                    throw new BifyZeroDivisionError(ErrorMessage.DivisionByZero());
+                    Traceback.Instance.ThrowException(new BifyZeroDivisionError(ErrorMessage.DivisionByZero()));
                 }
                 return new BifyFloat(this.Value / otherInt.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Div", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Div", GetName(), other.GetName())));
+            return null;
         }
 
         public override BifyObject Mod(BifyObject other)
@@ -88,7 +94,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyFloat(this.Value % otherInt.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Mod", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Mod", GetName(), other.GetName())));
+            return null;
         }
 
         public override BifyObject Pow(BifyObject other)
@@ -101,7 +108,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyFloat(Math.Pow(this.Value, otherInt.Value));
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Pow", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Pow", GetName(), other.GetName())));
+            return null;
         }
 
         public override BifyObject FloorDiv(BifyObject other)
@@ -110,7 +118,7 @@ namespace BoomifyCS.Objects
             {
                 if (otherFloat.Value == 0)
                 {
-                    throw new BifyZeroDivisionError(ErrorMessage.DivisionByZero());
+                    Traceback.Instance.ThrowException(new BifyZeroDivisionError(ErrorMessage.DivisionByZero()));
                 }
                 return new BifyFloat(Math.Floor(this.Value / otherFloat.Value));
             }
@@ -118,11 +126,12 @@ namespace BoomifyCS.Objects
             {
                 if (otherInt.Value == 0)
                 {
-                    throw new BifyZeroDivisionError(ErrorMessage.DivisionByZero());
+                    Traceback.Instance.ThrowException(new BifyZeroDivisionError(ErrorMessage.DivisionByZero()));
                 }
                 return new BifyFloat(Math.Floor(this.Value / otherInt.Value));
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("FloorDiv", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("FloorDiv", GetName(), other.GetName())));
+            return null;
         }
 
         public override BifyBoolean Bool()
@@ -145,7 +154,8 @@ namespace BoomifyCS.Objects
             {
                 return new BifyBoolean(this.Value <= otherInt.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Lte", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Lte", GetName(), other.GetName())));
+            return null;
         }
 
         public override BifyObject Gte(BifyObject other)
@@ -158,8 +168,10 @@ namespace BoomifyCS.Objects
             {
                 return new BifyBoolean(this.Value >= otherInt.Value);
             }
-            throw new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Gte", GetName(), other.GetName()));
+            Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Gte", GetName(), other.GetName())));
+            return null;
         }
+
         public override string ToString()
         {
             return ObjectToString().Value;

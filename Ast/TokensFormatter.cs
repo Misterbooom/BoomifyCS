@@ -33,6 +33,7 @@ namespace BoomifyCS.Ast
                     {
                         if (nextToken.Type != TokenType.IF && nextToken.Type != TokenType.ELSE)
                         {
+                            lineTokens.Add(token);
                             tokenIndex++;
                             break;
                         }
@@ -72,6 +73,35 @@ namespace BoomifyCS.Ast
             }
             return tokens[index];
         }
+        public static List<List<Token>> SplitTokensByType(List<Token> tokens, TokenType type)
+        {
+            List<List<Token>> tokenGroups = new();
+            List<Token> currentGroup = new();
+
+            foreach (Token token in tokens)
+            {
+                if (token.Type == type)
+                {
+                    if (currentGroup.Count > 0)
+                    {
+                        tokenGroups.Add(currentGroup);
+                        currentGroup = new(); 
+                    }
+                }
+                else
+                {
+                    currentGroup.Add(token);
+                }
+            }
+
+            if (currentGroup.Count > 0)
+            {
+                tokenGroups.Add(currentGroup);
+            }
+
+            return tokenGroups;
+        }
+
         public static List<Token> GetTokensBetween(List<Token> tokens, ref int index, TokenType open, TokenType close)
         {
             int count = 0;
@@ -113,7 +143,7 @@ namespace BoomifyCS.Ast
 
                 );
 
-                Traceback.Traceback.Instance.ThrowException(error,lastOpenToken.Column - 1);
+                Traceback.Instance.ThrowException(error,lastOpenToken.Column - 1);
             }
 
             return newTokens[1..];

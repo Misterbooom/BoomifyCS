@@ -15,12 +15,12 @@ namespace BoomifyCS.Ast.Validators
             if (identifierToken == null)
             {
                 BifySyntaxError error = new(ErrorMessage.MissingOperandAfterUnaryOperator(op),"",op);
-                Traceback.Traceback.Instance.ThrowException(error, identifierToken.Column);
+                Traceback.Instance.ThrowException(error, identifierToken.Column);
             }
             else if (identifierToken.Type != TokenType.IDENTIFIER)
             {
                 BifySyntaxError error = new(ErrorMessage.OperandMustBeIdentifierAfterUnaryOperator(op),"",op);
-                Traceback.Traceback.Instance.ThrowException(error,identifierToken.Column);
+                Traceback.Instance.ThrowException(error,identifierToken.Column);
 
             }
             return true;

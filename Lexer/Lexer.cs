@@ -23,7 +23,7 @@ namespace BoomifyCS.Lexer
 
             _lines = _code.Split("\n");
             _position = 0;
-            
+
         }
 
 
@@ -60,12 +60,12 @@ namespace BoomifyCS.Lexer
                 {
                     if (parenthesesStack.Count == 0)
                     {
-                        throw new BifySyntaxError(ErrorMessage.UnmatchedClosingParenthesis(), _lines[_lineCount], ")", _lineCount);
+                        Traceback.Instance.ThrowException(new BifySyntaxError(ErrorMessage.UnmatchedClosingParenthesis(), "", ")"));
                     }
                     parenthesesStack.Pop();
                 }
 
-                
+
                 else if (currentChar == ';')
                 {
                     if (parenthesesStack.Count == 0 && squareBracketsStack.Count == 0 && curlyBracesStack.Count == 0)
@@ -122,7 +122,7 @@ namespace BoomifyCS.Lexer
                 else
                 {
                     if (!char.IsWhiteSpace(currentChar))
-                        throw new BifySyntaxError(ErrorMessage.UnexpectedToken(currentChar.ToString()), _lines[_lineCount - 1], _code[_position].ToString(), _lineCount);
+                        Traceback.Instance.ThrowException(new BifySyntaxError(ErrorMessage.UnexpectedToken(currentChar.ToString()), _lines[_lineCount - 1], _code[_position].ToString(), _lineCount));
                 }
 
                 _position++;
@@ -251,12 +251,12 @@ namespace BoomifyCS.Lexer
             }
             if (counter > 0)
             {
-                throw new BifySyntaxError(
+                Traceback.Instance.ThrowException(new BifySyntaxError(
                     ErrorMessage.MissingCloseQuotationMark(),
                     _lines[_lineCount - 1],
                     stringChar.ToString(),
                     _lineCount
-                );
+                ));
             }
             return str;
 
@@ -299,7 +299,7 @@ namespace BoomifyCS.Lexer
                     counter--;
                     if (counter < 0)
                     {
-                        throw new BifySyntaxError(ErrorMessage.UnmatchedClosingBrace(), _lines[_lineCount - 1], "}", _lineCount);
+                        Traceback.Instance.ThrowException(new BifySyntaxError(ErrorMessage.UnmatchedClosingBrace(), _lines[_lineCount - 1], "}", _lineCount));
 
                     }
                     else if (counter == 0)
@@ -322,7 +322,7 @@ namespace BoomifyCS.Lexer
 
             if (counter != 0)
             {
-                throw new BifySyntaxError(ErrorMessage.UnmatchedOpeningBrace(), _lines[_lineCount - 1], "{", _lineCount - 1);
+                Traceback.Instance.ThrowException(new BifySyntaxError(ErrorMessage.UnmatchedOpeningBrace(), _lines[_lineCount - 1], "{", _lineCount - 1));
 
             }
             string blockString = _code[start.._position];

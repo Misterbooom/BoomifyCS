@@ -9,7 +9,7 @@ namespace BoomifyCS.Ast
 {
     class AstTree
     {
-        public AstTree(string[] sourceCode) => Traceback.Traceback.Instance.InitializeSource(sourceCode);
+        public AstTree(string[] sourceCode) => Traceback.Instance.InitializeSource(sourceCode);
 
         public AstNode ParseTokens(List<Token> tokens)
         {
@@ -20,7 +20,7 @@ namespace BoomifyCS.Ast
             {
                 lines.Add(ParseLine(tokens, ref tokenIndex, ref lineCount));
             }
-            lines.WriteNodes();
+            //lines.WriteNodes();
             AstModule module = new("","",lines);
             return module;
         }
@@ -28,7 +28,7 @@ namespace BoomifyCS.Ast
         {
             List<Token> line = TokensFormatter.NextLine(tokens, ref tokenIndex);
 
-            Console.WriteLine($"Line - {line.TokensToString()}");
+            //Console.WriteLine($"Line - {line.TokensToString()}");
             AstBuilder builder = new(line);
             return builder.BuildNode();
         }

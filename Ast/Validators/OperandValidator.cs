@@ -14,7 +14,7 @@ namespace BoomifyCS.Ast.Validators
             if (left == null || right == null)
             {
                 BifyArithmeticError error = new(ErrorMessage.NotEnoughOperands(operatorNode.Token.Value), "", operatorNode.Token.Value);
-                Traceback.Traceback.Instance.ThrowException(error, operatorNode.Token.Column);
+                Traceback.Instance.ThrowException(error, operatorNode.Token.Column);
             }
             CheckOperandType(left, operatorNode);
             CheckOperandType(right, operatorNode);
@@ -26,7 +26,7 @@ namespace BoomifyCS.Ast.Validators
             if (!IsOperand(node))
             {
                 BifyArithmeticError error = new(ErrorMessage.InvalidOperandType(node.GetType().Name.Replace("Ast","")), "", node.Token.Value);
-                Traceback.Traceback.Instance.ThrowException(error,node.Token.Column);
+                Traceback.Instance.ThrowException(error,node.Token.Column);
 
             }
         }

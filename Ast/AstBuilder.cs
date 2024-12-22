@@ -50,14 +50,14 @@ namespace BoomifyCS.Ast
         {
             if (node != null)
             {
-                node.LineNumber = Traceback.Traceback.Instance.line;
+                node.LineNumber = Traceback.Instance.line;
                 operandStack.Push(node);
             }
         }
 
         public void AddOperator(AstNode node)
         {
-            node.LineNumber = Traceback.Traceback.Instance.line;
+            node.LineNumber = Traceback.Instance.line;
             operatorStack.Push(node);
         }
 
@@ -75,7 +75,7 @@ namespace BoomifyCS.Ast
             else if (operandStack.Count < 2)
             {
                 BifySyntaxError error = new BifySyntaxError(ErrorMessage.NotEnoughOperands(operatorNode.Token.Value), "", operatorNode.Token.Value);
-                Traceback.Traceback.Instance.ThrowException(error, operatorNode.Token.Column);
+                Traceback.Instance.ThrowException(error, operatorNode.Token.Column);
             }
             AstNode right = operandStack.Pop();
             AstNode left = operandStack.Pop();
@@ -114,7 +114,7 @@ namespace BoomifyCS.Ast
 
         public AstNode ParseBlock(List<Token> blockTokens)
         {
-            return new AstBlock(((AstModule)new AstTree(Traceback.Traceback.Instance.source).ParseTokens(blockTokens)).ChildNodes);
+            return new AstBlock(((AstModule)new AstTree(Traceback.Instance.source).ParseTokens(blockTokens)).ChildNodes);
         }
     }
 }
