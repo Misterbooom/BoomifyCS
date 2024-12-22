@@ -36,7 +36,6 @@ namespace BoomifyCS.Traceback
 
         public void ThrowException(BifyError error, int column = 0)
         {
-            Console.WriteLine($"Source lenght - {source.Length} line - {line}");
             if (source != null && source.Length > line - 1)
             {
                 error.CurrentLine = line;

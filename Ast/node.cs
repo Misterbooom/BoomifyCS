@@ -287,9 +287,9 @@ namespace BoomifyCS.Ast
 
         }
     }
-    public class AstFor(Token token, AstBlock blockNode, AstNode conditionNode, AstNode incrementNode, AstNode initNode) : AstNode(token)
+    public class AstFor(Token token, AstNode blockNode, AstNode conditionNode, AstNode incrementNode, AstNode initNode) : AstNode(token)
     {
-        public AstBlock BlockNode = blockNode;
+        public AstNode BlockNode = blockNode;
         public AstNode ConditionNode = conditionNode;
         public AstNode IncrementNode = incrementNode;
         public AstNode InitNode = initNode;

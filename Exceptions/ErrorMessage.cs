@@ -5,6 +5,16 @@ namespace BoomifyCS.Exceptions
 {
     public static class ErrorMessage
     {
+        public static string InvalidForLoopStructure() => "Invalid for loop structure. A for loop requires an initialization, condition, and increment statement.";
+        public static string InitStatementIsRequired() => "Initialization statement is required in a for loop.";
+        public static string ConditionIsRequired() => "Condition statement is required in a for loop.";
+        public static string IncrementStatementIsRequired() => "Increment statement is required in a for loop.";
+        public static string InvalidInitNode() => "Initialization node is missing or invalid in the for loop.";
+        public static string InvalidInitNodeType() => "Initialization node type is invalid. Expected variable declaration or assignment.";
+        public static string InvalidConditionNode() => "Condition node is missing or invalid in the for loop.";
+        public static string InvalidConditionNodeType() => "Condition node type is invalid. Expected binary operation, unary operation, identifier, function call, or indexing operator.";
+        public static string InvalidIncrementNode() => "Increment node is missing or invalid in the for loop.";
+        public static string InvalidIncrementNodeType() => "Increment node type is invalid. Expected assignment or unary operation.";
         public static string InvalidOperandType(string operand)
         {
             return $"Invalid operand type '{operand}'.";
@@ -54,25 +64,7 @@ namespace BoomifyCS.Exceptions
             return "'else if' cannot follow an 'else' statement directly. It must follow an 'if' or another 'else if'.";
         }
 
-        public static string ForLoopMustHaveInitialization()
-        {
-            return "The 'for' loop must include an initialization statement.";
-        }
 
-        public static string ForLoopMustHaveCondition()
-        {
-            return "The 'for' loop must include a condition statement.";
-        }
-
-        public static string ForLoopMustHaveIncrement()
-        {
-            return "The 'for' loop must include an increment statement.";
-        }
-
-        public static string InvalidIncrementExpression()
-        {
-            return "Invalid increment expression in 'for' loop. The increment must be an assignment, a unary operation, or a function call.";
-        }
 
         public static string InvalidVariableDeclaration()
         {
@@ -83,20 +75,7 @@ namespace BoomifyCS.Exceptions
             return "The target of an index operation must be an array, identifier, or callable.";
         }
 
-        public static string InvalidIndexExpression()
-        {
-            return "The index of an array or callable must be a number, range, or identifier.";
-        }
-        public static string InvalidConditionExpression()
-        {
-            return "The condition in a 'for' loop must be a valid expression.";
-        }
-
-        public static string InvalidInitializationStatement()
-        {
-            return "Incorrect number of semicolon-separated statements in 'for' loop. There should be exactly three: initialization, condition, and increment.";
-        }
-
+ 
         public static string MissingCloseQuotationMark()
         {
             return "Missing closing quotation mark.";
@@ -150,19 +129,20 @@ namespace BoomifyCS.Exceptions
         {
             return $"Expected token of type {tokenType} not found";
         }
-        public static string ConditionIsRequired()
-        {
-            return "Condition is required";
-        }
+
         public static string InvalidFunctionDeclaration()
         {
             return "Invalid function declaration syntax\r\n";
         }
-        public static string OperationNotSupported(string operation,string objectName)
+        public static string InvalidIndexExpression()
+        {
+            return "The index of an array or callable must be a number, range, or identifier.";
+        }
+        public static string OperationNotSupported(string operation, string objectName)
         {
             return $"{operation} not supported for {objectName}.";
         }
-    
+
         public static string InvalidVariableName(string var)
         {
             return $"Invalid variable name. The variable must be a valid identifier. Not a '{var}'";
