@@ -14,25 +14,31 @@ namespace BoomifyCS.Ast
 
         public override void HandleToken(Token token)
         {
+            int line = Traceback.Instance.line;
 
             List<Token> conditionTokens = builder.GetConditionTokens();
             List<Token> blockTokens = builder.GetBlockTokens();
             AstNode conditionNode = builder.ParseCondition(conditionTokens);
             AstNode blockNode = builder.ParseBlock(blockTokens);
             AstWhile astWhile = new(token, blockNode, conditionNode);
+            Traceback.Instance.SetCurrentLine(line);
             IteratorStatementValidator.ValidateWhileStatement(conditionTokens, astWhile);
             builder.AddOperand(astWhile);
         }
     }
-    class ForHandler : TokenHandler { 
+    class ForHandler : TokenHandler
+    {
         public ForHandler(AstBuilder builder) : base(builder) { }
-        public override void HandleToken(Token token) { 
+        public override void HandleToken(Token token)
+        {
+            int line = Traceback.Instance.line;
             List<Token> conditionTokens = builder.GetConditionTokens();
             List<Token> blockTokens = builder.GetBlockTokens();
-            var splitedTokens = TokensFormatter.SplitTokensByType(conditionTokens, TokenType.SEMICOLON); 
+            var splitedTokens = TokensFormatter.SplitTokensByType(conditionTokens, TokenType.SEMICOLON);
             if (splitedTokens.Count != 3)
             {
                 BifySyntaxError error = new(ErrorMessage.InvalidForLoopStructure(), "", token.Value);
+                Traceback.Instance.ThrowException(error, token.Column);
             }
             List<Token> initTokens = splitedTokens[0];
             List<Token> condition = splitedTokens[1];
