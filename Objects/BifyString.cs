@@ -71,33 +71,30 @@ namespace BoomifyCS.Objects
 
         public override BifyInteger Int()
         {
-            try
-            {
-                return new BifyInteger(int.Parse(Value));
-            }
-            catch (FormatException)
-            {
-                Traceback.Instance.ThrowException(new BifyCastError($"The value '{Value}' is not in a correct format for an integer."));
-            }
-            catch (OverflowException)
-            {
-                Traceback.Instance.ThrowException(new BifyCastError($"The value '{Value}' is too large or too small for an integer."));
-            }
-            catch (ArgumentException)
-            {
-                Traceback.Instance.ThrowException(new BifyCastError($"An argument exception occurred while parsing '{Value}'."));
-            }
-            catch (Exception)
-            {
-                Traceback.Instance.ThrowException(new BifyCastError($"An unexpected error occurred while parsing '{Value}'."));
-            }
-
-            return null; // Ensure the method still returns null
+            
+            return BifyInteger.Convert(this); 
         }
 
         public override string ToString()
         {
             return ObjectToString().Value;
+        }
+        public static BifyString Convert(object other)
+        {
+            if (other is BifyString bifyString)
+            {
+                return bifyString;
+            }
+            else if (other is BifyInteger integer)
+            {
+                return new BifyString(integer.Value.ToString());
+            }
+            else if (other is BifyFloat bifyFloat)
+            {
+                return new BifyString(bifyFloat.Value.ToString());
+            }
+            Traceback.Instance.ThrowException(new BifyOverflowError("Unsupported conversion to String"));
+            return null;
         }
     }
 }

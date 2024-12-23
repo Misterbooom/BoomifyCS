@@ -91,7 +91,7 @@ namespace BoomifyCS.Compiler
                 {
                     if (value is BifyObject bifyObject)
                     {
-                        arguments += " " + bifyObject.ToString();
+                        arguments += " " + bifyObject.Repr().ObjectToString();
 
                     }
                     else

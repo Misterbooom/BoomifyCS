@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 using BoomifyCS.Objects;
 
@@ -17,32 +18,48 @@ namespace BoomifyCS.Ast
                 case TokenType.NUMBER:
                     if (token.Value.Contains('.'))
                     {
-
                         if (double.TryParse(token.Value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double parsedFloatValue))
                         {
+                            if (parsedFloatValue > double.MaxValue)
+                            {
+                                Traceback.Instance.ThrowException(new BifyOverflowError($"Token value '{token.Value}' exceeds the maximum allowable value for a double."));
+                                return null;
+                            }
                             return new AstNumber(token, new BifyFloat(parsedFloatValue));
                         }
                         else
                         {
-                            throw new FormatException($"Token value '{token.Value}' is not a valid float.");
+                            Traceback.Instance.ThrowException(new BifyOverflowError($"Token value '{token.Value}' is not a valid float."));
+                            return null;
                         }
                     }
                     else
                     {
                         if (int.TryParse(token.Value, out int parsedIntValue))
                         {
+                            if (parsedIntValue > int.MaxValue)
+                            {
+                                Traceback.Instance.ThrowException(new BifyOverflowError($"Token value '{token.Value}' exceeds the maximum allowable value for a double."));
+                                return null;
+                            }
                             return new AstNumber(token, new BifyInteger(parsedIntValue));
                         }
                         else
                         {
-                            throw new FormatException($"Token value '{token.Value}' is not a valid integer.");
+                            Traceback.Instance.ThrowException(new BifyOverflowError($"Token value '{token.Value}' is not a valid integer."));
+                            return null;
                         }
                     }
+
+
                 case TokenType.IDENTIFIER:
                     return new AstIdentifier(token,token.Value);
                 case TokenType.STRING:
                     return new AstString(token, new BifyString(token.Value));
-
+                case TokenType.BREAK:
+                    return new AstBreak(token);
+                case TokenType.CONTINUE:
+                    return new AstContinue(token);
                 default: return null;
             }
         }

@@ -24,11 +24,11 @@ namespace BoomifyCS.Objects
         {
             if (other is BifyFloat otherFloat)
             {
-                return new BifyFloat(this.Value + otherFloat.Value);
+                return new BifyFloat(checked(this.Value + otherFloat.Value));
             }
             if (other is BifyInteger otherInt)
             {
-                return new BifyFloat(this.Value + otherInt.Value);
+                return new BifyFloat(checked(this.Value + otherInt.Value));
             }
             Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Add", GetName(), other.GetName())));
             return null;
@@ -38,11 +38,11 @@ namespace BoomifyCS.Objects
         {
             if (other is BifyFloat otherFloat)
             {
-                return new BifyFloat(this.Value - otherFloat.Value);
+                return new BifyFloat(checked(this.Value - otherFloat.Value));
             }
             if (other is BifyInteger otherInt)
             {
-                return new BifyFloat(this.Value - otherInt.Value);
+                return new BifyFloat(checked(this.Value - otherInt.Value));
             }
             Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Sub", GetName(), other.GetName())));
             return null;
@@ -52,11 +52,11 @@ namespace BoomifyCS.Objects
         {
             if (other is BifyFloat otherFloat)
             {
-                return new BifyFloat(this.Value * otherFloat.Value);
+                return new BifyFloat(checked(this.Value * otherFloat.Value));
             }
             if (other is BifyInteger otherInt)
             {
-                return new BifyFloat(this.Value * otherInt.Value);
+                return new BifyFloat(checked(this.Value * otherInt.Value));
             }
             Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Mul", GetName(), other.GetName())));
             return null;
@@ -70,7 +70,7 @@ namespace BoomifyCS.Objects
                 {
                     Traceback.Instance.ThrowException(new BifyZeroDivisionError(ErrorMessage.DivisionByZero()));
                 }
-                return new BifyFloat(this.Value / otherFloat.Value);
+                return new BifyFloat(checked(this.Value / otherFloat.Value));
             }
             if (other is BifyInteger otherInt)
             {
@@ -78,7 +78,7 @@ namespace BoomifyCS.Objects
                 {
                     Traceback.Instance.ThrowException(new BifyZeroDivisionError(ErrorMessage.DivisionByZero()));
                 }
-                return new BifyFloat(this.Value / otherInt.Value);
+                return new BifyFloat(checked(this.Value / otherInt.Value));
             }
             Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Div", GetName(), other.GetName())));
             return null;
@@ -88,11 +88,11 @@ namespace BoomifyCS.Objects
         {
             if (other is BifyFloat otherFloat)
             {
-                return new BifyFloat(this.Value % otherFloat.Value);
+                return new BifyFloat(checked(this.Value % otherFloat.Value));
             }
             if (other is BifyInteger otherInt)
             {
-                return new BifyFloat(this.Value % otherInt.Value);
+                return new BifyFloat(checked(this.Value % otherInt.Value));
             }
             Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Mod", GetName(), other.GetName())));
             return null;
@@ -102,11 +102,11 @@ namespace BoomifyCS.Objects
         {
             if (other is BifyFloat otherFloat)
             {
-                return new BifyFloat(Math.Pow(this.Value, otherFloat.Value));
+                return new BifyFloat(checked((float)Math.Pow(this.Value, otherFloat.Value)));
             }
             if (other is BifyInteger otherInt)
             {
-                return new BifyFloat(Math.Pow(this.Value, otherInt.Value));
+                return new BifyFloat(checked((float)Math.Pow(this.Value, otherInt.Value)));
             }
             Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("Pow", GetName(), other.GetName())));
             return null;
@@ -120,7 +120,7 @@ namespace BoomifyCS.Objects
                 {
                     Traceback.Instance.ThrowException(new BifyZeroDivisionError(ErrorMessage.DivisionByZero()));
                 }
-                return new BifyFloat(Math.Floor(this.Value / otherFloat.Value));
+                return new BifyFloat(checked((float)Math.Floor(this.Value / otherFloat.Value)));
             }
             if (other is BifyInteger otherInt)
             {
@@ -128,7 +128,7 @@ namespace BoomifyCS.Objects
                 {
                     Traceback.Instance.ThrowException(new BifyZeroDivisionError(ErrorMessage.DivisionByZero()));
                 }
-                return new BifyFloat(Math.Floor(this.Value / otherInt.Value));
+                return new BifyFloat(checked((float)Math.Floor(this.Value / otherInt.Value)));
             }
             Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidTypeForOperation("FloorDiv", GetName(), other.GetName())));
             return null;
@@ -141,7 +141,7 @@ namespace BoomifyCS.Objects
 
         public override BifyInteger Int()
         {
-            return new BifyInteger((int)this.Value);
+            return BifyInteger.Convert(this);
         }
 
         public override BifyObject Lte(BifyObject other)
@@ -175,6 +175,32 @@ namespace BoomifyCS.Objects
         public override string ToString()
         {
             return ObjectToString().Value;
+        }
+
+        public static BifyFloat Convert(object other)
+        {
+            if (other is BifyFloat bifyFloat)
+            {
+                return bifyFloat;
+            }
+            else if (other is BifyInteger integer)
+            {
+                return new BifyFloat(integer.Value);
+            }
+            else if (other is BifyString bifyString)
+            {
+                if (float.TryParse(bifyString.Value, out float result))
+                {
+                    return new BifyFloat(result);
+                }
+                else
+                {
+                    Traceback.Instance.ThrowException(new BifyOverflowError("String cannot be converted to Float"));
+                    return null;
+                }
+            }
+            Traceback.Instance.ThrowException(new BifyOverflowError("Unsupported conversion to Float"));
+            return null;
         }
     }
 }

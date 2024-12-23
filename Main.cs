@@ -41,6 +41,7 @@ namespace BoomifyCS
             AstTree astParser = new(codeByLine);
             AstNode node = astParser.ParseTokens(tokens);
             MyCompiler interpreter = new(codeByLine);
+            Console.WriteLine(node.ToString());
             interpreter.RunVM(node);
 
 

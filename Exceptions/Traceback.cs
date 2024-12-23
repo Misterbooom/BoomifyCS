@@ -43,6 +43,7 @@ namespace BoomifyCS.Exceptions
                 error.Column = column;
 
                 error.PrintException();
+                
                 Environment.Exit(-1);
             }
             else
