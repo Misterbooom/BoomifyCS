@@ -9,8 +9,9 @@ namespace BoomifyCS.Exceptions
         public int line = 0;
         private string fileName = "main";
         public string[] source;
-
-        private Traceback() { }
+        private Stack<BifyError> stack;
+        private Stack<Type> track;
+        private Traceback() { stack = []; track = []; }
         public static Traceback Instance
         {
             get
@@ -27,7 +28,18 @@ namespace BoomifyCS.Exceptions
         {
             source = sourceCode;
         }
-
+        public void Catch(Type type)
+        {
+            track.Push(type);
+        }
+        public BifyError GetError()
+        {
+            if (stack.Count == 0)
+            {
+                return null;
+            }
+            return stack.Pop();
+        }
         public void SetCurrentLine(int currentLine)
         {
             line = currentLine;
@@ -41,9 +53,22 @@ namespace BoomifyCS.Exceptions
                 error.FileName = fileName;
                 error.LineTokensString = source[line - 1];
                 error.Column = column;
+                foreach (Type type in track)
+                {
+                    if (type.IsAssignableFrom(error.GetType()))
+                    {
+                        stack.Push(error);
+                        track.Pop();
+                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{error.GetType().Name} != {type.Name}");
+                    }
+                }
+
 
                 error.PrintException();
-                
                 Environment.Exit(-1);
             }
             else

@@ -1,9 +1,1 @@
-﻿var n = 12; 
-var result = 1;
-
-var i = 1;
-while (i <= n) {
-    result = result * i;
-    i = i + 1;
-    explode(result);
-}
+﻿var a = 5 * " 2";

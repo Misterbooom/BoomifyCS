@@ -203,16 +203,14 @@ namespace BoomifyCS.Compiler.VM
             BifyObject left = _stackManager.Pop();
             try
             {
-      
                 BifyObject result = PerformBinaryOperation(left, right, instruction.Type);
-                Console.WriteLine($"Result of: {left.Repr()} {instruction.Type} {right.Repr()} = {result.Repr()}");
                 _stackManager.Push(result);
             }
             catch (OverflowException)
             {
                 Traceback.Instance.ThrowException(new BifyOverflowError("Overflow error",right.ToString() + left.ToString()));
             }
-            
+
 
 
         }

@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 using BoomifyCS.Lexer;
+using BoomifyCS.Objects;
 using ColorConsole = Colorful.Console;
 
 namespace BoomifyCS.Exceptions
 {
-    public abstract class BifyError 
+    public abstract class BifyError : BifyObject 
     {
         public int CurrentLine { get; set; }
         public int Column { get; set; } // Added property for column tracking
