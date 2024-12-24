@@ -20,7 +20,7 @@ namespace BoomifyCS.Lexer
         public MyLexer(string code)
         {
             this._code = code;
-
+            Traceback.Instance.InitializeSource(_code.Split("\n"));
             _lines = _code.Split("\n");
             _position = 0;
 
@@ -60,7 +60,7 @@ namespace BoomifyCS.Lexer
                 {
                     if (parenthesesStack.Count == 0)
                     {
-                        Traceback.Instance.ThrowException(new BifySyntaxError(ErrorMessage.UnmatchedClosingParenthesis(), "", ")"));
+                        Traceback.Instance.ThrowException(new BifySyntaxError(ErrorMessage.UnmatchedClosingParenthesis(), "", ")"),column);
                     }
                     parenthesesStack.Pop();
                 }
@@ -126,6 +126,7 @@ namespace BoomifyCS.Lexer
                 }
 
                 _position++;
+                Traceback.Instance.SetCurrentLine(_lineCount);
             }
             return tokens;
         }
