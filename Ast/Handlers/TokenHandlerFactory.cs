@@ -18,11 +18,14 @@ namespace BoomifyCS.Ast.Handlers
                 TokenType.IDENTIFIER => new IdentifierHandler(builder),
                 TokenType.DOT => new DotHandler(builder),
                 TokenType.LBRACKET => new BracketHandler(builder),
+                TokenType.RETURN => new ReturnHandler(builder),
                 _ when TokenConfig.assignmentOperators.ContainsValue(token.Type) => new AssignmentOperatorHandler(builder),
+                _ when TokenConfig.binaryOperators.ContainsValue(token.Type) => new BinaryOperatorHandler(builder),
                 TokenType.INCREMENT or TokenType.DECREMENT => new UnaryOperatorHandler(builder),
                 TokenType.LPAREN => new ParenthesisHandler(builder),
                 TokenType.FOR => new ForHandler(builder),
-                _ when TokenConfig.binaryOperators.ContainsValue(token.Type) => new BinaryOperatorHandler(builder),
+
+                TokenType.FUNCTIONDECL => new FunctionDeclarationHandler(builder),
                 _ => new DefaultTokenHandler(builder),
             };
         }

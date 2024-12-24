@@ -99,6 +99,10 @@ namespace BoomifyCS.Compiler
                 case AstFunctionDecl astFunctionDecl:
                     HandleFunctionDeclaration(astFunctionDecl);
                     break;
+                case AstReturn astReturn:
+                    Visit(astReturn.ArgumentsNode);
+                    _instructions.Add(new ByteInstruction(ByteType.RETURN, _lineCount));
+                    break;
                 default:
                     Visit(node.Left);
                     Visit(node.Right);
@@ -157,7 +161,21 @@ namespace BoomifyCS.Compiler
                 VisitArgument(function.argumentsNode);
             }
             Visit(function.blockNode);
-
+            AstBlock functionBlock = (AstBlock)function.blockNode;
+            bool isContainReturnNode = false;
+            foreach (AstNode node in functionBlock.ChildsNodes)
+            {
+                if (node is AstReturn astReturn)
+                {
+                    isContainReturnNode = true;
+                    break;
+                }
+            }
+            if (!isContainReturnNode || !(functionBlock.ChildsNodes[^1] is AstReturn))
+            {
+                _instructions.Add(new ByteInstruction(ByteType.LOAD_CONST, new BifyNull(), _lineCount));
+                _instructions.Add(new ByteInstruction(ByteType.RETURN, _lineCount));
+            }
             ByteInstruction endFunc = new(ByteType.END_DEF_FUNC, _lineCount);
             _instructions.Add(endFunc);
         }
@@ -353,7 +371,10 @@ namespace BoomifyCS.Compiler
             Visit(ifNode.BlockNode);
 
             ByteInstruction jumpToEnd = new(ByteType.JUMP, -1, _lineCount);
-            _instructions.Add(jumpToEnd);
+            if (ifNode.ElseIfNodes.Count != 0)
+            {
+                _instructions.Add(jumpToEnd);
+            }
 
             jumpIfFalse.Value[0] = _instructions.Count - 1;
 
@@ -377,7 +398,7 @@ namespace BoomifyCS.Compiler
             {
                 Visit(ifNode.ElseNode);
             }
-
+            jumpIfFalse.Value[0] = _instructions.Count;
             jumpToEnd.Value[0] = _instructions.Count;
         }
         private static int CountCommaNode(AstNode node)

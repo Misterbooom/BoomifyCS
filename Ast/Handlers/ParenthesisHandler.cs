@@ -14,7 +14,7 @@ namespace BoomifyCS.Ast
         {
             List<Token> parenthesisTokens = TokensFormatter.GetTokensBetween(builder.tokens, ref builder.tokenIndex, TokenType.LPAREN, TokenType.RPAREN);
             AstBuilder parenthesisBuilder = new(parenthesisTokens);
-            builder.operandStack.Push(parenthesisBuilder.BuildNode());
+            builder.AddOperand(parenthesisBuilder.BuildNode());
         }
     }
 }

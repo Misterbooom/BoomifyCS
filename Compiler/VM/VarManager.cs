@@ -22,10 +22,12 @@ public class VarManager
     };
 
     private string _context = "globals";
-
+    private Stack<Dictionary<string, BifyObject>> _stack = [];
     public VarManager() { }
 
     // Set the context for the variable manager
+    public string GetContext() => _context;
+
     public void SetContext(string context)
     {
         if (_variables.ContainsKey(context))
@@ -37,14 +39,23 @@ public class VarManager
             throw new ArgumentException("Invalid context. Use 'locals' or 'globals'.");
         }
     }
+    // Create a new local scope
+    public void PushScope()
+    {
+        _stack.Push(_variables["locals"]);
+        _variables["locals"]  = new();
+    }
 
-    // Define a new variable in the current context
+    public void PopScope()
+    {
+        _variables["locals"] = _stack.Pop();
+    }
+
     public void DefineVariable(string name, BifyObject value)
     {
         _variables[_context][name] = value;
     }
 
-    // Store a value for an existing variable in the current context
     public void Store(string name, BifyObject value)
     {
         if (_variables[_context].ContainsKey(name))

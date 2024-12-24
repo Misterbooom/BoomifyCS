@@ -9,94 +9,50 @@ namespace BoomifyCS.Compiler.VM
 {
     public class StackManager
     {
-        private readonly Stack<BifyObject> globalStack = new();
-        private readonly Stack<BifyObject> localStack = new();
-        private string context = "global";
-
+        private Stack<BifyObject> globalStack = new();
+        private readonly Stack<Stack<BifyObject>> scopeStack = new();
         public StackManager() { }
-
-        public void SetContext(string context)
-        {
-            if (context == "global" || context == "local")
-            {
-                this.context = context;
-            }
-            else
-            {
-                throw new ArgumentException("Invalid context. Use 'local' or 'global'.");
-            }
-        }
 
         public void Push(BifyObject value)
         {
-            if (context == "global")
-            {
-                globalStack.Push(value);
-            }
-            else if (context == "local")
-            {
-                localStack.Push(value);
-            }
+            globalStack.Push(value);
         }
-
+        
         public BifyObject Pop()
         {
-            if (context == "global")
-            {
-                return globalStack.Pop();
-            }
-            else if (context == "local")
-            {
-                return localStack.Pop();
-            }
-            throw new InvalidOperationException("Invalid stack context.");
+            return globalStack.Pop();
+        }
+        public void PushScope()
+        {
+            scopeStack.Push(new Stack<BifyObject>(globalStack.Reverse()));
+
+            globalStack.Clear();
         }
 
+        public void PopScope()
+        {
+            globalStack = scopeStack.Pop();
+        }
         public BifyObject Peek()
         {
-            if (context == "global")
-            {
-                return globalStack.Peek();
-            }
-            else if (context == "local")
-            {
-                return localStack.Peek();
-            }
-            throw new InvalidOperationException("Invalid stack context.");
+            return globalStack.Peek();
         }
 
         public int Count()
         {
-            if (context == "global")
-            {
-                return globalStack.Count;
-            }
-            else if (context == "local")
-            {
-                return localStack.Count;
-            }
-            throw new InvalidOperationException("Invalid stack context.");
+            return globalStack.Count;
         }
 
         public void Clear()
         {
-            if (context == "global")
-            {
-                globalStack.Clear();
-            }
-            else if (context == "local")
-            {
-                localStack.Clear();
-            }
-            throw new InvalidOperationException("Invalid stack context.");
+            globalStack.Clear();
         }
+
         public void Print()
         {
-            Stack<BifyObject> stackToPrint = context == "global" ? globalStack : localStack;
+            Console.WriteLine("Contents of the global stack:");
 
-            Console.WriteLine($"Contents of the {context} stack:");
-
-            foreach (var item in stackToPrint)
+            foreach (var item in globalStack)
             {
                 Console.WriteLine(item.Repr());
             }

@@ -14,6 +14,7 @@ namespace BoomifyCS.Ast
             AstIdentifier identifier = (AstIdentifier)NodeConventer.TokenToNode(builder.tokens[builder.tokenIndex]);
             List<Token> parenthesisTokens = TokensFormatter.GetTokensBetween(builder.tokens, ref builder.tokenIndex, TokenType.LPAREN, TokenType.RPAREN);
             AstNode argumentsNode = new AstBuilder(parenthesisTokens).BuildNode();
+            identifier.Token.Type = TokenType.CALL;
             AstCall astCall = new(identifier.Token, identifier, argumentsNode);
             builder.AddOperand(astCall);
         }

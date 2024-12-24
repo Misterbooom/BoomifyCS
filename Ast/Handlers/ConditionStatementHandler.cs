@@ -4,7 +4,7 @@ using BoomifyCS.Ast.Handlers;
 using BoomifyCS.Lexer;
 using BoomifyCS.Ast.Validators;
 using BoomifyCS.Exceptions;
-namespace BoomifyCS.Ast
+namespace BoomifyCS.Ast 
 {
     class IfHandler : TokenHandler
     {

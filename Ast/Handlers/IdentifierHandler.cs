@@ -14,6 +14,7 @@ namespace BoomifyCS.Ast
             Token nextToken = TokensFormatter.GetTokenOrNull(builder.tokens, builder.tokenIndex + 1);
             if (nextToken != null && nextToken.Type == TokenType.LPAREN)
             {
+                Console.WriteLine("CallHandler");
                 new CallHandler(builder).HandleToken(token);
             }
             builder.AddOperand(NodeConventer.TokenToNode(builder.tokens[builder.tokenIndex]));

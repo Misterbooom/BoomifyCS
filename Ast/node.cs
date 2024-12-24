@@ -312,9 +312,8 @@ namespace BoomifyCS.Ast
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
-            string callableStr = CallableName?.StrHelper(level + 1, "Name: ");
             string argumentsStr = ArgumentsNode != null ? ArgumentsNode?.StrHelper(level + 2, "Arguments: ") : "";
-            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{callableStr}\n{argumentsStr}";
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{argumentsStr}";
 
         }
     }
@@ -330,11 +329,11 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{valueStr}";
         }
     }
-    public class AstFunctionDecl(Token token, AstIdentifier functionNameNode, AstNode argumentsNode, AstBlock blockNode) : AstNode(token)
+    public class AstFunctionDecl(Token token, AstIdentifier functionNameNode, AstNode argumentsNode, AstNode blockNode) : AstNode(token)
     {
         public AstNode argumentsNode = argumentsNode;
         public AstIdentifier functionNameNode = functionNameNode;
-        public AstBlock blockNode = blockNode;
+        public AstNode blockNode = blockNode;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -345,7 +344,7 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{functionNameStr}\n{argumentsStr}\n{blockStr}";
         }
     }
-    public class AstModule(string moduleName, string modulePath, List<AstNode> nodes) : AstNode(new Token(TokenType.IDENTIFIER,moduleName))
+    public class AstModule(string moduleName, string modulePath, List<AstNode> nodes) : AstNode(new Token(TokenType.IDENTIFIER, moduleName))
     {
         public List<AstNode> ChildNodes = nodes;
         public string ModuleName = moduleName;
@@ -355,8 +354,9 @@ namespace BoomifyCS.Ast
         {
             string baseStr = base.StrHelper(level, note, false);
             string childStr = "";
-            foreach (AstNode node in ChildNodes) { 
-                 childStr += node?.StrHelper(level + 1, "Child: ");
+            foreach (AstNode node in ChildNodes)
+            {
+                childStr += node?.StrHelper(level + 1, "Child: ");
 
             }
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{childStr}";
@@ -380,6 +380,16 @@ namespace BoomifyCS.Ast
     }
     public class AstBreak(Token token) : AstNode(token) { }
     public class AstContinue(Token token) : AstNode(token) { }
+    public class AstReturn(Token token, AstNode argumentsNode) : AstNode(token)
+    {
+        public AstNode ArgumentsNode = argumentsNode;
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
+        {
+            string baseStr = base.StrHelper(level, note, false);
+            string argumentsStr = ArgumentsNode?.StrHelper(level + 1, "Arguments: ");
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{argumentsStr}";
+        }
+    }
     public class AstArray(Token token, AstNode argumentsNode) : AstNode(token)
     {
         public AstNode ArgumentsNode = argumentsNode;
@@ -390,7 +400,7 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{argumentsStr}";
         }
     }
-    public class AstIndexOperator(AstNode nodeIndex,AstNode operandNode) : AstNode(new Token(TokenType.NUMBER,"UNKNOWN"))
+    public class AstIndexOperator(AstNode nodeIndex, AstNode operandNode) : AstNode(new Token(TokenType.NUMBER, "UNKNOWN"))
     {
         public AstNode IndexNode = nodeIndex;
         public AstNode OperandNode = operandNode;
@@ -402,11 +412,12 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{nodeIndexStr}\n{operandStr}";
         }
     }
-    public class AstConditionStatement(AstNode left = null,AstNode right = null) : AstNode(new Token(TokenType.IDENTIFIER, "Condition statement"),left,right)
+    public class AstConditionStatement(AstNode left = null, AstNode right = null) : AstNode(new Token(TokenType.IDENTIFIER, "Condition statement"), left, right)
     {
-        
+
     }
-    public class AstRangeOperator(Token token) : AstBinaryOp(token) { 
+    public class AstRangeOperator(Token token) : AstBinaryOp(token)
+    {
     }
 }
 

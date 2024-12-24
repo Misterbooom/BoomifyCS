@@ -134,6 +134,14 @@ namespace BoomifyCS.Exceptions
         {
             return "Invalid function declaration syntax\r\n";
         }
+        public static string ExpectedFunctionName()
+        {
+            return "Expected function name";
+        }
+        public static string InvalidParameter(string parameterType)
+        {
+            return $"Invalid parameter type '{parameterType}'. Expected a valid identifier or comma.";
+        }
         public static string InvalidIndexExpression()
         {
             return "The index of an array or callable must be a number, range, or identifier.";
