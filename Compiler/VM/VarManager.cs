@@ -77,11 +77,11 @@ public class VarManager
     // Retrieve a variable from the current context or globals
     public BifyObject GetVariable(string name)
     {
-        if (_variables[_context].TryGetValue(name, out BifyObject value))
+        if (_variables["locals"].TryGetValue(name, out BifyObject value))
         {
             return value;
         }
-        else if (_context == "locals" && _variables["globals"].TryGetValue(name, out value))
+        else if (_variables["globals"].TryGetValue(name, out value))
         {
             return value;
         }
@@ -93,19 +93,17 @@ public class VarManager
 
     public void Print()
     {
-        if (_variables.TryGetValue(_context, out Dictionary<string, BifyObject> variablesToPrint))
-        {
-            Console.WriteLine($"Contents of the {_context} context:");
-
-            foreach (var kvp in variablesToPrint)
+        Console.WriteLine("--Variables--");
+        
+            foreach (var kvp in _variables["locals"])
             {
                 Console.WriteLine($"{kvp.Key}: {kvp.Value.Repr()}");
             }
-        }
-        else
-        {
-            Console.WriteLine($"Context '{_context}' does not exist.");
-        }
+            foreach (var kvp in _variables["globals"])
+            {
+                Console.WriteLine($"{kvp.Key}: {kvp.Value.Repr()}");
+            }
+        Console.WriteLine("---End Of Variables---");
     }
 
     public Dictionary<string, BifyObject> CloneCurrentContext()

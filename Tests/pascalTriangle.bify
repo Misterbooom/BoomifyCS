@@ -1,0 +1,26 @@
+﻿function factorial(n) {
+  var result = 1;
+  var i = 1;
+  while (i <= n) {
+    result = result * i;
+    i++;
+  }
+  return result;
+}
+
+function pascal(row, col) {
+  return factorial(row) / (factorial(col) * factorial(row - col));
+}
+var rows = 12;
+var i = 0;
+while (i < rows) {
+    var j = 0;
+    var line = "";
+    while (j <= i) {
+        line = line + parse(pascal(i, j),"string") + " ";
+        j = j + 1;
+    }
+    explode(line);
+    i = i + 1;
+}
+

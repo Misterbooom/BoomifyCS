@@ -18,7 +18,7 @@ namespace BoomifyCS.Ast.Validators
                 Traceback.Instance.ThrowException(bifyError, nameToken == null ? funcToken.Column : nameToken.Column);
             }
             var result = TravelParameters(parametersNode);
-            if (!result.isCorrect)
+            if (!result.isCorrect && parametersNode != null)
             {
                 BifyError bifyError = new BifySyntaxError(ErrorMessage.InvalidParameter(result.token.Type.ToString()), "", result.token.Value);
                 Traceback.Instance.ThrowException(bifyError, result.token.Column);
@@ -28,6 +28,10 @@ namespace BoomifyCS.Ast.Validators
         }
         private static (bool isCorrect, Token token) TravelParameters(AstNode node)
         {
+            if (node is null)
+            {
+                return (false, null);
+            }
             if (node is AstBinaryOp binaryOp)
             {
                 if (binaryOp.Token.Type == TokenType.COMMA)
@@ -36,9 +40,11 @@ namespace BoomifyCS.Ast.Validators
                     var rightResult = TravelParameters(binaryOp.Right);
 
                     if (!leftResult.isCorrect)
-                        return (false, leftResult.token);
+                        return (false, leftResult.token ?? binaryOp.Token);
+
                     if (!rightResult.isCorrect)
-                        return (false, rightResult.token);
+                        return (false, rightResult.token ?? binaryOp.Token);
+
 
                     return (true, binaryOp.Token);
                 }

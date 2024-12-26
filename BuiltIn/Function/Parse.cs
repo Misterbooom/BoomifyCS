@@ -27,26 +27,9 @@ namespace BoomifyCS.BuiltIn.Function
             }
             else if (type == "float" && arguments[0] is BifyString bifyString)
             {
-                try
-                {
-                    return new BifyFloat(double.Parse(bifyString.Value));
-                }
-                catch (FormatException)
-                {
-                    Traceback.Instance.ThrowException(new BifyCastError($"The value '{bifyString}' is not in a correct format for an float. "));
-                }
-                catch (OverflowException)
-                {
-                    Traceback.Instance.ThrowException(new BifyCastError($"The value '{bifyString}' is too large or too small for an float."));
-                }
-                catch (ArgumentException)
-                {
-                    Traceback.Instance.ThrowException(new BifyCastError($"An argument exception occurred while parsing '{bifyString}'."));
-                }
-                catch (Exception)
-                {
-                    Traceback.Instance.ThrowException(new BifyCastError($"An unexpected error occurred while parsing '{bifyString}'."));
-                }
+                
+                 return BifyFloat.Convert(bifyString);
+               
             }
             
             return new BifyNull();

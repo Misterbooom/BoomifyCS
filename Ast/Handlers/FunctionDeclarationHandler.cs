@@ -23,8 +23,8 @@ namespace BoomifyCS.Ast.Handlers
             AstNode argumentsNode = builder.ParseCondition(parametersTokens);
             AstNode blockNode = builder.ParseBlock(blockTokens);
             Traceback.Instance.SetCurrentLine(token.Line);
-            FunctionDeclarationValidator.Validate(token,nameToken, argumentsNode, blockNode);
-            AstFunctionDecl functionNode = new AstFunctionDecl(token, (AstIdentifier)NodeConventer.TokenToNode(nameToken),argumentsNode, blockNode);
+            FunctionDeclarationValidator.Validate(token, nameToken, argumentsNode, blockNode);
+            AstFunctionDecl functionNode = new AstFunctionDecl(token, (AstIdentifier)NodeConventer.TokenToNode(nameToken), argumentsNode, blockNode);
             builder.AddOperand(functionNode);
         }
     }

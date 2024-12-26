@@ -52,7 +52,7 @@ namespace BoomifyCS.Compiler.VM
             {
                 var instruction = _instructions[instructionIndex];
                 Traceback.Instance.line = instruction.IndexOfInstruction;
-                //Console.WriteLine($"Curr instr - {instructionIndex}: {instruction.ToString()}");
+                Console.WriteLine($"Curr instr - {instructionIndex}: {instruction.ToString()}");
 
                 switch (instruction.Type)
                 {
@@ -112,6 +112,8 @@ namespace BoomifyCS.Compiler.VM
                     case ByteType.RETURN:
                         ProccesReturn(instruction);
                         return;
+                    case ByteType.LABEL:
+                        break;
                     default:
                         throw new InvalidOperationException($"Unknown instruction type: {instruction.Type}");
 
@@ -259,9 +261,11 @@ namespace BoomifyCS.Compiler.VM
                 ByteType.POWE => ByteType.POW,
                 _ => throw new NotImplementedException($"Bytecode - {instruction.Type} not implemented in unary op"),
             };
-
-            instruction.Type = byteType;
-            ProcessOperator(instruction);
+            ByteInstruction newInstruction = new(byteType, instruction.IndexOfInstruction);
+            stackManager.Push(varValue);
+            ProcessOperator(newInstruction);
+            var res = stackManager.Pop();
+            varManager.Store(identifier, res);
         }
 
         private void ProcessDefine(ByteInstruction instruction)
@@ -284,14 +288,21 @@ namespace BoomifyCS.Compiler.VM
 
         private void ProcessJump(ByteInstruction instruction, ref int instructionIndex)
         {
-            var jumpIndex = (int)instruction.Value[0];
+            string jumpLabel = (string)instruction.Value[0];
 
             if (instruction.Type == ByteType.JUMP_IF_FALSE && !stackManager.Pop().Bool().Value ||
                 instruction.Type == ByteType.JUMP_IF_TRUE && stackManager.Pop().Bool().Value ||
                 instruction.Type == ByteType.JUMP)
             {
-                instructionIndex = jumpIndex;
+                for (int i = 0; i < _instructions.Count; i++)
+                {
+                    if (_instructions[i].Type == ByteType.LABEL && (string)_instructions[i].Value[0] == jumpLabel)
+                    {
+                        instructionIndex = i + 1; // +1 because we want to jump to the instruction after the label
+                        return;
+                    }
 
+                }
             }
             else
             {
@@ -307,7 +318,7 @@ namespace BoomifyCS.Compiler.VM
             var expectedArgCount = (int)instruction.Value[0];
 
             _callStack.Add(new CallStackFrame(function.Name, Traceback.Instance.line, _modulePath, Traceback.Instance.source[Traceback.Instance.line - 1]));
-
+            Traceback.Instance.callStack = _callStack;
             if (expectedArgCount != function.ExpectedArgCount && function.ExpectedArgCount != -1)
             {
                 Traceback.Instance.ThrowException(new BifyArgumentError(
@@ -341,8 +352,8 @@ namespace BoomifyCS.Compiler.VM
                 varManager.PopScope();
                 stackManager.PopScope();
                 stackManager.Push(functionReturn);
-
                 varManager.SetContext(context);
+
 
                 instructionsIndex = tempIndex;
 

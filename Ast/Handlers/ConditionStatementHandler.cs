@@ -28,6 +28,12 @@ namespace BoomifyCS.Ast
         public override void HandleToken(Token token)
         {
             Token elseToken = builder.tokens[builder.tokenIndex];
+            Token nextToken = TokensFormatter.GetTokenOrNull(builder.tokens,builder.tokenIndex + 1);
+            if (nextToken != null && nextToken.Type == TokenType.IF)
+            {
+                new ElseIfHandler(builder).HandleToken(token);
+                return;
+            }
             int line = Traceback.Instance.line;
 
             List<Token> blockTokens = builder.GetBlockTokens();

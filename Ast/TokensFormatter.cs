@@ -29,6 +29,7 @@ namespace BoomifyCS.Ast
                 {
                     
                     curlyCount--;
+                    
                     if (curlyCount <= 0 && tokenIndex + 1 < tokens.Count)
                     {
                         if (nextToken.Type != TokenType.IF && nextToken.Type != TokenType.ELSE)

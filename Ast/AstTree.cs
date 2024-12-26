@@ -28,7 +28,6 @@ namespace BoomifyCS.Ast
         {
             List<Token> line = TokensFormatter.NextLine(tokens, ref tokenIndex);
 
-            //Console.WriteLine($"Line - {line.TokensToString()}");
             AstBuilder builder = new(line);
             return builder.BuildNode();
         }

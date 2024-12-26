@@ -14,6 +14,7 @@ namespace BoomifyCS.Compiler
         private readonly VirtualMachine _vm = new(sourcecode);
         private readonly Stack<ByteInstruction> _breakJumps = new();
         private readonly Stack<ByteInstruction> _continueJumps = new();
+        private int numberJumps = 0;
         private int _lineCount = 1;
         public void RunVM(AstNode root)
         {
@@ -22,6 +23,7 @@ namespace BoomifyCS.Compiler
             _instructions.WriteInstructions();
             _vm.Run(_instructions);
         }
+
 
         private void Visit(AstNode node)
         {
@@ -291,73 +293,83 @@ namespace BoomifyCS.Compiler
 
         private void HandleForLoop(AstFor astFor)
         {
+            string startLoopLabel = $"J{numberJumps++}";
+            string jumpToEndLabel = $"J{numberJumps++}";
+            string incrementLabel = $"J{numberJumps++}";
+
+            // Add start label for the loop
+
             Visit(astFor.InitNode);
-            int startLoopIndex = _instructions.Count;
+            _instructions.Add(new ByteInstruction(ByteType.LABEL, startLoopLabel, _lineCount));
+
             Visit(astFor.ConditionNode);
-
-            ByteInstruction jumpIfFalse = new(ByteType.JUMP_IF_FALSE, 0, _lineCount);
+            ByteInstruction jumpIfFalse = new(ByteType.JUMP_IF_FALSE, jumpToEndLabel, _lineCount);
             _instructions.Add(jumpIfFalse);
-
             Visit(astFor.BlockNode);
 
+            // Handle the continue jump if it exists
             if (_continueJumps.Count > 0)
             {
                 var continueJump = _continueJumps.Pop();
-                continueJump.Value[0] = _instructions.Count - 2;
+                continueJump.Value[0] = incrementLabel;
             }
-
-            Visit(astFor.IncrementNode);
-
-            ByteInstruction jump = new(ByteType.JUMP, startLoopIndex - 1, _lineCount);
-            _instructions.Add(jump);
 
             if (_breakJumps.Count > 0)
             {
                 var breakJump = _breakJumps.Pop();
-                breakJump.Value[0] = _instructions.Count;
+                breakJump.Value[0] = jumpToEndLabel;
             }
+            _instructions.Add(new ByteInstruction(ByteType.LABEL, incrementLabel, _lineCount));
+            Visit(astFor.IncrementNode);
 
-            jumpIfFalse.Value[0] = _instructions.Count;
+            ByteInstruction jump = new(ByteType.JUMP, startLoopLabel, _lineCount);
+            _instructions.Add(jump);
+
+
+            _instructions.Add(new ByteInstruction(ByteType.LABEL, jumpToEndLabel, _lineCount));
+
         }
+
 
         private void HandleWhileLoop(AstWhile astWhile)
         {
-            int startLoopIndex = _instructions.Count;
+            string startLoopLabel = $"J{numberJumps++}";
+            string jumpToEndLabel = $"J{numberJumps++}";
+            _instructions.Add(new ByteInstruction(ByteType.LABEL, startLoopLabel, _lineCount));
             Visit(astWhile.ConditionNode);
-
-            ByteInstruction jumpIfFalse = new(ByteType.JUMP_IF_FALSE, 0, _lineCount);
+            ByteInstruction jumpIfFalse = new(ByteType.JUMP_IF_FALSE, jumpToEndLabel, _lineCount);
             _instructions.Add(jumpIfFalse);
 
             Visit(astWhile.BlockNode);
 
-            ByteInstruction jump = new(ByteType.JUMP, startLoopIndex - 1, _lineCount);
+            ByteInstruction jump = new(ByteType.JUMP, startLoopLabel, _lineCount);
             _instructions.Add(jump);
 
             if (_continueJumps.Count > 0)
             {
                 var continueJump = _continueJumps.Pop();
-                continueJump.Value[0] = _instructions.Count - 1;
+                continueJump.Value[0] = jumpToEndLabel;
             }
 
             if (_breakJumps.Count > 0)
             {
                 var breakJump = _breakJumps.Pop();
-                breakJump.Value[0] = _instructions.Count;
+                breakJump.Value[0] = jumpToEndLabel;
             }
+            _instructions.Add(new ByteInstruction(ByteType.LABEL, jumpToEndLabel, _lineCount));
 
-            jumpIfFalse.Value[0] = _instructions.Count;
         }
 
         private void HandleBreak()
         {
-            ByteInstruction jump = new(ByteType.JUMP, -1, _lineCount);
+            ByteInstruction jump = new(ByteType.JUMP, "", _lineCount);
             _instructions.Add(jump);
             _breakJumps.Push(jump);
         }
 
         private void HandleContinue()
         {
-            ByteInstruction jump = new(ByteType.JUMP, -1, _lineCount);
+            ByteInstruction jump = new(ByteType.JUMP, "", _lineCount);
             _instructions.Add(jump);
             _continueJumps.Push(jump);
         }
@@ -365,41 +377,39 @@ namespace BoomifyCS.Compiler
         private void CompileIfStatement(AstIf ifNode)
         {
             Visit(ifNode.ConditionNode);
-            ByteInstruction jumpIfFalse = new(ByteType.JUMP_IF_FALSE, -1, _lineCount);
+            string jumpToEndLabel = $"J{numberJumps++}";
+            ByteInstruction jumpIfFalse = new(ByteType.JUMP_IF_FALSE, jumpToEndLabel, _lineCount);
             _instructions.Add(jumpIfFalse);
-
             Visit(ifNode.BlockNode);
 
-            ByteInstruction jumpToEnd = new(ByteType.JUMP, -1, _lineCount);
-            if (ifNode.ElseIfNodes.Count != 0)
-            {
-                _instructions.Add(jumpToEnd);
-            }
+            ByteInstruction jumpToEnd = new(ByteType.JUMP, jumpToEndLabel, _lineCount);
 
-            jumpIfFalse.Value[0] = _instructions.Count - 1;
+            _instructions.Add(jumpToEnd);
+
 
             foreach (var elseIfNode in ifNode.ElseIfNodes)
             {
+                string elseIfLabel = $"J{numberJumps++}";
+                _instructions.Add(new ByteInstruction(ByteType.LABEL, elseIfLabel, _lineCount));
                 Visit(elseIfNode.ConditionNode);
-                ByteInstruction jumpIfFalseElseIf = new(ByteType.JUMP_IF_FALSE, -1, _lineCount);
+                ByteInstruction jumpIfFalseElseIf = new(ByteType.JUMP_IF_FALSE, jumpToEndLabel, _lineCount);
+                jumpIfFalse.Value[0] = elseIfLabel;
                 _instructions.Add(jumpIfFalseElseIf);
 
                 Visit(elseIfNode.BlockNode);
+                _instructions.Add(new ByteInstruction(ByteType.JUMP, jumpToEndLabel, _lineCount));
 
-                jumpToEnd.Value[0] = _instructions.Count;
-
-                jumpToEnd = new(ByteType.JUMP, -1, _lineCount);
-                _instructions.Add(jumpToEnd);
-
-                jumpIfFalseElseIf.Value[0] = _instructions.Count;
             }
 
             if (ifNode.ElseNode != null)
             {
+                string elseLabel = $"J{numberJumps++}";
+                jumpIfFalse.Value[0] = elseLabel;
+                _instructions.Add(new ByteInstruction(ByteType.LABEL, elseLabel, _lineCount));
                 Visit(ifNode.ElseNode);
             }
-            jumpIfFalse.Value[0] = _instructions.Count;
-            jumpToEnd.Value[0] = _instructions.Count;
+
+            _instructions.Add(new ByteInstruction(ByteType.LABEL, jumpToEndLabel, _lineCount));
         }
         private static int CountCommaNode(AstNode node)
         {

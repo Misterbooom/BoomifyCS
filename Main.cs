@@ -37,7 +37,6 @@ namespace BoomifyCS
 
 
             List<Token> tokens = lexer.Tokenize();
-            tokens.WriteTokens();
             string[] codeByLine = code.Split('\n');
             AstTree astParser = new(codeByLine);
             AstNode node = astParser.ParseTokens(tokens);

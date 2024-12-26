@@ -1,6 +1,7 @@
 ﻿using BoomifyCS.Lexer;
 using System;
 using BoomifyCS.Exceptions;
+using System.Globalization;
 
 namespace BoomifyCS.Objects
 {
@@ -189,7 +190,7 @@ namespace BoomifyCS.Objects
             }
             else if (other is BifyString bifyString)
             {
-                if (float.TryParse(bifyString.Value, out float result))
+                if (double.TryParse(bifyString.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out double result))
                 {
                     return new BifyFloat(result);
                 }

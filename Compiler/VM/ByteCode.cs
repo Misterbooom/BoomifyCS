@@ -56,7 +56,9 @@ namespace BoomifyCS.Compiler
         END_DEF_FUNC,
         ADD_ARG,
         INIT,
-        RETURN
+        RETURN,
+        LABEL
+
     }
     public class ByteInstruction
     {

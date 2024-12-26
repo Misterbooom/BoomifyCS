@@ -9,6 +9,7 @@ namespace BoomifyCS.Exceptions
         public int line = 0;
         private string fileName = "main";
         public string[] source;
+        public List<CallStackFrame> callStack;
         private Stack<BifyError> stack;
         private Stack<Type> track;
         private Traceback() { stack = []; track = []; }
@@ -53,6 +54,7 @@ namespace BoomifyCS.Exceptions
                 error.FileName = fileName;
                 error.LineTokensString = source[line - 1];
                 error.Column = column;
+                error.CallStack = callStack;
                 foreach (Type type in track)
                 {
                     if (type.IsAssignableFrom(error.GetType()))

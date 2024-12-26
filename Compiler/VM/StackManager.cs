@@ -50,12 +50,12 @@ namespace BoomifyCS.Compiler.VM
 
         public void Print()
         {
-            Console.WriteLine("Contents of the global stack:");
-
+            Console.WriteLine("Stack:");
             foreach (var item in globalStack)
             {
                 Console.WriteLine(item.Repr());
             }
+            Console.WriteLine("End Of Stack");
         }
     }
 }

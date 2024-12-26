@@ -20,7 +20,7 @@ namespace BoomifyCS.Objects
 
         public override BifyString Repr()
         {
-            return new BifyString($"BifyString({Value})");
+            return new BifyString($"BifyString('{Value}')");
         }
 
         public override BifyObject Mul(BifyObject other)
