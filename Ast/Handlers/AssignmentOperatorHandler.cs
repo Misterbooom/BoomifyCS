@@ -16,13 +16,31 @@ namespace BoomifyCS.Ast
             Token variableToken = TokensFormatter.GetTokenOrNull(builder.tokens, builder.tokenIndex - 1);
             builder.tokenIndex += 1;
             List<Token> valueTokens = builder.tokens[builder.tokenIndex..];
-            VariableDeclarationValidator.Validate(variableToken, new Token(TokenType.ASSIGN, ""), valueTokens);
-            builder.tokenIndex = builder.tokens.Count;
-            builder.operandStack.Pop();
-            AstBuilder valueBuilder = new(valueTokens);
-            AstNode valueNode = valueBuilder.BuildNode();
-            AstAssignmentOperator astAssignmentOperator = new(assignToken, (AstIdentifier)NodeConventer.TokenToNode(variableToken), valueNode);
-            builder.AddOperand(astAssignmentOperator);
+
+            if (builder.operandStack.TryPop(out AstNode node) && node is AstIndexOperator indexOperator)
+            {
+                indexOperator.Token.Type = TokenType.INDEX_OPERATOR;
+                VariableDeclarationValidator.Validate(indexOperator.Token, new Token(TokenType.ASSIGN, ""), valueTokens);
+                builder.tokenIndex = builder.tokens.Count;
+                AstBuilder valueBuilder = new(valueTokens);
+                AstNode valueNode = valueBuilder.BuildNode();
+
+                AstAssignmentOperator astAssignmentOperator = new(assignToken, indexOperator, valueNode);
+                builder.AddOperand(astAssignmentOperator);
+
+            }
+            else
+            {
+                VariableDeclarationValidator.Validate(variableToken, new Token(TokenType.ASSIGN, ""), valueTokens);
+                builder.tokenIndex = builder.tokens.Count;
+                builder.operandStack.Pop();
+                AstBuilder valueBuilder = new(valueTokens);
+                AstNode valueNode = valueBuilder.BuildNode();
+
+                AstAssignmentOperator astAssignmentOperator = new(assignToken, (AstIdentifier)NodeConventer.TokenToNode(variableToken), valueNode);
+                builder.AddOperand(astAssignmentOperator);
+            }
+
         }
     }
 }

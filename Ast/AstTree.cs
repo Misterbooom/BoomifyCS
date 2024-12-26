@@ -30,7 +30,6 @@ namespace BoomifyCS.Ast
         private AstNode ParseLine(List<Token> tokens, ref int tokenIndex, ref int lineCount)
         {
             List<Token> line = TokensFormatter.NextLine(tokens, ref tokenIndex);
-
             AstBuilder builder = new(line);
             return builder.BuildNode();
         }

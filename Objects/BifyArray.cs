@@ -22,7 +22,7 @@ namespace BoomifyCS.Objects
         {
             if (index < 0 || index >= _bifyObjects.Count)
             {
-                Traceback.Instance.ThrowException(new BifyIndexError("Index is out of range."));
+                Traceback.Instance.ThrowException(new BifyIndexError("GetItem is out of range."));
             }
             return _bifyObjects[index];
         }
@@ -58,7 +58,7 @@ namespace BoomifyCS.Objects
         }
 
         // Handle array indexing with support for integers and ranges
-        public override BifyObject Index(BifyObject other)
+        public override BifyObject GetItem(BifyObject other)
         {
 
             if (other is BifyInteger bifyInteger)
@@ -105,6 +105,55 @@ namespace BoomifyCS.Objects
 
 
             return new BifyNull(); 
+        }
+        public override void SetItem(BifyObject key, BifyObject value)
+        {
+            if (key is BifyInteger bifyInteger)
+            {
+                if (_bifyObjects.Count == 0)
+                {
+                    Traceback.Instance.ThrowException(new BifyNullError(ErrorMessage.ArrayIsEmpty()));
+                }
+
+                int index = bifyInteger.Value < 0 ? _bifyObjects.Count + bifyInteger.Value : bifyInteger.Value;
+                if (!IsInBound(index))
+                {
+                    Traceback.Instance.ThrowException(new BifyIndexError(ErrorMessage.InvalidIndex(bifyInteger.Value, _bifyObjects.Count)));
+                }
+                if (index < 0 || index >= _bifyObjects.Count)
+                {
+                    Traceback.Instance.ThrowException(new BifyIndexError(ErrorMessage.InvalidIndex(bifyInteger.Value, _bifyObjects.Count)));
+                }
+
+                _bifyObjects[index] = value;
+            }
+            else if (key is BifyRange bifyRange)
+            {
+                BifyInteger start = bifyRange.First;
+                BifyInteger end = bifyRange.Second;
+
+                int startIndex = start.Value < 0 ? _bifyObjects.Count + start.Value : start.Value;
+                int endIndex = end.Value < 0 ? _bifyObjects.Count + end.Value : end.Value + 1;
+
+                if (!IsInBound(startIndex))
+                {
+                    Traceback.Instance.ThrowException(new BifyIndexError(ErrorMessage.InvalidIndex(start.Value, _bifyObjects.Count)));
+                }
+
+                if (!IsInBound(endIndex))
+                {
+                    Traceback.Instance.ThrowException(new BifyIndexError(ErrorMessage.InvalidIndex(end.Value, _bifyObjects.Count)));
+                }
+
+                for (int i = startIndex; i < endIndex; i++)
+                {
+                    _bifyObjects[i] = value;
+                }
+            }
+            else
+            {
+                Traceback.Instance.ThrowException(new BifyTypeError("Invalid key type for SetItem."));
+            }
         }
         private bool IsInBound(int value) => value < _bifyObjects.Count;
 

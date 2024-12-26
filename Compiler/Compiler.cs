@@ -115,7 +115,7 @@ namespace BoomifyCS.Compiler
 
         private void HandleAssignmentOperator(AstAssignmentOperator astAssignmentOperator)
         {
-            Visit(astAssignmentOperator.ValueNode);
+
 
             ByteType byteType = astAssignmentOperator.Token.Type switch
             {
@@ -128,15 +128,21 @@ namespace BoomifyCS.Compiler
                 TokenType.ASSIGN => ByteType.STORE,
                 _ => throw new InvalidOperationException($"Invalid assignment operator: {astAssignmentOperator.Token.Value}")
             };
+            if (byteType == ByteType.STORE && astAssignmentOperator.IdentifierNode is AstIndexOperator indexOperator)
+            {
+                
 
-            if (byteType != ByteType.STORE)
-            {
-                _instructions.Add(new ByteInstruction(byteType, astAssignmentOperator.IdentifierNode.Token.Value, _lineCount));
+                Visit(indexOperator.OperandNode);
+                Visit(indexOperator.IndexNode);
+                Visit(astAssignmentOperator.ValueNode);
+                _instructions.Add(new ByteInstruction(ByteType.STORE,  _lineCount));
+                return;
             }
-            else
-            {
-                _instructions.Add(new ByteInstruction(byteType, astAssignmentOperator.IdentifierNode.Token.Value, _lineCount));
-            }
+            Visit(astAssignmentOperator.ValueNode);
+
+
+            _instructions.Add(new ByteInstruction(byteType, astAssignmentOperator.IdentifierNode.Token.Value, _lineCount));
+           
         }
         private void HandleFunctionDeclaration(AstFunctionDecl function)
         {
@@ -245,7 +251,9 @@ namespace BoomifyCS.Compiler
 
         private void HandleAssignment(AstAssignment astAssignment)
         {
+            
             Visit(astAssignment.Right);
+            
 
             if (astAssignment.Left is AstVar astVar)
             {

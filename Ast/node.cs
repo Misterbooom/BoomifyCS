@@ -348,9 +348,9 @@ namespace BoomifyCS.Ast
 
         }
     }
-    public class AstAssignmentOperator(Token token, AstIdentifier identifierNode, AstNode valueNode) : AstNode(token)
+    public class AstAssignmentOperator(Token token, AstNode identifierNode, AstNode valueNode) : AstNode(token)
     {
-        public AstIdentifier IdentifierNode = identifierNode;
+        public AstNode IdentifierNode = identifierNode;
         public AstNode ValueNode = valueNode;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
@@ -411,7 +411,7 @@ namespace BoomifyCS.Ast
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note, isLeft);
-            string nodeIndexStr = IndexNode?.StrHelper(level + 1, "Index: ");
+            string nodeIndexStr = IndexNode?.StrHelper(level + 1, "IndexNode: ");
             string operandStr = OperandNode?.StrHelper(level + 1, "Operand: ");
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{nodeIndexStr}\n{operandStr}";
         }

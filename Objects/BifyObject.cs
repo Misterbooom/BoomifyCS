@@ -199,10 +199,15 @@ namespace BoomifyCS.Objects
             return null;
         }
 
-        public virtual BifyObject Index(BifyObject other)
+        public virtual BifyObject GetItem(BifyObject other)
         {
-            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Index", GetName())));
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("GetItem", GetName())));
             return null;
+        }
+        public virtual void SetItem(BifyObject key, BifyObject value)
+        {
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("SetItem", GetName())));
+            
         }
     }
 }

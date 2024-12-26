@@ -86,7 +86,7 @@ namespace BoomifyCS.Compiler.VM
                         break;
 
                     case ByteType.STORE:
-                        StoreVariable(stackManager.Pop(), (string)instruction.Value[0]);
+                        StoreVariable(instruction);
                         break;
 
                     case ByteType.NEW_ARRAY:
@@ -375,23 +375,36 @@ namespace BoomifyCS.Compiler.VM
         {
             var index = stackManager.Pop();
             var bifyObject = stackManager.Pop();
-            stackManager.Push(bifyObject.Index(index));
+            stackManager.Push(bifyObject.GetItem(index));
         }
 
-        private void StoreVariable(BifyObject varValue, string varName)
+        private void StoreVariable(ByteInstruction instruction)
         {
-            if (varManager.HasVariable(varName))
+            if ( instruction.Value != null && instruction.Value.Count == 1)
             {
-                varManager.Store(varName, varValue);
+                string varName = (string)instruction.Value[0];
+                if (varManager.HasVariable(varName))
+                {
+                    varManager.Store(varName, stackManager.Pop());
+                }
+                else
+                {
+                    Traceback.Instance.ThrowException(new BifyUndefinedError(
+                        $"Undefined variable - {varName}",
+                        "",
+                        varName
+                    ));
+                }
             }
             else
             {
-                Traceback.Instance.ThrowException(new BifyUndefinedError(
-                    $"Undefined variable - {varName}",
-                    "",
-                    varName
-                ));
+                var value = stackManager.Pop();
+                var index = stackManager.Pop();
+                var array = stackManager.Pop();
+                array.SetItem(index,value);
             }
+
+            
         }
 
         private static BifyObject PerformBinaryOperation(BifyObject a, BifyObject b, ByteType operatorType) => operatorType switch
