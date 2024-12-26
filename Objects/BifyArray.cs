@@ -12,7 +12,10 @@ namespace BoomifyCS.Objects
         private readonly List<BifyObject> _bifyObjects;
 
         // Constructor
-        public BifyArray(List<BifyObject> bifyObjects) : base() => _bifyObjects = bifyObjects ?? throw new ArgumentNullException(nameof(bifyObjects));
+        public BifyArray(List<BifyObject> bifyObjects) : base()
+        {
+            _bifyObjects = bifyObjects ?? throw new ArgumentNullException(nameof(bifyObjects));
+        }
 
         // Get an element by index
         public BifyObject Get(int index)
@@ -103,23 +106,13 @@ namespace BoomifyCS.Objects
 
             return new BifyNull(); 
         }
-        private bool IsInBound(int value)
-        {
-            return value < _bifyObjects.Count;
-            
-        }
+        private bool IsInBound(int value) => value < _bifyObjects.Count;
 
         // String representation of the array
-        public override BifyString Repr()
-        {
-            return new BifyString($"BifyArray({ToString()})");
-        }
+        public override BifyString Repr() => new BifyString($"BifyArray({ToString()})");
 
         // Override ToString to use ObjectToString
-        public override string ToString()
-        {
-            return ObjectToString().Value;
-        }
+        public override string ToString() => ObjectToString().Value;
     }
 
 }

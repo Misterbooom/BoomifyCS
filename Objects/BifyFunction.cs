@@ -19,10 +19,7 @@ namespace BoomifyCS.Objects
             ExpectedArgCount = -1;
 
         }
-        public override BifyObject Call(List<BifyObject> arguments)
-        {
-            return returnObject;
-        }
+        public override BifyObject Call(List<BifyObject> arguments) => returnObject;
         public override BifyString Repr()
         {
             if (arguments.Count > 0)
@@ -31,9 +28,6 @@ namespace BoomifyCS.Objects
             }
             return new BifyString($"<{Name} Function>");
         }
-        public override string ToString()
-        {
-            return ObjectToString().Value;
-        }
+        public override string ToString() => ObjectToString().Value;
     }
 }

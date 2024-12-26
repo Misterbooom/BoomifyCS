@@ -25,14 +25,8 @@ namespace BoomifyCS.Exceptions
             }
         }
 
-        public void InitializeSource(string[] sourceCode)
-        {
-            source = sourceCode;
-        }
-        public void Catch(Type type)
-        {
-            track.Push(type);
-        }
+        public void InitializeSource(string[] sourceCode) => source = sourceCode;
+        public void Catch(Type type) => track.Push(type);
         public BifyError GetError()
         {
             if (stack.Count == 0)
@@ -41,10 +35,7 @@ namespace BoomifyCS.Exceptions
             }
             return stack.Pop();
         }
-        public void SetCurrentLine(int currentLine)
-        {
-            line = currentLine;
-        }
+        public void SetCurrentLine(int currentLine) => line = currentLine;
 
         public void ThrowException(BifyError error, int column = 0)
         {

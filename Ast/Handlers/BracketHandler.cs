@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using BoomifyCS.Ast.Handlers;
 using BoomifyCS.Lexer;
 using BoomifyCS.Ast.Validators;
+using BoomifyCS.Parser;
 
 namespace BoomifyCS.Ast
 {
@@ -15,16 +16,27 @@ namespace BoomifyCS.Ast
             List<Token> tokensInBrackets = TokensFormatter.GetTokensBetween(builder.tokens, ref builder.tokenIndex, TokenType.LBRACKET, TokenType.RBRACKET);
             if (builder.operatorStack.TryPop(out AstNode operatorNode))
             {
-                new ArrayHandler(builder).HandleToken(token);
+                HandleArray(token, tokensInBrackets);
             }
             else if (builder.operandStack.TryPop(out AstNode previousNode))
             {
-                Console.WriteLine(builder.operatorStack.ToString());
                 AstNode indexNode = new AstBuilder(tokensInBrackets).BuildNode();
                 IndexOperatorValidator.Validate(previousNode, indexNode);
                 AstIndexOperator astIndexOperator = new(indexNode, previousNode);
                 builder.AddOperand(astIndexOperator);
             }
+            else
+            {
+                HandleArray(token, tokensInBrackets);
+            }
+        }
+
+        private void HandleArray(Token token, List<Token> tokensInBrackets)
+        {
+            tokensInBrackets.WriteTokens();
+            AstNode valueNode = new AstBuilder(tokensInBrackets).BuildNode();
+            AstArray arrayNode = new(token, valueNode);
+            builder.AddOperand(arrayNode);
         }
     }
 }

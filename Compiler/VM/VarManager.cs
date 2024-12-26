@@ -46,15 +46,9 @@ public class VarManager
         _variables["locals"]  = new();
     }
 
-    public void PopScope()
-    {
-        _variables["locals"] = _stack.Pop();
-    }
+    public void PopScope() => _variables["locals"] = _stack.Pop();
 
-    public void DefineVariable(string name, BifyObject value)
-    {
-        _variables[_context][name] = value;
-    }
+    public void DefineVariable(string name, BifyObject value) => _variables[_context][name] = value;
 
     public void Store(string name, BifyObject value)
     {
@@ -69,10 +63,7 @@ public class VarManager
     }
 
     // Check if a variable exists in the current context
-    public bool HasVariable(string name)
-    {
-        return _variables[_context].ContainsKey(name);
-    }
+    public bool HasVariable(string name) => _variables[_context].ContainsKey(name);
 
     // Retrieve a variable from the current context or globals
     public BifyObject GetVariable(string name)
@@ -106,8 +97,5 @@ public class VarManager
         Console.WriteLine("---End Of Variables---");
     }
 
-    public Dictionary<string, BifyObject> CloneCurrentContext()
-    {
-        return new Dictionary<string, BifyObject>(_variables[_context]);
-    }
+    public Dictionary<string, BifyObject> CloneCurrentContext() => new Dictionary<string, BifyObject>(_variables[_context]);
 }

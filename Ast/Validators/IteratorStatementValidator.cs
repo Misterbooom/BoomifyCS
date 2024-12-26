@@ -88,21 +88,12 @@ namespace BoomifyCS.Ast.Validators
             }
         }
 
-        public static bool IsValidInitNode(AstNode node)
-        {
-            return node is AstVarDecl || node is AstAssignmentOperator;
-        }
+        public static bool IsValidInitNode(AstNode node) => node is AstVarDecl || node is AstAssignmentOperator;
 
-        public static bool IsValidIncrementNode(AstNode node)
-        {
-            return node is AstAssignmentOperator || node is AstUnaryOperator;
-        }
+        public static bool IsValidIncrementNode(AstNode node) => node is AstAssignmentOperator || node is AstUnaryOperator;
 
-        public static bool IsValidConditionNode(AstNode node)
-        {
-            return node is AstBinaryOp || node is AstUnaryOperator ||
+        public static bool IsValidConditionNode(AstNode node) => node is AstBinaryOp || node is AstUnaryOperator ||
                    node is AstIdentifier || node is AstCall || node is AstIndexOperator;
-        }
 
     }
 }

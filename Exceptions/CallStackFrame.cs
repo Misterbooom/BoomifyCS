@@ -13,9 +13,6 @@ namespace BoomifyCS.Exceptions
         public string FilePath { get; } = filePath;
         public string CodeLine { get; } = codeLine;
 
-        public override string ToString()
-        {
-            return $"{FunctionName} at {FilePath}:{LineNumber} - {CodeLine}";
-        }
+        public override string ToString() => $"{FunctionName} at {FilePath}:{LineNumber} - {CodeLine}";
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using BoomifyCS.Ast.Handlers;
 using BoomifyCS.Lexer;
 using BoomifyCS.Ast.Validators;
+using BoomifyCS.Parser;
 namespace BoomifyCS.Ast
 {
     class VariableDeclarationHandler : TokenHandler
@@ -19,6 +20,7 @@ namespace BoomifyCS.Ast
             VariableDeclarationValidator.Validate(variableToken, assignmentToken, valueTokens);
             AstBuilder valueBuilder = new(valueTokens);
             AstNode valueNode = valueBuilder.BuildNode();
+            Console.WriteLine($"Value - {valueNode}");
             AstIdentifier identifierNode = (AstIdentifier)NodeConventer.TokenToNode(variableToken);
             identifierNode.LineNumber = variableToken.Line;
             AstAssignment assignmentNode = new(assignmentToken, identifierNode, valueNode);

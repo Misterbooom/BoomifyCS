@@ -10,29 +10,25 @@ namespace BoomifyCS.Ast.Validators
         {
             if (previousNode == null || !IsIndexableNode(previousNode))
             {
-                BifySyntaxError error = new(ErrorMessage.InvalidIndexTarget(), "" , previousNode.Token.Value);
+                BifySyntaxError error = new(ErrorMessage.InvalidIndexTarget(), "", previousNode.Token.Value);
                 Traceback.Instance.ThrowException(error, previousNode.Token.Column);
             }
 
             if (indexNode == null || !IsValidIndexNode(indexNode))
             {
                 Console.WriteLine(indexNode.ToString());
-                BifySyntaxError error = new(ErrorMessage.InvalidIndexExpression(), "",indexNode.Token.Value);
+                BifySyntaxError error = new(ErrorMessage.InvalidIndexExpression(), "", indexNode.Token.Value);
                 Traceback.Instance.ThrowException(error, indexNode.Token.Column);
             }
 
             return true; // Validation successful
         }
 
-        private static bool IsIndexableNode(AstNode node)
-        {
-            return node is AstArray || node is AstIdentifier || node is AstCall ;
-        }
+        private static bool IsIndexableNode(AstNode node) => node is AstArray || node is AstIdentifier || node is AstCall;
 
         // Helper method to check if the index expression is valid
-        private static bool IsValidIndexNode(AstNode node)
-        {
-            return node is AstNumber || node is AstIdentifier || node is AstRangeOperator;
-        }
+        private static bool IsValidIndexNode(AstNode node) => node is AstNumber || node is AstIdentifier ||
+                node is AstRangeOperator ||
+                node is AstBinaryOp && node.Token.Type != TokenType.COMMA;
     }
 }

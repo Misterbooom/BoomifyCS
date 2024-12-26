@@ -13,15 +13,9 @@ namespace BoomifyCS.Compiler.VM
         private readonly Stack<Stack<BifyObject>> scopeStack = new();
         public StackManager() { }
 
-        public void Push(BifyObject value)
-        {
-            globalStack.Push(value);
-        }
-        
-        public BifyObject Pop()
-        {
-            return globalStack.Pop();
-        }
+        public void Push(BifyObject value) => globalStack.Push(value);
+
+        public BifyObject Pop() => globalStack.Pop();
         public void PushScope()
         {
             scopeStack.Push(new Stack<BifyObject>(globalStack.Reverse()));
@@ -29,24 +23,12 @@ namespace BoomifyCS.Compiler.VM
             globalStack.Clear();
         }
 
-        public void PopScope()
-        {
-            globalStack = scopeStack.Pop();
-        }
-        public BifyObject Peek()
-        {
-            return globalStack.Peek();
-        }
+        public void PopScope() => globalStack = scopeStack.Pop();
+        public BifyObject Peek() => globalStack.Peek();
 
-        public int Count()
-        {
-            return globalStack.Count;
-        }
+        public int Count() => globalStack.Count;
 
-        public void Clear()
-        {
-            globalStack.Clear();
-        }
+        public void Clear() => globalStack.Clear();
 
         public void Print()
         {

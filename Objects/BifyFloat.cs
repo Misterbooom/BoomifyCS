@@ -9,17 +9,14 @@ namespace BoomifyCS.Objects
     {
         public double Value;
 
-        public BifyFloat(double value) : base() => this.Value = value;
-
-        public override BifyString ObjectToString()
+        public BifyFloat(double value) : base()
         {
-            return new BifyString($"{Value}");
+            this.Value = value;
         }
 
-        public override BifyString Repr()
-        {
-            return new BifyString($"BifyFloat({Value})");
-        }
+        public override BifyString ObjectToString() => new BifyString($"{Value}");
+
+        public override BifyString Repr() => new BifyString($"BifyFloat({Value})");
 
         public override BifyObject Add(BifyObject other)
         {
@@ -135,15 +132,9 @@ namespace BoomifyCS.Objects
             return new BifyInteger(0);
         }
 
-        public override BifyBoolean Bool()
-        {
-            return new BifyBoolean(this.Value != 0);
-        }
+        public override BifyBoolean Bool() => new BifyBoolean(this.Value != 0);
 
-        public override BifyInteger Int()
-        {
-            return BifyInteger.Convert(this);
-        }
+        public override BifyInteger Int() => BifyInteger.Convert(this);
 
         public override BifyObject Lte(BifyObject other)
         {
@@ -173,10 +164,7 @@ namespace BoomifyCS.Objects
             return new BifyBoolean(true);
         }
 
-        public override string ToString()
-        {
-            return ObjectToString().Value;
-        }
+        public override string ToString() => ObjectToString().Value;
 
         public static BifyFloat Convert(object other)
         {

@@ -13,15 +13,9 @@ public class BifyOwnFunction : BifyFunction
         ExpectedArgCount = 0;
     }
 
-    public void AddInstruction(ByteInstruction instruction)
-    {
-        _instructions.Add(instruction);
-    }
+    public void AddInstruction(ByteInstruction instruction) => _instructions.Add(instruction);
 
-    public void SetInstructions(List<ByteInstruction> byteInstruction)
-    {
-        _instructions = byteInstruction;
-    }
+    public void SetInstructions(List<ByteInstruction> byteInstruction) => _instructions = byteInstruction;
     public void AddArgument(string argumentName)
     {
         _arguments.Add(argumentName);

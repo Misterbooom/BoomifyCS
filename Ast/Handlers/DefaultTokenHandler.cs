@@ -6,9 +6,6 @@ namespace BoomifyCS.Ast.Handlers
     {
         public DefaultTokenHandler(AstBuilder builder) : base(builder) { }
 
-        public override void HandleToken(Token token)
-        {
-            builder.AddOperand(NodeConventer.TokenToNode(token));
-        }
+        public override void HandleToken(Token token) => builder.AddOperand(NodeConventer.TokenToNode(token));
     }
 }

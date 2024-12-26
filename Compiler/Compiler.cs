@@ -19,8 +19,8 @@ namespace BoomifyCS.Compiler
         public void RunVM(AstNode root)
         {
             Visit(root);
-            Console.WriteLine($"Instructions count - {_instructions.Count}");
-            _instructions.WriteInstructions();
+            //Console.WriteLine($"Instructions count - {_instructions.Count}");
+            //_instructions.WriteInstructions();
             _vm.Run(_instructions);
         }
 
@@ -232,10 +232,7 @@ namespace BoomifyCS.Compiler
             }
         }
 
-        private void HandleConstant(AstConstant astConstant)
-        {
-            _instructions.Add(new ByteInstruction(ByteType.LOAD_CONST, astConstant.BifyValue, _lineCount));
-        }
+        private void HandleConstant(AstConstant astConstant) => _instructions.Add(new ByteInstruction(ByteType.LOAD_CONST, astConstant.BifyValue, _lineCount));
 
         private void HandleVarDecl(AstVarDecl astVarDecl)
         {
@@ -244,10 +241,7 @@ namespace BoomifyCS.Compiler
             Visit(astVarDecl.Right);
         }
 
-        private void HandleIdentifier(AstIdentifier astIdentifier)
-        {
-            _instructions.Add(new ByteInstruction(ByteType.LOAD, astIdentifier.Token.Value, _lineCount));
-        }
+        private void HandleIdentifier(AstIdentifier astIdentifier) => _instructions.Add(new ByteInstruction(ByteType.LOAD, astIdentifier.Token.Value, _lineCount));
 
         private void HandleAssignment(AstAssignment astAssignment)
         {

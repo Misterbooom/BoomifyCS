@@ -8,14 +8,8 @@ namespace BoomifyCS.Objects
     public class BifyObject()
     {
         public int ExpectedArgCount;
-        public string GetName()
-        {
-            return GetType().Name.Replace("Bify", "");
-        }
-        public virtual void Initialize(List<BifyObject> args)
-        {
-            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Initialize", GetName())));
-        }
+        public string GetName() => GetType().Name.Replace("Bify", "");
+        public virtual void Initialize(List<BifyObject> args) => Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Initialize", GetName())));
         public virtual int GetInitializerArgs()
         {
             Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("GetInitializerArgs", GetName())));

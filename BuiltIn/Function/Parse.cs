@@ -12,7 +12,11 @@ namespace BoomifyCS.BuiltIn.Function
     public class Parse : BifyFunction
     {
 
-        public Parse() : base("parse") => ExpectedArgCount = 2;
+        public Parse() : base("parse")
+        {
+            ExpectedArgCount = 2;
+        }
+
         public override BifyObject Call(List<BifyObject> arguments)
         {
             BifyObject value = arguments[0];

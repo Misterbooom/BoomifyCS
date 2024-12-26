@@ -7,16 +7,14 @@ namespace BoomifyCS.Objects
     {
         public object Value;
 
-        public BifyNull() : base() => this.Value = null;
-        public override BifyString ObjectToString()
+        public BifyNull() : base()
         {
-            return new BifyString($"{Value}");
+            this.Value = null;
         }
 
-        public override BifyString Repr()
-        {
-            return new BifyString($"BifyNull({Value})");
-        }
+        public override BifyString ObjectToString() => new BifyString($"{Value}");
+
+        public override BifyString Repr() => new BifyString($"BifyNull({Value})");
 
         public override BifyObject Eq(BifyObject other)
         {
@@ -35,17 +33,8 @@ namespace BoomifyCS.Objects
             }
             return new BifyBoolean(true);
         }
-        public override BifyBoolean Bool()
-        {
-            return new BifyBoolean(false);
-        }
-        public override BifyInteger Int()
-        {
-            return new BifyInteger(0);
-        }
-        public override string ToString()
-        {
-            return ObjectToString().Value;
-        }
+        public override BifyBoolean Bool() => new BifyBoolean(false);
+        public override BifyInteger Int() => new BifyInteger(0);
+        public override string ToString() => ObjectToString().Value;
     }
 }

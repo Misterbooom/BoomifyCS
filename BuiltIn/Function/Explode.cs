@@ -10,7 +10,11 @@ namespace BoomifyCS.BuiltIn.Function
     public class Explode : BifyFunction
     {
 
-        public Explode() : base("explode") => ExpectedArgCount = -1;
+        public Explode() : base("explode")
+        {
+            ExpectedArgCount = -1;
+        }
+
         public override BifyObject Call(List<BifyObject> arguments)
         {
             foreach (BifyObject bifyObject in arguments)

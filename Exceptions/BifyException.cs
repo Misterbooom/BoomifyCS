@@ -18,8 +18,10 @@ namespace BoomifyCS.Exceptions
         public string FileName { get; set; }
         public string Message;
 
-        protected BifyError() : base() => FileName = "0";
-
+        protected BifyError() : base()
+        {
+            FileName = "0";
+        }
 
         protected BifyError(string message, string tokens, string invalidTokens, int currentLine = 1, int column = 0)
         {

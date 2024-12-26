@@ -130,18 +130,9 @@ namespace BoomifyCS.Lexer
             }
             return tokens;
         }
-        private void ResetColumn()
-        {
-            column = 1;
-        }
-        private void UpdateColumn(char currentChar)
-        {
-            column++;
-        }
-        private void UpdateColumn(int length = 1)
-        {
-            column += length;
-        }
+        private void ResetColumn() => column = 1;
+        private void UpdateColumn(char currentChar) => column++;
+        private void UpdateColumn(int length = 1) => column += length;
 
         private void AddToken(Token token)
         {
@@ -151,10 +142,7 @@ namespace BoomifyCS.Lexer
         }
 
 
-        public static bool IsIdentifier(char identifier)
-        {
-            return identifier == '_' || char.IsLetter(identifier) || char.IsDigit(identifier);
-        }
+        public static bool IsIdentifier(char identifier) => identifier == '_' || char.IsLetter(identifier) || char.IsDigit(identifier);
         public void SkipComment()
         {
             while (_position < _code.Length && _code[_position] != '\n')

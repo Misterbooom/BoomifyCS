@@ -10,18 +10,19 @@ namespace BoomifyCS.Objects
     {
         public string Value;
 
-        public BifyString(Token token, string value) : base() => this.Value = value;
-        public BifyString(string value) : base() => this.Value = value;
-
-        public override BifyString ObjectToString()
+        public BifyString(Token token, string value) : base()
         {
-            return new BifyString($"{Value}");
+            this.Value = value;
         }
 
-        public override BifyString Repr()
+        public BifyString(string value) : base()
         {
-            return new BifyString($"BifyString('{Value}')");
+            this.Value = value;
         }
+
+        public override BifyString ObjectToString() => new BifyString($"{Value}");
+
+        public override BifyString Repr() => new BifyString($"BifyString('{Value}')");
 
         public override BifyObject Mul(BifyObject other)
         {
@@ -37,10 +38,7 @@ namespace BoomifyCS.Objects
             return new BifyBoolean(false);
         }
 
-        public override BifyObject Add(BifyObject other)
-        {
-            return new BifyString(this.Value + other.ObjectToString().Value);
-        }
+        public override BifyObject Add(BifyObject other) => new BifyString(this.Value + other.ObjectToString().Value);
 
         public override BifyObject Eq(BifyObject other)
         {
@@ -69,16 +67,9 @@ namespace BoomifyCS.Objects
             return new BifyBoolean(true);
         }
 
-        public override BifyInteger Int()
-        {
-            
-            return BifyInteger.Convert(this); 
-        }
+        public override BifyInteger Int() => BifyInteger.Convert(this);
 
-        public override string ToString()
-        {
-            return ObjectToString().Value;
-        }
+        public override string ToString() => ObjectToString().Value;
         public static BifyString Convert(object other)
         {
             if (other is BifyString bifyString)

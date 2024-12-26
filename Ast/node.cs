@@ -13,10 +13,7 @@ namespace BoomifyCS.Ast
         public AstNode Right { get; set; } = right;
         public int LineNumber;
 
-        public override string ToString()
-        {
-            return StrHelper();
-        }
+        public override string ToString() => StrHelper();
 
         public virtual string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -53,10 +50,7 @@ namespace BoomifyCS.Ast
             string baseStr = base.StrHelper(level, note);
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n";
         }
-        public override string ToString()
-        {
-            return StrHelper();
-        }
+        public override string ToString() => StrHelper();
     }
 
     public class AstConstant(Token token) : AstNode(token)
@@ -68,15 +62,15 @@ namespace BoomifyCS.Ast
             string baseStr = base.StrHelper(level, note);
             return baseStr + $"{new String(' ', 4 * (level + 1))}";
         }
-        public override string ToString()
-        {
-            return StrHelper();
-        }
+        public override string ToString() => StrHelper();
     }
 
     public class AstNumber : AstConstant
     {
-        public AstNumber(Token token, BifyObject bifyValue) : base(token) => this.BifyValue = bifyValue;
+        public AstNumber(Token token, BifyObject bifyValue) : base(token)
+        {
+            this.BifyValue = bifyValue;
+        }
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -84,15 +78,15 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n";
         }
 
-        public override string ToString()
-        {
-            return StrHelper();
-        }
+        public override string ToString() => StrHelper();
     }
 
     public class AstString : AstConstant
     {
-        public AstString(Token token, BifyString bifyValue) : base(token) => this.BifyValue = bifyValue;
+        public AstString(Token token, BifyString bifyValue) : base(token)
+        {
+            this.BifyValue = bifyValue;
+        }
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -100,15 +94,15 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n";
         }
 
-        public override string ToString()
-        {
-            return StrHelper();
-        }
+        public override string ToString() => StrHelper();
     }
 
     public class AstBoolean : AstConstant
     {
-        public AstBoolean(Token token, BifyBoolean bifyValue) : base(token) => this.BifyValue = bifyValue;
+        public AstBoolean(Token token, BifyBoolean bifyValue) : base(token)
+        {
+            this.BifyValue = bifyValue;
+        }
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -116,19 +110,22 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n";
         }
 
-        public override string ToString()
-        {
-            return StrHelper();
-        }
+        public override string ToString() => StrHelper();
     }
     public class AstNull : AstConstant
     {
-        public AstNull(Token token) : base(token) => this.BifyValue = new BifyNull();
+        public AstNull(Token token) : base(token)
+        {
+            this.BifyValue = new BifyNull();
+        }
     }
     public class AstVar : AstConstant
     {
 
-        public AstVar(Token token, BifyVar bifyVar) : base(token) => this.BifyValue = bifyVar;
+        public AstVar(Token token, BifyVar bifyVar) : base(token)
+        {
+            this.BifyValue = bifyVar;
+        }
     }
 
     public class AstAssignment(Token token, AstNode left = null, AstNode right = null) : AstNode(token, left, right)
@@ -143,10 +140,7 @@ namespace BoomifyCS.Ast
 
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{leftStr}\n{rightStr}";
         }
-        public override string ToString()
-        {
-            return StrHelper();
-        }
+        public override string ToString() => StrHelper();
     }
 
     public class AstVarDecl(Token token, AstAssignment assignmentNode, AstNode left = null, AstNode right = null) : AstNode(token, left, right)
@@ -160,10 +154,7 @@ namespace BoomifyCS.Ast
             string assignmentStr = AssignmentNode?.StrHelper(level + 1, "Assignment:") ?? "";
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{assignmentStr}";
         }
-        public override string ToString()
-        {
-            return StrHelper();
-        }
+        public override string ToString() => StrHelper();
     }
     public class AstLine(AstNode child) : AstNode(new Token(TokenType.EOL, ";"))
     {
@@ -239,14 +230,8 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{conditionStr}\n{blockStr}\n{elseStr}\n{elseIfNodes}";
         }
 
-        public override string ToString()
-        {
-            return StrHelper();
-        }
-        public void AddElseIfNode(AstElseIf astElseIf)
-        {
-            ElseIfNodes.Add(astElseIf);
-        }
+        public override string ToString() => StrHelper();
+        public void AddElseIfNode(AstElseIf astElseIf) => ElseIfNodes.Add(astElseIf);
     }
     public class AstElse(Token token, AstNode blockNode) : AstNode(token, blockNode)
     {
@@ -396,8 +381,27 @@ namespace BoomifyCS.Ast
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note, false);
-            string argumentsStr = ArgumentsNode?.StrHelper(level + 1, "Arguments: ");
+            List<AstNode> nodes = UnpackCommaNode(ArgumentsNode);
+            string argumentsStr = "";
+            foreach (var node in nodes)
+            {
+                argumentsStr += node?.StrHelper(level + 1, "Argument: ");
+            }
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{argumentsStr}";
+        }
+        private List<AstNode> UnpackCommaNode(AstNode node)
+        {
+            List<AstNode> nodes = new List<AstNode>();
+            if (node is AstBinaryOp binaryOp && binaryOp.Token.Type == TokenType.COMMA)
+            {
+                nodes.AddRange(UnpackCommaNode(binaryOp.Left));
+                nodes.AddRange(UnpackCommaNode(binaryOp.Right));
+            }
+            else
+            {
+                nodes.Add(node);
+            }
+            return nodes;
         }
     }
     public class AstIndexOperator(AstNode nodeIndex, AstNode operandNode) : AstNode(new Token(TokenType.NUMBER, "UNKNOWN"))

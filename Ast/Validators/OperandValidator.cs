@@ -31,16 +31,14 @@ namespace BoomifyCS.Ast.Validators
             }
         }
 
-        private static bool IsOperand(AstNode node)
-        {
-            return node is AstConstant ||
+        private static bool IsOperand(AstNode node) => node is AstConstant ||
                    node is AstIdentifier ||
                    node is AstCall ||
-                   node is AstUnaryOperator || 
+                   node is AstUnaryOperator ||
                    node is AstArray ||
-                   node is AstAssignment || 
-                   node is AstBinaryOp; 
-        }
+                   node is AstAssignment ||
+                   node is AstBinaryOp ||
+                   node is AstIndexOperator;
 
     }
 }

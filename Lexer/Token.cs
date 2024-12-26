@@ -100,15 +100,13 @@ namespace BoomifyCS.Lexer
         public int Column;
         public List<Token> Tokens = tokens;
 
-        public override string ToString()
-        {
+        public override string ToString() =>
             //if (Tokens != null)
             //{
             //    return $"Token(type = '{Type}',value = '{Value} tokens - {Tokens.ToString()}')";
 
             //}
-            return $"Token(type = '{Type}', value = '{Value}', line = {Line}' column - '{Column}')";
-        }
+            $"Token(type = '{Type}', value = '{Value}', line = {Line}' column - '{Column}')";
 
     }
 

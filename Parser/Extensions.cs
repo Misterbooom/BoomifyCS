@@ -103,13 +103,7 @@ namespace BoomifyCS.Parser
             Console.WriteLine(sb.ToString());
         }
 
-        public static bool ContainsTokenType(this List<Token> list, TokenType tokenType)
-        {
-            return list.Any(token => token.Type == tokenType);
-        }
-        public static Token StringToToken(this  string str)
-        {
-            return new(TokenType.STRING,str);
-        }
+        public static bool ContainsTokenType(this List<Token> list, TokenType tokenType) => list.Any(token => token.Type == tokenType);
+        public static Token StringToToken(this string str) => new(TokenType.STRING, str);
     }
 }

@@ -20,20 +20,11 @@ namespace BoomifyCS.Objects
             }
         }
 
-        public override BifyString ObjectToString()
-        {
-            return new BifyString($"{Value}");
-        }
+        public override BifyString ObjectToString() => new BifyString($"{Value}");
 
-        public override string ToString()
-        {
-            return ObjectToString().Value;
-        }
+        public override string ToString() => ObjectToString().Value;
 
-        public override BifyString Repr()
-        {
-            return new BifyString($"BifyInteger({Value})");
-        }
+        public override BifyString Repr() => new BifyString($"BifyInteger({Value})");
 
         public override BifyObject Add(BifyObject other)
         {
@@ -196,10 +187,7 @@ namespace BoomifyCS.Objects
             return new BifyInteger(0);
         }
 
-        public override BifyObject BitNot()
-        {
-            return new BifyInteger(~this.Value);
-        }
+        public override BifyObject BitNot() => new BifyInteger(~this.Value);
 
         public override BifyObject LeftShift(BifyObject other)
         {
@@ -338,9 +326,7 @@ namespace BoomifyCS.Objects
             return new BifyInteger(0);
         }
 
-        public override BifyObject Not()
-        {
-            return new BifyBoolean(this.Value == 0);
-        }
+        public override BifyObject Not() => new BifyBoolean(this.Value == 0);
+        public override BifyInteger Int() => this;
     }
 }

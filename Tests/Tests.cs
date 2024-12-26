@@ -17,10 +17,7 @@ namespace BoomifyCS.Tests
         {
             var testResults = new Dictionary<string, bool>
             {
-                { nameof(TestVariableDeclaration), TestVariableDeclaration() },
-                { nameof(TestArithmeticOperations), TestArithmeticOperations() },
-                { nameof(TestWhileLoop), TestWhileLoop() },
-                { nameof(TestForLoop), TestForLoop() }
+                { "PascalTriangleTest", PascalTriangleTest() },
             };
 
             Console.WriteLine("\nTest Results:");
@@ -30,55 +27,53 @@ namespace BoomifyCS.Tests
             }
         }
 
-        static bool TestVariableDeclaration()
+        static bool PascalTriangleTest()
         {
-            string code = "var x = 10;\nexplode(x);";
-            return RunCode(code);
-        }
+            var code = @"
+function pascal(row, col) {
+    var result = 1;
+    var i = 1;
+    while (i <= col) {
+        result = result * (row - i + 1) / i;
+        i = i + 1;
+    }
+    return result;
+}
 
-        static bool TestArithmeticOperations()
-        {
-            string code = "var a = 5;\nvar b = 10;\nvar c = a + b;\nexplode(c);";
-            return RunCode(code);
-        }
-
-        static bool TestWhileLoop()
-        {
-            string code = @"var i = 0;
-while (i < 5) {
-    explode(i);
+var rows = 12;
+var i = 0;
+while (i < rows) {
+    var j = 0;
+    var line = '';
+    while (j <= i) {
+        line = line + parse(pascal(i, j), 'string') + ' ';
+        j = j + 1;
+    }
+    explode(line);
     i = i + 1;
-}";
-            return RunCode(code);
-        }
-
-        static bool TestForLoop()
-        {
-            string code = @"for (var i = 0; i < 5; i = i + 1) {
-    explode(i);
-}";
+}
+";
             return RunCode(code);
         }
 
         static bool RunCode(string code)
         {
             Console.OutputEncoding = Encoding.UTF8;
-            MyLexer lexer = new(code);
+            var lexer = new MyLexer(code);
             try
             {
-                List<Token> tokens = lexer.Tokenize();
-                string[] codeByLine = code.Split('\n');
-                AstTree astParser = new(codeByLine);
-                AstNode node = astParser.ParseTokens(tokens);
-                MyCompiler interpreter = new(codeByLine);
+                var tokens = lexer.Tokenize();
+                var codeByLine = code.Split('\n');
+                var astParser = new AstTree(codeByLine);
+                var node = astParser.ParseTokens(tokens);
+                var interpreter = new MyCompiler(codeByLine);
                 interpreter.RunVM(node);
                 return true;
             }
-           
             catch (Exception ex)
             {
-                Console.WriteLine($"Unexpected error: {ex.Message}");
-                return false;
+                Console.WriteLine($"Unexpected error:");
+                throw;
             }
         }
     }

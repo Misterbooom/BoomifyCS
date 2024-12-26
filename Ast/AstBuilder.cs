@@ -14,7 +14,10 @@ namespace BoomifyCS.Ast
         public readonly Stack<AstNode> operatorStack = new();
         public readonly Stack<AstNode> operandStack = new();
 
-        public AstBuilder(List<Token> tokens) => this.tokens = tokens;
+        public AstBuilder(List<Token> tokens)
+        {
+            this.tokens = tokens;
+        }
 
         public AstNode BuildNode()
         {
@@ -97,24 +100,12 @@ namespace BoomifyCS.Ast
             return currentPrecedence <= topPrecedence;
         }
 
-        public List<Token> GetConditionTokens()
-        {
-            return TokensFormatter.GetTokensBetween(tokens, ref tokenIndex, TokenType.LPAREN, TokenType.RPAREN);
-        }
+        public List<Token> GetConditionTokens() => TokensFormatter.GetTokensBetween(tokens, ref tokenIndex, TokenType.LPAREN, TokenType.RPAREN);
 
-        public List<Token> GetBlockTokens()
-        {
-            return TokensFormatter.GetTokensBetween(tokens, ref tokenIndex, TokenType.LCUR, TokenType.RCUR);
-        }
+        public List<Token> GetBlockTokens() => TokensFormatter.GetTokensBetween(tokens, ref tokenIndex, TokenType.LCUR, TokenType.RCUR);
 
-        public AstNode ParseCondition(List<Token> conditionTokens)
-        {
-            return new AstBuilder(conditionTokens).BuildNode();
-        }
+        public AstNode ParseCondition(List<Token> conditionTokens) => new AstBuilder(conditionTokens).BuildNode();
 
-        public AstNode ParseBlock(List<Token> blockTokens)
-        {
-            return new AstBlock(((AstModule)new AstTree(Traceback.Instance.source).ParseTokens(blockTokens)).ChildNodes);
-        }
+        public AstNode ParseBlock(List<Token> blockTokens) => new AstBlock(((AstModule)new AstTree(Traceback.Instance.source).ParseTokens(blockTokens)).ChildNodes);
     }
 }

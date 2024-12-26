@@ -19,14 +19,9 @@ namespace BoomifyCS.Objects
             : base()
         {
         }
-        public override string ToString()
-        {
-            return $"BifyRange({First}..{Second})";
-        }
-        public override int GetInitializerArgs()
-        {
-            return 2;
-        }
+        public override BifyString Repr() => new BifyString(ToString());
+        public override string ToString() => $"BifyRange({First}..{Second})";
+        public override int GetInitializerArgs() => 2;
         public override void Initialize(List<BifyObject> args)
         {
             First = args[0].Int();

@@ -20,29 +20,23 @@ namespace BoomifyCS.Compiler.VM
         private string _moduleName;
         private string _modulePath;
 
-        public VirtualMachine(string[] sourceCode) => _sourceCode = sourceCode;
-        public void LoadInstructions(List<ByteInstruction> instructions)
+        public VirtualMachine(string[] sourceCode)
         {
-            _instructions = instructions;
+            _sourceCode = sourceCode;
         }
+
+        public void LoadInstructions(List<ByteInstruction> instructions) => _instructions = instructions;
 
         public void RunWithVarManager(VarManager varManager)
         {
             this.varManager = varManager;
             ProcessInstructions(_instructions);
         }
-        public BifyObject GetReturnValue()
-        {
-            return stackManager.Pop();
-        }
+        public BifyObject GetReturnValue() => stackManager.Pop();
 
-        public void Run(List<ByteInstruction> instructions)
-        {
+        public void Run(List<ByteInstruction> instructions) =>
             //Console.WriteLine("***START VIRTUAL MACHINE***");
-            ProcessInstructions(instructions);
-            //Console.WriteLine("***END VIRTUAL MACHINE***");
-            //stackManager.Print();
-        }
+            ProcessInstructions(instructions);//Console.WriteLine("***END VIRTUAL MACHINE***");//stackManager.Print();
 
         private void ProcessInstructions(List<ByteInstruction> instructions)
         {
@@ -400,34 +394,31 @@ namespace BoomifyCS.Compiler.VM
             }
         }
 
-        private static BifyObject PerformBinaryOperation(BifyObject a, BifyObject b, ByteType operatorType)
+        private static BifyObject PerformBinaryOperation(BifyObject a, BifyObject b, ByteType operatorType) => operatorType switch
         {
-            return operatorType switch
-            {
-                ByteType.ADD => a.Add(b),
-                ByteType.SUB => a.Sub(b),
-                ByteType.MUL => a.Mul(b),
-                ByteType.DIV => a.Div(b),
-                ByteType.MOD => a.Mod(b),
-                ByteType.POW => a.Pow(b),
-                ByteType.FLOORDIV => a.FloorDiv(b),
-                ByteType.EQ => a.Eq(b),
-                ByteType.LT => a.Lt(b),
-                ByteType.GT => a.Gt(b),
-                ByteType.LTE => a.Lte(b),
-                ByteType.GTE => a.Gte(b),
-                ByteType.AND => a.Bool().And(b.Bool()),
-                ByteType.OR => a.Bool().Or(b.Bool()),
-                ByteType.NEQ => a.Neq(b),
-                ByteType.NOT => a.Bool().Not(),
-                ByteType.BITAND => a.BitAnd(b),
-                ByteType.BITOR => a.BitOr(b),
-                ByteType.BITXOR => a.BitXor(b),
-                ByteType.BITNOT => a.BitNot(),
-                ByteType.LSHIFT => a.LeftShift(b),
-                ByteType.RSHIFT => a.RightShift(b),
-                _ => throw new NotImplementedException($"{operatorType} is not implemented in PerformBinaryOperation"),
-            };
-        }
+            ByteType.ADD => a.Add(b),
+            ByteType.SUB => a.Sub(b),
+            ByteType.MUL => a.Mul(b),
+            ByteType.DIV => a.Div(b),
+            ByteType.MOD => a.Mod(b),
+            ByteType.POW => a.Pow(b),
+            ByteType.FLOORDIV => a.FloorDiv(b),
+            ByteType.EQ => a.Eq(b),
+            ByteType.LT => a.Lt(b),
+            ByteType.GT => a.Gt(b),
+            ByteType.LTE => a.Lte(b),
+            ByteType.GTE => a.Gte(b),
+            ByteType.AND => a.Bool().And(b.Bool()),
+            ByteType.OR => a.Bool().Or(b.Bool()),
+            ByteType.NEQ => a.Neq(b),
+            ByteType.NOT => a.Bool().Not(),
+            ByteType.BITAND => a.BitAnd(b),
+            ByteType.BITOR => a.BitOr(b),
+            ByteType.BITXOR => a.BitXor(b),
+            ByteType.BITNOT => a.BitNot(),
+            ByteType.LSHIFT => a.LeftShift(b),
+            ByteType.RSHIFT => a.RightShift(b),
+            _ => throw new NotImplementedException($"{operatorType} is not implemented in PerformBinaryOperation"),
+        };
     }
 }

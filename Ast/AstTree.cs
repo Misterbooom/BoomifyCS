@@ -9,7 +9,10 @@ namespace BoomifyCS.Ast
 {
     class AstTree
     {
-        public AstTree(string[] sourceCode) => Traceback.Instance.InitializeSource(sourceCode);
+        public AstTree(string[] sourceCode)
+        {
+            Traceback.Instance.InitializeSource(sourceCode);
+        }
 
         public AstNode ParseTokens(List<Token> tokens)
         {

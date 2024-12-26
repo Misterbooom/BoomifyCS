@@ -7,18 +7,19 @@ namespace BoomifyCS.Objects
     {
         public bool Value;
 
-        public BifyBoolean(Token token, bool value) : base() => this.Value = value;
-        public BifyBoolean(bool value) : base() => this.Value = value;
-
-        public override BifyString ObjectToString()
+        public BifyBoolean(Token token, bool value) : base()
         {
-            return new BifyString($"{Value}");
+            this.Value = value;
         }
 
-        public override BifyString Repr()
+        public BifyBoolean(bool value) : base()
         {
-            return new BifyString($"BifyBoolean({Value})");
+            this.Value = value;
         }
+
+        public override BifyString ObjectToString() => new BifyString($"{Value}");
+
+        public override BifyString Repr() => new BifyString($"BifyBoolean({Value})");
 
         // Logical AND operator (&&)
         public override BifyObject And(BifyObject other)
@@ -41,10 +42,7 @@ namespace BoomifyCS.Objects
         }
 
         // Logical NOT operator (!)
-        public override BifyObject Not()
-        {
-            return new BifyBoolean(!this.Value);
-        }
+        public override BifyObject Not() => new BifyBoolean(!this.Value);
 
         // Equal to (==)
         public override BifyObject Eq(BifyObject other)
@@ -66,10 +64,7 @@ namespace BoomifyCS.Objects
             }
             return new BifyBoolean(false);
         }
-        public override BifyBoolean Bool()
-        {
-            return this;
-        }
+        public override BifyBoolean Bool() => this;
         public override BifyInteger Int()
         {
             if (Value == false)
@@ -82,10 +77,7 @@ namespace BoomifyCS.Objects
                 return new BifyInteger(1);
             }
         }
-        public override string ToString()
-        {
-            return ObjectToString().Value;
-        }
+        public override string ToString() => ObjectToString().Value;
 
     }
 }
