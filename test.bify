@@ -1,5 +1,1 @@
-﻿while (true){
-	if (ignite("Write break to stop the loop") == "break"){
-		break;
-	}
-}
+﻿

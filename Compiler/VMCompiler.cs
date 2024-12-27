@@ -8,7 +8,7 @@ using BoomifyCS.Parser;
 
 namespace BoomifyCS.Compiler
 {
-    public class MyCompiler(string[] sourcecode)
+    public class VMCompiler(string[] sourcecode)
     {
         private readonly List<ByteInstruction> _instructions = [];
         private readonly VirtualMachine _vm = new(sourcecode);

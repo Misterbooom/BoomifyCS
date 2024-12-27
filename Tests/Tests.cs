@@ -99,7 +99,7 @@ namespace BoomifyCS.Tests
             var codeByLine = code.Split('\n');
             var astParser = new AstTree(codeByLine);
             var node = astParser.ParseTokens(tokens);
-            var interpreter = new MyCompiler(codeByLine);
+            var interpreter = new VMCompiler(codeByLine);
 
             compilationStopwatch.Stop();
             Console.WriteLine($"Compilation Time: {compilationStopwatch.ElapsedMilliseconds} ms");
