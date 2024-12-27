@@ -155,6 +155,7 @@ namespace BoomifyCS.Objects
                 Traceback.Instance.ThrowException(new BifyTypeError("Invalid key type for SetItem."));
             }
         }
+        public override BifyObject Len() => new BifyInteger(_bifyObjects.Count);
         private bool IsInBound(int value) => value < _bifyObjects.Count;
 
         // String representation of the array

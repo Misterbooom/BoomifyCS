@@ -209,5 +209,10 @@ namespace BoomifyCS.Objects
             Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("SetItem", GetName())));
             
         }
+        public virtual BifyObject Len()
+        {
+            Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Len", GetName())));
+            return null;
+        }
     }
 }

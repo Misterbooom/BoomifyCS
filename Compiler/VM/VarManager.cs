@@ -16,6 +16,7 @@ public class VarManager
                 { "null", new BifyNull()},
                 { "false", new BifyBoolean(false) },
                 { "true", new BifyBoolean(true) },
+                { "len", new Len()}
 
             }
         }

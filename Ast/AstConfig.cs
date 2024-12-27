@@ -43,16 +43,16 @@ namespace BoomifyCS.Ast
             Sum = 1,
             Product = 2,
             Power = 3,
-            Shift = 3,
-            BitwiseNot = 3, // BitwiseNot and NOT share the same precedence
-            BitwiseOr = 4,
-            BitwiseXor = 5,
-            BitwiseAnd = 5,
-            Equality = 6,
-            Comparison = 7,
-            Range = 8, // Added Range Precedence
-            And = 9,
-            Or = 10,
+            Shift = 4,
+            BitwiseNot = 5, // BitwiseNot and NOT share the same precedence
+            BitwiseOr = 6,
+            BitwiseXor = 7,
+            BitwiseAnd = 8,
+            Equality = 9,
+            Comparison = 10,
+            Range = 11, // Added Range Precedence
+            And = 12,
+            Or = 13,
         }
     }
 }

@@ -21,9 +21,11 @@ namespace BoomifyCS.Ast
 
         public AstNode BuildNode()
         {
+  
             while (tokenIndex < tokens.Count)
             {
                 Token token = tokens[tokenIndex];
+                Console.WriteLine(tokens[tokenIndex]);
                 TokenHandler handler = TokenHandlerFactory.CreateHandler(token, this);
                 handler.HandleToken(token);
                 tokenIndex++;

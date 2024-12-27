@@ -4,6 +4,7 @@ using BoomifyCS.Ast.Handlers;
 using BoomifyCS.Lexer;
 using BoomifyCS.Ast.Validators;
 using BoomifyCS.Exceptions;
+using BoomifyCS.Parser;
 namespace BoomifyCS.Ast 
 {
     class IfHandler : TokenHandler
@@ -19,6 +20,7 @@ namespace BoomifyCS.Ast
             ConditionStatementValidator.ValidateIfStatement(blockTokens, conditionTokens);
             AstIf ifNode = new(conditionTokens[0], conditionNode, blockNode);
             builder.AddOperand(ifNode);
+
         }
     }
     class ElseStatementHandler : TokenHandler

@@ -14,11 +14,7 @@ namespace BoomifyCS.Ast
         public override void HandleToken(Token token)
         {
             List<Token> tokensInBrackets = TokensFormatter.GetTokensBetween(builder.tokens, ref builder.tokenIndex, TokenType.LBRACKET, TokenType.RBRACKET);
-            if (builder.operatorStack.TryPop(out AstNode operatorNode))
-            {
-                HandleArray(token, tokensInBrackets);
-            }
-            else if (builder.operandStack.TryPop(out AstNode previousNode))
+            if (builder.operandStack.TryPop(out AstNode previousNode))
             {
                 AstNode indexNode = new AstBuilder(tokensInBrackets).BuildNode();
                 IndexOperatorValidator.Validate(previousNode, indexNode);
@@ -29,13 +25,17 @@ namespace BoomifyCS.Ast
             {
                 HandleArray(token, tokensInBrackets);
             }
+
         }
 
         private void HandleArray(Token token, List<Token> tokensInBrackets)
         {
-            tokensInBrackets.WriteTokens();
-            AstNode valueNode = new AstBuilder(tokensInBrackets).BuildNode();
+
+            AstBuilder newBuilder = new(tokensInBrackets);
+            AstNode valueNode = newBuilder.BuildNode();
             AstArray arrayNode = new(token, valueNode);
+    
+
             builder.AddOperand(arrayNode);
         }
     }
