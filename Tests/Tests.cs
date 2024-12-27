@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using System.Diagnostics;
 using System.Text;
-using System.Threading.Tasks;
 using BoomifyCS.Ast;
 using BoomifyCS.Compiler;
 using BoomifyCS.Exceptions;
@@ -18,15 +16,26 @@ namespace BoomifyCS.Tests
             var testResults = new Dictionary<string, Func<bool>>
                 {
                     { "PascalTriangleTest", PascalTriangleTest },
+                    { "CountToOneMillionTest",CountToOneMillionTest}
                 };
 
             Console.WriteLine("\nTest Results:");
+
+            Stopwatch totalStopwatch = new Stopwatch(); // Для общего времени
+            totalStopwatch.Start();
+
             foreach (var result in testResults)
             {
                 try
                 {
-                    Console.WriteLine($"{result.Key}: {(result.Value() ? "Passed" : "Failed")}");
+                    Stopwatch testStopwatch = new Stopwatch(); // Для времени одного теста
+                    testStopwatch.Start();
 
+                    bool passed = result.Value();
+                    Console.WriteLine($"{result.Key}: {(passed ? "Passed" : "Failed")}");
+
+                    testStopwatch.Stop();
+                    Console.WriteLine($"Test Execution Time: {testStopwatch.ElapsedMilliseconds} ms");
                 }
                 catch (Exception e)
                 {
@@ -36,6 +45,16 @@ namespace BoomifyCS.Tests
                     throw;
                 }
             }
+
+            totalStopwatch.Stop();
+            Console.WriteLine($"\nTotal Execution Time: {totalStopwatch.ElapsedMilliseconds} ms");
+        }
+        static bool CountToOneMillionTest()
+        {
+            var code = @"
+                for (var i = 0; i < 10**6;i++){}
+";
+            return RunCode(code);
         }
 
         static bool PascalTriangleTest()
@@ -64,20 +83,35 @@ namespace BoomifyCS.Tests
         i = i + 1;
     }
     ";
+
             return RunCode(code);
         }
 
         static bool RunCode(string code)
         {
             Console.OutputEncoding = Encoding.UTF8;
-            var lexer = new MyLexer(code);
 
+            Stopwatch compilationStopwatch = new Stopwatch();
+            compilationStopwatch.Start();
+
+            var lexer = new MyLexer(code);
             var tokens = lexer.Tokenize();
             var codeByLine = code.Split('\n');
             var astParser = new AstTree(codeByLine);
             var node = astParser.ParseTokens(tokens);
             var interpreter = new MyCompiler(codeByLine);
+
+            compilationStopwatch.Stop();
+            Console.WriteLine($"Compilation Time: {compilationStopwatch.ElapsedMilliseconds} ms");
+
+            Stopwatch executionStopwatch = new Stopwatch(); 
+            executionStopwatch.Start();
+
             interpreter.RunVM(node);
+
+            executionStopwatch.Stop();
+            Console.WriteLine($"Execution Time: {executionStopwatch.ElapsedMilliseconds} ms");
+
             return true;
         }
     }

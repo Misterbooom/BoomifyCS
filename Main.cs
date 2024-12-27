@@ -17,8 +17,8 @@ namespace BoomifyCS
     {
         static void Main()
         {
-            //RunInterpreter();
-            Tests.Tests.RunTests();
+            RunInterpreter();
+            //Tests.Tests.RunTests();
         }
         static void RunTests()
         {

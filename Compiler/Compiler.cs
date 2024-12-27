@@ -299,7 +299,6 @@ namespace BoomifyCS.Compiler
             string jumpToEndLabel = $"J{numberJumps++}";
             string incrementLabel = $"J{numberJumps++}";
 
-            // Add start label for the loop
 
             Visit(astFor.InitNode);
             _instructions.Add(new ByteInstruction(ByteType.LABEL, startLoopLabel, _lineCount));
@@ -309,7 +308,6 @@ namespace BoomifyCS.Compiler
             _instructions.Add(jumpIfFalse);
             Visit(astFor.BlockNode);
 
-            // Handle the continue jump if it exists
             if (_continueJumps.Count > 0)
             {
                 var continueJump = _continueJumps.Pop();
