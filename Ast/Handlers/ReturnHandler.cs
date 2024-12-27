@@ -17,7 +17,6 @@ namespace BoomifyCS.Ast.Handlers
         {
             builder.tokenIndex++;
             List<Token> returnTokens = builder.tokens[builder.tokenIndex..];
-            returnTokens.WriteTokens();
             AstReturn returnNode = new(token,builder.ParseCondition(returnTokens));
             builder.AddOperand(returnNode);
             builder.tokenIndex += returnTokens.Count;

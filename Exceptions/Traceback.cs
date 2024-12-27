@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Diagnostics;
 namespace BoomifyCS.Exceptions
 {
     public class Traceback

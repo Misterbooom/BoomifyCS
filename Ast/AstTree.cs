@@ -23,7 +23,6 @@ namespace BoomifyCS.Ast
             {
                 lines.Add(ParseLine(tokens, ref tokenIndex, ref lineCount));
             }
-            //lines.WriteNodes();
             AstModule module = new("","",lines);
             return module;
         }

@@ -6,7 +6,6 @@ using BoomifyCS.Objects;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Parser;
 using BoomifyCS.Ast;
-
 namespace BoomifyCS.Compiler.VM
 {
     public class VirtualMachine
@@ -46,7 +45,7 @@ namespace BoomifyCS.Compiler.VM
             {
                 var instruction = _instructions[instructionIndex];
                 Traceback.Instance.line = instruction.IndexOfInstruction;
-                Console.WriteLine($"Curr instr - {instructionIndex}: {instruction.ToString()}");
+                //Console.WriteLine($"Curr instr - {instructionIndex}: {instruction.ToString()}");
 
                 switch (instruction.Type)
                 {
@@ -400,7 +399,7 @@ namespace BoomifyCS.Compiler.VM
             {
                 var value = stackManager.Pop();
                 var index = stackManager.Pop();
-                var array = stackManager.Pop();
+                 var array = stackManager.Pop();
                 array.SetItem(index,value);
             }
 

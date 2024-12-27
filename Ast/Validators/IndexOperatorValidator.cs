@@ -16,7 +16,6 @@ namespace BoomifyCS.Ast.Validators
 
             if (indexNode == null || !IsValidIndexNode(indexNode))
             {
-                Console.WriteLine(indexNode.ToString());
                 BifySyntaxError error = new(ErrorMessage.InvalidIndexExpression(), "", indexNode.Token.Value);
                 Traceback.Instance.ThrowException(error, indexNode.Token.Column);
             }

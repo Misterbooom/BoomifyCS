@@ -20,7 +20,6 @@ namespace BoomifyCS.Ast
             VariableDeclarationValidator.Validate(variableToken, assignmentToken, valueTokens);
             AstBuilder valueBuilder = new(valueTokens);
             AstNode valueNode = valueBuilder.BuildNode();
-            Console.WriteLine($"Value - {valueNode}");
             AstIdentifier identifierNode = (AstIdentifier)NodeConventer.TokenToNode(variableToken);
             identifierNode.LineNumber = variableToken.Line;
             AstAssignment assignmentNode = new(assignmentToken, identifierNode, valueNode);

@@ -15,44 +15,55 @@ namespace BoomifyCS.Tests
     {
         public static void RunTests()
         {
-            var testResults = new Dictionary<string, bool>
-            {
-                { "PascalTriangleTest", PascalTriangleTest() },
-            };
+            var testResults = new Dictionary<string, Func<bool>>
+                {
+                    { "PascalTriangleTest", PascalTriangleTest },
+                };
 
             Console.WriteLine("\nTest Results:");
             foreach (var result in testResults)
             {
-                Console.WriteLine($"{result.Key}: {(result.Value ? "Passed" : "Failed")}");
+                try
+                {
+                    Console.WriteLine($"{result.Key}: {(result.Value() ? "Passed" : "Failed")}");
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{result.Key}: Failed");
+                    Console.WriteLine($"Line: {Traceback.Instance.line}");
+                    Console.WriteLine(e.Message);
+                    throw;
+                }
             }
         }
 
         static bool PascalTriangleTest()
         {
             var code = @"
-function pascal(row, col) {
-    var result = 1;
-    var i = 1;
-    while (i <= col) {
-        result = result * (row - i + 1) / i;
+    function pascal(row, col) {
+        var result = 1;
+        var i = 1;
+        while (i <= col) {
+            result = result * (row - i + 1) / i;
+            i = i + 1;
+        }
+        return result;
+    }
+
+    var rows = 12;
+    var i = 0;
+    while (i < rows) {
+        var j = 0;
+        var line = '';
+        while (j <= i) {
+            line = line + parse(pascal(i, j), 'string') + ' ';
+            j = j + 1;
+        }
+        explode(line);
         i = i + 1;
     }
-    return result;
-}
-
-var rows = 12;
-var i = 0;
-while (i < rows) {
-    var j = 0;
-    var line = '';
-    while (j <= i) {
-        line = line + parse(pascal(i, j), 'string') + ' ';
-        j = j + 1;
-    }
-    explode(line);
-    i = i + 1;
-}
-";
+    ";
             return RunCode(code);
         }
 
@@ -60,21 +71,14 @@ while (i < rows) {
         {
             Console.OutputEncoding = Encoding.UTF8;
             var lexer = new MyLexer(code);
-            try
-            {
-                var tokens = lexer.Tokenize();
-                var codeByLine = code.Split('\n');
-                var astParser = new AstTree(codeByLine);
-                var node = astParser.ParseTokens(tokens);
-                var interpreter = new MyCompiler(codeByLine);
-                interpreter.RunVM(node);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Unexpected error:");
-                throw;
-            }
+
+            var tokens = lexer.Tokenize();
+            var codeByLine = code.Split('\n');
+            var astParser = new AstTree(codeByLine);
+            var node = astParser.ParseTokens(tokens);
+            var interpreter = new MyCompiler(codeByLine);
+            interpreter.RunVM(node);
+            return true;
         }
     }
 }
