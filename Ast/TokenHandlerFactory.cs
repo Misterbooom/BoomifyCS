@@ -2,7 +2,7 @@ using BoomifyCS.Lexer;
 using BoomifyCS.Ast.Validators;
 using BoomifyCS.Ast.Handlers;
 using BoomifyCS.Exceptions;
-namespace BoomifyCS.Ast.Handlers
+namespace BoomifyCS.Ast
 {
     static class TokenHandlerFactory
     {
@@ -11,7 +11,6 @@ namespace BoomifyCS.Ast.Handlers
             Traceback.Instance.SetCurrentLine(token.Line);
             return token.Type switch
             {
-                TokenType.VARDECL => new VariableDeclarationHandler(builder),
                 TokenType.IF => new IfHandler(builder),
                 TokenType.ELSE => new ElseStatementHandler(builder),
                 TokenType.WHILE => new IteratorHandlers(builder),

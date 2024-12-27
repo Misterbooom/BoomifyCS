@@ -14,6 +14,25 @@ namespace BoomifyCS.Ast
 
         public override void HandleToken(Token token)
         {
+            if (builder.operandStack.Count == 1)
+            {
+                HandleAssignment(token);
+            }
+            else if (builder.operandStack.Count == 2 && token.Type == TokenType.ASSIGN)
+            {
+                new VariableDeclarationHandler(builder).HandleToken(token);
+            }
+            else
+            { 
+                BifyDebug.Log($"Operand Stack Count - {builder.operandStack.Count}");
+                Traceback.Instance.ThrowException(
+                    new BifySyntaxError("Not enough tokens for Assignment", "",token.Value)
+              );
+            }
+
+        }
+        private void HandleAssignment(Token token)
+        {
             Token assignToken = builder.tokens[builder.tokenIndex];
             builder.tokenIndex += 1;
             List<Token> valueTokens = builder.tokens[builder.tokenIndex..];
@@ -27,7 +46,7 @@ namespace BoomifyCS.Ast
             if (node is AstIndexOperator indexOperator)
             {
                 indexOperator.Token.Type = TokenType.INDEX_OPERATOR;
-                VariableDeclarationValidator.Validate(indexOperator.Token, new Token(TokenType.ASSIGN, ""), valueTokens);
+                AssignmentOperatorValidator.Validate(indexOperator.Token, new Token(TokenType.ASSIGN, ""), valueTokens);
                 builder.tokenIndex = builder.tokens.Count;
                 AstBuilder valueBuilder = new(valueTokens);
                 AstNode valueNode = valueBuilder.BuildNode();
@@ -41,7 +60,7 @@ namespace BoomifyCS.Ast
 
                 Token variableToken = node.Token;
 
-                VariableDeclarationValidator.Validate(variableToken, token, valueTokens);
+                AssignmentOperatorValidator.Validate(variableToken, token, valueTokens);
                 builder.tokenIndex = builder.tokens.Count;
                 AstBuilder valueBuilder = new(valueTokens);
                 AstNode valueNode = valueBuilder.BuildNode();
@@ -49,7 +68,6 @@ namespace BoomifyCS.Ast
                 AstAssignmentOperator astAssignmentOperator = new(assignToken, (AstIdentifier)node, valueNode);
                 builder.AddOperand(astAssignmentOperator);
             }
-
         }
     }
 }

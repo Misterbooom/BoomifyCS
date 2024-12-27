@@ -1,6 +1,6 @@
 ﻿*.exe
 *.dll
-
+*.todo
 *.log
 *.tmp
 /.vs/

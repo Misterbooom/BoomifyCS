@@ -40,7 +40,7 @@ namespace BoomifyCS
             string[] codeByLine = code.Split('\n');
             AstTree astParser = new(codeByLine);
             AstNode node = astParser.ParseTokens(tokens);
-          
+            BifyDebug.Log(node.ToString());
 
 
 

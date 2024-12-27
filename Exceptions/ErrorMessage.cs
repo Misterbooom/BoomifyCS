@@ -67,5 +67,9 @@ namespace BoomifyCS.Exceptions
 
 
         public static string InvalidSyntaxInAssignment() => "Invalid syntax in assignment statement.";
+
+        public static string ExpectedTypeOfVariable() => "Expected type of variable not found during assignment.";
+
+        public static string InvalidVariableType(string value) => $"Invalid variable type '{value}'.";
     }
 }

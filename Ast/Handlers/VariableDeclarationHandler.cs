@@ -4,6 +4,7 @@ using BoomifyCS.Ast.Handlers;
 using BoomifyCS.Lexer;
 using BoomifyCS.Ast.Validators;
 using BoomifyCS.Parser;
+using BoomifyCS.Exceptions;
 namespace BoomifyCS.Ast
 {
     class VariableDeclarationHandler : TokenHandler
@@ -12,19 +13,18 @@ namespace BoomifyCS.Ast
 
         public override void HandleToken(Token token)
         {
-            Token variableToken = TokensFormatter.GetTokenOrNull(builder.tokens, builder.tokenIndex + 1);
-            Token assignmentToken = TokensFormatter.GetTokenOrNull(builder.tokens, builder.tokenIndex + 2);
-            builder.tokenIndex += 3;
+            builder.tokenIndex++; // To Skip the ASSIGN token
+            AstNode identifierNode = builder.operandStack.Pop();
+            AstNode typeNode = builder.operandStack.Pop();
+            BifyDebug.Log($"Identifier Node - {identifierNode}");
+            BifyDebug.Log($"Type Node - {typeNode}");
             List<Token> valueTokens = builder.tokens[builder.tokenIndex..];
+            AstNode valueNode = builder.ParseCondition(valueTokens);
+            VariableDeclarationValidator.Validate(identifierNode, typeNode, valueNode, valueTokens, token);
+            AstAssignment astAssignment = new(token, identifierNode, valueNode);
+            AstVarDecl astVarDecl = new(token, astAssignment, typeNode, valueNode);
             builder.tokenIndex = builder.tokens.Count;
-            VariableDeclarationValidator.Validate(variableToken, assignmentToken, valueTokens);
-            AstBuilder valueBuilder = new(valueTokens);
-            AstNode valueNode = valueBuilder.BuildNode();
-            AstIdentifier identifierNode = (AstIdentifier)NodeConventer.TokenToNode(variableToken);
-            identifierNode.LineNumber = variableToken.Line;
-            AstAssignment assignmentNode = new(assignmentToken, identifierNode, valueNode);
-            AstVarDecl varDeclNode = new(builder.tokens[builder.tokenIndex - 3], assignmentNode);
-            builder.AddOperand(varDeclNode);
+            builder.AddOperand(astVarDecl);
         }
     }
 }
