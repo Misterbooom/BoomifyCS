@@ -143,7 +143,7 @@ namespace BoomifyCS.Ast
         public override string ToString() => StrHelper();
     }
 
-    public class AstVarDecl(Token token, AstAssignment assignmentNode,AstNode type = null, AstNode left = null, AstNode right = null) : AstNode(token, left, right)
+    public class AstVarDecl(Token token, AstAssignment assignmentNode, AstNode type = null, AstNode left = null, AstNode right = null) : AstNode(token, left, right)
     {
         public AstAssignment AssignmentNode = assignmentNode;
         public AstNode Type = type;
@@ -183,13 +183,13 @@ namespace BoomifyCS.Ast
     public class AstBlock(List<AstNode> childsNodes) : AstNode(new Token(TokenType.BLOCK, "Block"))
     {
 
-        public List<AstNode> ChildsNodes = childsNodes;
+        public List<AstNode> ChildNodes = childsNodes;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
             string statementsStr = "";
-            foreach (AstNode node in ChildsNodes)
+            foreach (AstNode node in ChildNodes)
             {
                 statementsStr += node?.StrHelper(level + 1, "Statement: ") ?? "";
 
@@ -315,11 +315,12 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{valueStr}";
         }
     }
-    public class AstFunctionDecl(Token token, AstIdentifier functionNameNode, AstNode argumentsNode, AstNode blockNode) : AstNode(token)
+    public class AstFunctionDecl(Token token, AstNode typeNode, AstIdentifier functionNameNode, AstNode argumentsNode, AstNode blockNode) : AstNode(token)
     {
         public AstNode argumentsNode = argumentsNode;
         public AstIdentifier functionNameNode = functionNameNode;
         public AstNode blockNode = blockNode;
+        public AstNode typeNode = typeNode;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -327,7 +328,8 @@ namespace BoomifyCS.Ast
             string functionNameStr = functionNameNode?.StrHelper(level + 1, "Name: ");
             string argumentsStr = argumentsNode?.StrHelper(level + 1, "Arguments: ");
             string blockStr = blockNode?.StrHelper(level + 1, "Block: ");
-            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{functionNameStr}\n{argumentsStr}\n{blockStr}";
+            string typeStr = typeNode?.StrHelper(level + 1, "Type: ");
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{typeStr}\n{functionNameStr}\n{argumentsStr}\n{blockStr}";
         }
     }
     public class AstModule(string moduleName, string modulePath, List<AstNode> nodes) : AstNode(new Token(TokenType.IDENTIFIER, moduleName))

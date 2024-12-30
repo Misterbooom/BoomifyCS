@@ -16,15 +16,15 @@ namespace BoomifyCS.Ast.Handlers
         public FunctionDeclarationHandler(AstBuilder builder) : base(builder) { }
         public override void HandleToken(Token token)
         {
-            Token nameToken = TokensFormatter.GetTokenOrNull(builder.tokens, builder.tokenIndex + 1);
-            builder.tokenIndex++;
+            AstNode typeNode = builder.operandStack.Pop();
             List<Token> parametersTokens = builder.GetConditionTokens();
             List<Token> blockTokens = builder.GetBlockTokens();
-            AstNode argumentsNode = builder.ParseCondition(parametersTokens);
+            AstNode parametersNode = builder.ParseCondition(parametersTokens);
             AstNode blockNode = builder.ParseBlock(blockTokens);
+            AstNode functionNameNode = builder.ParseCondition([token]);
             Traceback.Instance.SetCurrentLine(token.Line);
-            FunctionDeclarationValidator.Validate(token, nameToken, argumentsNode, blockNode);
-            AstFunctionDecl functionNode = new AstFunctionDecl(token, (AstIdentifier)NodeConventer.TokenToNode(nameToken), argumentsNode, blockNode);
+            FunctionDeclarationValidator.Validate(token, parametersNode, blockNode, typeNode);
+            AstFunctionDecl functionNode = new AstFunctionDecl(token, typeNode,(AstIdentifier)functionNameNode, parametersNode, blockNode);
             builder.AddOperand(functionNode);
         }
     }

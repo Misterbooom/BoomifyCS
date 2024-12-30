@@ -16,14 +16,16 @@ namespace BoomifyCS.Ast
             builder.tokenIndex++; // To Skip the ASSIGN token
             AstNode identifierNode = builder.operandStack.Pop();
             AstNode typeNode = builder.operandStack.Pop();
-            BifyDebug.Log($"Identifier Node - {identifierNode}");
-            BifyDebug.Log($"Type Node - {typeNode}");
+
             List<Token> valueTokens = builder.tokens[builder.tokenIndex..];
+            BifyDebug.Log($"Value Tokens - {valueTokens.TokensToString()}");
             AstNode valueNode = builder.ParseCondition(valueTokens);
+            builder.tokenIndex = builder.tokens.Count;
+
             VariableDeclarationValidator.Validate(identifierNode, typeNode, valueNode, valueTokens, token);
+
             AstAssignment astAssignment = new(token, identifierNode, valueNode);
             AstVarDecl astVarDecl = new(token, astAssignment, typeNode, valueNode);
-            builder.tokenIndex = builder.tokens.Count;
             builder.AddOperand(astVarDecl);
         }
     }

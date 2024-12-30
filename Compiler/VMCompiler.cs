@@ -65,7 +65,7 @@ namespace BoomifyCS.Compiler
                     CompileIfStatement(astIf);
                     break;
                 case AstBlock astBlock:
-                    foreach (AstNode childNode in astBlock.ChildsNodes)
+                    foreach (AstNode childNode in astBlock.ChildNodes)
                     {
                         Visit(childNode);
 
@@ -171,7 +171,7 @@ namespace BoomifyCS.Compiler
             Visit(function.blockNode);
             AstBlock functionBlock = (AstBlock)function.blockNode;
             bool isContainReturnNode = false;
-            foreach (AstNode node in functionBlock.ChildsNodes)
+            foreach (AstNode node in functionBlock.ChildNodes)
             {
                 if (node is AstReturn astReturn)
                 {
@@ -179,7 +179,7 @@ namespace BoomifyCS.Compiler
                     break;
                 }
             }
-            if (!isContainReturnNode || !(functionBlock.ChildsNodes[^1] is AstReturn))
+            if (!isContainReturnNode || !(functionBlock.ChildNodes[^1] is AstReturn))
             {
                 _instructions.Add(new ByteInstruction(ByteType.LOAD_CONST, new BifyNull(), _lineCount));
                 _instructions.Add(new ByteInstruction(ByteType.RETURN, _lineCount));

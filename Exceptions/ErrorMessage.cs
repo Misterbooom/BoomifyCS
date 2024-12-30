@@ -71,5 +71,6 @@ namespace BoomifyCS.Exceptions
         public static string ExpectedTypeOfVariable() => "Expected type of variable not found during assignment.";
 
         public static string InvalidVariableType(string value) => $"Invalid variable type '{value}'.";
+        public static string InvalidFunctionReturnType(string type) => $"Invalid function return type '{type}'.";
     }
 }

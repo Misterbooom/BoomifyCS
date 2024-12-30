@@ -10,7 +10,9 @@ using BoomifyCS.Parser;
 using BoomifyCS.Compiler;
 using BoomifyCS.Objects;
 using BoomifyCS.Exceptions;
-
+using BoomifyCS.Assembly;
+using LLVMSharp;
+using LLVMSharp.Interop;
 namespace BoomifyCS
 {
     internal class Program
@@ -24,7 +26,7 @@ namespace BoomifyCS
         {
         }
         static void RunInterpreter()
-        {
+        { 
             Console.OutputEncoding = Encoding.UTF8;
             string code;
             string file = "C:/BoomifyCS/test.bify";
@@ -41,6 +43,8 @@ namespace BoomifyCS
             AstTree astParser = new(codeByLine);
             AstNode node = astParser.ParseTokens(tokens);
             BifyDebug.Log(node.ToString());
+            AssemblyCompiler compiler = new();
+            compiler.Compile(node);
 
 
 

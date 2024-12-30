@@ -7,6 +7,7 @@ namespace BoomifyCS.Objects
     public class BifyInteger : BifyObject
     {
         public int Value;
+        public static new int Size => 8;
 
         public BifyInteger(int value) : base()
         {

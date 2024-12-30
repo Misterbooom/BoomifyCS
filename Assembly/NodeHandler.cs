@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using BoomifyCS.Ast;
 using BoomifyCS.Lexer;
 
-namespace BoomifyCS.AssemblyCompiler
+namespace BoomifyCS.Assembly
 {
     abstract class NodeHandler
     {
