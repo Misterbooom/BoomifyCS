@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using BoomifyCS.Ast.Handlers;
+using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Ast
@@ -14,9 +15,13 @@ namespace BoomifyCS.Ast
             Token nextToken = TokensFormatter.GetTokenOrNull(builder.tokens, builder.tokenIndex + 1);
             if (nextToken != null && nextToken.Type == TokenType.LPAREN)
             {
+                BifyDebug.Log("Handling call nde");
                 new CallHandler(builder).HandleToken(token);
             }
-            builder.AddOperand(NodeConventer.TokenToNode(builder.tokens[builder.tokenIndex]));
+            else
+            {
+                builder.AddOperand(NodeConventer.TokenToNode(token));
+            }
         }
     }
 }

@@ -12,12 +12,19 @@ namespace BoomifyCS.Objects
         public  string Name;
         public  BifyObject returnObject;
         public List<string> arguments = [];
+        public Type returnType;
         public BifyFunction(string name) : base()
         {
             Name = name;
             returnObject = new BifyNull();
             ExpectedArgCount = -1;
-
+        }
+        public BifyFunction(string name,Type type) : base()
+        {
+            Name = name;
+            returnObject = new BifyNull();
+            ExpectedArgCount = -1;
+            returnType = type;
         }
         public override BifyObject Call(List<BifyObject> arguments) => returnObject;
         public override BifyString Repr()

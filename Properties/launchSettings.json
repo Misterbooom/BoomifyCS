@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "BoomifyCS": {
+      "commandName": "Project",
+      "hotReloadEnabled": false
+    }
+  }
+}

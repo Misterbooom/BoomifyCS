@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using BoomifyCS.Lexer;
 using BoomifyCS.Objects;
+using LLVMSharp.Interop;
 
 namespace BoomifyCS.Ast
 {
@@ -11,6 +12,7 @@ namespace BoomifyCS.Ast
         public Token Token { get; set; } = token;
         public AstNode Left { get; set; } = left;
         public AstNode Right { get; set; } = right;
+        public LLVMValueRef LlvmValue { get; set; }
         public int LineNumber;
 
         public override string ToString() => StrHelper();

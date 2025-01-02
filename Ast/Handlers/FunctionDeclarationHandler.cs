@@ -21,11 +21,12 @@ namespace BoomifyCS.Ast.Handlers
             List<Token> blockTokens = builder.GetBlockTokens();
             AstNode parametersNode = builder.ParseCondition(parametersTokens);
             AstNode blockNode = builder.ParseBlock(blockTokens);
-            AstNode functionNameNode = builder.ParseCondition([token]);
+            
             Traceback.Instance.SetCurrentLine(token.Line);
             FunctionDeclarationValidator.Validate(token, parametersNode, blockNode, typeNode);
-            AstFunctionDecl functionNode = new AstFunctionDecl(token, typeNode,(AstIdentifier)functionNameNode, parametersNode, blockNode);
+            AstFunctionDecl functionNode = new AstFunctionDecl(token, typeNode,new AstIdentifier(token,token.Value), parametersNode, blockNode);
             builder.AddOperand(functionNode);
+            builder.tokenIndex++; // skip the closing curly brace
         }
     }
 }

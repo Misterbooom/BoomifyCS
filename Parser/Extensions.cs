@@ -42,7 +42,7 @@ namespace BoomifyCS.Parser
             sb.Append('[');
             foreach (var token in list)
             {
-                sb.Append("   " + token.ToString() + ", \n");
+                sb.Append("   " + token.ToString()  + ", \n");
             }
             sb.Append(']');
 
@@ -70,6 +70,10 @@ namespace BoomifyCS.Parser
                 if (node != null)
                 {
                     Console.WriteLine(node.ToString());
+                }
+                else
+                {
+                    Console.WriteLine("NullNode");
                 }
             }
             Console.WriteLine("]");

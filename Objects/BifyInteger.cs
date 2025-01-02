@@ -1,6 +1,7 @@
 ﻿using System;
 using BoomifyCS.Lexer;
 using BoomifyCS.Exceptions;
+using LLVMSharp.Interop;
 
 namespace BoomifyCS.Objects
 {
@@ -8,6 +9,7 @@ namespace BoomifyCS.Objects
     {
         public int Value;
         public static new int Size => 8;
+        public static new LLVMTypeRef LLVMType => LLVMTypeRef.Int32;
 
         public BifyInteger(int value) : base()
         {
@@ -27,6 +29,13 @@ namespace BoomifyCS.Objects
 
         public override BifyString Repr() => new BifyString($"BifyInteger({Value})");
 
+        public override LLVMValueRef ToLLVM()
+        {
+            unsafe
+            {
+                return LLVM.ConstInt(LLVM.Int32Type(), (ulong)Value, 1);
+            }
+        }
         public override BifyObject Add(BifyObject other)
         {
             if (other is BifyInteger otherInt)

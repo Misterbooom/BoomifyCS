@@ -19,8 +19,8 @@ namespace BoomifyCS.Compiler
         public void RunVM(AstNode root)
         {
             Visit(root);
-            //Console.WriteLine($"Instructions count - {_instructions.Count}");
-            //_instructions.WriteInstructions();
+            Console.WriteLine($"Instructions count - {_instructions.Count}");
+            _instructions.WriteInstructions();
             _vm.Run(_instructions);
         }
 

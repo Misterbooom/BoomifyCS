@@ -24,7 +24,6 @@ namespace BoomifyCS.Ast
             }
             else
             { 
-                BifyDebug.Log($"Operand Stack Count - {builder.operandStack.Count}");
                 Traceback.Instance.ThrowException(
                     new BifySyntaxError("Not enough tokens for Assignment", "",token.Value)
               );

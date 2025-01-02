@@ -18,7 +18,6 @@ namespace BoomifyCS.Ast
             AstNode typeNode = builder.operandStack.Pop();
 
             List<Token> valueTokens = builder.tokens[builder.tokenIndex..];
-            BifyDebug.Log($"Value Tokens - {valueTokens.TokensToString()}");
             AstNode valueNode = builder.ParseCondition(valueTokens);
             builder.tokenIndex = builder.tokens.Count;
 

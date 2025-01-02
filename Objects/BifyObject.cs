@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using BoomifyCS.Exceptions;
+using LLVMSharp.Interop;
 
 namespace BoomifyCS.Objects
 {
@@ -9,6 +10,7 @@ namespace BoomifyCS.Objects
     {
         public int ExpectedArgCount;
         public static int Size => 0;
+        public static LLVMTypeRef LLVMType;
         public string GetName() => GetType().Name.Replace("Bify", "");
         public virtual void Initialize(List<BifyObject> args) => Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Initialize", GetName())));
         public virtual int GetInitializerArgs()
@@ -214,6 +216,10 @@ namespace BoomifyCS.Objects
         {
             Traceback.Instance.ThrowException(new BifyOperationError(ErrorMessage.OperationNotSupported("Len", GetName())));
             return null;
+        }
+        public virtual LLVMValueRef ToLLVM()
+        {
+            throw new NotImplementedException($"Init llvm not implemented in - {Repr()}");
         }
     }
 }

@@ -27,6 +27,7 @@ namespace BoomifyCS.Ast
                 Token token = tokens[tokenIndex];
                 TokenHandler handler = TokenHandlerFactory.CreateHandler(token, this);
                 handler.HandleToken(token);
+
                 tokenIndex++;
             }
             while (operatorStack.Count > 0)
@@ -35,6 +36,7 @@ namespace BoomifyCS.Ast
             }
             while (operandStack.Count > 1)
             {
+
                 AstNode right = operandStack.Pop();
                 AstNode left = operandStack.Pop();
 

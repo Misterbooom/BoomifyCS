@@ -5,8 +5,10 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Objects;
+using LLVMSharp.Interop;
 using NUnit.Framework;
 
 namespace BoomifyCS.Assembly
@@ -16,14 +18,12 @@ namespace BoomifyCS.Assembly
         public string Name { get; set; }
         public Type Type { get; set; } // Type is used to store type information
         public string Value { get; set; }
-        public int Offset { get; set; }
         public int Size => (int)Type.GetProperty("Size").GetValue(null);
-
+        public LLVMTypeRef LlvmType => (LLVMTypeRef)Type.GetProperty("LLVMType").GetValue(null);
         public Variable(string name, Type type, int offset)
         {
             Name = name;
             Type = type;
-            Offset = offset;
             Value = null; // Default value
         }
 
@@ -32,12 +32,17 @@ namespace BoomifyCS.Assembly
             Name = name;
             Type = type;
             Value = null; // Default value
-            Offset = 0; // Default offset
+        }
+        public Variable(string name, Type type,BifyFunction bifyFunction)
+        {
+            Name = name;
+            Type = type;
+            Value = null; // Default value
         }
 
         public override string ToString()
         {
-            return $"Name: {Name}, Type: {Type}, Value: {Value}, Offset: {Offset}";
+            return $"Name: {Name}, Type: {Type}, Value: {Value}";
         }
     }
 
@@ -47,31 +52,58 @@ namespace BoomifyCS.Assembly
         Dictionary<string, Variable> table = new Dictionary<string, Variable>();
 
         Dictionary<string, Variable> localTable = new Dictionary<string, Variable>();
-        private int offset = 0;
         public AssemblyVariableManager()
         {
             table["int"] = new Variable("int", typeof(BifyInteger), 0);
+            table["void"] = new Variable("void", typeof(BifyVoid));
         }
 
-        public int AllocateLocal(string name, string type)
+        public LLVMTypeRef AllocateLocal(string name, string type)
         {
             if (table.ContainsKey(type))
             {
-                localTable[name] = new Variable(name, table[type].Type, table[type].Offset);
-                offset += (int)table[type].Size;
-                localTable[name].Offset = offset;
-                return offset;
+                Type typeT = table[type].Type;
+                localTable[name] = new Variable(name, typeT);
+
+                return GetType(type);
+
             }
             else
             {
-                Traceback.Instance.ThrowException(new BifyNameError($"Type '{type}' doesn't exist.","",type));
-                return 0;
+                Traceback.Instance.ThrowException(new BifyNameError($"Type '{type}' doesn't exist.", "", type));
+                return null;
             }
+        }
+
+        public LLVMTypeRef AllocateFunction(string name, string type)
+        {
+            if (table.ContainsKey(type))
+            {
+                LLVMTypeRef lLVMType = GetType(type);
+                table[name] = new Variable(name, typeof(BifyFunction),new BifyFunction(name, table[type].Type));
+                return lLVMType;
+
+            }
+            else
+            {
+                Traceback.Instance.ThrowException(new BifyNameError($"Type '{type}' doesn't exist.", "", type));
+                return null;
+            }
+        }
+        private LLVMTypeRef GetType(string type)
+        {
+            BifyDebug.Log($"Type - {type}");
+            LLVMTypeRef llvmType = table[type].LlvmType;
+            if (llvmType != null)
+            {
+                return llvmType;
+            }
+            Traceback.Instance.ThrowException(new BifyNameError($"Type '{type}' doesn't exist.", "", type));
+            return null;
         }
         public void ClearLocals()
         {
             localTable.Clear();
-            offset = 0;
         }
         public Variable GetVariable(string name)
         {
