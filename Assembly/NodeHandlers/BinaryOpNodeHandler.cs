@@ -22,11 +22,12 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
             compiler.Visit(rightNode);
             var rightValue = rightNode.LlvmValue;
+            BifyDebug.Log($"Left - {leftNode.LlvmValue} Right - {rightNode.LlvmValue}");
+
             LLVMValueRef result;
             switch (operatorType)
             {
                 case TokenType.ADD:
-                    BifyDebug.Log($"Left - {leftNode.LlvmValue} Right - {rightNode.LlvmValue}");
                     result = compiler.builder.BuildAdd(leftValue, rightValue, "addtmp");
                     break;
                 case TokenType.SUB:
@@ -47,18 +48,6 @@ namespace BoomifyCS.Assembly.NodeHandlers
         }
     }
 
-    class ConstantNodeHandler : NodeHandler
-    {
-        public ConstantNodeHandler(AssemblyCompiler compiler) : base(compiler) { }
 
-        public override void HandleNode(AstNode node)
-        {
-            if (node is AstConstant astConstant)
-            {
-                node.LlvmValue = astConstant.BifyValue.ToLLVM();
-            }
-
-        }
-    }
 
 }

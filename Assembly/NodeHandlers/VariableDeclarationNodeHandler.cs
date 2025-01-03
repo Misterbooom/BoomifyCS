@@ -15,21 +15,20 @@ namespace BoomifyCS.Assembly.NodeHandlers
             string identifier = astVarDecl.AssignmentNode.Left.Token.Value;
             string typeIdentifier = astVarDecl.Type.Token.Value;
 
-            
+
             LLVMTypeRef lLVMType = compiler.variableManager.AllocateLocal(identifier, typeIdentifier);
-
-            var varAlloca = compiler.builder.BuildAlloca(lLVMType, identifier);
             
+            var varAlloca = compiler.builder.BuildAlloca(lLVMType, identifier);
             compiler.Visit(astVarDecl.AssignmentNode.Right);
-
-            compiler.builder.BuildStore(astVarDecl.AssignmentNode.Right.LlvmValue,varAlloca);
+            compiler.builder.BuildStore(astVarDecl.AssignmentNode.Right.LlvmValue, varAlloca);
+            compiler.variableManager.SetLocalValue(identifier, astVarDecl.AssignmentNode.Right.LlvmValue);
 
 
         }
 
-        
+
     }
-  
+
 
 }
 

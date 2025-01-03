@@ -30,7 +30,10 @@ namespace BoomifyCS.Assembly.NodeHandlers
             compiler.builder.PositionAtEnd(entryBlock);
             compiler.Visit(astFunctionDecl.blockNode);
 
-            if (FunctionPathChecker.CheckAllPathsReturn(astFunctionDecl).AllPathsReturn == false && functionTypeName == "void")
+            var blockNode = (AstBlock)astFunctionDecl.blockNode;
+            bool hasNoReturn = blockNode.ChildNodes[^1] is not AstReturn;
+
+            if (hasNoReturn && functionTypeName == "void")
             {
                 compiler.builder.BuildRetVoid();
             }

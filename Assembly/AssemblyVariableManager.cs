@@ -10,34 +10,32 @@ using BoomifyCS.Exceptions;
 using BoomifyCS.Objects;
 using LLVMSharp.Interop;
 using NUnit.Framework;
+using NUnit.Framework.Internal.Execution;
 
 namespace BoomifyCS.Assembly
 {
     class Variable
     {
-        public string Name { get; set; }
-        public Type Type { get; set; } // Type is used to store type information
-        public string Value { get; set; }
+        public string Name;
+        public Type Type; // Type is used to store type information
+        public LLVMValueRef Value;
         public int Size => (int)Type.GetProperty("Size").GetValue(null);
         public LLVMTypeRef LlvmType => (LLVMTypeRef)Type.GetProperty("LLVMType").GetValue(null);
         public Variable(string name, Type type, int offset)
         {
             Name = name;
             Type = type;
-            Value = null; // Default value
         }
 
         public Variable(string name, Type type)
         {
             Name = name;
             Type = type;
-            Value = null; // Default value
         }
-        public Variable(string name, Type type,BifyFunction bifyFunction)
+        public Variable(string name, Type type, BifyFunction bifyFunction)
         {
             Name = name;
             Type = type;
-            Value = null; // Default value
         }
 
         public override string ToString()
@@ -49,15 +47,37 @@ namespace BoomifyCS.Assembly
 
     class AssemblyVariableManager
     {
-        Dictionary<string, Variable> table = new Dictionary<string, Variable>();
+        private Dictionary<string, Variable> table = new Dictionary<string, Variable>();
 
-        Dictionary<string, Variable> localTable = new Dictionary<string, Variable>();
+        private Dictionary<string, Variable> localTable = new Dictionary<string, Variable>();
         public AssemblyVariableManager()
         {
             table["int"] = new Variable("int", typeof(BifyInteger), 0);
             table["void"] = new Variable("void", typeof(BifyVoid));
         }
+        public void IsExists(string name)
+        {
+            if (!localTable.Concat(table).ToDictionary().ContainsKey(name))
+            {
+                Traceback.Instance.ThrowException(new BifyUndefinedError($"Undefined variable - {name}", "", name));
+            }
 
+        }
+        public LLVMValueRef GetLocalValue(string name)
+        {
+            if (localTable[name].Value == null)
+            {
+                Traceback.Instance.ThrowException(new BifyUnknownError("Compiler Side: Get: Incorrect local value is null"));
+            } 
+            return localTable[name].Value;
+        }
+        public void SetLocalValue(string name,LLVMValueRef valueRef) {
+            if (valueRef == null)
+            {
+                Traceback.Instance.ThrowException(new BifyUnknownError("Compiler Side: Set: Incorrect local value is null"));
+            }
+            localTable[name].Value = valueRef;
+        }
         public LLVMTypeRef AllocateLocal(string name, string type)
         {
             if (table.ContainsKey(type))
@@ -80,7 +100,7 @@ namespace BoomifyCS.Assembly
             if (table.ContainsKey(type))
             {
                 LLVMTypeRef lLVMType = GetType(type);
-                table[name] = new Variable(name, typeof(BifyFunction),new BifyFunction(name, table[type].Type));
+                table[name] = new Variable(name, typeof(BifyFunction), new BifyFunction(name, table[type].Type));
                 return lLVMType;
 
             }
