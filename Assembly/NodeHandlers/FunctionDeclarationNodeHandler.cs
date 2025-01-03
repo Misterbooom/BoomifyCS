@@ -23,9 +23,6 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 Traceback.Instance.ThrowException(new BifyTypeError("Not all paths return a value"));
                 return;
             }
-
-
-
             var llvmFunctionType = compiler.variableManager.AllocateFunction(functionName,functionTypeName);
             var functionType = LLVMTypeRef.CreateFunction(llvmFunctionType, new LLVMTypeRef[] { });
             var function = compiler.module.AddFunction(functionName,functionType);
@@ -76,7 +73,6 @@ public class FunctionPathChecker
         switch (statement)
         {
             case AstReturn:
-                // A return statement guarantees that this path returns
                 return (true, null);
 
             case AstIf ifNode:
@@ -104,17 +100,14 @@ public class FunctionPathChecker
                     return (blockReturns, blockLastNode);
                 }
 
-            case AstWhile whileNode:
-                // Loops may or may not return depending on condition and block
-                return CheckBlock(whileNode.BlockNode);
+            //case AstWhile whileNode:
+            //    return CheckBlock(whileNode.BlockNode);
 
-            case AstFor forNode:
-                // Similar to while loop
-                return CheckBlock(forNode.BlockNode);
+            //case AstFor forNode:
+            //    return CheckBlock(forNode.BlockNode);
 
             default:
-                // Any other statement is treated as non-returning
-                return (false, statement);
+                return (true, statement);
         }
     }
 }
