@@ -11,7 +11,13 @@ namespace BoomifyCS.Assembly.NodeHandlers
     {
         public override void HandleNode(AstNode node)
         {
-          
+            AstReturn astReturn = node as AstReturn; 
+            if (astReturn.ArgumentsNode == null) {
+                compiler.builder.BuildRetVoid();
+                return;
+            }
+            compiler.Visit(astReturn.ArgumentsNode);
+            compiler.builder.BuildRet(astReturn.ArgumentsNode.LlvmValue);
         }
     }
 }

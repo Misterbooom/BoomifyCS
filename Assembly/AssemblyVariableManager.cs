@@ -63,6 +63,11 @@ namespace BoomifyCS.Assembly
             }
 
         }
+        public Variable GetVariable(string name)
+        {
+            IsExists(name);
+            return localTable.Concat(table).ToDictionary()[name];
+        }
         public LLVMValueRef GetLocalValue(string name)
         {
             if (localTable[name].Value == null)
@@ -125,17 +130,7 @@ namespace BoomifyCS.Assembly
         {
             localTable.Clear();
         }
-        public Variable GetVariable(string name)
-        {
-            if (table.ContainsKey(name))
-            {
-                return table[name];
-            }
-            else
-            {
-                throw new KeyNotFoundException("Variable not found.");
-            }
-        }
+      
 
         public override string ToString()
         {

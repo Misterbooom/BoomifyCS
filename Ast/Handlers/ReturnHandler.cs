@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BoomifyCS.Ast.Validators;
+using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 using BoomifyCS.Parser;
+using NUnit.Framework;
 
 namespace BoomifyCS.Ast.Handlers
 {
@@ -20,6 +23,7 @@ namespace BoomifyCS.Ast.Handlers
             AstReturn returnNode = new(token,builder.ParseCondition(returnTokens));
             builder.AddOperand(returnNode);
             builder.tokenIndex += returnTokens.Count;
+            ReturnValidator.Validate(returnNode);
         }
     }
 }

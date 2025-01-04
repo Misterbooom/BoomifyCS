@@ -12,18 +12,15 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
         public override void HandleNode(AstNode node)
         {
-            // Assuming node has fields: Left, Right, and Operator
-            var leftNode = node.Left; // Left operand
-            var rightNode = node.Right; // Right operand
-            var operatorType = node.Token.Type; // Operator (+, -, *, /)
+            var leftNode = node.Left;
+            var rightNode = node.Right; 
+            var operatorType = node.Token.Type; 
 
             compiler.Visit(leftNode);
             var leftValue = leftNode.LlvmValue;
 
             compiler.Visit(rightNode);
             var rightValue = rightNode.LlvmValue;
-            BifyDebug.Log($"Left - {leftNode.LlvmValue} Right - {rightNode.LlvmValue}");
-
             LLVMValueRef result;
             switch (operatorType)
             {
