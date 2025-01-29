@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BoomifyCS.Exceptions
 {
@@ -16,10 +12,16 @@ namespace BoomifyCS.Exceptions
             [CallerFilePath] string callerFilePath = "",
             [CallerLineNumber] int callerLineNumber = 0)
         {
+            string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             string fileName = Path.GetFileName(callerFilePath);
 
-            string logMessage = $"[DEBUG] [{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}\n" +
-                                $"Called from: {callerName} in {fileName} at line {callerLineNumber}";
+            string logMessage = $"\n[DEBUG LOG] \n" +
+                                $"Timestamp   : {timestamp}\n" +
+                                $"Message     : {message}\n" +
+                                $"Caller      : {callerName}\n" +
+                                $"File        : {fileName}\n" +
+                                $"Line        : {callerLineNumber}\n";
+
             Console.WriteLine(logMessage);
         }
     }

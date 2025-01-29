@@ -17,7 +17,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 return;
             }
             compiler.Visit(astReturn.ArgumentsNode);
-            compiler.builder.BuildRet(astReturn.ArgumentsNode.LlvmValue);
+            compiler.builder.BuildRet(compiler.stack.Pop().GetValueRef());
         }
     }
 }

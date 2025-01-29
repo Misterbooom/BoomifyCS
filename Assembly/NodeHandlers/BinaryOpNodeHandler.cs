@@ -15,33 +15,48 @@ namespace BoomifyCS.Assembly.NodeHandlers
             var leftNode = node.Left;
             var rightNode = node.Right; 
             var operatorType = node.Token.Type; 
-
-            compiler.Visit(leftNode);
-            var leftValue = leftNode.LlvmValue;
-
-            compiler.Visit(rightNode);
-            var rightValue = rightNode.LlvmValue;
-            LLVMValueRef result;
-            switch (operatorType)
+            if (operatorType == TokenType.COMMA)
             {
-                case TokenType.ADD:
-                    result = compiler.builder.BuildAdd(leftValue, rightValue, "addtmp");
-                    break;
-                case TokenType.SUB:
-                    result = compiler.builder.BuildFSub(leftValue, rightValue, "subtmp");
-                    break;
-                case TokenType.MUL:
-
-                    result = compiler.builder.BuildMul(leftValue, rightValue, "multmp");
-                    break;
-                case TokenType.DIV:
-                    result = compiler.builder.BuildSDiv(leftValue, rightValue, "divtmp");
-                    break;
-                default:
-                    throw new InvalidOperationException($"Unsupported operator: {operatorType}");
+                
+                compiler.Visit(leftNode);
+                    
+                compiler.Visit(rightNode);
+                
             }
+            else
+            {
+                compiler.Visit(leftNode);
+                var leftValue = compiler.stack.Pop();
 
-            node.LlvmValue = result;
+                compiler.Visit(rightNode);
+                var rightValue = compiler.stack.Pop();
+                LLVMValueRef result;
+
+                switch (operatorType)
+                {
+                    case TokenType.ADD:
+                        result = compiler.builder.BuildAdd(leftValue.GetValueRef(), rightValue.GetValueRef(), "addtmp");
+                        break;
+                    case TokenType.SUB:
+                        result = compiler.builder.BuildFSub(leftValue.GetValueRef(), rightValue.GetValueRef(), "subtmp");
+                        break;
+                    case TokenType.MUL:
+
+                        result = compiler.builder.BuildMul(leftValue.GetValueRef(), rightValue.GetValueRef(), "multmp");
+                        break;
+                    case TokenType.DIV:
+                        result = compiler.builder.BuildSDiv(leftValue.GetValueRef(), rightValue.GetValueRef(), "divtmp");
+                        break;
+
+
+
+                    default:
+                        throw new InvalidOperationException($"Unsupported operator: {operatorType}");
+                }
+
+               compiler.stack.Push(new BifyValue(leftValue.GetBifyObject(),result));
+            }
+           
         }
     }
 

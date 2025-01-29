@@ -17,6 +17,6 @@ namespace BoomifyCS.Assembly
             this.compiler = compiler;
         }
 
-        public abstract void HandleNode(AstNode token);
+        public abstract void HandleNode(AstNode node);
     }
 }

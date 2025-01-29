@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BoomifyCS.Objects;
 using BoomifyCS.Lexer;
+using LLVMSharp.Interop;
 namespace BoomifyCS.Objects
 {
     public class BifyFunction : BifyObject
@@ -13,6 +14,8 @@ namespace BoomifyCS.Objects
         public  BifyObject returnObject;
         public List<string> arguments = [];
         public Type returnType;
+        public LLVMTypeRef functionType; 
+        public LLVMValueRef functionValue = null;
         public BifyFunction(string name) : base()
         {
             Name = name;
@@ -27,6 +30,11 @@ namespace BoomifyCS.Objects
             returnType = type;
         }
         public override BifyObject Call(List<BifyObject> arguments) => returnObject;
+        
+        public virtual LLVMValueRef LLVMBuild()
+        {
+            throw new NotImplementedException("LLVMCALL not implemented");
+        }
         public override BifyString Repr()
         {
             if (arguments.Count > 0)

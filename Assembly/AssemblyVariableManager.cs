@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using BoomifyCS.BuiltIn.Function;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Objects;
 using LLVMSharp.Interop;
@@ -20,6 +21,7 @@ namespace BoomifyCS.Assembly
         public Type Type; // Type is used to store type information
         public LLVMValueRef Value;
         public int Size => (int)Type.GetProperty("Size").GetValue(null);
+        public BifyObject BifyObject;
         public LLVMTypeRef LlvmType => (LLVMTypeRef)Type.GetProperty("LLVMType").GetValue(null);
         public Variable(string name, Type type, int offset)
         {
@@ -31,16 +33,22 @@ namespace BoomifyCS.Assembly
         {
             Name = name;
             Type = type;
+
         }
-        public Variable(string name, Type type, BifyFunction bifyFunction)
+        public Variable(string name, Type type, BifyObject bifyValue)
         {
             Name = name;
             Type = type;
+            BifyObject = bifyValue;
         }
-
+       
         public override string ToString()
         {
-            return $"Name: {Name}, Type: {Type}, Value: {Value}";
+            return $"{Name}(Type: {Type}, Value: {Value}, BifyObject: {BifyObject})";
+        }
+        public BifyValue ToBifyValue()
+        {
+            return new BifyValue(BifyObject, Value);
         }
     }
 
@@ -50,14 +58,18 @@ namespace BoomifyCS.Assembly
         private Dictionary<string, Variable> table = new Dictionary<string, Variable>();
 
         private Dictionary<string, Variable> localTable = new Dictionary<string, Variable>();
-        public AssemblyVariableManager()
+
+        private AssemblyCompiler compiler;
+        public AssemblyVariableManager(AssemblyCompiler compiler)
         {
+            this.compiler = compiler;
             table["int"] = new Variable("int", typeof(BifyInteger), 0);
             table["void"] = new Variable("void", typeof(BifyVoid));
+            table["explode"] = new Variable("explode", typeof(Explode),new Explode(compiler));
         }
         public void IsExists(string name)
         {
-            if (!localTable.Concat(table).ToDictionary().ContainsKey(name))
+            if (!GetCombinedTables().ContainsKey(name))
             {
                 Traceback.Instance.ThrowException(new BifyUndefinedError($"Undefined variable - {name}", "", name));
             }
@@ -66,7 +78,7 @@ namespace BoomifyCS.Assembly
         public Variable GetVariable(string name)
         {
             IsExists(name);
-            return localTable.Concat(table).ToDictionary()[name];
+            return GetCombinedTables()[name];
         }
         public LLVMValueRef GetLocalValue(string name)
         {
@@ -83,14 +95,22 @@ namespace BoomifyCS.Assembly
             }
             localTable[name].Value = valueRef;
         }
-        public LLVMTypeRef AllocateLocal(string name, string type)
+        public void SetLocalBifyObject(string name,BifyObject bifyObject)
+        {
+            localTable[name].BifyObject = bifyObject;
+        }
+        public Dictionary<string, Variable> GetCombinedTables()
+        {
+            return localTable.Concat(table).ToDictionary();
+        }
+        public Variable AllocateLocal(string name, string type)
         {
             if (table.ContainsKey(type))
             {
                 Type typeT = table[type].Type;
                 localTable[name] = new Variable(name, typeT);
 
-                return GetType(type);
+                return GetVariable(type);
 
             }
             else
@@ -117,7 +137,6 @@ namespace BoomifyCS.Assembly
         }
         private LLVMTypeRef GetType(string type)
         {
-            BifyDebug.Log($"Type - {type}");
             LLVMTypeRef llvmType = table[type].LlvmType;
             if (llvmType != null)
             {

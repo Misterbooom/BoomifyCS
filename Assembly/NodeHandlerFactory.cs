@@ -23,6 +23,7 @@ namespace BoomifyCS.Assembly
                 AstConstant astConstant => new ConstantNodeHandler(compiler),
                 AstReturn astReturn => new ReturnNodeHandler(compiler),
                 AstIdentifier astIdentifier => new IdentifierNodeHandler(compiler),
+                AstCall astCall => new CallNodeHandler(compiler),
                 _ => throw new SyntaxErrorException($"Unhandled node - {node.GetType().Name}") 
             };
         }

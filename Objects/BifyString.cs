@@ -3,6 +3,8 @@ using System.Text;
 using BoomifyCS.Ast;
 using BoomifyCS.Lexer;
 using BoomifyCS.Exceptions;
+using LLVMSharp.Interop;
+using BoomifyCS.Assembly;
 
 namespace BoomifyCS.Objects
 {
@@ -86,6 +88,10 @@ namespace BoomifyCS.Objects
             }
             Traceback.Instance.ThrowException(new BifyOverflowError("Unsupported conversion to String"));
             return null;
+        }
+        public override LLVMValueRef ToLLVM()
+        {
+            return AssemblyCompiler.Instance.builder.BuildGlobalStringPtr(Value, "message");
         }
     }
 }

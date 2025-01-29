@@ -37,8 +37,14 @@ namespace BoomifyCS.Assembly.NodeHandlers
         {
             string identifier = node.Token.Value;
             compiler.variableManager.IsExists(identifier);
-            BifyDebug.Log("Identifier");
-            node.LlvmValue = compiler.variableManager.GetLocalValue(identifier);
+            var variable = compiler.variableManager.GetVariable(identifier);
+            if (variable.BifyObject == null)
+            {
+                throw new NullReferenceException($"{identifier} has null bifyValue.");
+            }
+            compiler.stack.Push(variable.ToBifyValue());
+            BifyDebug.Log("Identifier: " + node.LlvmValue.ToString());
+
         }
     }
     class ConstantNodeHandler : NodeHandler
@@ -49,7 +55,8 @@ namespace BoomifyCS.Assembly.NodeHandlers
         {
             if (node is AstConstant astConstant)
             {
-                node.LlvmValue = astConstant.BifyValue.ToLLVM();
+                BifyValue bifyValue = new BifyValue(astConstant.BifyValue,astConstant.BifyValue.ToLLVM());
+                compiler.stack.Push(bifyValue);
             }
 
         }
