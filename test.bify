@@ -1,7 +1,7 @@
 ﻿int main(){
-	int a = 2;
-	int b = 4;
-	explode("a + b = %d",a + b);
+	int a = 1;
+	int b = 4 + a - 2;
+	explode("%d + %d = %d",a,b, a + b);
 	
 	return a;
 }

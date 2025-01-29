@@ -12,10 +12,12 @@ namespace BoomifyCS.Objects
     {
         public  string Name;
         public  BifyObject returnObject;
-        public List<string> arguments = [];
+        public bool isVariadic = false;
         public Type returnType;
-        public LLVMTypeRef functionType; 
+        public LLVMTypeRef functionType;
+        public List<string> arguments;
         public LLVMValueRef functionValue = null;
+        public List<Type> ArgumentsType = [];
         public BifyFunction(string name) : base()
         {
             Name = name;

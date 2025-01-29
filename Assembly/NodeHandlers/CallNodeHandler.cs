@@ -27,22 +27,28 @@ namespace BoomifyCS.Assembly.NodeHandlers
             }
             BifyFunction bifyFunction = callableVar.BifyObject as BifyFunction;
             bifyFunction.LLVMBuild();
-            List<LLVMValueRef> lLVMValueRefs = new List<LLVMValueRef>();
+            List<BifyValue> bifyValues = [];
             for (int i = 0; i < expectedCount; i++)
             {
                 if (compiler.stack.Peek() == null)
                 {
                     throw new NullReferenceException("Expected value on stack");
                 }
-                lLVMValueRefs.Add(compiler.stack.Pop().GetValueRef());
+                bifyValues.Add(compiler.stack.Pop());
             }
-            lLVMValueRefs.Reverse();
+            bifyValues.Reverse();
+            CheckArguments(bifyValues,bifyFunction.ArgumentsType,bifyFunction.isVariadic);
+            List<LLVMValueRef> valueRefs = [];
+            foreach (BifyValue bifyValue in bifyValues)
+            {
+                valueRefs.Add(bifyValue.GetValueRef());
+            }
             unsafe
             {
                 compiler.builder.BuildCall2(
                  bifyFunction.functionType,
                  bifyFunction.functionValue,
-                 lLVMValueRefs.ToArray(),
+                valueRefs.ToArray(),
                 callableVar.LlvmType != LLVMTypeRef.Void ? "callTemp" : "");
             }
 
@@ -60,6 +66,27 @@ namespace BoomifyCS.Assembly.NodeHandlers
             }
 
             return 1;
+        }
+        private void CheckArguments(List<BifyValue> inputArgs, List<Type> targetArgs, bool isVariadic)
+        {
+            if (!isVariadic && inputArgs.Count != targetArgs.Count)
+            {
+                Traceback.Instance.ThrowException(new BifyArgumentError($"Expected {targetArgs.Count} arguments but got {inputArgs.Count}"));
+            }
+            else if (isVariadic && inputArgs.Count < targetArgs.Count)
+            {
+                Traceback.Instance.ThrowException(new BifyArgumentError($"Expected at least {targetArgs.Count} arguments but got {inputArgs.Count}"));
+            }
+
+            for (int i = 0; i < targetArgs.Count; i++)
+            {
+                if (inputArgs[i].GetBifyObject().GetType() != targetArgs[i])
+                {
+                    Traceback.Instance.ThrowException(
+                        new BifyCastError($"Expected {targetArgs[i].Name.Replace("Bify","")} but got {inputArgs[i].GetBifyObject().GetName()} on index {i + 1}")
+                    );
+                }
+            }
         }
 
     }

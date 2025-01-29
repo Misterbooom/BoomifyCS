@@ -21,6 +21,9 @@ namespace BoomifyCS.BuiltIn.Function
         {
             ExpectedArgCount = -1;
             this.compiler = compiler;
+            ArgumentsType = [typeof(BifyString)];
+            isVariadic = true;
+
         }
 
         public override BifyObject Call(List<BifyObject> arguments)
@@ -43,33 +46,29 @@ namespace BoomifyCS.BuiltIn.Function
                 return functionValue;
             }
 
-            // Save the current builder position
             var currentBlock = compiler.builder.InsertBlock;
 
-            // Declare printf
             var printfType = LLVMTypeRef.CreateFunction(
                 LLVMTypeRef.Int32,
                 new LLVMTypeRef[] { LLVMTypeRef.CreatePointer(LLVMTypeRef.Int8, 0) },
-                true // Variadic
+                true 
             );
             var printfFunction = compiler.module.AddFunction("printf", printfType);
 
-            // Declare the explode function
             functionType = LLVMTypeRef.CreateFunction(
                 LLVMTypeRef.Void,
                 new LLVMTypeRef[] {
-            LLVMTypeRef.CreatePointer(LLVMTypeRef.Int8, 0), // Format string
-            LLVMTypeRef.Int32                                // Argument (e.g., %d)
+            LLVMTypeRef.CreatePointer(LLVMTypeRef.Int8, 0), 
+            LLVMTypeRef.Int32                             
                 },
-                false // Not variadic
+                false
             );
             functionValue = compiler.module.AddFunction("explode", functionType);
             var entryBlock = functionValue.AppendBasicBlock("entry");
             compiler.builder.PositionAtEnd(entryBlock);
 
-            // Build the explode function body
-            var formatArg = functionValue.GetParam(0); // Format string argument
-            var intArg = functionValue.GetParam(1);    // Integer argument
+            var formatArg = functionValue.GetParam(0); 
+            var intArg = functionValue.GetParam(1);   
 
             compiler.builder.BuildCall2(
                 printfType,
@@ -79,8 +78,7 @@ namespace BoomifyCS.BuiltIn.Function
             );
             compiler.builder.BuildRetVoid();
 
-            // Restore the original builder position
-            if (currentBlock.Handle != IntPtr.Zero) // Ensure a valid insertion block exists
+            if (currentBlock.Handle != IntPtr.Zero) 
             {
                 compiler.builder.PositionAtEnd(currentBlock);
             }
