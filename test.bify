@@ -1,7 +1,8 @@
 ﻿int main(){
-	int a = 1;
-	int b = 4 + a - 2;
-	explode("%d + %d = %d",a,b, a + b);
-	
-	return a;
+	float a = 1.0;
+	float b = 2.0;
+	float c = a + b;
+	c /= 2;
+	explode("float operations result: %f",c);
+	return 1;
 }

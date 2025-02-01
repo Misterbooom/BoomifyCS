@@ -11,21 +11,26 @@ namespace BoomifyCS.Assembly
     class BifyValue
     {
         BifyObject bifyObject;
-        LLVMValueRef valueRef;
-        public BifyValue(BifyObject bifyObject,LLVMValueRef valueRef)
+        public BifyValue(BifyObject bifyObject)
         {
             this.bifyObject = bifyObject;
-            this.valueRef = valueRef;
         }
         public BifyObject GetBifyObject()
         {
             return bifyObject;
         }
+        
         public LLVMValueRef GetValueRef()
         {
-            return valueRef;
+            return bifyObject.ToLLVM();
         }
+        public void SetBifyObject(BifyObject obj) {
+            bifyObject = obj;
+        }
+        public override string  ToString()
+        {
+            return $"BifyValue({bifyObject.Repr()})";
 
-
+        }
     }
 }

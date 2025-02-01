@@ -48,7 +48,7 @@ namespace BoomifyCS.Assembly
         }
         public BifyValue ToBifyValue()
         {
-            return new BifyValue(BifyObject, Value);
+            return new BifyValue(BifyObject);
         }
     }
 
@@ -63,9 +63,10 @@ namespace BoomifyCS.Assembly
         public AssemblyVariableManager(AssemblyCompiler compiler)
         {
             this.compiler = compiler;
-            table["int"] = new Variable("int", typeof(BifyInteger), 0);
+            table["int"] = new Variable("int", typeof(BifyInteger));
             table["void"] = new Variable("void", typeof(BifyVoid));
             table["explode"] = new Variable("explode", typeof(Explode),new Explode(compiler));
+            table["float"] = new Variable("float", typeof(BifyFloat));
         }
         public void IsExists(string name)
         {

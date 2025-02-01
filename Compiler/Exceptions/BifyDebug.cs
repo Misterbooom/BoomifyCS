@@ -15,12 +15,9 @@ namespace BoomifyCS.Exceptions
             string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             string fileName = Path.GetFileName(callerFilePath);
 
-            string logMessage = $"\n[DEBUG LOG] \n" +
-                                $"Timestamp   : {timestamp}\n" +
-                                $"Message     : {message}\n" +
-                                $"Caller      : {callerName}\n" +
-                                $"File        : {fileName}\n" +
-                                $"Line        : {callerLineNumber}\n";
+            string logMessage =
+                                $"Message     : {message}\n";
+
 
             Console.WriteLine(logMessage);
         }

@@ -3,6 +3,7 @@ using BoomifyCS.Assembly;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
+using BoomifyCS.Objects;
 using LLVMSharp.Interop;
 namespace BoomifyCS.Assembly.NodeHandlers
 {
@@ -23,40 +24,48 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 compiler.Visit(rightNode);
                 
             }
-            else
+            else 
             {
-                compiler.Visit(leftNode);
-                var leftValue = compiler.stack.Pop();
-
-                compiler.Visit(rightNode);
-                var rightValue = compiler.stack.Pop();
-                LLVMValueRef result;
-
-                switch (operatorType)
-                {
-                    case TokenType.ADD:
-                        result = compiler.builder.BuildAdd(leftValue.GetValueRef(), rightValue.GetValueRef(), "addtmp");
-                        break;
-                    case TokenType.SUB:
-                        result = compiler.builder.BuildFSub(leftValue.GetValueRef(), rightValue.GetValueRef(), "subtmp");
-                        break;
-                    case TokenType.MUL:
-
-                        result = compiler.builder.BuildMul(leftValue.GetValueRef(), rightValue.GetValueRef(), "multmp");
-                        break;
-                    case TokenType.DIV:
-                        result = compiler.builder.BuildSDiv(leftValue.GetValueRef(), rightValue.GetValueRef(), "divtmp");
-                        break;
-
-
-
-                    default:
-                        throw new InvalidOperationException($"Unsupported operator: {operatorType}");
-                }
-
-               compiler.stack.Push(new BifyValue(leftValue.GetBifyObject(),result));
+                HandleBinaryOp(leftNode, rightNode, operatorType);
             }
            
+        }
+        private void HandleBinaryOp(AstNode leftNode, AstNode rightNode, TokenType operatorType)
+        {
+            compiler.Visit(leftNode);
+            var leftValue = compiler.stack.Pop();
+            BifyDebug.Log($"Left value: {leftValue}");
+
+            compiler.Visit(rightNode);
+            var rightValue = compiler.stack.Pop();
+            BifyDebug.Log($"Right value: {rightValue}");
+
+            BifyObject result;
+            switch (operatorType)
+            {
+                case TokenType.ADD:
+                    result = leftValue.GetBifyObject().Add(rightValue.GetBifyObject());
+                    BifyDebug.Log("Operation: ADD");
+                    break;
+                case TokenType.SUB:
+                    result = leftValue.GetBifyObject().Sub(rightValue.GetBifyObject());
+                    BifyDebug.Log("Operation: SUB");
+                    break;
+                case TokenType.MUL:
+
+                    result = leftValue.GetBifyObject().Mul(rightValue.GetBifyObject());
+                    BifyDebug.Log("Operation: MUL");
+                    break;
+                case TokenType.DIV:
+                    result = leftValue.GetBifyObject().Div(rightValue.GetBifyObject());
+                    BifyDebug.Log("Operation: DIV");
+                    break;
+                default:
+                    throw new InvalidOperationException($"Unsupported operator: {operatorType}");
+            }
+
+            BifyDebug.Log($"Result: {result.Repr()}");
+            compiler.stack.Push(new BifyValue(result));
         }
     }
 

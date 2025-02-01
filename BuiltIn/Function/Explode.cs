@@ -48,18 +48,18 @@ namespace BoomifyCS.BuiltIn.Function
 
             var currentBlock = compiler.builder.InsertBlock;
 
-            var printfType = LLVMTypeRef.CreateFunction(
+            var printfFunctionType = LLVMTypeRef.CreateFunction(
                 LLVMTypeRef.Int32,
                 new LLVMTypeRef[] { LLVMTypeRef.CreatePointer(LLVMTypeRef.Int8, 0) },
                 true 
             );
-            var printfFunction = compiler.module.AddFunction("printf", printfType);
+            var printfFunction = compiler.module.AddFunction("printf", printfFunctionType);
 
             functionType = LLVMTypeRef.CreateFunction(
                 LLVMTypeRef.Void,
                 new LLVMTypeRef[] {
             LLVMTypeRef.CreatePointer(LLVMTypeRef.Int8, 0), 
-            LLVMTypeRef.Int32                             
+            LLVMTypeRef.Double                              
                 },
                 false
             );
@@ -67,18 +67,19 @@ namespace BoomifyCS.BuiltIn.Function
             var entryBlock = functionValue.AppendBasicBlock("entry");
             compiler.builder.PositionAtEnd(entryBlock);
 
-            var formatArg = functionValue.GetParam(0); 
-            var intArg = functionValue.GetParam(1);   
+            var formatString = functionValue.GetParam(0);
+            var doubleArg = functionValue.GetParam(1);
 
             compiler.builder.BuildCall2(
-                printfType,
+                printfFunctionType,
                 printfFunction,
-                new LLVMValueRef[] { formatArg, intArg },
+                new LLVMValueRef[] { formatString, doubleArg },
                 "callPrintf"
             );
+
             compiler.builder.BuildRetVoid();
 
-            if (currentBlock.Handle != IntPtr.Zero) 
+            if (currentBlock.Handle != IntPtr.Zero)
             {
                 compiler.builder.PositionAtEnd(currentBlock);
             }

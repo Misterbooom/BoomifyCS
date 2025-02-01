@@ -43,7 +43,6 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 throw new NullReferenceException($"{identifier} has null bifyValue.");
             }
             compiler.stack.Push(variable.ToBifyValue());
-            BifyDebug.Log("Identifier: " + node.LlvmValue.ToString());
 
         }
     }
@@ -55,7 +54,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
         {
             if (node is AstConstant astConstant)
             {
-                BifyValue bifyValue = new BifyValue(astConstant.BifyValue,astConstant.BifyValue.ToLLVM());
+                BifyValue bifyValue = new BifyValue(astConstant.BifyValue);
                 compiler.stack.Push(bifyValue);
             }
 

@@ -2,12 +2,15 @@
 using System;
 using BoomifyCS.Exceptions;
 using System.Globalization;
+using LLVMSharp.Interop;
 
 namespace BoomifyCS.Objects
 {
     public class BifyFloat : BifyObject
     {
         public double Value;
+        public static new LLVMTypeRef LLVMType => LLVMTypeRef.Double;
+            
 
         public BifyFloat(double value) : base()
         {
@@ -190,6 +193,13 @@ namespace BoomifyCS.Objects
             }
             Traceback.Instance.ThrowException(new BifyOverflowError("Unsupported conversion to Float"));
             return new BifyFloat(0);
+        }
+        public override LLVMValueRef ToLLVM()
+        {
+            unsafe
+            {
+                return LLVM.ConstReal(LLVM.DoubleType(), Value);
+            }
         }
     }
 }

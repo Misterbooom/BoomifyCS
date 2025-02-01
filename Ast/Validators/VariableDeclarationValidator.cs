@@ -47,7 +47,7 @@ namespace BoomifyCS.Ast.Validators
             }
             if (variableToken != null && variableToken.Type == TokenType.IDENTIFIER || variableToken.Type == TokenType.INDEX_OPERATOR)
             {
-                if (assignmentToken != null && assignmentToken.Type == TokenType.ASSIGN)
+                if (assignmentToken != null)
                 {
                     return true;
                 }
