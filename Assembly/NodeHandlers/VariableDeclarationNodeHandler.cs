@@ -1,7 +1,7 @@
 ﻿using System;
+using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
-using BoomifyCS.Objects;
 using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.NodeHandlers
@@ -12,43 +12,44 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
         public override void HandleNode(AstNode node)
         {
-            AstVarDecl astVarDecl = node as AstVarDecl;
-            string identifier = astVarDecl.AssignmentNode.Left.Token.Value;
-            string typeIdentifier = astVarDecl.Type.Token.Value;
-            Variable typeVar = compiler.variableManager.AllocateLocal(identifier, typeIdentifier);
-            var varAlloca = compiler.builder.BuildAlloca(typeVar.LlvmType, identifier);
-            compiler.Visit(astVarDecl.AssignmentNode.Right);
-            BifyValue varValue = compiler.stack.Pop();
-            BifyDebug.Log($"Var value - {varValue}");
-            if (varValue.GetBifyObject().GetType() != typeVar.Type)
+            AstVarDecl varDeclNode = node as AstVarDecl;
+            string varName = varDeclNode.AssignmentNode.Left.Token.Value;
+            string typeName = varDeclNode.Type.Token.Value;
+
+            BifyType bifyType = compiler.variableManager.GetBifyType(typeName);
+
+
+            var alloca = compiler.builder.BuildAlloca(bifyType.LLVMType, varName);
+            compiler.Visit(varDeclNode.AssignmentNode.Right);
+            BifyValue variableValue = compiler.stack.Pop();
+
+            if (!bifyType.CompareType(variableValue))
             {
-                if (varValue.GetBifyObject() is BifyFloat && typeVar.Type == typeof(BifyInteger))
+
+                if (variableValue is IntegerValue && bifyType is FloatType)
                 {
-                    varValue.SetBifyObject(varValue.GetBifyObject().Int());
+                    LLVMValueRef floatValue = compiler.builder.BuildSIToFP(variableValue.GetLLVMValue(), LLVMTypeRef.Float, "cast_int_to_float");
+                    variableValue = new FloatValue(floatValue);
                 }
-                else if (varValue.GetBifyObject() is BifyInteger && typeVar.Type == typeof(BifyFloat))
+                else if (variableValue is FloatValue && bifyType is IntegerType)
                 {
-                    varValue.SetBifyObject(BifyFloat.Convert(varValue.GetBifyObject()));
+                    LLVMValueRef intValue = compiler.builder.BuildFPToSI(variableValue.GetLLVMValue(), LLVMTypeRef.Int32, "cast_float_to_int");
+                    variableValue = new IntegerValue(intValue);
                 }
                 else
                 {
-                    Traceback.Instance.ThrowException(
-                        new BifyCastError($"Cannot assign {varValue.GetBifyObject().GetName()} to {typeVar.Name }")
-                        );
+                    Traceback.Instance.ThrowException(new BifyTypeError($"Cannot assign {variableValue.GetTypeName()} to {typeName}"));
                     return;
                 }
             }
+            compiler.builder.BuildStore(variableValue.GetLLVMValue(), alloca);
 
-            compiler.builder.BuildStore(varValue.GetValueRef(), varAlloca);
-            compiler.variableManager.SetLocalValue(identifier, varValue.GetValueRef());
-            compiler.variableManager.SetLocalBifyObject(identifier, varValue.GetBifyObject());
+            compiler.variableManager.RegisterLocalVariable(varName, variableValue);
+
+
 
 
         }
-
-
     }
-
-
 }
 

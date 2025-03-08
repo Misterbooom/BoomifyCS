@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BoomifyCS.Ast;
-using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
-using BoomifyCS.Objects;
 using LLVMSharp.Interop;
+using BoomifyCS.Exceptions;
+using BoomifyCS.Assembly.BifyObject;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
@@ -15,79 +15,64 @@ namespace BoomifyCS.Assembly.NodeHandlers
     {
         public override void HandleNode(AstNode node)
         {
-            AstCall astCall = (AstCall)node;
-            int expectedCount = CountArgs(astCall.ArgumentsNode);
-            compiler.Visit(astCall.ArgumentsNode);
-            string callableName = astCall.CallableName.Token.Value;
-            Variable callableVar = compiler.variableManager.GetVariable(callableName);
-            if (callableVar.BifyObject == null || callableVar.BifyObject is not BifyFunction)
+            AstCall callNode = node as AstCall;
+            string callableName = callNode.CallableName.Token.Value;
+            BifyFunction callable = compiler.variableManager.GetVariable(callableName) as BifyFunction;
+            compiler.Visit(callNode.ArgumentsNode);
+            List<BifyValue> providedArgs = new List<BifyValue>();
+            for (int i = 0; i < CountArgs(callNode.ArgumentsNode); i++)
             {
-                Traceback.Instance.ThrowException(new BifyCastError($"{callableName} is not callable"));
-                return;
+                BifyValue arg = compiler.stack.Pop();
+                providedArgs.Add(arg);
             }
-            BifyFunction bifyFunction = callableVar.BifyObject as BifyFunction;
-            bifyFunction.LLVMBuild();
-            List<BifyValue> bifyValues = [];
-            for (int i = 0; i < expectedCount; i++)
-            {
-                if (compiler.stack.Peek() == null)
-                {
-                    throw new NullReferenceException("Expected value on stack");
-                }
-                bifyValues.Add(compiler.stack.Pop());
-            }
-            bifyValues.Reverse();
-            CheckArguments(bifyValues,bifyFunction.ArgumentsType,bifyFunction.isVariadic);
-            List<LLVMValueRef> valueRefs = [];
-            foreach (BifyValue bifyValue in bifyValues)
-            {
-                valueRefs.Add(bifyValue.GetValueRef());
-            }
-            unsafe
-            {
-                compiler.builder.BuildCall2(
-                 bifyFunction.functionType,
-                 bifyFunction.functionValue,
-                valueRefs.ToArray(),
-                callableVar.LlvmType != LLVMTypeRef.Void ? "callTemp" : "");
-            }
+            providedArgs.Reverse();
+            BifyDebug.Log($"Type: {callable.TypeRef}, callable: {callable.GetLLVMValue()}, ");
+
+            ValidateArguments([.. providedArgs], callable.FunctionArgs.BifyTypes, callable.IsVariadic);
+
+            var call = callable.Call(providedArgs.ToArray());
+            compiler.stack.Push(callable.ReturnType.CreateByValueRef(call.GetLLVMValue()));
+
+
 
         }
+
         private static int CountArgs(AstNode node)
         {
             if (node == null)
             {
                 return 0;
             }
-
             if (node is AstBinaryOp binaryOp && binaryOp.Token.Type == TokenType.COMMA)
             {
                 return CountArgs(binaryOp.Left) + CountArgs(binaryOp.Right);
             }
-
             return 1;
         }
-        private void CheckArguments(List<BifyValue> inputArgs, List<Type> targetArgs, bool isVariadic)
-        {
-            if (!isVariadic && inputArgs.Count != targetArgs.Count)
-            {
-                Traceback.Instance.ThrowException(new BifyArgumentError($"Expected {targetArgs.Count} arguments but got {inputArgs.Count}"));
-            }
-            else if (isVariadic && inputArgs.Count < targetArgs.Count)
-            {
-                Traceback.Instance.ThrowException(new BifyArgumentError($"Expected at least {targetArgs.Count} arguments but got {inputArgs.Count}"));
-            }
 
-            for (int i = 0; i < targetArgs.Count; i++)
+        private void ValidateArguments(BifyValue[] providedArgs, BifyType[] expectedArgsType, bool isVariadic)
+        {
+            if (!isVariadic && providedArgs.Length != expectedArgsType.Length)
             {
-                if (inputArgs[i].GetBifyObject().GetType() != targetArgs[i])
+                Traceback.Instance.ThrowException(new BifyArgumentError($"Expected {providedArgs.Length} arguments but got {expectedArgsType.Length}"));
+                return;
+            }
+            else if (isVariadic && providedArgs.Length < expectedArgsType.Length)
+            {
+                Traceback.Instance.ThrowException(new BifyArgumentError($"Expected at least {expectedArgsType.Length} arguments but got {providedArgs.Length}"));
+                return;
+            }
+            for (int i = 0; i < expectedArgsType.Length; i++)
+            {
+                if (!expectedArgsType[i].CompareType(providedArgs[i]))
                 {
-                    Traceback.Instance.ThrowException(
-                        new BifyCastError($"Expected {targetArgs[i].Name.Replace("Bify","")} but got {inputArgs[i].GetBifyObject().GetName()} on index {i + 1}")
-                    );
+                    string expectedTypeName = expectedArgsType[i].GetTypeName();
+                    string providedTypeName = providedArgs[i].GetTypeName();
+                    string errorMessage = $"Type mismatch at argument {i + 1}: Expected {expectedTypeName} but got {providedTypeName}.";
+                    Traceback.Instance.ThrowException(new BifyTypeError(errorMessage));
                 }
             }
-        }
 
     }
+}
 }

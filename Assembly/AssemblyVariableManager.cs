@@ -1,165 +1,108 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using BoomifyCS.BuiltIn.Function;
+using BoomifyCS.Assembly.BifyObject;
+using BoomifyCS.Assembly.Builtin;
 using BoomifyCS.Exceptions;
-using BoomifyCS.Objects;
 using LLVMSharp.Interop;
-using NUnit.Framework;
-using NUnit.Framework.Internal.Execution;
-
 namespace BoomifyCS.Assembly
 {
-    class Variable
+
+    public class AssemblyVariableManager
     {
-        public string Name;
-        public Type Type; // Type is used to store type information
-        public LLVMValueRef Value;
-        public int Size => (int)Type.GetProperty("Size").GetValue(null);
-        public BifyObject BifyObject;
-        public LLVMTypeRef LlvmType => (LLVMTypeRef)Type.GetProperty("LLVMType").GetValue(null);
-        public Variable(string name, Type type, int offset)
+        private readonly Dictionary<string, BifyValue> globalVariables = new()
         {
-            Name = name;
-            Type = type;
-        }
+            {"int", new IntegerType()},
+            {"float", new FloatType()},
+            {"void",new VoidType()},
+            {"explode", new Explode() },
+            {"string", new StringType()}
 
-        public Variable(string name, Type type)
+        };
+
+        private readonly Stack<Dictionary<string, BifyValue>> localScopes = new();
+        public AssemblyVariableManager()
         {
-            Name = name;
-            Type = type;
 
         }
-        public Variable(string name, Type type, BifyObject bifyValue)
-        {
-            Name = name;
-            Type = type;
-            BifyObject = bifyValue;
-        }
-       
-        public override string ToString()
-        {
-            return $"{Name}(Type: {Type}, Value: {Value}, BifyObject: {BifyObject})";
-        }
-        public BifyValue ToBifyValue()
-        {
-            return new BifyValue(BifyObject);
-        }
-    }
 
-
-    class AssemblyVariableManager
-    {
-        private Dictionary<string, Variable> table = new Dictionary<string, Variable>();
-
-        private Dictionary<string, Variable> localTable = new Dictionary<string, Variable>();
-
-        private AssemblyCompiler compiler;
-        public AssemblyVariableManager(AssemblyCompiler compiler)
+        public void EnterLocalScope()
         {
-            this.compiler = compiler;
-            table["int"] = new Variable("int", typeof(BifyInteger));
-            table["void"] = new Variable("void", typeof(BifyVoid));
-            table["explode"] = new Variable("explode", typeof(Explode),new Explode(compiler));
-            table["float"] = new Variable("float", typeof(BifyFloat));
+            localScopes.Push(new Dictionary<string, BifyValue>());
         }
-        public void IsExists(string name)
+
+        public void ExitLocalScope()
         {
-            if (!GetCombinedTables().ContainsKey(name))
+            if (localScopes.Count > 0)
+                localScopes.Pop();
+            else
+                throw new InvalidOperationException("No local scope to exit.");
+        }
+        public LLVMTypeRef GetLLVMType(string type)
+        {
+
+            BifyValue value = GetVariable(type);
+            if (value is BifyType bifyType)
             {
-                Traceback.Instance.ThrowException(new BifyUndefinedError($"Undefined variable - {name}", "", name));
-            }
-
-        }
-        public Variable GetVariable(string name)
-        {
-            IsExists(name);
-            return GetCombinedTables()[name];
-        }
-        public LLVMValueRef GetLocalValue(string name)
-        {
-            if (localTable[name].Value == null)
-            {
-                Traceback.Instance.ThrowException(new BifyUnknownError("Compiler Side: Get: Incorrect local value is null"));
-            } 
-            return localTable[name].Value;
-        }
-        public void SetLocalValue(string name,LLVMValueRef valueRef) {
-            if (valueRef == null)
-            {
-                Traceback.Instance.ThrowException(new BifyUnknownError("Compiler Side: Set: Incorrect local value is null"));
-            }
-            localTable[name].Value = valueRef;
-        }
-        public void SetLocalBifyObject(string name,BifyObject bifyObject)
-        {
-            localTable[name].BifyObject = bifyObject;
-        }
-        public Dictionary<string, Variable> GetCombinedTables()
-        {
-            return localTable.Concat(table).ToDictionary();
-        }
-        public Variable AllocateLocal(string name, string type)
-        {
-            if (table.ContainsKey(type))
-            {
-                Type typeT = table[type].Type;
-                localTable[name] = new Variable(name, typeT);
-
-                return GetVariable(type);
-
+                return bifyType.LLVMType;
             }
             else
             {
-                Traceback.Instance.ThrowException(new BifyNameError($"Type '{type}' doesn't exist.", "", type));
+                Traceback.Instance.ThrowException(new BifyTypeError($"{type} cannot be used as type."));
+                return null;
+            }
+        }
+        public BifyType GetBifyType(string type)
+        {
+
+            BifyValue value = GetVariable(type);
+            if (value is BifyType bifyType)
+            {
+                return bifyType;
+            }
+            else
+            {
+                Traceback.Instance.ThrowException(new BifyTypeError($"{type} cannot be used as type."));
                 return null;
             }
         }
 
-        public LLVMTypeRef AllocateFunction(string name, string type)
+        public void RegisterLocalVariable(string name, BifyValue variable)
         {
-            if (table.ContainsKey(type))
+            if (localScopes.Count == 0)
+                throw new InvalidOperationException("Local scope not created. Call EnterLocalScope before registering local variables.");
+            if (localScopes.Peek().ContainsKey(name))
             {
-                LLVMTypeRef lLVMType = GetType(type);
-                table[name] = new Variable(name, typeof(BifyFunction), new BifyFunction(name, table[type].Type));
-                return lLVMType;
-
+                Traceback.Instance.ThrowException(new BifyNameError($"Variable redefinded: '{name}'"));
+                return;
             }
-            else
-            {
-                Traceback.Instance.ThrowException(new BifyNameError($"Type '{type}' doesn't exist.", "", type));
-                return null;
-            }
+            localScopes.Peek()[name] = variable;
         }
-        private LLVMTypeRef GetType(string type)
+
+        public void RegisterGlobalVariable(string name, BifyValue variable)
         {
-            LLVMTypeRef llvmType = table[type].LlvmType;
-            if (llvmType != null)
+            if (globalVariables.ContainsKey(name))
             {
-                return llvmType;
+                Traceback.Instance.ThrowException(new BifyNameError($"Variable redefinded: '{name}'"));
+                return;
             }
-            Traceback.Instance.ThrowException(new BifyNameError($"Type '{type}' doesn't exist.", "", type));
+            globalVariables[name] = variable;
+        }
+
+        public BifyValue? GetVariable(string name)
+        {
+            foreach (var scope in localScopes)
+                if (scope.TryGetValue(name, out BifyValue variable))
+                    return variable;
+            if (globalVariables.TryGetValue(name, out BifyValue globalVar))
+                return globalVar;
+
+            Traceback.Instance.ThrowException(new BifyUndefinedError(ErrorMessage.UndefindedVariable(name)));
             return null;
-        }
-        public void ClearLocals()
-        {
-            localTable.Clear();
-        }
-      
 
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            foreach (var entry in table)
-            {
-                sb.AppendLine(entry.Value.ToString());
-            }
-            return sb.ToString();
         }
+
+        public void ClearGlobalVariables() => globalVariables.Clear();
+
+        public void ClearLocalScopes() => localScopes.Clear();
     }
 }

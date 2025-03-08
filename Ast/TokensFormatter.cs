@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
+using BoomifyCS.Parser;
 
 namespace BoomifyCS.Ast
 {
@@ -14,59 +15,59 @@ namespace BoomifyCS.Ast
         {
             List<Token> lineTokens = new();
             int curlyCount = 0;
-            int elseCount = 0;
-            int ifCount = 0;
-            while (tokens.Count > tokenIndex)
+            bool isInsideConditionChain = false; 
+
+            while (tokenIndex < tokens.Count)
             {
                 Token token = tokens[tokenIndex];
                 Token nextToken = GetTokenOrNull(tokens, tokenIndex + 1);
-                Token previousToken = GetTokenOrNull(tokens, tokenIndex - 1);
-                if (token.Type == TokenType.LCUR)
+                Token prevToken = GetTokenOrNull(tokens, tokenIndex - 1);
+
+                if (lineTokens.Count > 0 && IsNewCondition(token, prevToken) && !isInsideConditionChain)
                 {
-                    curlyCount++;
+                    break;
                 }
+
+                if (token.Type == TokenType.LCUR) curlyCount++;
                 else if (token.Type == TokenType.RCUR)
                 {
-                    
-                    curlyCount--;
-                    
-                    if (curlyCount <= 0 && tokenIndex + 1 < tokens.Count)
+                    curlyCount = Math.Max(0, curlyCount - 1);
+                    if (curlyCount == 0 && !IsConditionChainToken(nextToken))
                     {
-                        if (nextToken.Type != TokenType.IF && nextToken.Type != TokenType.ELSE)
-                        {
-                            lineTokens.Add(token);
-                            tokenIndex++;
-                            break;
-                        }
-                        
+                        lineTokens.Add(token);
+                        tokenIndex++;
+                        break;
                     }
                 }
-                if (token.Type == TokenType.EOL && curlyCount == 0)
-                {
-                    tokenIndex++;
-                    break;
-                }
-                else if (token.Type == TokenType.ELSE && nextToken.Type != TokenType.IF)
-                {
-                    elseCount++;
-                }
-                else if (token.Type == TokenType.IF && previousToken != null && previousToken.Type != TokenType.ELSE)
-                {
-                    ifCount++;
-                }
-                if (elseCount > 1 || ifCount > 1)
-                {
-                    break;
-                }
+
                 lineTokens.Add(token);
                 tokenIndex++;
 
-               
+                isInsideConditionChain = IsConditionChainToken(token) ||
+                                        (nextToken != null && IsConditionChainToken(nextToken));
+
+                if (token.Type == TokenType.EOL && curlyCount == 0 && !isInsideConditionChain)
+                {
+                    break;
+                }
             }
 
             return lineTokens;
         }
-       
+
+        private static bool IsConditionChainToken(Token token)
+        {
+            return token != null &&
+                  (token.Type == TokenType.IF ||
+                   token.Type == TokenType.ELSE);
+        }
+
+        private static bool IsNewCondition(Token token, Token prevToken)
+        {
+            return (token.Type == TokenType.IF && (prevToken == null || prevToken.Type != TokenType.ELSE)) ||
+                   (token.Type == TokenType.ELSE && prevToken == null);
+        }
+
         public static Token GetTokenOrNull(List<Token> tokens, int index) {
             if (index + 1  > tokens.Count || index < 0)
             {

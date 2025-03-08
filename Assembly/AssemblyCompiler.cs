@@ -2,32 +2,43 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 using LLVMSharp;
 using LLVMSharp.Interop;
 using Microsoft.Win32;
 
+
+
 namespace BoomifyCS.Assembly
 {
     class AssemblyCompiler
     {
         private static AssemblyCompiler _instance;
-        private static readonly object _lock = new object();
+        private static readonly object _lock = new();
 
         public AssemblerCodeManager assemblerCode = new();
         public AssemblyVariableManager variableManager;
-        public LLVMContext context = new LLVMContext();
+        public LLVMContext context = new();
         public LLVMModuleRef module;
         public LLVMBuilderRef builder;
         public Stack<BifyValue> stack = new();
-        private int tmpCount = 0;
+        public BifyType returnType;
 
         private AssemblyCompiler()
         {
+            LLVM.LinkInMCJIT();
+            LLVM.InitializeX86TargetMC();
+            LLVM.InitializeX86Target();
+            LLVM.InitializeX86TargetInfo();
+            LLVM.InitializeX86AsmParser();
+            LLVM.InitializeX86AsmPrinter();
             module = context.Handle.CreateModuleWithName("test");
             builder = context.Handle.CreateBuilder();
-            variableManager = new(this);
+            variableManager = new();
+
+
         }
 
         public static AssemblyCompiler Instance
@@ -36,15 +47,19 @@ namespace BoomifyCS.Assembly
             {
                 lock (_lock)
                 {
-                    if (_instance == null)
-                    {
-                        _instance = new AssemblyCompiler();
-                    }
+                    _instance ??= new AssemblyCompiler();
                     return _instance;
                 }
             }
         }
 
+     
+
+        public void Visit(AstNode node)
+        {
+            NodeHandler handler = NodeHandlerFactory.CreateHandler(node, this);
+            handler.HandleNode(node);
+        }
         public void Compile(AstNode node)
         {
             Visit(node);
@@ -52,17 +67,8 @@ namespace BoomifyCS.Assembly
             CompileFile("test.ll", "output");
         }
 
-        public void Visit(AstNode node)
-        {
-            NodeHandler handler = NodeHandlerFactory.CreateHandler(node, this);
-            handler.HandleNode(node);
-        }
-
-        public string GetTempName()
-        {
-            return $"tmp{tmpCount++}";
-        }
-
+    
+       
         private void CompileFile(string filePath, string outputDirectory)
         {
             string fileName = Path.GetFileNameWithoutExtension(filePath);
@@ -143,7 +149,6 @@ namespace BoomifyCS.Assembly
             }
         }
 
-        // Метод для запуска скомпилированного .exe файла
         static void RunExecutable(string exePath)
         {
             try
@@ -153,8 +158,8 @@ namespace BoomifyCS.Assembly
                     FileName = exePath,
                     CreateNoWindow = false,
                     UseShellExecute = false,
-                    RedirectStandardOutput = true,  
-                    RedirectStandardError = true    
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
                 };
 
                 Process process = Process.Start(processStartInfo);
@@ -166,4 +171,6 @@ namespace BoomifyCS.Assembly
             }
         }
     }
+
+
 }

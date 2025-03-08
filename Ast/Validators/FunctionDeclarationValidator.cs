@@ -15,7 +15,7 @@ namespace BoomifyCS.Ast.Validators
 
             if (typeNode is not AstIdentifier)
             {
-                BifyTypeError bifyTypeError = new BifyTypeError(ErrorMessage.InvalidFunctionReturnType(typeNode?.Token.Type.ToString().ToLower()), "", typeNode?.Token.Value);
+                BifyTypeError bifyTypeError = new(ErrorMessage.InvalidFunctionType());
                 Traceback.Instance.ThrowException(bifyTypeError, typeNode?.Token.Column ?? nameToken.Column);
             }
 
@@ -47,6 +47,12 @@ namespace BoomifyCS.Ast.Validators
                         return (false, rightResult.token ?? binaryOp.Token);
 
                     return (true, binaryOp.Token);
+                }
+                else if (binaryOp.Token.Value == "concat")
+                {
+                    
+                    return (binaryOp.Left.Token.Type == TokenType.IDENTIFIER &&
+                        binaryOp.Right.Token.Type == TokenType.IDENTIFIER, binaryOp.Token);
                 }
                 return (false, binaryOp.Token);
             }

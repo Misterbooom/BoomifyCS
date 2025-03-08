@@ -37,11 +37,12 @@ namespace BoomifyCS.Ast
                 return;
             }
             int line = Traceback.Instance.line;
+            BifyDebug.Log($"Block Tokens: {builder.tokens.TokensToString()}");
 
             List<Token> blockTokens = builder.GetBlockTokens();
             AstNode blockNode = builder.ParseBlock(blockTokens);
-
             AstElse astElse = new(elseToken, blockNode);
+
             Traceback.Instance.SetCurrentLine(line);
             ConditionStatementValidator.ValidateElseStatement(builder.operandStack, astElse);
 
@@ -62,7 +63,7 @@ namespace BoomifyCS.Ast
             List<Token> blockTokens = builder.GetBlockTokens();
             AstNode conditionNode = builder.ParseCondition(conditionTokens);
             AstNode blockNode = builder.ParseBlock(blockTokens);
-
+            
             AstElseIf astElseIf = new(elseToken, blockNode, conditionNode);
             Traceback.Instance.SetCurrentLine(line);
             ConditionStatementValidator.ValidateElseIfStatement(conditionTokens, builder.operandStack, astElseIf);

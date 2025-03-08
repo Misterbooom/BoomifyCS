@@ -5,14 +5,14 @@ namespace BoomifyCS.Assembly
 {
     class AssemblerCodeManager
     {
-        private List<string> code = new List<string>();
-        private Dictionary<string, List<string>> labeledCode = new Dictionary<string, List<string>>();
+        private List<string> code = new();
+        private Dictionary<string, List<string>> labeledCode = new();
         
         public AssemblerCodeManager() { }
 
         public void AddInstruction(string instruction, int indentLevel = 1)
         {
-            string indent = new string(' ', indentLevel * 4); 
+            string indent = new(' ', indentLevel * 4); 
             this.code.Add(indent + instruction);
         }
 
@@ -35,13 +35,13 @@ namespace BoomifyCS.Assembly
             {
                 labeledCode[label] = new List<string>();
             }
-            string indent = new string(' ', indentLevel * 4);
+            string indent = new(' ', indentLevel * 4);
             labeledCode[label].Add(indent + instruction);
         }
 
         public string GetCode()
         {
-            List<string> allCode = new List<string>(this.code);
+            List<string> allCode = new(this.code);
             foreach (var label in labeledCode.Keys)
             {
                 allCode.Add(label + ":");

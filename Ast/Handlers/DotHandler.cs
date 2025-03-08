@@ -14,7 +14,7 @@ namespace BoomifyCS.Ast
             Token nextToken = TokensFormatter.GetTokenOrNull(builder.tokens, builder.tokenIndex + 1);
             if (nextToken.Type == TokenType.DOT)
             {
-                Token rangeToken = new Token(TokenType.RANGE, builder.tokens[builder.tokenIndex + 1].Value + builder.tokens[builder.tokenIndex]);
+                Token rangeToken = new(TokenType.RANGE, builder.tokens[builder.tokenIndex + 1].Value + builder.tokens[builder.tokenIndex]);
                 builder.AddOperator(new AstRangeOperator(rangeToken));
                 builder.tokenIndex++;
             }

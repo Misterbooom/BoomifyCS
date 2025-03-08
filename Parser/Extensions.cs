@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using BoomifyCS.Ast;
-using BoomifyCS.Compiler;
 using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Parser
@@ -93,19 +92,19 @@ namespace BoomifyCS.Parser
             return sb.ToString();
         }
 
-        public static void WriteInstructions(this List<ByteInstruction> list)
-        {
-            var sb = new StringBuilder();
-            for (int i = 0; i < list.Count; i++)
-            {
-                var instruction = list[i];
-                if (instruction != null)
-                {
-                    sb.AppendLine($"{i}:{instruction.ToString()}");
-                }
-            }
-            Console.WriteLine(sb.ToString());
-        }
+        //public static void WriteInstructions(this List<ByteInstruction> list)
+        //{
+        //    var sb = new StringBuilder();
+        //    for (int i = 0; i < list.Count; i++)
+        //    {
+        //        var instruction = list[i];
+        //        if (instruction != null)
+        //        {
+        //            sb.AppendLine($"{i}:{instruction.ToString()}");
+        //        }
+        //    }
+        //    Console.WriteLine(sb.ToString());
+        //}
 
         public static bool ContainsTokenType(this List<Token> list, TokenType tokenType) => list.Any(token => token.Type == tokenType);
         public static Token StringToToken(this string str) => new(TokenType.STRING, str);

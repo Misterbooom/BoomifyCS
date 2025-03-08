@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 using LLVMSharp.Interop;
@@ -35,15 +36,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
     {
         public override void HandleNode(AstNode node)
         {
-            string identifier = node.Token.Value;
-            compiler.variableManager.IsExists(identifier);
-            var variable = compiler.variableManager.GetVariable(identifier);
-            if (variable.BifyObject == null)
-            {
-                throw new NullReferenceException($"{identifier} has null bifyValue.");
-            }
-            compiler.stack.Push(variable.ToBifyValue());
-
+            compiler.stack.Push(compiler.variableManager.GetVariable(node.Token.Value));
         }
     }
     class ConstantNodeHandler : NodeHandler
@@ -52,12 +45,24 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
         public override void HandleNode(AstNode node)
         {
-            if (node is AstConstant astConstant)
+            unsafe
             {
-                BifyValue bifyValue = new BifyValue(astConstant.BifyValue);
-                compiler.stack.Push(bifyValue);
-            }
+                if (node is AstNumber astNumber)
+                {
 
+
+                    compiler.stack.Push(new IntegerType().Create(astNumber.Value));
+
+                }
+                else if (node is AstFloat astFloat)
+                {
+                    compiler.stack.Push(new FloatType().Create(astFloat.Value));
+                }
+                else if (node is AstString astString)
+                {
+                    compiler.stack.Push(new StringType().Create((string)astString.Value));
+                }
+            }
         }
     }
 }

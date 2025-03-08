@@ -80,7 +80,7 @@ namespace BoomifyCS.Ast
             }
             else if (operandStack.Count < 2)
             {
-                BifySyntaxError error = new BifySyntaxError(ErrorMessage.NotEnoughOperands(operatorNode.Token.Value), "", operatorNode.Token.Value);
+                BifySyntaxError error = new(ErrorMessage.NotEnoughOperands(operatorNode.Token.Value), "", operatorNode.Token.Value);
                 Traceback.Instance.ThrowException(error, operatorNode.Token.Column);
             }
             AstNode right = operandStack.Pop();

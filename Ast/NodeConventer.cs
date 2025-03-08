@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
-using BoomifyCS.Objects;
 
 namespace BoomifyCS.Ast
 {
@@ -18,14 +17,14 @@ namespace BoomifyCS.Ast
                 case TokenType.NUMBER:
                     if (token.Value.Contains('.'))
                     {
-                        if (double.TryParse(token.Value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double parsedFloatValue))
+                        if (float.TryParse(token.Value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float parsedFloatValue))
                         {
-                            if (parsedFloatValue > double.MaxValue)
+                            if (parsedFloatValue > float.MaxValue)
                             {
                                 Traceback.Instance.ThrowException(new BifyOverflowError($"Token value '{token.Value}' exceeds the maximum allowable value for a double."));
                                 return null;
                             }
-                            return new AstNumber(token, new BifyFloat(parsedFloatValue));
+                            return new AstFloat(token, parsedFloatValue);
                         }
                         else
                         {
@@ -42,7 +41,7 @@ namespace BoomifyCS.Ast
                                 Traceback.Instance.ThrowException(new BifyOverflowError($"Token value '{token.Value}' exceeds the maximum allowable value for a double."));
                                 return null;
                             }
-                            return new AstNumber(token, new BifyInteger(parsedIntValue));
+                            return new AstNumber(token, parsedIntValue);
                         }
                         else
                         {
@@ -55,7 +54,7 @@ namespace BoomifyCS.Ast
                 case TokenType.IDENTIFIER:
                     return new AstIdentifier(token,token.Value);
                 case TokenType.STRING:
-                    return new AstString(token, new BifyString(token.Value));
+                    return new AstString(token, token.Value);
                 case TokenType.BREAK:
                     return new AstBreak(token);
                 case TokenType.CONTINUE:

@@ -1,43 +1,67 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BoomifyCS.Ast;
 using BoomifyCS.Lexer;
 using BoomifyCS.Parser;
-using BoomifyCS.Compiler;
-using BoomifyCS.Objects;
-using BoomifyCS.Exceptions;
 using BoomifyCS.Assembly;
 using LLVMSharp;
 using LLVMSharp.Interop;
+using BoomifyCS.Exceptions;
+
 namespace BoomifyCS
 {
     internal class Program
     {
-        static void Main()
+        static async Task Main(string[] args)
         {
-            RunInterpreter();
-            //Tests.Tests.RunTests();
+            await Run(args);
         }
-        static void RunTests()
+
+        static async Task Run(string[] args)
         {
+            try
+            {
+                RunInterpreter();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error!");
+                string errorText = e.ToString();
+                new ErrorWrapper(e).PrintStackTrace();
+                //ProcessStartInfo psi = new ProcessStartInfo
+                //{
+                //    FileName = "python",
+                //    Arguments = $"C:/BoomifyCS/analyzer.py \"{errorText}\"",
+                //    RedirectStandardOutput = true,
+                //    UseShellExecute = false,
+                //    CreateNoWindow = true
+                //};
+
+                //using (Process process = Process.Start(psi))
+                //{
+                //    string output = await process.StandardOutput.ReadToEndAsync();
+                //    process.WaitForExit();
+                //    Console.WriteLine("Error analysis:");
+                //    Console.WriteLine(output);
+                //}
+            }
         }
+
         static void RunInterpreter()
-        { 
+        {
             Console.OutputEncoding = Encoding.UTF8;
             string code;
             string file = "C:/BoomifyCS/test.bify";
             using (StreamReader reader = new(file))
             {
                 code = reader.ReadToEnd();
-
             }
+
             MyLexer lexer = new(code);
-
-
             List<Token> tokens = lexer.Tokenize();
             string[] codeByLine = code.Split('\n');
             AstTree astParser = new(codeByLine);
@@ -45,11 +69,6 @@ namespace BoomifyCS
             BifyDebug.Log(node.ToString());
             AssemblyCompiler compiler = AssemblyCompiler.Instance;
             compiler.Compile(node);
-
-
-
-
         }
-
     }
 }

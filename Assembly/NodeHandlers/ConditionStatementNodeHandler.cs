@@ -4,17 +4,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BoomifyCS.Ast;
-using BoomifyCS.Exceptions;
-using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class AssignmentOperatorNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    class ConditionStatementNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
         public override void HandleNode(AstNode node)
         {
-         
+            if (node is AstIf astIf)
+            {
+                HandleIfStatement(astIf);
+            }
         }
+        private void HandleIfStatement(AstIf node)
+        {
 
+        }
     }
 }

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
+using BoomifyCS.Exceptions;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
@@ -11,13 +13,17 @@ namespace BoomifyCS.Assembly.NodeHandlers
     {
         public override void HandleNode(AstNode node)
         {
-            AstReturn astReturn = node as AstReturn; 
-            if (astReturn.ArgumentsNode == null) {
-                compiler.builder.BuildRetVoid();
-                return;
+            AstReturn returnNode = node as AstReturn;
+
+            compiler.Visit(returnNode.ArgumentsNode);
+            BifyValue returnValue = compiler.stack.Pop();
+            if (!compiler.returnType.CompareType(returnValue))
+            {
+                Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidFunctionReturnType(returnValue.GetTypeName(),
+                    compiler.returnType.GetTypeName())));
             }
-            compiler.Visit(astReturn.ArgumentsNode);
-            compiler.builder.BuildRet(compiler.stack.Pop().GetValueRef());
+            compiler.builder.BuildRet(returnValue.GetLLVMValue());
+
         }
     }
 }

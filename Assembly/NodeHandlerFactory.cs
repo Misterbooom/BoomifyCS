@@ -12,10 +12,11 @@ namespace BoomifyCS.Assembly
     {
         public static NodeHandler CreateHandler(AstNode node, AssemblyCompiler compiler)
         {
+            var conditionStatementHanlder = new ConditionStatementNodeHandler(compiler);
             Traceback.Instance.SetCurrentLine(node.LineNumber);
             return node switch
             {
-                AstModule astModule => new ModuleHandler(compiler), 
+                AstModule astModule => new ModuleHandler(compiler),
                 AstFunctionDecl astFunctionDecl => new FunctionDeclarationNodeHandler(compiler),
                 AstVarDecl astVarDecl => new VariableDeclarationNodeHandler(compiler),
                 AstBinaryOp astBinaryOp => new BinaryOpNodeHandler(compiler),
@@ -25,7 +26,10 @@ namespace BoomifyCS.Assembly
                 AstIdentifier astIdentifier => new IdentifierNodeHandler(compiler),
                 AstCall astCall => new CallNodeHandler(compiler),
                 AstAssignmentOperator astAssignmentOperator => new AssignmentOperatorNodeHandler(compiler),
-                _ => throw new SyntaxErrorException($"Unhandled node - {node.GetType().Name}") 
+                AstIf => conditionStatementHanlder,
+                AstElse => conditionStatementHanlder,
+                AstElseIf => conditionStatementHanlder,
+                _ => throw new SyntaxErrorException($"Unhandled node - {node.GetType().Name}")
             };
         }
     }

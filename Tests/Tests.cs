@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using BoomifyCS.Ast;
-using BoomifyCS.Compiler;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 
@@ -21,14 +20,14 @@ namespace BoomifyCS.Tests
 
             Console.WriteLine("\nTest Results:");
 
-            Stopwatch totalStopwatch = new Stopwatch(); // Для общего времени
+            Stopwatch totalStopwatch = new(); // Для общего времени
             totalStopwatch.Start();
 
             foreach (var result in testResults)
             {
                 try
                 {
-                    Stopwatch testStopwatch = new Stopwatch(); // Для времени одного теста
+                    Stopwatch testStopwatch = new(); // Для времени одного теста
                     testStopwatch.Start();
 
                     bool passed = result.Value();
@@ -91,7 +90,7 @@ namespace BoomifyCS.Tests
         {
             Console.OutputEncoding = Encoding.UTF8;
 
-            Stopwatch compilationStopwatch = new Stopwatch();
+            Stopwatch compilationStopwatch = new();
             compilationStopwatch.Start();
 
             var lexer = new MyLexer(code);
@@ -99,15 +98,13 @@ namespace BoomifyCS.Tests
             var codeByLine = code.Split('\n');
             var astParser = new AstTree(codeByLine);
             var node = astParser.ParseTokens(tokens);
-            var interpreter = new VMCompiler(codeByLine);
 
             compilationStopwatch.Stop();
             Console.WriteLine($"Compilation Time: {compilationStopwatch.ElapsedMilliseconds} ms");
 
-            Stopwatch executionStopwatch = new Stopwatch(); 
+            Stopwatch executionStopwatch = new(); 
             executionStopwatch.Start();
 
-            interpreter.RunVM(node);
 
             executionStopwatch.Stop();
             Console.WriteLine($"Execution Time: {executionStopwatch.ElapsedMilliseconds} ms");
