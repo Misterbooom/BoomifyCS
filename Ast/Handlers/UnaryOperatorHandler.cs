@@ -12,6 +12,7 @@ namespace BoomifyCS.Ast
 
         public override void HandleToken(Token token)
         {
+            
             Token previousToken = TokensFormatter.GetTokenOrNull(builder.tokens, builder.tokenIndex - 1);
             UnaryOperatorValidator.Validate(builder.tokens[builder.tokenIndex].Value, previousToken);
             AstIdentifier astIdentifier = (AstIdentifier)NodeConventer.TokenToNode(previousToken);

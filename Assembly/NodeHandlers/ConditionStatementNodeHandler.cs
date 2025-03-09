@@ -18,7 +18,6 @@ namespace BoomifyCS.Assembly.NodeHandlers
         }
         private void HandleIfStatement(AstIf node)
         {
-
         }
     }
 }

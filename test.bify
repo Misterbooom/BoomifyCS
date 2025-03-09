@@ -1,10 +1,19 @@
-﻿
-int add(int a ,int b){
-	return a + b;
+﻿int add(int a, int b) {
+    return a + b;
 }
 
-int main(){
-	float result = add(add(add(add(1, 2), add(3, 4)), add(add(5, 6), 7)), add(add(8, add(9, 10)), add(11, add(12, add(13, 14)))));
-	explode("%f",result);
-	return 1;
+int main() {
+    bool greaterThan = 5 > add(3,2);
+    bool lowerThan = 5 < add(3,2);
+    bool greaterOrEqual = 5 >= add(3,2);
+    bool lowerOrEqual = 5 <= add(3,2);
+    bool equal = 5 == add(3,2);
+
+    explode("greaterThan: %d\n",greaterThan);
+    explode("lowerThan: %d\n",lowerThan);
+    explode("greaterOrEqual: %d\n",greaterOrEqual);
+    explode("lowerOrEqual: %d\n",lowerOrEqual);
+    explode("equal: %d\n",equal);
+
+    return 1;
 }

@@ -5,6 +5,7 @@ using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 using BoomifyCS.Parser;
 using BoomifyCS.Ast.Handlers;
+using System.Linq;
 namespace BoomifyCS.Ast
 {
     class AstBuilder
@@ -72,6 +73,10 @@ namespace BoomifyCS.Ast
             AstBinaryOp operatorNode = (AstBinaryOp)operatorStack.Pop();
             if (operatorNode.Token.Type == TokenType.NOT)
             {
+                if (operandStack.Count == 0)
+                {
+                    throw new InvalidOperationException("Not enough operands for the second NOT operation.");
+                }
                 AstNode operand = operandStack.Pop();
                 OperandValidator.Validate(operand, operand, operatorNode);
                 operatorNode.Left = operand;
@@ -82,6 +87,7 @@ namespace BoomifyCS.Ast
             {
                 BifySyntaxError error = new(ErrorMessage.NotEnoughOperands(operatorNode.Token.Value), "", operatorNode.Token.Value);
                 Traceback.Instance.ThrowException(error, operatorNode.Token.Column);
+                return;
             }
             AstNode right = operandStack.Pop();
             AstNode left = operandStack.Pop();
@@ -94,13 +100,21 @@ namespace BoomifyCS.Ast
         public bool ShouldPopOperator(Token token)
         {
             if (operatorStack.Count == 0)
+            {
                 return false;
+            }
 
             AstNode topOperator = operatorStack.Peek();
             int currentPrecedence = AstConfig.Precedence[token.Type];
             int topPrecedence = AstConfig.Precedence[topOperator.Token.Type];
 
-            return currentPrecedence <= topPrecedence;
+            if (token.Type == TokenType.NOT )
+            {
+                return false;
+            }
+
+            bool shouldPop = currentPrecedence <= topPrecedence;
+            return shouldPop;
         }
 
         public List<Token> GetConditionTokens() => TokensFormatter.GetTokensBetween(tokens, ref tokenIndex, TokenType.LPAREN, TokenType.RPAREN);

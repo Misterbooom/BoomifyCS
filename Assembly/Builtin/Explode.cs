@@ -46,8 +46,15 @@ namespace BoomifyCS.Assembly.Builtin
             {
                 if (args[i].GetLLVMValue().TypeOf == LLVMTypeRef.Float)
                 {
-                    llvmArgs[i] = AssemblyCompiler.Instance.builder.BuildFPExt(args[i].GetLLVMValue(),
-                        LLVMTypeRef.Double,"float_to_double");
+                    unsafe
+                    {
+                        llvmArgs[i] = AssemblyCompiler.Instance.builder.BuildFPExt(args[i].GetLLVMValue(),
+                        LLVM.DoubleType(), "float_to_double");
+                    }
+                }
+                else if (args[i].GetBifyType().CompareType(new BoolType()))
+                {
+                    llvmArgs[i] = AssemblyCompiler.Instance.builder.BuildZExt(args[i].GetLLVMValue(),LLVMTypeRef.Int32,"int1_to_int32");
                 }
                 else
                 {

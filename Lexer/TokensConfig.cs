@@ -13,7 +13,6 @@ namespace BoomifyCS.Lexer
             { "for", TokenType.FOR },
             { "break", TokenType.BREAK },
             { "continue", TokenType.CONTINUE },
-            { "//", TokenType.FLOORDIV },
             { "return", TokenType.RETURN },
             {"**", TokenType.POW},
             { "<=", TokenType.LTEQ },
@@ -30,7 +29,7 @@ namespace BoomifyCS.Lexer
             { "!=", TokenType.NEQ },
             { "&&", TokenType.AND },
             { "||", TokenType.OR},
-            { "!!",TokenType.COMMENT}
+            { "//",TokenType.COMMENT}
 
 
         };

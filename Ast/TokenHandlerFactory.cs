@@ -20,7 +20,7 @@ namespace BoomifyCS.Ast
                 TokenType.RETURN => new ReturnHandler(builder),
                 _ when TokenConfig.assignmentOperators.ContainsValue(token.Type) => new AssignmentOperatorHandler(builder),
                 _ when TokenConfig.binaryOperators.ContainsValue(token.Type) => new BinaryOperatorHandler(builder),
-                TokenType.INCREMENT or TokenType.DECREMENT => new UnaryOperatorHandler(builder),
+                TokenType.INCREMENT or TokenType.DECREMENT  => new UnaryOperatorHandler(builder),
                 TokenType.LPAREN => new ParenthesisHandler(builder),
                 TokenType.FOR => new ForHandler(builder),
 

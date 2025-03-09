@@ -8,16 +8,16 @@ using NUnit.Framework;
 class FunctionPathChecker
 {
     public bool AllPathsReturn = false;
-    private BifyValue _functionType;
+    private BifyType _functionType;
     private AssemblyVariableManager _variableManager = AssemblyCompiler.Instance.variableManager;
 
-    public FunctionPathChecker(BifyValue functionType, AstNode node)
+    public FunctionPathChecker(BifyType functionType, AstNode node)
     {
         _functionType = functionType;
         AllPathsReturn = Check(node);
-        if (!_functionType.CompareType(_variableManager.GetBifyType("void")) && !AllPathsReturn)
+        if (!_functionType.CompareType(new VoidType()) && !AllPathsReturn)
         {
-            Traceback.Instance.ThrowException(new BifyTypeError($"Not all execution paths return a value for {_functionType.GetTypeName()}"));
+            Traceback.Instance.ThrowException(new BifyTypeError($"Not all execution paths return a value for {_functionType.Name}"));
         }
     }
 
@@ -33,7 +33,7 @@ class FunctionPathChecker
         {
             if (astReturn.ArgumentsNode == null && !_functionType.CompareType(_variableManager.GetBifyType("void")))
             {
-                Traceback.Instance.ThrowException(new BifyTypeError($"Expected {_functionType.GetTypeName()} but got void"));
+                Traceback.Instance.ThrowException(new BifyTypeError($"Expected {_functionType.Name} but got void"));
                 return false;
             }
             return true;

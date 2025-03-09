@@ -36,7 +36,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
     {
         public override void HandleNode(AstNode node)
         {
-            compiler.stack.Push(compiler.variableManager.GetVariable(node.Token.Value));
+            compiler.StackPush(compiler.variableManager.GetVariable(node.Token.Value));
         }
     }
     class ConstantNodeHandler : NodeHandler
@@ -51,16 +51,16 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 {
 
 
-                    compiler.stack.Push(new IntegerType().Create(astNumber.Value));
+                    compiler.StackPush(new IntegerType().Create(astNumber.Value));
 
                 }
                 else if (node is AstFloat astFloat)
                 {
-                    compiler.stack.Push(new FloatType().Create(astFloat.Value));
+                    compiler.StackPush(new FloatType().Create(astFloat.Value));
                 }
                 else if (node is AstString astString)
                 {
-                    compiler.stack.Push(new StringType().Create((string)astString.Value));
+                    compiler.StackPush(new StringType().Create((string)astString.Value));
                 }
             }
         }

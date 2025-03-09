@@ -11,6 +11,7 @@ using BoomifyCS.Assembly;
 using LLVMSharp;
 using LLVMSharp.Interop;
 using BoomifyCS.Exceptions;
+using BoomifyCS.Assembly.BifyObject;
 
 namespace BoomifyCS
 {
@@ -54,19 +55,14 @@ namespace BoomifyCS
         static void RunInterpreter()
         {
             Console.OutputEncoding = Encoding.UTF8;
-            string code;
             string file = "C:/BoomifyCS/test.bify";
-            using (StreamReader reader = new(file))
-            {
-                code = reader.ReadToEnd();
-            }
-
+            string code = File.ReadAllText(file);
             MyLexer lexer = new(code);
             List<Token> tokens = lexer.Tokenize();
             string[] codeByLine = code.Split('\n');
             AstTree astParser = new(codeByLine);
             AstNode node = astParser.ParseTokens(tokens);
-            BifyDebug.Log(node.ToString());
+            //BifyDebug.Log(node.ToString());
             AssemblyCompiler compiler = AssemblyCompiler.Instance;
             compiler.Compile(node);
         }

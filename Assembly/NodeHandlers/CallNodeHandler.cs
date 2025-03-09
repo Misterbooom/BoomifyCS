@@ -11,38 +11,48 @@ using BoomifyCS.Assembly.BifyObject;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class CallNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    class CallNodeHandler : NodeHandler
     {
+        public CallNodeHandler(AssemblyCompiler compiler) : base(compiler) { }
+
         public override void HandleNode(AstNode node)
         {
-            AstCall callNode = node as AstCall;
-            string callableName = callNode.CallableName.Token.Value;
-            BifyFunction callable = compiler.variableManager.GetVariable(callableName) as BifyFunction;
-            compiler.Visit(callNode.ArgumentsNode);
-            List<BifyValue> providedArgs = new List<BifyValue>();
-            for (int i = 0; i < CountArgs(callNode.ArgumentsNode); i++)
+            if (node is AstCall callNode)
             {
-                BifyValue arg = compiler.stack.Pop();
-                providedArgs.Add(arg);
+                string callableName = callNode.CallableName.Token.Value;
+                if (compiler.variableManager.GetVariable(callableName) is BifyFunction callable)
+                {
+                    compiler.Visit(callNode.ArgumentsNode);
+                    List<BifyValue> providedArgs = new List<BifyValue>();
+
+                    for (int i = 0; i < CountArgs(callNode.ArgumentsNode); i++)
+                    {
+                        BifyValue arg = compiler.StackPop();
+                        providedArgs.Add(arg);
+                    }
+                    providedArgs.Reverse();
+
+
+                    // Validate and auto-cast arguments
+                    ValidateAndAutoCastArguments(providedArgs, callable.FunctionArgs.BifyTypes, callable.IsVariadic);
+
+                    var call = callable.Call(providedArgs.ToArray());
+                    compiler.StackPush(callable.ReturnType.CreateByValueRef(call.GetLLVMValue()));
+                }
+                else
+                {
+                    Traceback.Instance.ThrowException(new BifyNameError($"Function '{callableName}' is not defined."));
+                }
             }
-            providedArgs.Reverse();
-            BifyDebug.Log($"Type: {callable.TypeRef}, callable: {callable.GetLLVMValue()}, ");
-
-            ValidateArguments([.. providedArgs], callable.FunctionArgs.BifyTypes, callable.IsVariadic);
-
-            var call = callable.Call(providedArgs.ToArray());
-            compiler.stack.Push(callable.ReturnType.CreateByValueRef(call.GetLLVMValue()));
-
-
-
+            else
+            {
+                Traceback.Instance.ThrowException(new BifyTypeError("Expected an AstCall node."));
+            }
         }
 
         private static int CountArgs(AstNode node)
         {
-            if (node == null)
-            {
-                return 0;
-            }
+            if (node == null) return 0;
             if (node is AstBinaryOp binaryOp && binaryOp.Token.Type == TokenType.COMMA)
             {
                 return CountArgs(binaryOp.Left) + CountArgs(binaryOp.Right);
@@ -50,29 +60,43 @@ namespace BoomifyCS.Assembly.NodeHandlers
             return 1;
         }
 
-        private void ValidateArguments(BifyValue[] providedArgs, BifyType[] expectedArgsType, bool isVariadic)
+        private void ValidateAndAutoCastArguments(List<BifyValue> providedArgs, BifyType[] expectedArgsType, bool isVariadic)
         {
-            if (!isVariadic && providedArgs.Length != expectedArgsType.Length)
+            if (!isVariadic && providedArgs.Count != expectedArgsType.Length)
             {
-                Traceback.Instance.ThrowException(new BifyArgumentError($"Expected {providedArgs.Length} arguments but got {expectedArgsType.Length}"));
+                Traceback.Instance.ThrowException(new BifyArgumentError($"Expected {expectedArgsType.Length} arguments but got {providedArgs.Count}."));
                 return;
             }
-            else if (isVariadic && providedArgs.Length < expectedArgsType.Length)
+            else if (isVariadic && providedArgs.Count < expectedArgsType.Length)
             {
-                Traceback.Instance.ThrowException(new BifyArgumentError($"Expected at least {expectedArgsType.Length} arguments but got {providedArgs.Length}"));
+                Traceback.Instance.ThrowException(new BifyArgumentError($"Expected at least {expectedArgsType.Length} arguments but got {providedArgs.Count}."));
                 return;
-            }
-            for (int i = 0; i < expectedArgsType.Length; i++)
-            {
-                if (!expectedArgsType[i].CompareType(providedArgs[i]))
-                {
-                    string expectedTypeName = expectedArgsType[i].GetTypeName();
-                    string providedTypeName = providedArgs[i].GetTypeName();
-                    string errorMessage = $"Type mismatch at argument {i + 1}: Expected {expectedTypeName} but got {providedTypeName}.";
-                    Traceback.Instance.ThrowException(new BifyTypeError(errorMessage));
-                }
             }
 
+            for (int i = 0; i < expectedArgsType.Length; i++)
+            {
+                BifyType expectedType = expectedArgsType[i];
+                BifyValue providedArg = providedArgs[i];
+
+                if (!expectedType.CompareType(providedArg.GetBifyType()))
+                {
+                    Traceback.Instance.Catch(typeof(BifyTypeError));
+                    BifyValue castedArg = providedArg.AutoCast(expectedType, compiler.builder);
+                    if (castedArg == null | Traceback.Instance.GetError() != null)
+                    {
+                        string expectedTypeName = expectedType.Name;
+                        string providedTypeName = providedArg.GetTypeName();
+                        string errorMessage = $"Type mismatch at argument {i + 1}: Expected {expectedTypeName} but got {providedTypeName}, and auto-casting failed.";
+                        Traceback.Instance.ThrowException(new BifyTypeError(errorMessage));
+                        return;
+                    }
+                    else
+                    {
+                        providedArgs[i] = castedArg;
+                    }
+                }
+            }
+        }
     }
-}
+
 }

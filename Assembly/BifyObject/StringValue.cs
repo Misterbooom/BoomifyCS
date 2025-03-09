@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BoomifyCS.Ast;
+using BoomifyCS.Exceptions;
 using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.BifyObject
@@ -11,7 +12,7 @@ namespace BoomifyCS.Assembly.BifyObject
     class StringValue : BifyValue
     {
 
-        public StringValue(LLVMValueRef value) : base(value, "string")
+        public StringValue(LLVMValueRef value) : base(value, new StringType())
         {
         }
     }
@@ -22,8 +23,10 @@ namespace BoomifyCS.Assembly.BifyObject
         }
         public override BifyValue Create(object value)
         {
-            return new StringValue(AssemblyCompiler.Instance
-                .builder.BuildGlobalStringPtr((string)value, (string)value));
+            var stringValue = AssemblyCompiler.Instance
+                .builder.BuildGlobalStringPtr(((string)value).Replace(@"\n", "\n"), (string)value);
+            
+            return new StringValue(stringValue);
         }
         public override BifyValue CreateByValueRef(LLVMValueRef value)
         {

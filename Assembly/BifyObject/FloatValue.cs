@@ -5,7 +5,7 @@ namespace BoomifyCS.Assembly.BifyObject
 {
     public class FloatValue : BifyValue
     {
-        public FloatValue(LLVMValueRef value) : base(value, "float") { }
+        public FloatValue(LLVMValueRef value) : base(value, new FloatType()) { }
 
       
 

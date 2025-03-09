@@ -14,7 +14,8 @@ namespace BoomifyCS.Assembly.BifyObject
         public BifyType ReturnType;
         public LLVMTypeRef TypeRef;
         public bool IsVariadic;
-        public BifyFunction(LLVMValueRef value, FunctionArgs args, BifyType returnType, LLVMTypeRef type, bool isVariadic = false) : base(value, "callable")
+        public BifyFunction(LLVMValueRef value, FunctionArgs args, BifyType returnType, LLVMTypeRef type, bool isVariadic = false) 
+            : base(value,new FunctionType(type))
         {
             FunctionArgs = args;
             IsVariadic = isVariadic;
@@ -32,5 +33,20 @@ namespace BoomifyCS.Assembly.BifyObject
                  )
             );
         }
+    }
+    class FunctionType : BifyType
+    {
+        public FunctionType(LLVMTypeRef type):base("callable", type)
+        {
+        }
+        public override BifyValue CreateByValueRef(LLVMValueRef value)
+        {
+            throw new NotImplementedException();
+        }
+        public override BifyValue Create(object value)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

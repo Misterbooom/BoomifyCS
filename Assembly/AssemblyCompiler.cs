@@ -23,7 +23,7 @@ namespace BoomifyCS.Assembly
         public LLVMContext context = new();
         public LLVMModuleRef module;
         public LLVMBuilderRef builder;
-        public Stack<BifyValue> stack = new();
+        private Stack<IValue> stack = new();
         public BifyType returnType;
 
         private AssemblyCompiler()
@@ -39,6 +39,15 @@ namespace BoomifyCS.Assembly
             variableManager = new();
 
 
+        }
+        public void StackPush(IValue value)
+        {
+            stack.Push(value);
+        }
+        
+        public BifyValue StackPop()
+        {
+            return (BifyValue)stack.Pop();
         }
 
         public static AssemblyCompiler Instance

@@ -9,17 +9,20 @@ namespace BoomifyCS.Assembly
 
     public class AssemblyVariableManager
     {
-        private readonly Dictionary<string, BifyValue> globalVariables = new()
+        private readonly Dictionary<string, IValue> globalVariables = new()
         {
             {"int", new IntegerType()},
             {"float", new FloatType()},
             {"void",new VoidType()},
             {"explode", new Explode() },
-            {"string", new StringType()}
+            {"string", new StringType()},
+            {"bool", new BoolType()},
+            {"false", new BoolType().Create(0)},
+            {"true", new BoolType().Create(1)}
 
         };
 
-        private readonly Stack<Dictionary<string, BifyValue>> localScopes = new();
+        private readonly Stack<Dictionary<string, IValue>> localScopes = new();
         public AssemblyVariableManager()
         {
 
@@ -27,7 +30,7 @@ namespace BoomifyCS.Assembly
 
         public void EnterLocalScope()
         {
-            localScopes.Push(new Dictionary<string, BifyValue>());
+            localScopes.Push(new Dictionary<string, IValue>());
         }
 
         public void ExitLocalScope()
@@ -40,7 +43,7 @@ namespace BoomifyCS.Assembly
         public LLVMTypeRef GetLLVMType(string type)
         {
 
-            BifyValue value = GetVariable(type);
+            IValue value = GetVariable(type);
             if (value is BifyType bifyType)
             {
                 return bifyType.LLVMType;
@@ -51,10 +54,21 @@ namespace BoomifyCS.Assembly
                 return null;
             }
         }
+        public void SetLocalVariable(string name, IValue value)
+        {
+            if (localScopes.Count == 0)
+                throw new InvalidOperationException("Local scope not created. Call EnterLocalScope before setting local variables.");
+            if (!localScopes.Peek().ContainsKey(name))
+            {
+                Traceback.Instance.ThrowException(new BifyNameError(ErrorMessage.UndefindedVariable(name)));
+                return;
+            }
+            localScopes.Peek()[name] = value;
+        }
         public BifyType GetBifyType(string type)
         {
 
-            BifyValue value = GetVariable(type);
+            IValue value = GetVariable(type);
             if (value is BifyType bifyType)
             {
                 return bifyType;
@@ -66,7 +80,7 @@ namespace BoomifyCS.Assembly
             }
         }
 
-        public void RegisterLocalVariable(string name, BifyValue variable)
+        public void RegisterLocalVariable(string name, IValue variable)
         {
             if (localScopes.Count == 0)
                 throw new InvalidOperationException("Local scope not created. Call EnterLocalScope before registering local variables.");
@@ -78,7 +92,7 @@ namespace BoomifyCS.Assembly
             localScopes.Peek()[name] = variable;
         }
 
-        public void RegisterGlobalVariable(string name, BifyValue variable)
+        public void RegisterGlobalVariable(string name, IValue variable)
         {
             if (globalVariables.ContainsKey(name))
             {
@@ -88,16 +102,22 @@ namespace BoomifyCS.Assembly
             globalVariables[name] = variable;
         }
 
-        public BifyValue? GetVariable(string name)
+        public IValue? GetVariable(string name)
         {
             foreach (var scope in localScopes)
-                if (scope.TryGetValue(name, out BifyValue variable))
+                if (scope.TryGetValue(name, out IValue variable))
                     return variable;
-            if (globalVariables.TryGetValue(name, out BifyValue globalVar))
+            if (globalVariables.TryGetValue(name, out IValue globalVar))
                 return globalVar;
 
             Traceback.Instance.ThrowException(new BifyUndefinedError(ErrorMessage.UndefindedVariable(name)));
             return null;
+
+        }
+        public BifyValue? GetBifyValue(string name)
+        {
+
+            return (BifyValue)GetVariable(name);
 
         }
 

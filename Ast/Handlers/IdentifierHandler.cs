@@ -15,7 +15,6 @@ namespace BoomifyCS.Ast
             Token nextToken = TokensFormatter.GetTokenOrNull(builder.tokens, builder.tokenIndex + 1);
             if (nextToken != null && nextToken.Type == TokenType.LPAREN)
             {
-                BifyDebug.Log("Handling call nde");
                 new CallHandler(builder).HandleToken(token);
             }
             else

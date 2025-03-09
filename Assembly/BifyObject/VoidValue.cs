@@ -38,7 +38,7 @@ namespace BoomifyCS.Assembly.BifyObject
     }
     class NullValue : BifyValue
     {
-        public NullValue() : base(LLVMValueRef.CreateConstNull(LLVMTypeRef.Void), "null")
+        public NullValue() : base(LLVMValueRef.CreateConstNull(LLVMTypeRef.Void), new NullType())
         { }
         public override BifyValue Add(BifyValue other, LLVMBuilderRef builder)
         {

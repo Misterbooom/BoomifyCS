@@ -28,7 +28,7 @@ namespace BoomifyCS.Ast
             { TokenType.BITOR, (int)PrecedenceLevel.BitwiseOr },
             { TokenType.BITXOR, (int)PrecedenceLevel.BitwiseXor },
             { TokenType.BITNOT, (int)PrecedenceLevel.BitwiseNot },
-            { TokenType.NOT, (int)PrecedenceLevel.BitwiseNot }, // Added NOT operator
+            { TokenType.NOT, (int)PrecedenceLevel.BitwiseNot },
             { TokenType.LSHIFT, (int)PrecedenceLevel.Shift },
             { TokenType.RSHIFT, (int)PrecedenceLevel.Shift },
             { TokenType.AND, (int)PrecedenceLevel.And },
@@ -44,15 +44,16 @@ namespace BoomifyCS.Ast
             Product = 2,
             Power = 3,
             Shift = 4,
-            BitwiseNot = 5, 
-            BitwiseOr = 6,
-            BitwiseXor = 7,
-            BitwiseAnd = 8,
+            BitwiseNot = 5,   // Unary operator, high precedence (still before AND/OR)
+            BitwiseAnd = 6,   // Higher than BitwiseNot
+            BitwiseXor = 7,   // Higher than BitwiseAnd
+            BitwiseOr = 8,    // Higher than BitwiseXor
             Equality = 9,
             Comparison = -1,
-            Range = 11, 
-            And = 12,
-            Or = 13,
+            Range = 11,
+            And = 12,         // Logical AND
+            Or = 13,          // Logical OR
         }
+
     }
 }

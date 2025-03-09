@@ -16,11 +16,11 @@ namespace BoomifyCS.Assembly.NodeHandlers
             AstReturn returnNode = node as AstReturn;
 
             compiler.Visit(returnNode.ArgumentsNode);
-            BifyValue returnValue = compiler.stack.Pop();
-            if (!compiler.returnType.CompareType(returnValue))
+            BifyValue returnValue = compiler.StackPop();
+            if (!compiler.returnType.CompareType(returnValue.GetBifyType()))
             {
                 Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidFunctionReturnType(returnValue.GetTypeName(),
-                    compiler.returnType.GetTypeName())));
+                    compiler.returnType.Name)));
             }
             compiler.builder.BuildRet(returnValue.GetLLVMValue());
 

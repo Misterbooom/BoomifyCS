@@ -37,7 +37,6 @@ namespace BoomifyCS.Ast
                 return;
             }
             int line = Traceback.Instance.line;
-            BifyDebug.Log($"Block Tokens: {builder.tokens.TokensToString()}");
 
             List<Token> blockTokens = builder.GetBlockTokens();
             AstNode blockNode = builder.ParseBlock(blockTokens);
