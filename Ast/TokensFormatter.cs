@@ -11,48 +11,53 @@ namespace BoomifyCS.Ast
 {
     class TokensFormatter
     {
-        public static List<Token> NextLine(List<Token> tokens, ref int tokenIndex)
+        public static List<List<Token>> SplitLines(List<Token> tokens)
         {
-            List<Token> lineTokens = new();
+            List<List<Token>> lines = new();
+            List<Token> currentLine = new();
             int curlyCount = 0;
-            bool isInsideConditionChain = false; 
+            bool isInsideConditionChain = false;
 
-            while (tokenIndex < tokens.Count)
+            for (int tokenIndex = 0; tokenIndex < tokens.Count; tokenIndex++)
             {
                 Token token = tokens[tokenIndex];
-                Token nextToken = GetTokenOrNull(tokens, tokenIndex + 1);
-                Token prevToken = GetTokenOrNull(tokens, tokenIndex - 1);
-
-                if (lineTokens.Count > 0 && IsNewCondition(token, prevToken) && !isInsideConditionChain)
+                if (token.Type == TokenType.LCUR)
                 {
-                    break;
-                }
+                    List<Token> tokensInCur = GetTokensBetween(tokens,ref tokenIndex,TokenType.LCUR,TokenType.RCUR);
+                    Token nextToken = GetTokenOrNull(tokens, tokenIndex + 1);
+                    currentLine.Add(new Token(TokenType.LCUR,"{"));
+                    currentLine.AddRange(tokensInCur);
+                    currentLine.Add(new Token(TokenType.RCUR, "}"));
 
-                if (token.Type == TokenType.LCUR) curlyCount++;
-                else if (token.Type == TokenType.RCUR)
-                {
-                    curlyCount = Math.Max(0, curlyCount - 1);
-                    if (curlyCount == 0 && !IsConditionChainToken(nextToken))
+                    if (nextToken != null && nextToken.Type != TokenType.ELSE)
                     {
-                        lineTokens.Add(token);
-                        tokenIndex++;
-                        break;
+                        lines.Add(new List<Token>(currentLine));
+                        currentLine = new();
                     }
                 }
-
-                lineTokens.Add(token);
-                tokenIndex++;
-
-                isInsideConditionChain = IsConditionChainToken(token) ||
-                                        (nextToken != null && IsConditionChainToken(nextToken));
-
-                if (token.Type == TokenType.EOL && curlyCount == 0 && !isInsideConditionChain)
+                else if (token.Type == TokenType.EOL)
                 {
-                    break;
+                    if (currentLine.Count > 0)
+                    {
+                        lines.Add(new List<Token>(currentLine));
+                        currentLine = new();
+                    }
                 }
+              
+                else
+                {
+                    currentLine.Add(token);
+                }
+                
+
             }
 
-            return lineTokens;
+            if (currentLine.Count > 0)
+            {
+                lines.Add(new List<Token>(currentLine));
+            }
+
+            return lines;
         }
 
         private static bool IsConditionChainToken(Token token)

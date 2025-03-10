@@ -62,6 +62,7 @@ namespace BoomifyCS.Exceptions
 
 
                 error.PrintException();
+                throw new NotFiniteNumberException();
                 Environment.Exit(-1);
             }
             else

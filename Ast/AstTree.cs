@@ -19,16 +19,16 @@ namespace BoomifyCS.Ast
             int tokenIndex = 0;
             int lineCount = 0;
             List<AstNode> lines = [];
-            while (tokenIndex < tokens.Count)
+            foreach(var lineTokens in TokensFormatter.SplitLines(tokens))
             {
-                lines.Add(ParseLine(tokens, ref tokenIndex, ref lineCount));
+                BifyDebug.Log($"Line: {lineTokens.TokensToString()}");
+                lines.Add(ParseLine(lineTokens, ref tokenIndex, ref lineCount));
             }
             AstModule module = new("","",lines);
             return module;
         }
-        private AstNode ParseLine(List<Token> tokens, ref int tokenIndex, ref int lineCount)
+        private AstNode ParseLine(List<Token> line, ref int tokenIndex, ref int lineCount)
         {
-            List<Token> line = TokensFormatter.NextLine(tokens, ref tokenIndex);
             AstBuilder builder = new(line);
             return builder.BuildNode();
         }

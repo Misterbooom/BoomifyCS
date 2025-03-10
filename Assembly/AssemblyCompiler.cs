@@ -28,7 +28,6 @@ namespace BoomifyCS.Assembly
 
         private AssemblyCompiler()
         {
-            LLVM.LinkInMCJIT();
             LLVM.InitializeX86TargetMC();
             LLVM.InitializeX86Target();
             LLVM.InitializeX86TargetInfo();
@@ -103,10 +102,7 @@ namespace BoomifyCS.Assembly
                 Console.WriteLine($"Generating object file: {objFile}");
                 ExecuteCommand($"clang -c {filePath} -o {objFile}");
                 if (!File.Exists(objFile)) throw new FileNotFoundException($"Object file not generated: {objFile}");
-
-                // Run GCC
-                Console.WriteLine($"Generating executable: {exeFile}");
-                ExecuteCommand($"gcc -m64 {objFile} -o {exeFile} -lkernel32 -luser32 -e main");
+                ExecuteCommand($"clang -m64 {objFile} -o {exeFile} -lkernel32 -luser32");
                 if (!File.Exists(exeFile)) throw new FileNotFoundException($"Executable not generated: {exeFile}");
                 Console.WriteLine("Running exe");
                 // Run the compiled executable

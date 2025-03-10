@@ -1,19 +1,5 @@
-﻿int add(int a, int b) {
-    return a + b;
-}
-
-int main() {
-    bool greaterThan = 5 > add(3,2);
-    bool lowerThan = 5 < add(3,2);
-    bool greaterOrEqual = 5 >= add(3,2);
-    bool lowerOrEqual = 5 <= add(3,2);
-    bool equal = 5 == add(3,2);
-
-    explode("greaterThan: %d\n",greaterThan);
-    explode("lowerThan: %d\n",lowerThan);
-    explode("greaterOrEqual: %d\n",greaterOrEqual);
-    explode("lowerOrEqual: %d\n",lowerOrEqual);
-    explode("equal: %d\n",equal);
+﻿int main() {
+    int number = 3;
 
     return 1;
 }

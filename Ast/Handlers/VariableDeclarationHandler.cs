@@ -14,6 +14,7 @@ namespace BoomifyCS.Ast
         public override void HandleToken(Token token)
         {
             builder.tokenIndex++; // To Skip the ASSIGN token
+            BifyDebug.Log($"Tokens -{builder.tokens.TokensToString()}");
             AstNode identifierNode = builder.operandStack.Pop();
             AstNode typeNode = builder.operandStack.Pop();
 
