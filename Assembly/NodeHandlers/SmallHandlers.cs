@@ -60,7 +60,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 }
                 else if (node is AstString astString)
                 {
-                    compiler.StackPush(new StringType().Create((string)astString.Value));
+                    compiler.StackPush(new ConstStringType().Create((string)astString.Value));
                 }
             }
         }

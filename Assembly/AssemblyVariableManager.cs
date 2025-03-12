@@ -15,10 +15,11 @@ namespace BoomifyCS.Assembly
             {"float", new FloatType()},
             {"void",new VoidType()},
             {"explode", new Explode() },
-            {"string", new StringType()},
+            {"str", new ConstStringType()},
             {"bool", new BoolType()},
             {"false", new BoolType().Create(0)},
-            {"true", new BoolType().Create(1)}
+            {"true", new BoolType().Create(1)},
+            {"input",new Input() },
 
         };
 

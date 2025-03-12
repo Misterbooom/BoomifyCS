@@ -15,7 +15,7 @@ namespace BoomifyCS.Assembly.Builtin
         public Explode() : base(null, null, null, null)
         {
             FunctionArgs = new FunctionArgs(null);
-            FunctionArgs.SetArguments(new Dictionary<string, string> { { "format", "string" } });
+            FunctionArgs.SetArguments(new Dictionary<string, string> { { "format", "str" } });
             ReturnType = new IntegerType();
             IsVariadic = true;
         }
@@ -27,7 +27,6 @@ namespace BoomifyCS.Assembly.Builtin
             TypeRef = LLVMTypeRef.CreateFunction(returnType, argTypes, true);
 
             llvmValue = AssemblyCompiler.Instance.module.AddFunction("printf", TypeRef);
-            llvmValue.Linkage = LLVMLinkage.LLVMExternalLinkage;
         }
 
         public override BifyValue Call(BifyValue[] args)
@@ -39,7 +38,7 @@ namespace BoomifyCS.Assembly.Builtin
             }
 
 
-            var formatString = (StringValue)args[0];
+            var formatString = (ConstStringValue)args[0];
             var llvmArgs = new LLVMValueRef[args.Length];
 
             for (int i = 0; i < args.Length; i++)
