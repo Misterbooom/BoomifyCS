@@ -33,8 +33,8 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 LLVMValueRef func = LLVM.GetBasicBlockParent(LLVM.GetInsertBlock(compiler.builder));
 
                 LLVMBasicBlockRef mergeBB = func.AppendBasicBlock("if_merge");
-
                 LLVMBasicBlockRef thenBB = func.AppendBasicBlock("if_then");
+
 
                 int numElseIf = node.ElseIfNodes.Count;
                 var elseIfCondBlocks = new List<LLVMBasicBlockRef>();

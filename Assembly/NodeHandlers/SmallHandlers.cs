@@ -36,7 +36,9 @@ namespace BoomifyCS.Assembly.NodeHandlers
     {
         public override void HandleNode(AstNode node)
         {
-            compiler.StackPush(compiler.variableManager.GetVariable(node.Token.Value));
+            BifyValue variable = compiler.variableManager.GetBifyValue(node.Token.Value);
+            var value = compiler.builder.BuildLoad2(variable.GetBifyType().LLVMType,variable.GetLLVMValue());
+            compiler.StackPush(variable.GetBifyType().CreateByValueRef(value));
         }
     }
     class ConstantNodeHandler : NodeHandler

@@ -18,8 +18,9 @@ namespace BoomifyCS.Assembly.NodeHandlers
         {
             AstAssignmentOperator assignmentOperator = node as AstAssignmentOperator;
             compiler.Visit(assignmentOperator.ValueNode);
-            BifyValue variable = compiler.variableManager.GetBifyValue(assignmentOperator.IdentifierNode.Token.Value);
             BifyValue value = compiler.StackPop();
+            compiler.Visit(assignmentOperator.IdentifierNode);
+            BifyValue variable = compiler.StackPop();
             value = value.AutoCast(variable.GetBifyType(),compiler.builder);
             BifyValue result;
             switch (assignmentOperator.Token.Type)

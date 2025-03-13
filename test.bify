@@ -1,15 +1,6 @@
 ﻿int main() {
-
-    str command = input("Write Command: ");
-    if (command == "1"){
-        explode("command is 1");
+    for (int i =  0;i <= 10; i++){
+        explode("%d",i)
     }
-    else if (command == "2"){
-        explode("command is 2");
-    }
-    else{
-        explode("invalid command!");
-    }
-    explode(" \n%d",command == "1");
     return 1;
 }

@@ -25,9 +25,11 @@ namespace BoomifyCS.Assembly.NodeHandlers
             
 
             var alloca = compiler.builder.BuildAlloca(bifyType.LLVMType, varName);
-            compiler.builder.BuildStore(variableValue.GetLLVMValue(), alloca);
+            
+                compiler.builder.BuildStore(variableValue.GetLLVMValue(), alloca);
+                compiler.variableManager.RegisterLocalVariable(varName, variableValue.GetBifyType().CreateByValueRef(alloca));
 
-            compiler.variableManager.RegisterLocalVariable(varName, variableValue);
+
         }
 
     }

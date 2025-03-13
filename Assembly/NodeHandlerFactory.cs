@@ -13,6 +13,7 @@ namespace BoomifyCS.Assembly
         public static NodeHandler CreateHandler(AstNode node, AssemblyCompiler compiler)
         {
             var conditionStatementHanlder = new ConditionStatementNodeHandler(compiler);
+            var loopNodeHandler = new LoopNodeHandler(compiler);
             Traceback.Instance.SetCurrentLine(node.LineNumber);
             return node switch
             {
@@ -29,6 +30,9 @@ namespace BoomifyCS.Assembly
                 AstIf => conditionStatementHanlder,
                 AstElse => conditionStatementHanlder,
                 AstElseIf => conditionStatementHanlder,
+                AstFor => loopNodeHandler,
+                AstWhile => loopNodeHandler,
+                AstUnaryOperator => new UnaryOperatorNodeHandler(compiler),
                 _ => throw new SyntaxErrorException($"Unhandled node - {node.GetType().Name}")
             };
         }

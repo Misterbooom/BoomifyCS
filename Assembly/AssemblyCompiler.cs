@@ -13,6 +13,11 @@ using Microsoft.Win32;
 
 namespace BoomifyCS.Assembly
 {
+    [Flags]
+    enum NodeVisitFlag
+    {
+        DontStoreWhileVar = 1 << 0,
+    }
     class AssemblyCompiler
     {
         private static AssemblyCompiler _instance;
@@ -25,6 +30,8 @@ namespace BoomifyCS.Assembly
         public LLVMBuilderRef builder;
         public LLVMExecutionEngineRef engine;
         private Stack<IValue> stack = new();
+
+        public NodeVisitFlag flag;
 
         public BifyType returnType;
 
