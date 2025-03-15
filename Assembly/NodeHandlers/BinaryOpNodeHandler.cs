@@ -19,23 +19,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 compiler.Visit(node.Right);
                 return;
             }
-            else if (node.Token.Type == TokenType.POINTER)
-            {
-                compiler.Visit(node.Left);
-                IValue value = compiler.StackIValuePop();
-
-                if (value is not BifyType)
-                {
-                    Traceback.Instance.ThrowException(new BifyTypeError($"{value.GetType().Name.ToLower()} cannot be used as type"));
-                    return;
-                }
-                BifyType bifyType = (BifyType) value;
-
-
-                compiler.StackPush(new BifyPointerType(bifyType));
-
-                return;
-            }
+           
             else if (node.Token.Type == TokenType.NOT)
             {
                 compiler.Visit(node.Left);

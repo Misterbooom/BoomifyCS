@@ -16,7 +16,9 @@ namespace BoomifyCS.Ast.Handlers
         public FunctionDeclarationHandler(AstBuilder builder) : base(builder) { }
         public override void HandleToken(Token token)
         {
+            BifyDebug.Log("Handling func");
             AstNode typeNode = builder.operandStack.Pop();
+            BifyDebug.Log($"Type node = {typeNode}");
             List<Token> parametersTokens = builder.GetConditionTokens();
             List<Token> blockTokens = builder.GetBlockTokens();
 
@@ -85,6 +87,8 @@ namespace BoomifyCS.Ast.Handlers
                 parametersNode,
                 (AstBlock)blockNode
             );
+            builder.operatorStack.Clear();
+            builder.operandStack.Clear();
             builder.AddOperand(functionNode);
             builder.tokenIndex++;
         }

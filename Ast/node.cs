@@ -283,10 +283,9 @@ namespace BoomifyCS.Ast
 
         }
     }
-    public class AstUnaryOperator(Token token, AstNode value, int increment) : AstNode(token)
+    public class AstUnaryOperator(Token token, AstNode value) : AstNode(token)
     {
-        public AstNode value = value;
-        public int increment = increment;
+        public AstNode Operand = value;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {

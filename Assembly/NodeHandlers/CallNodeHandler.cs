@@ -22,7 +22,8 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 string callableName = callNode.CallableName.Token.Value;
                 if (compiler.variableManager.GetVariable(callableName) is BifyFunction callable)
                 {
-                    compiler.Visit(callNode.ArgumentsNode);
+                    if (callNode.ArgumentsNode != null)
+                        compiler.Visit(callNode.ArgumentsNode);
                     List<BifyValue> providedArgs = new List<BifyValue>();
 
                     for (int i = 0; i < CountArgs(callNode.ArgumentsNode); i++)
@@ -33,7 +34,6 @@ namespace BoomifyCS.Assembly.NodeHandlers
                     providedArgs.Reverse();
 
 
-                    // Validate and auto-cast arguments
                     ValidateAndAutoCastArguments(providedArgs, callable.FunctionArgs.BifyTypes, callable.IsVariadic);
 
                     var call = callable.Call(providedArgs.ToArray());
@@ -82,7 +82,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 {
                     Traceback.Instance.Catch(typeof(BifyTypeError));
                     BifyValue castedArg = providedArg.AutoCast(expectedType, compiler.builder);
-                    if (castedArg == null | Traceback.Instance.GetError() != null)
+                    if (castedArg == null || Traceback.Instance.GetError() != null)
                     {
                         string expectedTypeName = expectedType.Name;
                         string providedTypeName = providedArg.GetTypeName();

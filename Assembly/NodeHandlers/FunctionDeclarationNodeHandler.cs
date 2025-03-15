@@ -19,8 +19,14 @@ namespace BoomifyCS.Assembly.NodeHandlers
         {
             AstFunctionDecl functionDeclNode = node as AstFunctionDecl;
             string functionName = functionDeclNode.functionNameNode.Name;
-
-            BifyType functionReturnType = compiler.variableManager.GetBifyType(functionDeclNode.typeNode.Token.Value);
+            compiler.Visit(functionDeclNode.typeNode);
+            IValue value = compiler.StackIValuePop();
+            if (value is not BifyType)
+            {
+                Traceback.Instance.ThrowException(new BifyTypeError($"{value.GetType().Name.ToLower()} cannot be used as type."));
+                return;
+            }
+            BifyType functionReturnType = (BifyType)value;
             compiler.returnType = functionReturnType;
 
             var functionArgs = new FunctionArgs(functionDeclNode.argumentsNode);

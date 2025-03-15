@@ -14,8 +14,12 @@ namespace BoomifyCS.Ast
         public override void HandleToken(Token token)
         {
             AstNode identifierNode = builder.operandStack.Pop();
-            AstNode typeNode = builder.ParseCondition(builder.tokens[0..(builder.tokenIndex - 1)]);
-            BifyDebug.Log($"Type tokens: {builder.tokens[0..(builder.tokenIndex - 1)].TokensToString()}");
+            AstNode typeNode = BuildPointerToType(identifierNode,
+                builder.ParseCondition(builder.tokens[0..(builder.tokenIndex - 1)]));
+
+
+
+
 
             builder.tokenIndex++;
 
@@ -30,8 +34,26 @@ namespace BoomifyCS.Ast
             builder.operatorStack.Clear();
             builder.operandStack.Clear();
             builder.AddOperand(astVarDecl);
-        
-            
+        }
+        private AstNode BuildPointerToType(AstNode pointerToName, AstNode name)
+        {
+            if (pointerToName == null)
+                return name;
+            if (pointerToName  is not AstUnaryOperator)
+            {
+                return name;
+            }
+            AstNode current = pointerToName;
+            while (current is AstUnaryOperator unaryOp && unaryOp.Token.Type == TokenType.MUL)
+            {
+                if (unaryOp == null)
+                {
+                    unaryOp.Operand = name;
+                    return pointerToName;
+                }
+                current = unaryOp.Operand;
+            }
+            return pointerToName;
         }
     }
 }

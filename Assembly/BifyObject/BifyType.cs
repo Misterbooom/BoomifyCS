@@ -22,7 +22,7 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             return null;
         }
-        public bool CompareType(BifyType other)
+        public virtual bool CompareType(BifyType other)
         {
             return this.GetType() == other.GetType();
         }

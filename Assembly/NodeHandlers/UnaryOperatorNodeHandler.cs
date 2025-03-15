@@ -16,9 +16,35 @@ namespace BoomifyCS.Assembly.NodeHandlers
         public override void HandleNode(AstNode node)
         {
             AstUnaryOperator unaryOperator = (AstUnaryOperator)node;
-            compiler.Visit(unaryOperator.value);
+
+            if (unaryOperator.Token.Type == TokenType.POINTER)
+            {  
+                compiler.Visit(unaryOperator.Operand);
+                IValue value = compiler.StackIValuePop();
+
+                if (value is  BifyType)
+                {
+                    //return;
+                    BifyType bifyType = (BifyType)value;
+
+
+                    compiler.StackPush(new BifyPointerType(bifyType));
+                }
+                else if (value is PointerValue pointer)
+                {
+                    compiler.StackPush(pointer.Dereference());
+
+                }
+                else
+                {
+                    Traceback.Instance.ThrowException(new BifyTypeError($"Cannot dereference {value.GetType().Name.ToLower()}"));
+
+                }
+                return;
+            }
+            compiler.Visit(unaryOperator.Operand);
             BifyValue varValue = compiler.StackPop();
-            BifyValue varPtr = compiler.variableManager.GetBifyValue(unaryOperator.value.Token.Value);
+            BifyValue varPtr = compiler.variableManager.GetBifyValue(unaryOperator.Operand.Token.Value);
             BifyValue newValue;
 
             if (unaryOperator.Token.Type == TokenType.INCREMENT)

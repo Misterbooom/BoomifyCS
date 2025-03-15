@@ -13,7 +13,7 @@ namespace BoomifyCS.Ast.Validators
                 Traceback.Instance.ThrowException(bifyError, nameToken == null ? typeNode.Token.Column : nameToken.Column);
             }
 
-            if (typeNode is not AstIdentifier)
+            if (typeNode is not AstIdentifier && typeNode.Token.Type != TokenType.POINTER)
             {
                 BifyTypeError bifyTypeError = new(ErrorMessage.InvalidFunctionType());
                 Traceback.Instance.ThrowException(bifyTypeError, typeNode?.Token.Column ?? nameToken.Column);

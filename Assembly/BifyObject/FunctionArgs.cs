@@ -9,47 +9,29 @@ namespace BoomifyCS.Assembly.BifyObject
 {
     class FunctionArgs
     {
-        public LLVMTypeRef[] LLVMTypes
-        {
-            get
-            {
-                return arguments
-                    .Select(item => AssemblyCompiler.Instance.variableManager.GetLLVMType(item.Value))
-                    .ToArray();
-            }
-            private set
-            {
-            }
-        }
-        public BifyType[] BifyTypes
-        {
-            get
-            {
-                return arguments
-                    .Select(item => AssemblyCompiler.Instance.variableManager.GetBifyType(item.Value))
-                    .ToArray();
-            }
-        }
-        public string[] ArgsNames
-        {
-            get
-            {
-                return arguments
-                    .Select(item => item.Key)
-                    .ToArray();
-            }
-        }
+        private Dictionary<string, BifyType> arguments = new Dictionary<string, BifyType>();
 
-        private Dictionary<string, string> arguments = new Dictionary<string, string>();
+        public LLVMTypeRef[] LLVMTypes => arguments.Values
+            .Select(type => type.LLVMType)
+            .ToArray();
+
+        public BifyType[] BifyTypes => arguments.Values.ToArray();
+
+        public string[] ArgsNames => arguments.Keys.ToArray();
 
         public FunctionArgs(AstNode argNode)
         {
             ExtractArgs(argNode);
         }
-        public void SetArguments(Dictionary<string, string> arguments)
+
+        public void SetArguments(Dictionary<string, BifyType> newArguments)
         {
-            this.arguments = arguments;
+            if (newArguments == null)
+                throw new ArgumentNullException(nameof(newArguments), "Arguments cannot be null.");
+
+            arguments = new Dictionary<string, BifyType>(newArguments);
         }
+
         private void ExtractArgs(AstNode node)
         {
             if (node is AstBinaryOp astBinaryOp)
@@ -59,11 +41,9 @@ namespace BoomifyCS.Assembly.BifyObject
                     ExtractArgs(astBinaryOp.Left);
                     ExtractArgs(astBinaryOp.Right);
                 }
-                else
+                else if (astBinaryOp.Right is AstIdentifier rightId && astBinaryOp.Left is AstIdentifier leftId)
                 {
-                    string name = astBinaryOp.Right.Token.Value;
-                    string type = astBinaryOp.Left.Token.Value;
-                    arguments[name] = type;
+                    arguments[rightId.Token.Value] = AssemblyCompiler.Instance.variableManager.GetBifyType(leftId.Token.Value);
                 }
             }
         }

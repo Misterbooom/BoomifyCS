@@ -16,7 +16,7 @@ namespace BoomifyCS.Ast
             Token previousToken = TokensFormatter.GetTokenOrNull(builder.tokens, builder.tokenIndex - 1);
             UnaryOperatorValidator.Validate(builder.tokens[builder.tokenIndex].Value, previousToken);
             AstIdentifier astIdentifier = (AstIdentifier)NodeConventer.TokenToNode(previousToken);
-            AstUnaryOperator unaryOperator = new(builder.tokens[builder.tokenIndex], astIdentifier, 1);
+            AstUnaryOperator unaryOperator = new(builder.tokens[builder.tokenIndex], astIdentifier);
             builder.operandStack.Pop();
             builder.AddOperand(unaryOperator);
         }

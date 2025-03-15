@@ -15,7 +15,8 @@ namespace BoomifyCS.Assembly.Builtin
         public Explode() : base(null, null, null, null)
         {
             FunctionArgs = new FunctionArgs(null);
-            FunctionArgs.SetArguments(new Dictionary<string, string> { { "format", "str" } });
+            FunctionArgs.SetArguments(new Dictionary<string, BifyType> { { "format", new BifyPointerType(new CharType()) } });
+
             ReturnType = new IntegerType();
             IsVariadic = true;
         }
@@ -38,7 +39,7 @@ namespace BoomifyCS.Assembly.Builtin
             }
 
 
-            var formatString = (ConstStringValue)args[0];
+            var formatString = (PointerValue)args[0];
             var llvmArgs = new LLVMValueRef[args.Length];
 
             for (int i = 0; i < args.Length; i++)

@@ -17,7 +17,7 @@ namespace BoomifyCS.Assembly.Builtin
             ReturnType = new ConstStringType();
             IsVariadic = false;
             // Expect one string parameter for the prompt.
-            FunctionArgs.SetArguments(new Dictionary<string, string> { { "prompt", "str" } });
+            FunctionArgs.SetArguments(new Dictionary<string, BifyType> { { "prompt", new BifyPointerType(new CharType())} });
         }
 
         private void InitFunction()
@@ -64,7 +64,7 @@ namespace BoomifyCS.Assembly.Builtin
             }
 
             var printFunction = AssemblyCompiler.Instance.variableManager.GetBifyValue("explode");
-            var prompt = (ConstStringValue)args[0];
+            var prompt = (PointerValue)args[0];
             printFunction.Call([prompt]);
 
             return new ConstStringType().CreateByValueRef(

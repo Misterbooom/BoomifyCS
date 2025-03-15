@@ -9,11 +9,11 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.BifyObject
 {
-    class ConstStringValue : BifyValue
+    class CharValue : BifyValue
     {
         static LLVMTypeRef strCompType;
         static LLVMValueRef strComp;
-        public ConstStringValue(LLVMValueRef value) : base(value, new ConstStringType())
+        public CharValue(LLVMValueRef value) : base(value, new CharType())
         {
             if (strCompType.Handle == IntPtr.Zero)
             {
@@ -36,27 +36,51 @@ namespace BoomifyCS.Assembly.BifyObject
                 return null;
             }
             var value = builder.BuildCall2(strCompType, strComp, new LLVMValueRef[] { GetLLVMValue(), other.GetLLVMValue() }, "str_comp");
-            var castedValue = builder.BuildIntCast(value,LLVMTypeRef.Int1,"int32_to_int1");
+            var castedValue = builder.BuildIntCast(value, LLVMTypeRef.Int1, "int32_to_int1");
             return new BoolType()
                 .CreateByValueRef(castedValue)
                 .Not(builder);
         }
     }
-    class ConstStringType : BifyType
+    class CharType : BifyType
     {
-        public ConstStringType() : base("string", LLVMTypeRef.CreatePointer(LLVMTypeRef.Int8, 0))
+        public CharType() : base("char", LLVMTypeRef.Int8)
         {
-        }
-        public override BifyValue Create(object value)
-        {
-            var stringValue = AssemblyCompiler.Instance.builder.BuildGlobalStringPtr(((string)value).Replace(@"\n", "\n"), (string)value);
 
-            return new ConstStringValue(stringValue);
         }
         public override BifyValue CreateByValueRef(LLVMValueRef value)
         {
-            return new ConstStringValue(value);
+            return new CharValue(value);
+        }
+        public override BifyValue Create(object value)
+        {
+            unsafe
+            {
+                return new CharValue(LLVM.ConstInt(LLVMTypeRef.Int8, (ulong)(int)value, 0));
+            }
         }
     }
+    class ConstStringType : BifyType
+    {
+        public ConstStringType()
+            : base("string", LLVMTypeRef.CreatePointer(LLVMTypeRef.Int8, 0))
+        {
+        }
+
+        public override BifyValue Create(object value)
+        {
+            var stringValue = AssemblyCompiler.Instance.builder.BuildGlobalStringPtr(
+                ((string)value).Replace(@"\n", "\n"), (string)value);
+            var pointerType = new BifyPointerType(new CharType());
+            return pointerType.CreateByValueRef(stringValue);
+        }
+
+
+        public override BifyValue CreateByValueRef(LLVMValueRef value)
+        {
+            return new PointerValue(value, new BifyPointerType(new CharType()));
+        }
+    }
+
 
 }
