@@ -58,6 +58,10 @@ namespace BoomifyCS.Assembly
         {
             return (BifyValue)stack.Pop();
         }
+        public IValue StackIValuePop()
+        {
+            return stack.Pop();
+        }
 
         public static AssemblyCompiler Instance
         {

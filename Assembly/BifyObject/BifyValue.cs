@@ -24,8 +24,11 @@ namespace BoomifyCS.Assembly.BifyObject
         public virtual bool CompareType(BifyValue other) => GetBifyType().CompareType(other.GetBifyType());
         public BifyValue AutoCast(BifyType desiredType, LLVMBuilderRef builder)
         {
-
-            if (!desiredType.CompareType(type))
+            if (desiredType is BifyPointerType pointerType)
+            {
+                return AutoCast(pointerType.BifyType, builder);
+            }
+            else if (!desiredType.CompareType(type))
             {
                 if (type is IntegerType && desiredType is FloatType)
                 {

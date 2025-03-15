@@ -91,7 +91,8 @@ namespace BoomifyCS.Lexer
         COMMENT,
         CONCAT,
         RANGE,
-        INDEX_OPERATOR
+        INDEX_OPERATOR,
+        POINTER
     }
     public class Token(TokenType type, string value, List<Token> tokens = null)
     {

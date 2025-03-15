@@ -71,14 +71,29 @@ namespace BoomifyCS.Ast
         public void PopOperator()
         {
             AstBinaryOp operatorNode = (AstBinaryOp)operatorStack.Pop();
+
             if (operatorNode.Token.Type == TokenType.NOT)
             {
                 if (operandStack.Count == 0)
                 {
-                    throw new InvalidOperationException("Not enough operands for the second NOT operation.");
+                    throw new InvalidOperationException("Not enough operands for the NOT operation.");
                 }
                 AstNode operand = operandStack.Pop();
                 OperandValidator.Validate(operand, operand, operatorNode);
+                operatorNode.Left = operand;
+                AddOperand(operatorNode);
+                return;
+            }
+            else if (operatorNode.Token.Type == TokenType.MUL)
+            {
+                if (operandStack.Count == 0)
+                {
+                    throw new InvalidOperationException("Not enough operands for the pointer operation.");
+                }
+                AstNode operand = operandStack.Pop();
+                OperandValidator.Validate(operand, operand, operatorNode);
+                Token pointerToken = new Token(TokenType.POINTER, "*Pointer");
+                operatorNode.Token = pointerToken;
                 operatorNode.Left = operand;
                 AddOperand(operatorNode);
                 return;
@@ -89,6 +104,7 @@ namespace BoomifyCS.Ast
                 Traceback.Instance.ThrowException(error, operatorNode.Token.Column);
                 return;
             }
+
             AstNode right = operandStack.Pop();
             AstNode left = operandStack.Pop();
             OperandValidator.Validate(left, right, operatorNode);
@@ -96,6 +112,7 @@ namespace BoomifyCS.Ast
             operatorNode.Right = right;
             AddOperand(operatorNode);
         }
+
 
         public bool ShouldPopOperator(Token token)
         {

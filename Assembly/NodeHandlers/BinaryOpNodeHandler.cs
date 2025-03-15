@@ -19,6 +19,23 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 compiler.Visit(node.Right);
                 return;
             }
+            else if (node.Token.Type == TokenType.POINTER)
+            {
+                compiler.Visit(node.Left);
+                IValue value = compiler.StackIValuePop();
+
+                if (value is not BifyType)
+                {
+                    Traceback.Instance.ThrowException(new BifyTypeError($"{value.GetType().Name.ToLower()} cannot be used as type"));
+                    return;
+                }
+                BifyType bifyType = (BifyType) value;
+
+
+                compiler.StackPush(new BifyPointerType(bifyType));
+
+                return;
+            }
             else if (node.Token.Type == TokenType.NOT)
             {
                 compiler.Visit(node.Left);
@@ -36,14 +53,14 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 BifyValue value = BinaryVal(lhs, rhs, node.Token.Type);
                 compiler.StackPush(value);
             }
-          
+
         }
-        private BifyValue BinaryVal(BifyValue lhs,BifyValue rhs,TokenType type)
+        private BifyValue BinaryVal(BifyValue lhs, BifyValue rhs, TokenType type)
         {
             switch (type)
             {
                 case TokenType.ADD:
-                    return lhs.Add(rhs,compiler.builder);
+                    return lhs.Add(rhs, compiler.builder);
                 case TokenType.SUB:
                     return lhs.Sub(rhs, compiler.builder);
                 case TokenType.MUL:
@@ -79,7 +96,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                     throw new NotImplementedException($"Not implemented binary operator.Type: {type}");
             }
         }
-      
+
     }
 
 

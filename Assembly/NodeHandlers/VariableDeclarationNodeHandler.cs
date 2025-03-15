@@ -15,9 +15,14 @@ namespace BoomifyCS.Assembly.NodeHandlers
             AstVarDecl varDeclNode = (AstVarDecl)node;
 
             string varName = varDeclNode.AssignmentNode.Left.Token.Value;
-            string typeName = varDeclNode.Type.Token.Value;
-
-            BifyType bifyType = compiler.variableManager.GetBifyType(typeName);
+            compiler.Visit(varDeclNode.Type);
+            IValue value = compiler.StackIValuePop();
+            if (value is not BifyType)
+            {
+                Traceback.Instance.ThrowException(new BifyTypeError($"{value.GetType().Name.ToLower()} cannot be used as type."));
+                return;
+            }
+            BifyType bifyType = (BifyType)value;
 
             compiler.Visit(varDeclNode.AssignmentNode.Right);
             BifyValue variableValue = compiler.StackPop().AutoCast(bifyType,compiler.builder);

@@ -13,10 +13,11 @@ namespace BoomifyCS.Ast
 
         public override void HandleToken(Token token)
         {
-            builder.tokenIndex++; // To Skip the ASSIGN token
-            BifyDebug.Log($"Tokens -{builder.tokens.TokensToString()}");
             AstNode identifierNode = builder.operandStack.Pop();
-            AstNode typeNode = builder.operandStack.Pop();
+            AstNode typeNode = builder.ParseCondition(builder.tokens[0..(builder.tokenIndex - 1)]);
+            BifyDebug.Log($"Type tokens: {builder.tokens[0..(builder.tokenIndex - 1)].TokensToString()}");
+
+            builder.tokenIndex++;
 
             List<Token> valueTokens = builder.tokens[builder.tokenIndex..];
             AstNode valueNode = builder.ParseCondition(valueTokens);
@@ -26,7 +27,11 @@ namespace BoomifyCS.Ast
 
             AstAssignment astAssignment = new(token, identifierNode, valueNode);
             AstVarDecl astVarDecl = new(token, astAssignment, typeNode, valueNode);
+            builder.operatorStack.Clear();
+            builder.operandStack.Clear();
             builder.AddOperand(astVarDecl);
+        
+            
         }
     }
 }
