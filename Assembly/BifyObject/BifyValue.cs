@@ -24,11 +24,9 @@ namespace BoomifyCS.Assembly.BifyObject
         public virtual bool CompareType(BifyValue other) => GetBifyType().CompareType(other.GetBifyType());
         public BifyValue AutoCast(BifyType desiredType, LLVMBuilderRef builder)
         {
-            // If the types already match, no cast is needed.
             if (desiredType.CompareType(this.type))
                 return this;
 
-            // Handle pointer conversions.
             if (desiredType is BifyPointerType desiredPtr)
             {
                 if (this.type is BifyPointerType currentPtr)
@@ -38,7 +36,6 @@ namespace BoomifyCS.Assembly.BifyObject
                     LLVMValueRef loadedValue = builder.BuildLoad2(GetBifyType().LLVMType,this.GetLLVMValue(), "load_ptr");
                     BifyValue castedValue = GetBifyType().CreateByValueRef(loadedValue)
                                                 .AutoCast(desiredPtr.PointedType, builder);
-                    // Allocate space for the casted value and return its pointer.
                     LLVMValueRef newPtr = builder.BuildAlloca(desiredPtr.PointedType.LLVMType, "alloc_casted");
                     builder.BuildStore(castedValue.GetLLVMValue(), newPtr);
                     return new PointerValue(newPtr, desiredPtr);
@@ -67,7 +64,12 @@ namespace BoomifyCS.Assembly.BifyObject
             );
             return null;
         }
+        public virtual BifyValue Index(BifyValue indexValue, LLVMBuilderRef builder)
+        {
+            Traceback.Instance.ThrowException(new BifyTypeError($"{GetTypeName()} doesn't support Index"));
+            return null;
 
+        }
         public virtual BifyValue Not(LLVMBuilderRef builder)
         {
             Traceback.Instance.ThrowException(new BifyTypeError($"{GetTypeName()} doesn't support Not"));

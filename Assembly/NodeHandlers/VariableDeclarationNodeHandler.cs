@@ -23,6 +23,10 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 return;
             }
             BifyType bifyType = (BifyType)value;
+            if (bifyType is ArrayType)
+            {
+                compiler.StackPush(bifyType);
+            }
             compiler.Visit(varDeclNode.AssignmentNode.Right);
             BifyValue loadedValue = compiler.StackPop();
             BifyDebug.Log($"Var type - {bifyType.Name} Var value type - {loadedValue.GetTypeName()} LLVMVarType: {bifyType.LLVMType} pointer to i8");
@@ -34,7 +38,10 @@ namespace BoomifyCS.Assembly.NodeHandlers
             var alloca = compiler.builder.BuildAlloca(bifyType.LLVMType, varName);
 
             compiler.builder.BuildStore(variableValue.GetLLVMValue(), alloca);
-            compiler.variableManager.RegisterLocalVariable(varName, variableValue.GetBifyType().CreateByValueRef(alloca));
+            compiler.variableManager.RegisterLocalVariable(varName, 
+
+                new BifyPointerType(variableValue.GetBifyType()).CreateByValueRef(alloca)
+                );
          
         }
 

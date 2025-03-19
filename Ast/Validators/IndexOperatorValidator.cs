@@ -14,18 +14,17 @@ namespace BoomifyCS.Ast.Validators
                 Traceback.Instance.ThrowException(error, previousNode.Token.Column);
             }
 
-            if (indexNode == null || !IsValidIndexNode(indexNode))
+            if (indexNode != null && !IsValidIndexNode(indexNode))
             {
                 BifySyntaxError error = new(ErrorMessage.InvalidIndexExpression(), "", indexNode.Token.Value);
                 Traceback.Instance.ThrowException(error, indexNode.Token.Column);
             }
 
-            return true; // Validation successful
+            return true;
         }
 
-        private static bool IsIndexableNode(AstNode node) => node is AstArray || node is AstIdentifier || node is AstCall;
+        private static bool IsIndexableNode(AstNode node) => node is AstArray || node is AstIdentifier || node is AstCall || node.Token.Type == TokenType.POINTER;
 
-        // Helper method to check if the index expression is valid
         private static bool IsValidIndexNode(AstNode node) => node is AstNumber || node is AstIdentifier ||
                 node is AstRangeOperator ||
                 node is AstBinaryOp && node.Token.Type != TokenType.COMMA;

@@ -33,6 +33,8 @@ namespace BoomifyCS.Assembly
                 AstFor => loopNodeHandler,
                 AstWhile => loopNodeHandler,
                 AstUnaryOperator => new UnaryOperatorNodeHandler(compiler),
+                AstIndexOperator => new IndexOperatorNodeHandler(compiler),
+                AstArray => new ArrayNodeHandler(compiler),
                 _ => throw new SyntaxErrorException($"Unhandled node - {node.GetType().Name}")
             };
         }

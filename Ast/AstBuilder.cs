@@ -86,34 +86,50 @@ namespace BoomifyCS.Ast
             }
             else if (opNode.Token.Type == TokenType.MUL)
             {
-                if (operandStack.Count == 0)
-                    throw new InvalidOperationException("Not enough operands for the pointer operation.");
+                if (operandStack.Count >= 2)
+                {
+                    AstNode right = operandStack.Pop();
+                    AstNode left = operandStack.Pop();
+                    OperandValidator.Validate(left, right, opNode);
+                    opNode.Left = left;
+                    opNode.Right = right;
+                    AddOperand(opNode);
+                    return;
+                }
+                else if (operandStack.Count == 1)
+                {
+                    AstNode operand = operandStack.Pop();
+                    BifyDebug.Log("Creating pointer");
+                    OperandValidator.Validate(operand, operand, opNode);
 
-                AstNode operand = operandStack.Pop();
-                BifyDebug.Log("Creating pointer");
-                OperandValidator.Validate(operand, operand, opNode);
-
-                Token pointerToken = new Token(TokenType.POINTER, "*Pointer");
-
-                AstUnaryOperator pointerNode = new AstUnaryOperator(pointerToken, operand);
-                AddOperand(pointerNode);
-                return;
+                    Token pointerToken = new Token(TokenType.POINTER, "*Pointer");
+                    AstUnaryOperator pointerNode = new AstUnaryOperator(pointerToken, operand);
+                    AddOperand(pointerNode);
+                    return;
+                }
+                else
+                {
+                    throw new InvalidOperationException("Not enough operands for the multiplication or pointer operation.");
+                }
             }
-            else if (operandStack.Count < 2)
+            else
             {
-                BifySyntaxError error = new(ErrorMessage.NotEnoughOperands(opNode.Token.Value), "", opNode.Token.Value);
-                Traceback.Instance.ThrowException(error, opNode.Token.Column);
-                return;
-            }
+                if (operandStack.Count < 2)
+                {
+                    BifySyntaxError error = new(ErrorMessage.NotEnoughOperands(opNode.Token.Value), "", opNode.Token.Value);
+                    Traceback.Instance.ThrowException(error, opNode.Token.Column);
+                    return;
+                }
 
-            // For other binary operations, pop two operands.
-            AstNode right = operandStack.Pop();
-            AstNode left = operandStack.Pop();
-            OperandValidator.Validate(left, right, opNode);
-            opNode.Left = left;
-            opNode.Right = right;
-            AddOperand(opNode);
+                AstNode right = operandStack.Pop();
+                AstNode left = operandStack.Pop();
+                OperandValidator.Validate(left, right, opNode);
+                opNode.Left = left;
+                opNode.Right = right;
+                AddOperand(opNode);
+            }
         }
+
 
 
         public bool ShouldPopOperator(Token token)

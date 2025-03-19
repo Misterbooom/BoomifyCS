@@ -10,7 +10,7 @@ namespace BoomifyCS.Assembly.BifyObject
     public abstract class BifyType:IValue
     {
         public string Name { get; }
-        public LLVMTypeRef LLVMType { get; }
+        public LLVMTypeRef LLVMType { get;protected set; }
 
         protected BifyType(string name, LLVMTypeRef llvmType)
         {

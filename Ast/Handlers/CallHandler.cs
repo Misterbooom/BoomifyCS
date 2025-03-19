@@ -17,8 +17,27 @@ namespace BoomifyCS.Ast
             {
                 new FunctionDeclarationHandler(builder).HandleToken(token);
             }
-            else if (builder.operandStack.Count == 1 && builder.operatorStack.Count == 1)
+            else if (builder.operandStack.Count == 1 && builder.operatorStack.Count == 1 && builder.operandStack.Peek() is AstIdentifier)
             {
+                int i = builder.tokenIndex;
+                bool isFunc = false;
+                while (i < builder.tokens.Count)
+                {
+                    if (builder.tokens[i].Type == TokenType.RPAREN)
+                    {
+                        if (i + 1 < builder.tokens.Count && builder.tokens[i + 1].Type == TokenType.LCUR)
+                        {
+                            isFunc = true;
+                            break;
+                        }
+                    }
+                    i++;
+                }
+                if (!isFunc)
+                {
+                    HandleCall();
+                    return;
+                }
                 AstNode op = builder.operatorStack.Pop();
 
                 if (op.Token.Type == TokenType.MUL)
@@ -27,9 +46,8 @@ namespace BoomifyCS.Ast
                     builder.operandStack.Push(pointer);
                     new FunctionDeclarationHandler(builder).HandleToken(token);
                 }
-
-
             }
+
             else
             {
                 HandleCall();
