@@ -54,5 +54,9 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             return new BoolValue(value);
         }
+        public override uint Size()
+        {
+            return 1;
+        }
     }
 }

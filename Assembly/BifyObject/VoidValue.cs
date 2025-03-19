@@ -22,6 +22,10 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             return new NullValue();
         }
+        public override uint Size()
+        {
+            return 0;
+        }
     }
     class NullType : BifyType
     {
@@ -35,6 +39,11 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             return new NullValue();
         }
+        public override uint Size()
+        {
+            return 0;
+        }
+
     }
     class NullValue : BifyValue
     {

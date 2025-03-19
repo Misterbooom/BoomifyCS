@@ -7,17 +7,17 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.BifyObject
 {
-    public abstract class BifyType:IValue
+    public abstract class BifyType : IValue
     {
         public string Name { get; }
-        public LLVMTypeRef LLVMType { get;protected set; }
+        public LLVMTypeRef LLVMType { get; protected set; }
 
         protected BifyType(string name, LLVMTypeRef llvmType)
         {
             Name = name;
             LLVMType = llvmType;
         }
-       
+
         public LLVMValueRef GetLLVMValue()
         {
             return null;
@@ -28,6 +28,27 @@ namespace BoomifyCS.Assembly.BifyObject
         }
         public abstract BifyValue Create(object value);
         public abstract BifyValue CreateByValueRef(LLVMValueRef value);
+        public abstract uint Size();
+    }
+    class AnyType : BifyType
+    {
+        public AnyType() : base("any", LLVMTypeRef.Void) { }
+        public override BifyValue CreateByValueRef(LLVMValueRef value)
+        {
+            throw new NotImplementedException();
+        }
+        public override BifyValue Create(object value)
+        {
+            throw new NotImplementedException();
+        }
+        public override bool CompareType(BifyType other)
+        {
+            return true;
+        }
+        public override uint Size()
+        {
+            throw new NotImplementedException();
+        }
 
     }
 }

@@ -47,6 +47,10 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             throw new NotImplementedException();
         }
+        public override uint Size()
+        {
+            return 0;
+        }
 
     }
 }

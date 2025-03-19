@@ -108,5 +108,9 @@ namespace BoomifyCS.Assembly.BifyObject
             return new FloatValue(value);
 
         }
+        public override uint Size()
+        {
+            return 4;
+        }
     }
 }

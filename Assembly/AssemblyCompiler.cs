@@ -16,7 +16,8 @@ namespace BoomifyCS.Assembly
     [Flags]
     enum NodeVisitFlag
     {
-        DontStoreWhileVar = 1 << 0,
+        NONE,
+        DONT_LOAD_INDEX = 1 << 0,
     }
     class AssemblyCompiler
     {
@@ -31,7 +32,7 @@ namespace BoomifyCS.Assembly
         public LLVMExecutionEngineRef engine;
         private Stack<IValue> stack = new();
 
-        public NodeVisitFlag flag;
+        public NodeVisitFlag flag = NodeVisitFlag.NONE;
 
         public BifyType returnType;
 

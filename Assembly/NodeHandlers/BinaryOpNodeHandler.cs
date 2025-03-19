@@ -34,6 +34,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 compiler.Visit(node.Right);
                 BifyValue rhs = compiler.StackPop();
                 BifyValue lhs = compiler.StackPop();
+                BifyDebug.Log($"{rhs},{lhs}");
                 BifyValue value = BinaryVal(lhs, rhs, node.Token.Type);
                 compiler.StackPush(value);
             }

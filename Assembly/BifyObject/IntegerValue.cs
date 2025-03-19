@@ -198,6 +198,10 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             return new IntegerValue(value);
         }
+        public override uint Size()
+        {
+            return 4;
+        }
     }
 
 

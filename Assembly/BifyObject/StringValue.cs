@@ -59,6 +59,10 @@ namespace BoomifyCS.Assembly.BifyObject
                 return new CharValue(LLVM.ConstInt(LLVMTypeRef.Int8, (ulong)(int)value, 0));
             }
         }
+        public override uint Size()
+        {
+            return 1;
+        }
     }
     class ConstStringType : BifyType
     {
@@ -79,6 +83,10 @@ namespace BoomifyCS.Assembly.BifyObject
         public override BifyValue CreateByValueRef(LLVMValueRef value)
         {
             return new PointerValue(value, new BifyPointerType(new CharType()));
+        }
+        public override uint Size()
+        {
+            return 1;
         }
     }
 

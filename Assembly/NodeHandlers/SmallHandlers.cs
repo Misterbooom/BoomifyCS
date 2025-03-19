@@ -34,12 +34,13 @@ namespace BoomifyCS.Assembly.NodeHandlers
             }
         }
     }
-    class ArrayNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler) {
+    class ArrayNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    {
         public override void HandleNode(AstNode node)
         {
             AstArray astArray = (AstArray)node;
             BifyType bifyType = (BifyType)compiler.StackIValuePop();
-            
+
             if (bifyType is not ArrayType arrayType)
             {
                 Traceback.Instance.ThrowException(new BifyTypeError("Invalid array type"));
@@ -112,18 +113,16 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 compiler.StackPush(variable);
                 return;
             }
-            
-            PointerValue bifyValue = (PointerValue)variable;
-            if (((BifyPointerType)bifyValue.GetBifyType()).PointedType is ArrayType arrType)
+            PointerValue pointerValue = (PointerValue)variable;
+
+            if (((BifyPointerType)pointerValue.GetBifyType()).PointedType is ArrayType arrayType)
             {
-                compiler.StackPush(
-                    arrType.CreateByValueRef(bifyValue.GetLLVMValue())
-                        
-                    );
+                compiler.StackPush(arrayType.CreateByValueRef(pointerValue.GetLLVMValue()));
                 return;
             }
-            var loadedValue = compiler.builder.BuildLoad2(bifyValue.GetBifyType().LLVMType, bifyValue.GetLLVMValue());
-            compiler.StackPush(bifyValue.GetBifyType().CreateByValueRef(loadedValue));
+            BifyPointerType pointerType = (BifyPointerType)pointerValue.GetBifyType();
+            var loadedValue = compiler.builder.BuildLoad2(pointerType.PointedType.LLVMType, pointerValue.GetLLVMValue());
+            compiler.StackPush(pointerType.PointedType.CreateByValueRef(loadedValue));
         }
     }
     class ConstantNodeHandler : NodeHandler

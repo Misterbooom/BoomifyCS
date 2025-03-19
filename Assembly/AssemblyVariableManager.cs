@@ -20,6 +20,7 @@ namespace BoomifyCS.Assembly
             {"false", new BoolType().Create(0)},
             {"true", new BoolType().Create(1)},
             {"input",new Input() },
+            {"sizeof",new SizeOf() },
 
         };
 

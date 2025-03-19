@@ -92,5 +92,9 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             return new PointerValue(value, this);
         }
+        public override uint Size()
+        {
+            return PointedType.Size();
+        }
     }
 }

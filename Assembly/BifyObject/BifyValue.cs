@@ -133,5 +133,9 @@ namespace BoomifyCS.Assembly.BifyObject
             Traceback.Instance.ThrowException(new BifyArithmeticError($"{GetTypeName()} doesn't support Div"));
             return null;
         }
+        public override string ToString()
+        {
+            return $"{GetTypeName()}({llvmValue})";
+        }
     }
 }

@@ -19,10 +19,20 @@ namespace BoomifyCS.Assembly.NodeHandlers
             AstAssignmentOperator assignmentOperator = node as AstAssignmentOperator;
             compiler.Visit(assignmentOperator.ValueNode);
             BifyValue value = compiler.StackPop();
+
+            compiler.flag |= NodeVisitFlag.DONT_LOAD_INDEX;
             compiler.Visit(assignmentOperator.IdentifierNode);
             BifyValue variable = compiler.StackPop();
-            value = value.AutoCast(variable.GetBifyType(),compiler.builder);
+
+            BifyType targetType = variable.GetBifyType();
+            if (targetType is BifyPointerType pointerType)
+            {
+                targetType = pointerType.PointedType;
+            }
+
+            value = value.AutoCast(targetType, compiler.builder);
             BifyValue result;
+
             switch (assignmentOperator.Token.Type)
             {
                 case TokenType.ADDE:
@@ -38,16 +48,15 @@ namespace BoomifyCS.Assembly.NodeHandlers
                     result = variable.Div(value, compiler.builder);
                     break;
                 case TokenType.ASSIGN:
-                    variable.SetLLVMValue(value.GetLLVMValue());
-                    result = variable;
+                    result = targetType.CreateByValueRef(value.GetLLVMValue());
                     break;
                 default:
                     throw new NotImplementedException($"{assignmentOperator.Token}");
-
             }
-            compiler.variableManager.SetLocalVariable(assignmentOperator.IdentifierNode.Token.Value, result);
 
+            BifyDebug.Log($"Result - {result}");
+            compiler.builder.BuildStore(result.GetLLVMValue(), variable.GetLLVMValue());
         }
-
     }
+
 }
