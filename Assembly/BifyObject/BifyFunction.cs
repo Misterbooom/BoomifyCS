@@ -24,7 +24,7 @@ namespace BoomifyCS.Assembly.BifyObject
         }
         public override BifyValue Call(BifyValue[] args)
         {
-            return ReturnType.CreateByValueRef(
+            return ReturnType.CreateValueRef(
                 AssemblyCompiler.Instance.builder.BuildCall2(
                      TypeRef,
                      GetLLVMValue(),
@@ -39,7 +39,7 @@ namespace BoomifyCS.Assembly.BifyObject
         public FunctionType(LLVMTypeRef type):base("callable", type)
         {
         }
-        public override BifyValue CreateByValueRef(LLVMValueRef value)
+        protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
             throw new NotImplementedException();
         }

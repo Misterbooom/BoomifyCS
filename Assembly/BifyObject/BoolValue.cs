@@ -50,7 +50,7 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             return new BoolValue(LLVMValueRef.CreateConstInt(LLVMType, (ulong)(int)value, false));
         }
-        public override BifyValue CreateByValueRef(LLVMValueRef value)
+        protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
             return new BoolValue(value);
         }

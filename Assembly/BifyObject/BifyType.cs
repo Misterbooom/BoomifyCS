@@ -11,10 +11,12 @@ namespace BoomifyCS.Assembly.BifyObject
     {
         public string Name { get; }
         public LLVMTypeRef LLVMType { get; protected set; }
+        public ValueFlag ValueFlag = ValueFlag.None;
 
         protected BifyType(string name, LLVMTypeRef llvmType)
         {
             Name = name;
+            
             LLVMType = llvmType;
         }
 
@@ -22,18 +24,28 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             return null;
         }
+
         public virtual bool CompareType(BifyType other)
         {
             return this.GetType() == other.GetType();
         }
+
+        public BifyValue CreateValueRef(LLVMValueRef value)
+        {
+            var bifyValue = CreateByValueRef(value);
+            bifyValue.ValueFlag = this.ValueFlag; 
+            return bifyValue;
+        }
+
         public abstract BifyValue Create(object value);
-        public abstract BifyValue CreateByValueRef(LLVMValueRef value);
+        
+        protected abstract BifyValue CreateByValueRef(LLVMValueRef value);
         public abstract uint Size();
     }
     class AnyType : BifyType
     {
         public AnyType() : base("any", LLVMTypeRef.Void) { }
-        public override BifyValue CreateByValueRef(LLVMValueRef value)
+        protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
             throw new NotImplementedException();
         }

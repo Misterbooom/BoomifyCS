@@ -18,7 +18,7 @@ namespace BoomifyCS.Ast
             {
                 HandleAssignment(token);
             }
-            else if (builder.operandStack.Count == 2 && token.Type == TokenType.ASSIGN)
+            else if (builder.operandStack.Count == 2 && token.Type == TokenType.ASSIGN || builder.operandStack.Count == 3 && token.Type == TokenType.ASSIGN)
             {
                 new VariableDeclarationHandler(builder).HandleToken(token);
             }

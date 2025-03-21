@@ -8,10 +8,16 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly
 {
-
-    public interface IValue
+    public enum ValueFlag
     {
-        LLVMValueRef GetLLVMValue();  
+        None,
+        Constant,
+        Variable
+    }
+    public interface  IValue
+    {
+        public abstract LLVMValueRef GetLLVMValue();
+
     }
 
 }

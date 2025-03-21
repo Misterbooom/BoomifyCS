@@ -18,7 +18,7 @@ namespace BoomifyCS.Assembly.BifyObject
             return new NullValue();
         }
 
-        public override BifyValue CreateByValueRef(LLVMValueRef value)
+        protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
             return new NullValue();
         }
@@ -35,7 +35,7 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             return new NullValue();
         }
-        public override BifyValue CreateByValueRef(LLVMValueRef value)
+        protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
             return new NullValue();
         }

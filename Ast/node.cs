@@ -123,17 +123,19 @@ namespace BoomifyCS.Ast
         public override string ToString() => StrHelper();
     }
 
-    public class AstVarDecl(Token token, AstAssignment assignmentNode, AstNode type = null, AstNode left = null, AstNode right = null) : AstNode(token, left, right)
+    public class AstVarDecl(Token token, AstAssignment assignmentNode, AstNode type = null,AstNode flagNode = null, AstNode left = null, AstNode right = null) : AstNode(token, left, right)
     {
         public AstAssignment AssignmentNode = assignmentNode;
         public AstNode Type = type;
+        public AstNode Flag = flagNode;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
             string assignmentStr = AssignmentNode?.StrHelper(level + 1, "Assignment:") ?? "";
-            string Type = this.Type?.StrHelper(level + 1, "Type: ") ?? "";
-            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{assignmentStr}{Type}";
+            string type = this.Type?.StrHelper(level + 1, "Type: ") ?? "";
+            string flag = this.Flag?.StrHelper(level + 1, "Flag: ") ?? "";
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{assignmentStr}{type}{flag}";
         }
         public override string ToString() => StrHelper();
     }

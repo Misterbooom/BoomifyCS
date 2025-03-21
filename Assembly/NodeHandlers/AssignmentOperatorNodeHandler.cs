@@ -23,6 +23,12 @@ namespace BoomifyCS.Assembly.NodeHandlers
             compiler.flag |= NodeVisitFlag.DONT_LOAD_INDEX;
             compiler.Visit(assignmentOperator.IdentifierNode);
             BifyValue variable = compiler.StackPop();
+            if (variable.ValueFlag.HasFlag(ValueFlag.Constant))
+            {
+                Traceback.Instance.ThrowException(new BifyTypeError("Cannot assign to const variable"));
+                return;
+            }
+            Console.WriteLine($"Variable Flag - {variable.ValueFlag}");
 
             BifyType targetType = variable.GetBifyType();
             if (targetType is BifyPointerType pointerType)
@@ -48,7 +54,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                     result = variable.Div(value, compiler.builder);
                     break;
                 case TokenType.ASSIGN:
-                    result = targetType.CreateByValueRef(value.GetLLVMValue());
+                    result = targetType.CreateValueRef(value.GetLLVMValue());
                     break;
                 default:
                     throw new NotImplementedException($"{assignmentOperator.Token}");

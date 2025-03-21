@@ -152,7 +152,6 @@ namespace BoomifyCS.Ast
 
                 Traceback.Instance.ThrowException(error,lastOpenToken.Column - 1);
             }
-            BifyDebug.Log($"Tokens: {newTokens.TokensToString()}");
             return newTokens[1..];
         }
         private static char GetKeyByValue(Dictionary<char, TokenType> dictionary, TokenType value)

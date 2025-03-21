@@ -59,7 +59,7 @@ namespace BoomifyCS.Assembly.BifyObject
             var loadedValue = AssemblyCompiler.Instance.builder.BuildLoad2(GetBifyType().LLVMType, this.GetLLVMValue());
             return ((BifyPointerType)GetBifyType()).
                 PointedType.
-                CreateByValueRef(loadedValue);
+                CreateValueRef(loadedValue);
         }
     }
 
@@ -88,7 +88,7 @@ namespace BoomifyCS.Assembly.BifyObject
             throw new NotImplementedException("Create method not implemented in Pointer type");
         }
 
-        public override BifyValue CreateByValueRef(LLVMValueRef value)
+        protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
             return new PointerValue(value, this);
         }

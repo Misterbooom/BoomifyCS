@@ -33,7 +33,7 @@ namespace BoomifyCS.Exceptions
 
         public void PrintException()
         {
-            string exceptionInfo = $"{this.GetType().Name}: {Message}";
+            string exceptionInfo = $"{this.GetType().Name.Replace("Bify", "")}: {Message}";
             string fileInfo = $"    File '{FileName}', line {CurrentLine}, column {Column}";
 
             ColorConsole.WriteLine(exceptionInfo, Color.IndianRed);

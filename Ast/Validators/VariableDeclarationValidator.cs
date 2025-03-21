@@ -11,29 +11,33 @@ namespace BoomifyCS.Ast.Validators
     class VariableDeclarationValidator
     {
         public static void Validate(AstNode identifierNode, AstNode typeNode,
-            AstNode valueNode, List<Token> valueTokens, Token assignmentToken)
+            AstNode valueNode, List<Token> valueTokens, AstNode flagNode, Token assignmentToken)
         {
             if (valueTokens.Count == 0 || valueNode == null)
             {
                 BifySyntaxError error = new(ErrorMessage.EmptyValueAssigned());
                 Traceback.Instance.ThrowException(error, assignmentToken.Column);
-
             }
             if (identifierNode is not AstIdentifier)
             {
                 BifyNameError error = new(ErrorMessage.InvalidVariableName(identifierNode?.Token.Value),
-                    "",identifierNode?.Token.Value);
+                    "", identifierNode?.Token.Value);
                 Traceback.Instance.ThrowException(error, identifierNode?.Token.Column ?? assignmentToken.Column);
             }
-            if (typeNode is not AstIdentifier && typeNode is not AstUnaryOperator && typeNode.Token.Type == TokenType.POINTER)
+            //BifyDebug.Log($"Type Node - {typeNode} type token type - {typeNode.Token.Type}");
+            if (typeNode is not AstIdentifier && typeNode.Token.Type != TokenType.POINTER)
             {
                 BifyTypeError bifyTypeError = new(ErrorMessage.InvalidVariableType(typeNode?.Token.Type.ToString().ToLower()),
-                    "",typeNode?.Token.Value);
+                    "", typeNode?.Token.Value);
                 Traceback.Instance.ThrowException(bifyTypeError, typeNode?.Token.Column ?? assignmentToken.Column);
             }
-
+            if (flagNode !=  null && flagNode is not AstIdentifier && flagNode.Token.Type != TokenType.CONST )
+            {
+                BifyTypeError bifyTypeError = new(ErrorMessage.InvalidVariableType(typeNode?.Token.Type.ToString().ToLower()),
+                    "", typeNode?.Token.Value);
+                Traceback.Instance.ThrowException(bifyTypeError, typeNode?.Token.Column ?? assignmentToken.Column);
+            }
         }
-       
     }
     class AssignmentOperatorValidator
     {
@@ -43,9 +47,8 @@ namespace BoomifyCS.Ast.Validators
             {
                 BifySyntaxError error = new(ErrorMessage.EmptyValueAssigned());
                 Traceback.Instance.ThrowException(error, assignmentToken.Column);
-
             }
-            if (variableToken != null && variableToken.Type == TokenType.IDENTIFIER || variableToken.Type == TokenType.INDEX_OPERATOR)
+            if (variableToken != null && (variableToken.Type == TokenType.IDENTIFIER || variableToken.Type == TokenType.INDEX_OPERATOR))
             {
                 if (assignmentToken != null)
                 {

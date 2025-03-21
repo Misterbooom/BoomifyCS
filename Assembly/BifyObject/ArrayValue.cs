@@ -25,7 +25,7 @@ namespace BoomifyCS.Assembly.BifyObject
                 ArrayType arrayType = (ArrayType)GetBifyType();
                 //LLVMValueRef loadedValue = builder.BuildLoad2(arrayType.ItemType.LLVMType, gep, "loadArrayElem");
                 
-                return new BifyPointerType(arrayType.ItemType).CreateByValueRef(gep);
+                return new BifyPointerType(arrayType.ItemType).CreateValueRef(gep);
             }
         }
     }
@@ -61,7 +61,7 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             return ItemType.Size() * ElementCount;
         }
-        public override BifyValue CreateByValueRef(LLVMValueRef value)
+        protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
             return new ArrayValue(value, this);
         }

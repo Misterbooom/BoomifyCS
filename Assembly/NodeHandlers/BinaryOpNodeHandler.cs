@@ -5,6 +5,7 @@ using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 using LLVMSharp.Interop;
+using NUnit.Framework.Constraints;
 namespace BoomifyCS.Assembly.NodeHandlers
 {
     class BinaryOpNodeHandler : NodeHandler
@@ -19,7 +20,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 compiler.Visit(node.Right);
                 return;
             }
-           
+
             else if (node.Token.Type == TokenType.NOT)
             {
                 compiler.Visit(node.Left);
@@ -51,7 +52,14 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 case TokenType.MUL:
                     return lhs.Mul(rhs, compiler.builder);
                 case TokenType.DIV:
-                    return lhs.Div(rhs, compiler.builder);
+                    var res = lhs.Div(rhs, compiler.builder);
+                    if (res.GetLLVMValue().IsPoison)
+                    {
+                        Traceback.Instance.ThrowException(new BifyZeroDivisionError("Division by zero!"));
+                        return res;
+                    }
+                    return res;
+
                 case TokenType.EQ:
                     return lhs.Equal(rhs, compiler.builder);
                 case TokenType.NEQ:

@@ -8,6 +8,7 @@ namespace BoomifyCS.Lexer
 {
     public enum TokenType
     {
+        CONST,
         CALL,
         IDENTIFIER,
         NUMBER,

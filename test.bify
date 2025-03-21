@@ -1,20 +1,8 @@
-﻿
-
-void main(){
-	int[] arr = [1,3,4,432,5432,54];
-	int len = sizeof(arr) / sizeof(arr[0]);
-    for (int i = 0; i < len; i++){
-        for (int j = i; j < len; j++){
-            if (arr[i] > arr[j]){
-                int temp = arr[i];
-                arr[i] = arr[j];
-                arr[j] = temp;
-            }
-        }
+﻿void main() {
+    int a = 12;
+    for (int i = 0; i < 1000000; i++) {
+        a = i;
     }
-	explode("Sorted array: ");
-	for (int y = 0;y < len;y++){
-		explode("%d,",arr[y]);
-	}
+    explode("WOW: %d\n",a);
 
 }

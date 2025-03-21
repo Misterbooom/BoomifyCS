@@ -37,7 +37,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                     ValidateAndAutoCastArguments(providedArgs, callable.FunctionArgs.BifyTypes, callable.IsVariadic);
 
                     var call = callable.Call(providedArgs.ToArray());
-                    compiler.StackPush(callable.ReturnType.CreateByValueRef(call.GetLLVMValue()));
+                    compiler.StackPush(callable.ReturnType.CreateValueRef(call.GetLLVMValue()));
                 }
                 else
                 {

@@ -103,7 +103,7 @@ namespace BoomifyCS.Assembly.BifyObject
             }
            
         }
-        public override BifyValue CreateByValueRef(LLVMValueRef value)
+        protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
             return new FloatValue(value);
 

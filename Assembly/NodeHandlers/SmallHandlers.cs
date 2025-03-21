@@ -8,7 +8,6 @@ using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
-using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
@@ -28,10 +27,14 @@ namespace BoomifyCS.Assembly.NodeHandlers
         public override void HandleNode(AstNode node)
         {
             AstBlock blockNode = (AstBlock)node;
+            var locals = compiler.variableManager.GetLocals();
+            compiler.variableManager.EnterLocalScope();
+            compiler.variableManager.SetCurrentLocalScope(locals);
             foreach (AstNode child in blockNode.ChildNodes)
             {
                 compiler.Visit(child);
             }
+            compiler.variableManager.ExitLocalScope();
         }
     }
     class ArrayNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
@@ -102,28 +105,46 @@ namespace BoomifyCS.Assembly.NodeHandlers
     {
         public override void HandleNode(AstNode node)
         {
-            IValue variable = compiler.variableManager.GetVariable(node.Token.Value);
+            var variable = compiler.variableManager.GetVariable(node.Token.Value);
+
             if (variable is BifyType bifyType)
             {
                 compiler.StackPush(bifyType);
                 return;
             }
-            else if (variable is not PointerValue)
+
+            if (variable is not PointerValue)
             {
                 compiler.StackPush(variable);
                 return;
             }
-            PointerValue pointerValue = (PointerValue)variable;
 
-            if (((BifyPointerType)pointerValue.GetBifyType()).PointedType is ArrayType arrayType)
+            if (compiler.flag.HasFlag(NodeVisitFlag.DONT_LOAD_INDEX))
             {
-                compiler.StackPush(arrayType.CreateByValueRef(pointerValue.GetLLVMValue()));
+                compiler.StackPush(variable);
+                compiler.flag &= ~NodeVisitFlag.DONT_LOAD_INDEX;
                 return;
             }
-            BifyPointerType pointerType = (BifyPointerType)pointerValue.GetBifyType();
+
+            var pointerValue = (PointerValue)variable;
+            var pointerType = pointerValue.GetBifyType() as BifyPointerType;
+
+            if (pointerType == null)
+            {
+                compiler.StackPush(variable);
+                return;
+            }
+
+            if (pointerType.PointedType is ArrayType arrayType)
+            {
+                compiler.StackPush(arrayType.CreateValueRef(pointerValue.GetLLVMValue()));
+                return;
+            }
+
             var loadedValue = compiler.builder.BuildLoad2(pointerType.PointedType.LLVMType, pointerValue.GetLLVMValue());
-            compiler.StackPush(pointerType.PointedType.CreateByValueRef(loadedValue));
+            compiler.StackPush(pointerType.PointedType.CreateValueRef(loadedValue));
         }
+
     }
     class ConstantNodeHandler : NodeHandler
     {

@@ -28,7 +28,8 @@ namespace BoomifyCS.Lexer
             { "!=", TokenType.NEQ },
             { "&&", TokenType.AND },
             { "||", TokenType.OR},
-            { "//",TokenType.COMMENT}
+            { "//",TokenType.COMMENT},
+            {"const",TokenType.CONST },
 
 
         };

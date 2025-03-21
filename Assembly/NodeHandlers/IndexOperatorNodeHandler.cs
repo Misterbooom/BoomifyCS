@@ -55,7 +55,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 {
                     var loadedValue = compiler.builder.BuildLoad2(indexedPointerType.PointedType.LLVMType,
                         indexedResult.GetLLVMValue(), "loadedValue");
-                    BifyValue bifyValue = indexedPointerType.PointedType.CreateByValueRef(loadedValue);
+                    BifyValue bifyValue = indexedPointerType.PointedType.CreateValueRef(loadedValue);
                     BifyDebug.Log($"Loading Value from pointer: {bifyValue}");
 
                     compiler.StackPush(bifyValue);

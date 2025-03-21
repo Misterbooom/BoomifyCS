@@ -38,7 +38,7 @@ namespace BoomifyCS.Assembly.BifyObject
             var value = builder.BuildCall2(strCompType, strComp, new LLVMValueRef[] { GetLLVMValue(), other.GetLLVMValue() }, "str_comp");
             var castedValue = builder.BuildIntCast(value, LLVMTypeRef.Int1, "int32_to_int1");
             return new BoolType()
-                .CreateByValueRef(castedValue)
+                .CreateValueRef(castedValue)
                 .Not(builder);
         }
     }
@@ -48,7 +48,7 @@ namespace BoomifyCS.Assembly.BifyObject
         {
 
         }
-        public override BifyValue CreateByValueRef(LLVMValueRef value)
+        protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
             return new CharValue(value);
         }
@@ -76,11 +76,11 @@ namespace BoomifyCS.Assembly.BifyObject
             var stringValue = AssemblyCompiler.Instance.builder.BuildGlobalStringPtr(
                 ((string)value).Replace(@"\n", "\n"), (string)value);
             var pointerType = new BifyPointerType(new CharType());
-            return pointerType.CreateByValueRef(stringValue);
+            return pointerType.CreateValueRef(stringValue);
         }
 
 
-        public override BifyValue CreateByValueRef(LLVMValueRef value)
+        protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
             return new PointerValue(value, new BifyPointerType(new CharType()));
         }

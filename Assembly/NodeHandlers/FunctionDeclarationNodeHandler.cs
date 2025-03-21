@@ -75,7 +75,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             {
                 unsafe
                 {
-                    BifyValue value = function.FunctionArgs.BifyTypes[i].CreateByValueRef(LLVM.GetParam(function.GetLLVMValue(), i));
+                    BifyValue value = function.FunctionArgs.BifyTypes[i].CreateValueRef(LLVM.GetParam(function.GetLLVMValue(), i));
                     compiler.variableManager.RegisterLocalVariable(function.FunctionArgs.ArgsNames[i], value);
                 }
             }

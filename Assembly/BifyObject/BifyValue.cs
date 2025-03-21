@@ -1,12 +1,21 @@
 ﻿using System;
+using System.Threading.Tasks.Sources;
 using BoomifyCS.Exceptions;
 using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.BifyObject
 {
+    
     public abstract class BifyValue : IValue
     {
-
+        public ValueFlag ValueFlag
+        {
+            get => type.ValueFlag;
+            set
+            {
+                type.ValueFlag = value;
+            }
+        }
         protected LLVMValueRef llvmValue;
         protected BifyType type;
 
@@ -34,7 +43,7 @@ namespace BoomifyCS.Assembly.BifyObject
                     if (desiredPtr.PointedType.CompareType(currentPtr.PointedType))
                         return this;
                     LLVMValueRef loadedValue = builder.BuildLoad2(GetBifyType().LLVMType,this.GetLLVMValue(), "load_ptr");
-                    BifyValue castedValue = GetBifyType().CreateByValueRef(loadedValue)
+                    BifyValue castedValue = GetBifyType().CreateValueRef(loadedValue)
                                                 .AutoCast(desiredPtr.PointedType, builder);
                     LLVMValueRef newPtr = builder.BuildAlloca(desiredPtr.PointedType.LLVMType, "alloc_casted");
                     builder.BuildStore(castedValue.GetLLVMValue(), newPtr);

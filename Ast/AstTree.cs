@@ -21,7 +21,6 @@ namespace BoomifyCS.Ast
             List<AstNode> lines = [];
             foreach(var lineTokens in TokensFormatter.SplitLines(tokens))
             {
-                BifyDebug.Log($"Line: {lineTokens.TokensToString()}");
                 lines.Add(ParseLine(lineTokens, ref tokenIndex, ref lineCount));
             }
             AstModule module = new("","",lines);

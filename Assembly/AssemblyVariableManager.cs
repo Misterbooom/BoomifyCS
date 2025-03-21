@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Assembly.Builtin;
 using BoomifyCS.Exceptions;
@@ -29,11 +30,21 @@ namespace BoomifyCS.Assembly
         {
 
         }
-
+        public Dictionary<string, IValue> GetLocals()
+        {
+            return localScopes.Peek();
+        }
         public void EnterLocalScope()
         {
             localScopes.Push(new Dictionary<string, IValue>());
         }
+        public void SetCurrentLocalScope(Dictionary<string,IValue> scope)
+        {
+            localScopes.Pop();
+            localScopes.Push(new Dictionary<string, IValue>(scope));
+        }
+
+
 
         public void ExitLocalScope()
         {
@@ -126,5 +137,11 @@ namespace BoomifyCS.Assembly
         public void ClearGlobalVariables() => globalVariables.Clear();
 
         public void ClearLocalScopes() => localScopes.Clear();
+        public override string ToString()
+        {
+            var globalVars = string.Join(", ", globalVariables.Keys);
+            var localVars = string.Join(", ", localScopes.Peek().Keys);
+            return $"Global Variables: [{globalVars}], Local Variables: [{localVars}]";
+        }
     }
 }

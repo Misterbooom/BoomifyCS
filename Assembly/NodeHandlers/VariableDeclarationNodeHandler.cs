@@ -2,6 +2,7 @@
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
+using BoomifyCS.Lexer;
 using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.NodeHandlers
@@ -16,6 +17,8 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
             string varName = varDeclNode.AssignmentNode.Left.Token.Value;
             compiler.Visit(varDeclNode.Type);
+
+
             IValue value = compiler.StackIValuePop();
             if (value is not BifyType)
             {
@@ -29,6 +32,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             }
             compiler.Visit(varDeclNode.AssignmentNode.Right);
             BifyValue loadedValue = compiler.StackPop();
+
             BifyDebug.Log($"Var type - {bifyType.Name} Var value type - {loadedValue.GetTypeName()} LLVMVarType: {bifyType.LLVMType} pointer to i8");
 
             BifyValue variableValue = loadedValue.AutoCast(bifyType, compiler.builder);
@@ -38,11 +42,17 @@ namespace BoomifyCS.Assembly.NodeHandlers
             var alloca = compiler.builder.BuildAlloca(bifyType.LLVMType, varName);
 
             compiler.builder.BuildStore(variableValue.GetLLVMValue(), alloca);
-            compiler.variableManager.RegisterLocalVariable(varName, 
+            var allocaPointer = new BifyPointerType(variableValue.GetBifyType()).CreateValueRef(alloca);
+            if (varDeclNode.Flag?.Token.Type == TokenType.CONST)
+            {
+                allocaPointer.ValueFlag = ValueFlag.Constant |ValueFlag.Variable;
+            }
 
-                new BifyPointerType(variableValue.GetBifyType()).CreateByValueRef(alloca)
-                );
-         
+            compiler.variableManager.RegisterLocalVariable(varName, allocaPointer);
+
+
+
+
         }
 
     }

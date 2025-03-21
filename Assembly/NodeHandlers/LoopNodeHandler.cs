@@ -63,6 +63,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             LLVMBasicBlockRef incrementBB = func.AppendBasicBlock("for.inc");
             LLVMBasicBlockRef mergeBB = func.AppendBasicBlock("for.end");
 
+            compiler.variableManager.EnterLocalScope();
             compiler.Visit(astFor.InitNode);
             compiler.builder.BuildBr(conditionBB);
 

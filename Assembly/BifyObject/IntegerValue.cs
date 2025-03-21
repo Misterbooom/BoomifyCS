@@ -194,7 +194,7 @@ namespace BoomifyCS.Assembly.BifyObject
             LLVMValueRef llvmValue = LLVMValueRef.CreateConstInt(LLVMType, (ulong)(int)value, false);
             return new IntegerValue(llvmValue);
         }
-        public override BifyValue CreateByValueRef(LLVMValueRef value)
+        protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
             return new IntegerValue(value);
         }

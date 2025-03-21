@@ -56,7 +56,7 @@ namespace BoomifyCS.Exceptions
                     }
                     else
                     {
-                        Console.WriteLine($"{error.GetType().Name} != {type.Name}");
+                        Console.WriteLine($"{error.GetType().Name.Replace("Bify","")} != {type.Name}");
                     }
                 }
 

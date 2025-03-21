@@ -67,7 +67,7 @@ namespace BoomifyCS.Assembly.Builtin
             var prompt = (PointerValue)args[0];
             printFunction.Call([prompt]);
 
-            return new ConstStringType().CreateByValueRef(
+            return new ConstStringType().CreateValueRef(
                 AssemblyCompiler.Instance.builder.BuildCall2(TypeRef, llvmValue, args.Select(i => i.GetLLVMValue()).ToArray())
                 );
         }
