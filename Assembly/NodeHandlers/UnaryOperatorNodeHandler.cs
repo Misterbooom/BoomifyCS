@@ -44,20 +44,20 @@ namespace BoomifyCS.Assembly.NodeHandlers
             }
             compiler.Visit(unaryOperator.Operand);
             BifyValue varValue = compiler.StackPop();
-            BifyValue varPtr = compiler.variableManager.GetBifyValue(unaryOperator.Operand.Token.Value);
+            BifyValue varPtr = compiler.VariableManager.GetBifyValue(unaryOperator.Operand.Token.Value);
             BifyValue newValue;
 
             if (unaryOperator.Token.Type == TokenType.INCREMENT)
             {
-                newValue = varValue.Add(new IntegerType().Create(1),compiler.builder);
+                newValue = varValue.Add(new IntegerType().Create(1),compiler.Builder);
             }
             else
             {
-                newValue = varValue.Sub(new IntegerType().Create(1), compiler.builder);
+                newValue = varValue.Sub(new IntegerType().Create(1), compiler.Builder);
 
             }
-            //compiler.variableManager.SetLocalVariable(unaryOperator.value.Token.Value,newValue);
-            compiler.builder.BuildStore(newValue.GetLLVMValue(),varPtr.GetLLVMValue());
+            //compiler.VariableManager.SetLocalVariable(unaryOperator.value.Token.Value,newValue);
+            compiler.Builder.BuildStore(newValue.GetLLVMValue(),varPtr.GetLLVMValue());
 
 
         }

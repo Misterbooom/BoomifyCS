@@ -43,7 +43,7 @@ namespace BoomifyCS.Assembly.BifyObject
                 }
                 else if (astBinaryOp.Right is AstIdentifier rightId && astBinaryOp.Left is AstIdentifier leftId)
                 {
-                    arguments[rightId.Token.Value] = AssemblyCompiler.Instance.variableManager.GetBifyType(leftId.Token.Value);
+                    arguments[rightId.Token.Value] = AssemblyCompiler.Instance.VariableManager.GetBifyType(leftId.Token.Value);
                 }
             }
         }

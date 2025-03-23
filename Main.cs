@@ -17,12 +17,12 @@ namespace BoomifyCS
 {
     internal class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
-            await Run(args);
+            Run(args);
         }
 
-        static async Task Run(string[] args)
+        static void Run(string[] args)
         {
             try
             {

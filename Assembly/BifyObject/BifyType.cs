@@ -29,6 +29,10 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             return this.GetType() == other.GetType();
         }
+        public virtual bool CompareType(Type other)
+        {
+            return this.GetType() == other;
+        }
 
         public BifyValue CreateValueRef(LLVMValueRef value)
         {

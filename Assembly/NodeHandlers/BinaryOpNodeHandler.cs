@@ -25,7 +25,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             {
                 compiler.Visit(node.Left);
                 BifyValue value = compiler.StackPop();
-                BifyValue result = value.Not(compiler.builder);
+                BifyValue result = value.Not(compiler.Builder);
                 compiler.StackPush(result);
                 return;
             }
@@ -46,13 +46,13 @@ namespace BoomifyCS.Assembly.NodeHandlers
             switch (type)
             {
                 case TokenType.ADD:
-                    return lhs.Add(rhs, compiler.builder);
+                    return lhs.Add(rhs, compiler.Builder);
                 case TokenType.SUB:
-                    return lhs.Sub(rhs, compiler.builder);
+                    return lhs.Sub(rhs, compiler.Builder);
                 case TokenType.MUL:
-                    return lhs.Mul(rhs, compiler.builder);
+                    return lhs.Mul(rhs, compiler.Builder);
                 case TokenType.DIV:
-                    var res = lhs.Div(rhs, compiler.builder);
+                    var res = lhs.Div(rhs, compiler.Builder);
                     if (res.GetLLVMValue().IsPoison)
                     {
                         Traceback.Instance.ThrowException(new BifyZeroDivisionError("Division by zero!"));
@@ -61,30 +61,30 @@ namespace BoomifyCS.Assembly.NodeHandlers
                     return res;
 
                 case TokenType.EQ:
-                    return lhs.Equal(rhs, compiler.builder);
+                    return lhs.Equal(rhs, compiler.Builder);
                 case TokenType.NEQ:
-                    return lhs.NotEqual(rhs, compiler.builder);
+                    return lhs.NotEqual(rhs, compiler.Builder);
                 case TokenType.LT:
-                    return lhs.LessThan(rhs, compiler.builder);
+                    return lhs.LessThan(rhs, compiler.Builder);
                 case TokenType.GT:
-                    return lhs.GreaterThan(rhs, compiler.builder);
+                    return lhs.GreaterThan(rhs, compiler.Builder);
                 case TokenType.LTEQ:
-                    return lhs.LessThanOrEqual(rhs, compiler.builder);
+                    return lhs.LessThanOrEqual(rhs, compiler.Builder);
                 case TokenType.GTEQ:
-                    return lhs.GreaterThanOrEqual(rhs, compiler.builder);
+                    return lhs.GreaterThanOrEqual(rhs, compiler.Builder);
                 case TokenType.OR:
                     if (!lhs.CompareType(typeof(BoolType)) || !rhs.CompareType(typeof(BoolType)))
                     {
                         Traceback.Instance.ThrowException(new BifyTypeError($"Cannot compare {lhs.GetTypeName()} with {rhs.GetTypeName()}"));
                     }
 
-                    return new BoolValue(compiler.builder.BuildOr(lhs.GetLLVMValue(), rhs.GetLLVMValue(), "or"));
+                    return new BoolValue(compiler.Builder.BuildOr(lhs.GetLLVMValue(), rhs.GetLLVMValue(), "or"));
                 case TokenType.AND:
                     if (!lhs.CompareType(typeof(BoolType)) || !rhs.CompareType(typeof(BoolType)))
                     {
                         Traceback.Instance.ThrowException(new BifyTypeError($"Cannot compare {lhs.GetTypeName()} with {rhs.GetTypeName()}"));
                     }
-                    return new BoolValue(compiler.builder.BuildAnd(lhs.GetLLVMValue(), rhs.GetLLVMValue(), "and"));
+                    return new BoolValue(compiler.Builder.BuildAnd(lhs.GetLLVMValue(), rhs.GetLLVMValue(), "and"));
                 default:
                     throw new NotImplementedException($"Not implemented binary operator.Type: {type}");
             }

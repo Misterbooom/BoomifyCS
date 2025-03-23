@@ -27,19 +27,19 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 return;
             }
             BifyType functionReturnType = (BifyType)value;
-            compiler.returnType = functionReturnType;
+            compiler.ReturnType = functionReturnType;
 
             var functionArgs = new FunctionArgs(functionDeclNode.argumentsNode);
             var functionPathChecker = new FunctionPathChecker(functionReturnType, functionDeclNode.blockNode);
             var functionType = LLVMTypeRef.CreateFunction(functionReturnType.LLVMType, functionArgs.LLVMTypes);
 
 
-            var function = compiler.module.AddFunction(functionName, functionType);
+            var function = compiler.Module.AddFunction(functionName, functionType);
             var entry = function.AppendBasicBlock("entry");
-            compiler.builder.PositionAtEnd(entry);
-            compiler.variableManager.EnterLocalScope();
+            compiler.Builder.PositionAtEnd(entry);
+            compiler.VariableManager.EnterLocalScope();
             var bifyFunction = new BifyFunction(function, functionArgs, functionReturnType, functionType);
-            compiler.variableManager.RegisterGlobalVariable(functionName, bifyFunction);
+            compiler.VariableManager.RegisterGlobalVariable(functionName, bifyFunction);
 
             SetFunctionArgsName(function, functionArgs.ArgsNames);
             AddFunctionArgsToScope(bifyFunction);
@@ -49,10 +49,10 @@ namespace BoomifyCS.Assembly.NodeHandlers
             compiler.Visit(functionDeclNode.blockNode);
             if (!functionPathChecker.AllPathsReturn && functionReturnType.CompareType(new VoidType()))
             {
-                compiler.builder.BuildRetVoid();
+                compiler.Builder.BuildRetVoid();
             }
 
-            compiler.variableManager.ExitLocalScope();
+            compiler.VariableManager.ExitLocalScope();
 
         }
         private void SetFunctionArgsName(LLVMValueRef function, string[] argsNames)
@@ -76,7 +76,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 unsafe
                 {
                     BifyValue value = function.FunctionArgs.BifyTypes[i].CreateValueRef(LLVM.GetParam(function.GetLLVMValue(), i));
-                    compiler.variableManager.RegisterLocalVariable(function.FunctionArgs.ArgsNames[i], value);
+                    compiler.VariableManager.RegisterLocalVariable(function.FunctionArgs.ArgsNames[i], value);
                 }
             }
         }

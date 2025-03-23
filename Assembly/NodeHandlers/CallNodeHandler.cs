@@ -20,7 +20,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             if (node is AstCall callNode)
             {
                 string callableName = callNode.CallableName.Token.Value;
-                if (compiler.variableManager.GetVariable(callableName) is BifyFunction callable)
+                if (compiler.VariableManager.GetVariable(callableName) is BifyFunction callable)
                 {
                     if (callNode.ArgumentsNode != null)
                         compiler.Visit(callNode.ArgumentsNode);
@@ -81,7 +81,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 if (!expectedType.CompareType(providedArg.GetBifyType()))
                 {
                     Traceback.Instance.Catch(typeof(BifyTypeError));
-                    BifyValue castedArg = providedArg.AutoCast(expectedType, compiler.builder);
+                    BifyValue castedArg = providedArg.AutoCast(expectedType, compiler.Builder);
                     if (castedArg == null || Traceback.Instance.GetError() != null)
                     {
                         string expectedTypeName = expectedType.Name;

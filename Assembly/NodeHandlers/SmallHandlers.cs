@@ -27,14 +27,20 @@ namespace BoomifyCS.Assembly.NodeHandlers
         public override void HandleNode(AstNode node)
         {
             AstBlock blockNode = (AstBlock)node;
-            var locals = compiler.variableManager.GetLocals();
-            compiler.variableManager.EnterLocalScope();
-            compiler.variableManager.SetCurrentLocalScope(locals);
-            foreach (AstNode child in blockNode.ChildNodes)
+            var locals = compiler.VariableManager.GetLocals();
+            compiler.VariableManager.EnterLocalScope();
+            compiler.VariableManager.SetCurrentLocalScope(locals);
+            for (int i = 0; i < blockNode.ChildNodes.Count; i++)
             {
+                AstNode child = blockNode.ChildNodes[i];
+                compiler.NextNode = blockNode.ChildNodes.ElementAtOrDefault(i + 1);
                 compiler.Visit(child);
+                if (child is AstContinue || child is AstBreak || child  is AstReturn)
+                {
+                    return;
+                }
             }
-            compiler.variableManager.ExitLocalScope();
+            compiler.VariableManager.ExitLocalScope();
         }
     }
     class ArrayNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
@@ -75,7 +81,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 if (!expectedType.CompareType(providedArg.GetBifyType()))
                 {
                     Traceback.Instance.Catch(typeof(BifyTypeError));
-                    BifyValue castedArg = providedArg.AutoCast(expectedType, AssemblyCompiler.Instance.builder);
+                    BifyValue castedArg = providedArg.AutoCast(expectedType, AssemblyCompiler.Instance.Builder);
                     if (castedArg == null || Traceback.Instance.GetError() != null)
                     {
                         string expectedTypeName = expectedType.Name;
@@ -105,7 +111,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
     {
         public override void HandleNode(AstNode node)
         {
-            var variable = compiler.variableManager.GetVariable(node.Token.Value);
+            var variable = compiler.VariableManager.GetVariable(node.Token.Value);
 
             if (variable is BifyType bifyType)
             {
@@ -119,10 +125,10 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 return;
             }
 
-            if (compiler.flag.HasFlag(NodeVisitFlag.DONT_LOAD_INDEX))
+            if (compiler.Flag.HasFlag(NodeVisitFlag.DONT_LOAD_INDEX))
             {
                 compiler.StackPush(variable);
-                compiler.flag &= ~NodeVisitFlag.DONT_LOAD_INDEX;
+                compiler.Flag &= ~NodeVisitFlag.DONT_LOAD_INDEX;
                 return;
             }
 
@@ -141,7 +147,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 return;
             }
 
-            var loadedValue = compiler.builder.BuildLoad2(pointerType.PointedType.LLVMType, pointerValue.GetLLVMValue());
+            var loadedValue = compiler.Builder.BuildLoad2(pointerType.PointedType.LLVMType, pointerValue.GetLLVMValue());
             compiler.StackPush(pointerType.PointedType.CreateValueRef(loadedValue));
         }
 

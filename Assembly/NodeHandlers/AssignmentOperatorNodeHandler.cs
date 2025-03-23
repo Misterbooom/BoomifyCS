@@ -1,68 +1,70 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 using LLVMSharp.Interop;
-using NUnit.Framework.Constraints;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class AssignmentOperatorNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    class AssignmentOperatorNodeHandler : NodeHandler
     {
+        public AssignmentOperatorNodeHandler(AssemblyCompiler compiler)
+            : base(compiler)
+        {
+        }
+
         public override void HandleNode(AstNode node)
         {
-            AstAssignmentOperator assignmentOperator = node as AstAssignmentOperator;
-            compiler.Visit(assignmentOperator.ValueNode);
-            BifyValue value = compiler.StackPop();
+            AstAssignmentOperator assignmentOp = node as AstAssignmentOperator;
 
-            compiler.flag |= NodeVisitFlag.DONT_LOAD_INDEX;
-            compiler.Visit(assignmentOperator.IdentifierNode);
-            BifyValue variable = compiler.StackPop();
-            if (variable.ValueFlag.HasFlag(ValueFlag.Constant))
+            compiler.Visit(assignmentOp.ValueNode);
+            BifyValue rhsValue = compiler.StackPop();
+
+            compiler.Flag |= NodeVisitFlag.DONT_LOAD_INDEX;
+            compiler.Visit(assignmentOp.IdentifierNode);
+            BifyValue lhsPointer = compiler.StackPop();
+
+            if (lhsPointer.ValueFlag.HasFlag(ValueFlag.Constant))
             {
                 Traceback.Instance.ThrowException(new BifyTypeError("Cannot assign to const variable"));
                 return;
             }
-            Console.WriteLine($"Variable Flag - {variable.ValueFlag}");
+            Console.WriteLine($"Variable Flag - {lhsPointer.ValueFlag}");
 
-            BifyType targetType = variable.GetBifyType();
-            if (targetType is BifyPointerType pointerType)
-            {
-                targetType = pointerType.PointedType;
-            }
+            BifyType targetValueType = lhsPointer.GetBifyType();
+            if (targetValueType is BifyPointerType pointerType)
+                targetValueType = pointerType.PointedType;
 
-            value = value.AutoCast(targetType, compiler.builder);
-            BifyValue result;
+            rhsValue = rhsValue.AutoCast(targetValueType, compiler.Builder);
+            BifyValue computedValue;
+            BifyPointerType lhsPointerType = lhsPointer.GetBifyType() as BifyPointerType;
+            BifyDebug.Log($"pointer type: {lhsPointerType.Name} {targetValueType.LLVMType}");
+            BifyValue lhsLoadedValue = targetValueType.CreateValueRef(
+                compiler.Builder.BuildLoad2(targetValueType.LLVMType, lhsPointer.GetLLVMValue(), "load_lhs"));
 
-            switch (assignmentOperator.Token.Type)
+            switch (assignmentOp.Token.Type)
             {
                 case TokenType.ADDE:
-                    result = variable.Add(value, compiler.builder);
+                    computedValue = lhsLoadedValue.Add(rhsValue, compiler.Builder);
                     break;
                 case TokenType.SUBE:
-                    result = variable.Sub(value, compiler.builder);
+                    computedValue = lhsLoadedValue.Sub(rhsValue, compiler.Builder);
                     break;
                 case TokenType.MULE:
-                    result = variable.Mul(value, compiler.builder);
+                    computedValue = lhsLoadedValue.Mul(rhsValue, compiler.Builder);
                     break;
                 case TokenType.DIVE:
-                    result = variable.Div(value, compiler.builder);
+                    computedValue = lhsLoadedValue.Div(rhsValue, compiler.Builder);
                     break;
                 case TokenType.ASSIGN:
-                    result = targetType.CreateValueRef(value.GetLLVMValue());
+                    computedValue = targetValueType.CreateValueRef(rhsValue.GetLLVMValue());
                     break;
                 default:
-                    throw new NotImplementedException($"{assignmentOperator.Token}");
+                    throw new NotImplementedException($"{assignmentOp.Token}");
             }
-
-            BifyDebug.Log($"Result - {result}");
-            compiler.builder.BuildStore(result.GetLLVMValue(), variable.GetLLVMValue());
+            BifyDebug.Log($"Computed Value - {computedValue}");
+            compiler.Builder.BuildStore(computedValue.GetLLVMValue(), lhsPointer.GetLLVMValue());
         }
     }
-
 }

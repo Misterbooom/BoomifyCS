@@ -29,7 +29,7 @@ namespace BoomifyCS.Assembly.BifyObject
         public void SetLLVMValue(LLVMValueRef value) => llvmValue = value;
         public BifyType GetBifyType() => type;
         public string GetTypeName() => type.Name;
-        public virtual bool CompareType(Type other) => GetBifyType().GetType() == other;
+        public virtual bool CompareType(Type other) => GetBifyType().CompareType(other);
         public virtual bool CompareType(BifyValue other) => GetBifyType().CompareType(other.GetBifyType());
         public BifyValue AutoCast(BifyType desiredType, LLVMBuilderRef builder)
         {

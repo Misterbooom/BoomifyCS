@@ -22,8 +22,8 @@ namespace BoomifyCS.Assembly.Builtin
 
         private void InitFunction()
         {
-            var builder = AssemblyCompiler.Instance.builder;
-            var module = AssemblyCompiler.Instance.module;
+            var builder = AssemblyCompiler.Instance.Builder;
+            var module = AssemblyCompiler.Instance.Module;
             var context = module.Context;
 
             var scanfType = LLVMTypeRef.CreateFunction(
@@ -57,18 +57,18 @@ namespace BoomifyCS.Assembly.Builtin
         {
             if (needToInit)
             {
-                var entryBlock = AssemblyCompiler.Instance.builder.InsertBlock;
+                var entryBlock = AssemblyCompiler.Instance.Builder.InsertBlock;
                 InitFunction();
                 needToInit = false;
-                AssemblyCompiler.Instance.builder.PositionAtEnd(entryBlock);
+                AssemblyCompiler.Instance.Builder.PositionAtEnd(entryBlock);
             }
 
-            var printFunction = AssemblyCompiler.Instance.variableManager.GetBifyValue("explode");
+            var printFunction = AssemblyCompiler.Instance.VariableManager.GetBifyValue("explode");
             var prompt = (PointerValue)args[0];
             printFunction.Call([prompt]);
 
             return new ConstStringType().CreateValueRef(
-                AssemblyCompiler.Instance.builder.BuildCall2(TypeRef, llvmValue, args.Select(i => i.GetLLVMValue()).ToArray())
+                AssemblyCompiler.Instance.Builder.BuildCall2(TypeRef, llvmValue, args.Select(i => i.GetLLVMValue()).ToArray())
                 );
         }
     }

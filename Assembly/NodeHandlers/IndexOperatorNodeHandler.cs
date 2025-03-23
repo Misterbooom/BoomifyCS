@@ -43,7 +43,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             else if (operandValue is BifyValue operandBifyValue)
             {
                 compiler.Visit(indexOperatorNode.IndexNode);
-                BifyValue indexedResult = operandBifyValue.Index(compiler.StackPop(), compiler.builder);
+                BifyValue indexedResult = operandBifyValue.Index(compiler.StackPop(), compiler.Builder);
 
                 if (!indexedResult.CompareType(typeof(BifyPointerType)))
                 {
@@ -51,9 +51,9 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 }
                 BifyPointerType indexedPointerType = (BifyPointerType)indexedResult.GetBifyType();
 
-                if (!compiler.flag.HasFlag(NodeVisitFlag.DONT_LOAD_INDEX))
+                if (!compiler.Flag.HasFlag(NodeVisitFlag.DONT_LOAD_INDEX))
                 {
-                    var loadedValue = compiler.builder.BuildLoad2(indexedPointerType.PointedType.LLVMType,
+                    var loadedValue = compiler.Builder.BuildLoad2(indexedPointerType.PointedType.LLVMType,
                         indexedResult.GetLLVMValue(), "loadedValue");
                     BifyValue bifyValue = indexedPointerType.PointedType.CreateValueRef(loadedValue);
                     BifyDebug.Log($"Loading Value from pointer: {bifyValue}");
@@ -63,7 +63,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 else
                 {
                     compiler.StackPush(indexedResult);
-                    compiler.flag &= ~NodeVisitFlag.DONT_LOAD_INDEX;
+                    compiler.Flag &= ~NodeVisitFlag.DONT_LOAD_INDEX;
 
                 }
             }

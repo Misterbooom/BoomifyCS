@@ -27,7 +27,7 @@ namespace BoomifyCS.Assembly.Builtin
             var argTypes = new[] { LLVMTypeRef.CreatePointer(LLVMTypeRef.Int8, 0) };
             TypeRef = LLVMTypeRef.CreateFunction(returnType, argTypes, true);
 
-            llvmValue = AssemblyCompiler.Instance.module.AddFunction("printf", TypeRef);
+            llvmValue = AssemblyCompiler.Instance.Module.AddFunction("printf", TypeRef);
         }
 
         public override BifyValue Call(BifyValue[] args)
@@ -48,13 +48,13 @@ namespace BoomifyCS.Assembly.Builtin
                 {
                     unsafe
                     {
-                        llvmArgs[i] = AssemblyCompiler.Instance.builder.BuildFPExt(args[i].GetLLVMValue(),
+                        llvmArgs[i] = AssemblyCompiler.Instance.Builder.BuildFPExt(args[i].GetLLVMValue(),
                         LLVM.DoubleType(), "float_to_double");
                     }
                 }
                 else if (args[i].GetBifyType().CompareType(new BoolType()))
                 {
-                    llvmArgs[i] = AssemblyCompiler.Instance.builder.BuildZExt(args[i].GetLLVMValue(),LLVMTypeRef.Int32,"int1_to_int32");
+                    llvmArgs[i] = AssemblyCompiler.Instance.Builder.BuildZExt(args[i].GetLLVMValue(),LLVMTypeRef.Int32,"int1_to_int32");
                 }
                 else
                 {
@@ -63,7 +63,7 @@ namespace BoomifyCS.Assembly.Builtin
                 }
             }
 
-            AssemblyCompiler.Instance.builder.BuildCall2(
+            AssemblyCompiler.Instance.Builder.BuildCall2(
                 TypeRef,
                 llvmValue,
                 llvmArgs,

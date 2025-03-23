@@ -25,7 +25,7 @@ namespace BoomifyCS.Assembly.BifyObject
         public override BifyValue Call(BifyValue[] args)
         {
             return ReturnType.CreateValueRef(
-                AssemblyCompiler.Instance.builder.BuildCall2(
+                AssemblyCompiler.Instance.Builder.BuildCall2(
                      TypeRef,
                      GetLLVMValue(),
                      args.Select(item => item.GetLLVMValue()).ToArray(),

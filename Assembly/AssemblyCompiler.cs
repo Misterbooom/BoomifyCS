@@ -2,14 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using LLVMSharp;
+using LLVMSharp.Interop;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
-using LLVMSharp;
-using LLVMSharp.Interop;
-using Microsoft.Win32;
-
-
 
 namespace BoomifyCS.Assembly
 {
@@ -19,22 +16,24 @@ namespace BoomifyCS.Assembly
         NONE,
         DONT_LOAD_INDEX = 1 << 0,
     }
-    class AssemblyCompiler
+
+    class AssemblyCompiler : IDisposable
     {
         private static AssemblyCompiler _instance;
         private static readonly object _lock = new();
 
-        public AssemblerCodeManager assemblerCode = new();
-        public AssemblyVariableManager variableManager;
-        public LLVMContext context = new();
-        public LLVMModuleRef module;
-        public LLVMBuilderRef builder;
-        public LLVMExecutionEngineRef engine;
-        private Stack<IValue> stack = new();
+        public AssemblerCodeManager AssemblerCode { get; } = new();
+        public AssemblyVariableManager VariableManager { get; }
+        public LLVMContext Context { get; }
+        public LLVMModuleRef Module { get; }
+        public LLVMBuilderRef Builder { get; }
+        public LLVMExecutionEngineRef Engine { get; }
+        public LoopManager LoopManager { get; } = new();
+        public AstNode NextNode { get; set; }
+        public NodeVisitFlag Flag { get; set; } = NodeVisitFlag.NONE;
+        public BifyType ReturnType { get; set; }
 
-        public NodeVisitFlag flag = NodeVisitFlag.NONE;
-
-        public BifyType returnType;
+        private readonly Stack<IValue> _stack = new();
 
         private AssemblyCompiler()
         {
@@ -43,25 +42,12 @@ namespace BoomifyCS.Assembly
             LLVM.InitializeX86TargetInfo();
             LLVM.InitializeX86AsmParser();
             LLVM.InitializeX86AsmPrinter();
-            module = context.Handle.CreateModuleWithName("test");
-            builder = context.Handle.CreateBuilder();
-            variableManager = new();
-            engine = module.CreateExecutionEngine();
 
-
-        }
-        public void StackPush(IValue value)
-        {
-            stack.Push(value);
-        }
-
-        public BifyValue StackPop()
-        {
-            return (BifyValue)stack.Pop();
-        }
-        public IValue StackIValuePop()
-        {
-            return stack.Pop();
+            Context = new LLVMContext();
+            Module = Context.Handle.CreateModuleWithName("test");
+            Builder = Context.Handle.CreateBuilder();
+            VariableManager = new AssemblyVariableManager();
+            Engine = Module.CreateExecutionEngine();
         }
 
         public static AssemblyCompiler Instance
@@ -76,77 +62,47 @@ namespace BoomifyCS.Assembly
             }
         }
 
+        public void StackPush(IValue value)
+        {
+            _stack.Push(value);
+        }
 
+        public BifyValue StackPop()
+        {
+            return (BifyValue)_stack.Pop();
+        }
+
+        public IValue StackIValuePop()
+        {
+            return _stack.Pop();
+        }
 
         public void Visit(AstNode node)
         {
             NodeHandler handler = NodeHandlerFactory.CreateHandler(node, this);
             handler.HandleNode(node);
         }
+
         public void Compile(AstNode node)
         {
             Visit(node);
-            BifyDebug.Log("\n" + module.ToString());
-            CompileFile("test.ll", "output");
-            var mainFunction = module.GetNamedFunction("main");
-            if (mainFunction == null)
+            BifyDebug.Log($"Module:\n{Module}");
+            LLVMValueRef mainFunction = Module.GetNamedFunction("main");
+            if (mainFunction.Handle == IntPtr.Zero)
             {
                 Console.WriteLine("Main function not found.");
                 return;
             }
-
-            // Execute the 'main' function
-            //var result = engine.RunFunction(mainFunction, []);
+            CompileFile("test.ll", "output");
         }
-
-
 
         private void CompileFile(string filePath, string outputDirectory)
         {
             string fileName = Path.GetFileNameWithoutExtension(filePath);
             Directory.CreateDirectory(outputDirectory);
-            // Write LLVM IR to filePath
             try
             {
-                module.PrintToFile(filePath);
-//                File.WriteAllText(filePath, @"
-//; ModuleID = 'my_module'
-//target triple = ""x86_64-pc-win32""
-//target datalayout = ""e-m:w-i64:64-f80:128-n8:16:32:64-S128""
-
-//@.scanf_fmt = private unnamed_addr constant [3 x i8] c""%d\00"", align 1
-//@.printf_fmt = private unnamed_addr constant [4 x i8] c""%d\0A\00"", align 1
-
-//declare dso_local i32 @scanf(i8*, ...)
-//declare dso_local i32 @printf(i8*, ...)
-
-//define dso_local i32 @main() {
-//entry:
-//  ; Allocate space for an integer variable 'num'
-//  %num = alloca i32, align 4
-
-//  ; Get pointer to the scanf format string (""%d"")
-//  %fmt_sc = getelementptr inbounds [3 x i8], [3 x i8]* @.scanf_fmt, i32 0, i32 0
-  
-//  ; Call scanf(""%d"", &num)
-//  %call_scanf = call i32 @scanf(i8* %fmt_sc, i32* %num)
-
-//  ; Load the integer value read from input
-//  %val = load i32, i32* %num, align 4
-
-//  ; Get pointer to the printf format string (""%d\n"")
-//  %fmt_pr = getelementptr inbounds [4 x i8], [4 x i8]* @.printf_fmt, i32 0, i32 0
-
-//  ; Call printf(""%d\n"", val)
-//  %call_printf = call i32 @printf(i8* %fmt_pr, i32 %val)
-
-//  ret i32 0
-//}
-
-
-//");
-  
-            
+                Module.PrintToFile(filePath);
                 Console.WriteLine($"LLVM IR written to: {filePath}");
             }
             catch (Exception ex)
@@ -155,7 +111,6 @@ namespace BoomifyCS.Assembly
                 return;
             }
 
-            string objFile = Path.Combine(outputDirectory, $"{fileName}.o");
             string exeFile = Path.Combine(outputDirectory, $"{fileName}.exe");
 
             try
@@ -164,28 +119,24 @@ namespace BoomifyCS.Assembly
                 {
                     File.Delete(exeFile);
                 }
-
-
-                ExecuteCommand($"clang {filePath} -o {exeFile} -nodefaultlibs -lmsvcrt -lkernel32 -luser32 -llegacy_stdio_definitions ");
+                string clangCommand = $"clang {filePath} -o {exeFile} -nodefaultlibs -lmsvcrt -lkernel32 -luser32 -llegacy_stdio_definitions";
+                ExecuteCommand(clangCommand);
                 if (!File.Exists(exeFile))
                     throw new FileNotFoundException($"Executable not generated: {exeFile}");
-
-                Console.WriteLine("Running exe");
+                Console.WriteLine("Running executable...");
                 RunExecutable(exeFile);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error during compilation or execution: {ex.Message}");
-                return;
             }
         }
 
-        // Метод для выполнения команд в командной строке
-        static void ExecuteCommand(string command)
+        private static void ExecuteCommand(string command)
         {
             try
             {
-                ProcessStartInfo processStartInfo = new ProcessStartInfo
+                ProcessStartInfo psi = new ProcessStartInfo
                 {
                     FileName = "cmd.exe",
                     Arguments = $"/C {command}",
@@ -195,22 +146,20 @@ namespace BoomifyCS.Assembly
                     RedirectStandardError = true
                 };
 
-                Process process = Process.Start(processStartInfo);
-
-                string output = process.StandardOutput.ReadToEnd();
-                string errorOutput = process.StandardError.ReadToEnd();
-
-                process.WaitForExit();
-
-                // Выводим в консоль
-                if (!string.IsNullOrEmpty(output))
+                using (Process process = Process.Start(psi))
                 {
-                    Console.WriteLine(output);
-                }
+                    string output = process.StandardOutput.ReadToEnd();
+                    string errorOutput = process.StandardError.ReadToEnd();
+                    process.WaitForExit();
 
-                if (!string.IsNullOrEmpty(errorOutput))
-                {
-                    Console.WriteLine($"Error: {errorOutput}");
+                    if (!string.IsNullOrEmpty(output))
+                    {
+                        Console.WriteLine(output);
+                    }
+                    if (!string.IsNullOrEmpty(errorOutput))
+                    {
+                        Console.WriteLine($"Error: {errorOutput}");
+                    }
                 }
             }
             catch (Exception ex)
@@ -219,20 +168,22 @@ namespace BoomifyCS.Assembly
             }
         }
 
-        static void RunExecutable(string exePath)
+        private static void RunExecutable(string exePath)
         {
             try
             {
-                ProcessStartInfo processStartInfo = new ProcessStartInfo
+                ProcessStartInfo psi = new ProcessStartInfo
                 {
                     FileName = "cmd.exe",
                     Arguments = $"/K \"{exePath}\"",
                     CreateNoWindow = false,
-                    UseShellExecute = true, 
+                    UseShellExecute = true,
                 };
 
-                Process process = Process.Start(processStartInfo);
-                process.WaitForExit();
+                using (Process process = Process.Start(psi))
+                {
+                    process.WaitForExit();
+                }
             }
             catch (Exception ex)
             {
@@ -240,7 +191,16 @@ namespace BoomifyCS.Assembly
             }
         }
 
+        private bool _disposed = false;
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                Builder.Dispose();
+                Module.Dispose();
+                Engine.Dispose();
+                _disposed = true;
+            }
+        }
     }
-
-
 }

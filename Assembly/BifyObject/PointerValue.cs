@@ -56,7 +56,7 @@ namespace BoomifyCS.Assembly.BifyObject
         }
         public BifyValue Dereference()
         {
-            var loadedValue = AssemblyCompiler.Instance.builder.BuildLoad2(GetBifyType().LLVMType, this.GetLLVMValue());
+            var loadedValue = AssemblyCompiler.Instance.Builder.BuildLoad2(GetBifyType().LLVMType, this.GetLLVMValue());
             return ((BifyPointerType)GetBifyType()).
                 PointedType.
                 CreateValueRef(loadedValue);

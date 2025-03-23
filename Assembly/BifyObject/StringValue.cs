@@ -24,7 +24,7 @@ namespace BoomifyCS.Assembly.BifyObject
 
             if (strComp.Handle == IntPtr.Zero)
             {
-                strComp = AssemblyCompiler.Instance.module.AddFunction("strcmp", strCompType);
+                strComp = AssemblyCompiler.Instance.Module.AddFunction("strcmp", strCompType);
             }
         }
 
@@ -73,7 +73,7 @@ namespace BoomifyCS.Assembly.BifyObject
 
         public override BifyValue Create(object value)
         {
-            var stringValue = AssemblyCompiler.Instance.builder.BuildGlobalStringPtr(
+            var stringValue = AssemblyCompiler.Instance.Builder.BuildGlobalStringPtr(
                 ((string)value).Replace(@"\n", "\n"), (string)value);
             var pointerType = new BifyPointerType(new CharType());
             return pointerType.CreateValueRef(stringValue);

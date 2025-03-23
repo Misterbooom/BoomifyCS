@@ -23,7 +23,7 @@ namespace BoomifyCS.Assembly.BifyObject
                 LLVMValueRef gep = builder.BuildInBoundsGEP2(GetBifyType().LLVMType, GetLLVMValue(), indices, "arrayIndex");
 
                 ArrayType arrayType = (ArrayType)GetBifyType();
-                //LLVMValueRef loadedValue = builder.BuildLoad2(arrayType.ItemType.LLVMType, gep, "loadArrayElem");
+                //LLVMValueRef loadedValue = Builder.BuildLoad2(arrayType.ItemType.LLVMType, gep, "loadArrayElem");
                 
                 return new BifyPointerType(arrayType.ItemType).CreateValueRef(gep);
             }

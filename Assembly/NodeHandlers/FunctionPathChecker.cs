@@ -9,7 +9,7 @@ class FunctionPathChecker
 {
     public bool AllPathsReturn = false;
     private BifyType _functionType;
-    private AssemblyVariableManager _variableManager = AssemblyCompiler.Instance.variableManager;
+    private AssemblyVariableManager _variableManager = AssemblyCompiler.Instance.VariableManager;
 
     public FunctionPathChecker(BifyType functionType, AstNode node)
     {
