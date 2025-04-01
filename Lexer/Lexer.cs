@@ -227,6 +227,10 @@ namespace BoomifyCS.Lexer
                         counter--;
                         break;
                     }
+                    else
+                    {
+                        str += currentChar;
+                    }
                 }
                 else if (currentChar == '\n')
                 {

@@ -1,6 +1,6 @@
 ﻿
 
 void main() {
-	const char* str = input("Hello: ");
+	const char* str = input("Hello:'' ");
 	explode("User input is '%s'",str);
 }
