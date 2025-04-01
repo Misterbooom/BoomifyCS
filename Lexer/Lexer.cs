@@ -41,7 +41,7 @@ namespace BoomifyCS.Lexer
                 {
                     _lineCount++;
                     _position++;
-                    ResetColumn(); // Reset column to 1 for the new line
+                    ResetColumn(); // Reset column to 1 for the new Line
                     continue;
                 }
                 if (char.IsWhiteSpace(currentChar))

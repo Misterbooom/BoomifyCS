@@ -19,7 +19,7 @@ namespace BoomifyCS.Exceptions
             string fileName = Path.GetFileName(callerFilePath);
 
             string logMessage = $"[DEBUG] [{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}\n" +
-                                $"Called from: {callerName} in {fileName} at line {callerLineNumber}";
+                                $"Called from: {callerName} in {fileName} at Line {callerLineNumber}";
             Console.WriteLine(logMessage);
         }
     }

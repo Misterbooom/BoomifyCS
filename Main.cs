@@ -33,6 +33,7 @@ namespace BoomifyCS
                 Console.WriteLine("Error!");
                 string errorText = e.ToString();
                 new ErrorWrapper(e).PrintStackTrace();
+                throw;
                 //ProcessStartInfo psi = new ProcessStartInfo
                 //{
                 //    FileName = "python",
@@ -56,9 +57,11 @@ namespace BoomifyCS
         {
             Console.OutputEncoding = Encoding.UTF8;
             string file = "C:/BoomifyCS/test.bify";
+            Traceback.Instance.FileName = file;
             string code = File.ReadAllText(file);
             MyLexer lexer = new(code);
             List<Token> tokens = lexer.Tokenize();
+            //tokens.WriteTokens();
             string[] codeByLine = code.Split('\n');
             AstTree astParser = new(codeByLine);
             AstNode node = astParser.ParseTokens(tokens);

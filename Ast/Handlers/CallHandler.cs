@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using BoomifyCS.Ast.Handlers;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
@@ -13,7 +14,7 @@ namespace BoomifyCS.Ast
 
         public override void HandleToken(Token token)
         {
-            if (builder.operandStack.Count == 1 && builder.operatorStack.Count == 0)
+            if (builder.operandStack.Count == 1 && builder.operatorStack.Count == 0 && builder.operandStack.Peek() is AstIdentifier)
             {
                 new FunctionDeclarationHandler(builder).HandleToken(token);
             }

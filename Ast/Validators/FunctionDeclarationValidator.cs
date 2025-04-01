@@ -13,7 +13,7 @@ namespace BoomifyCS.Ast.Validators
                 Traceback.Instance.ThrowException(bifyError, nameToken == null ? typeNode.Token.Column : nameToken.Column);
             }
 
-            if (typeNode is not AstIdentifier && typeNode.Token.Type != TokenType.POINTER)
+            if (typeNode is not AstIdentifier && typeNode.Token.Type != TokenType.POINTER && typeNode is not AstIndexOperator)
             {
                 BifyTypeError bifyTypeError = new(ErrorMessage.InvalidFunctionType());
                 Traceback.Instance.ThrowException(bifyTypeError, typeNode?.Token.Column ?? nameToken.Column);
@@ -22,6 +22,8 @@ namespace BoomifyCS.Ast.Validators
             var result = TravelParameters(parametersNode);
             if (!result.isCorrect && parametersNode != null)
             {
+                BifyDebug.Log($"Parameeters node: {parametersNode}");
+
                 BifyError bifyError = new BifySyntaxError(ErrorMessage.InvalidParameter(result.token.Type.ToString()), "", result.token.Value);
                 Traceback.Instance.ThrowException(bifyError, result.token.Column);
             }
@@ -51,8 +53,7 @@ namespace BoomifyCS.Ast.Validators
                 else if (binaryOp.Token.Value == "concat")
                 {
                     
-                    return (binaryOp.Left.Token.Type == TokenType.IDENTIFIER &&
-                        binaryOp.Right.Token.Type == TokenType.IDENTIFIER, binaryOp.Token);
+                    return (binaryOp.Left is AstIdentifier || binaryOp.Left is AstIndexOperator && binaryOp.Right is AstIdentifier,binaryOp.Token);
                 }
                 return (false, binaryOp.Token);
             }

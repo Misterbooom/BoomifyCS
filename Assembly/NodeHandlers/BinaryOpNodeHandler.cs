@@ -1,6 +1,7 @@
 ﻿using System;
 using BoomifyCS.Assembly;
 using BoomifyCS.Assembly.BifyObject;
+using BoomifyCS.Assembly.Builtin;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
@@ -52,12 +53,20 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 case TokenType.MUL:
                     return lhs.Mul(rhs, compiler.Builder);
                 case TokenType.DIV:
-                    var res = lhs.Div(rhs, compiler.Builder);
-                    if (res.GetLLVMValue().IsPoison)
+                    if (rhs.CompareType(typeof(IntegerType)) || rhs.CompareType(typeof(FloatType)))
                     {
-                        Traceback.Instance.ThrowException(new BifyZeroDivisionError("Division by zero!"));
-                        return res;
+                        return SafeDiv.Instance(lhs.GetBifyType())
+                            .Call([lhs, rhs,new IntegerType().Create(Traceback.Instance.Line)]);
                     }
+                    
+                    var res = lhs.Div(rhs, compiler.Builder);
+                    //if (res.GetLLVMValue().IsPoison)
+                    //{
+                    //    Traceback.Instance.ThrowException(new BifyZeroDivisionError("Division by zero!"));
+                    //    return res;
+                    //}
+                    
+                    
                     return res;
 
                 case TokenType.EQ:

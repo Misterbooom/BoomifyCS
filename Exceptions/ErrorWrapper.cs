@@ -27,7 +27,7 @@ namespace BoomifyCS.Exceptions
                     string lineNumber = ExtractLineNumber(trimmed);
                     string method = ExtractMethod(trimmed);
 
-                    Console.WriteLine($"  File \"{file}\", line {lineNumber}, in {method}");
+                    Console.WriteLine($"  File \"{file}\", Line {lineNumber}, in {method}");
                     if (file != "<unknown>" && int.TryParse(lineNumber, out int numLine))
                     {
                         PrintCodeSnippet(file, numLine);
@@ -42,7 +42,7 @@ namespace BoomifyCS.Exceptions
         private static string ExtractFile(string stackLine)
         {
             int inIndex = stackLine.IndexOf(" in ");
-            int lineIndex = stackLine.LastIndexOf(":line");
+            int lineIndex = stackLine.LastIndexOf(":Line");
             return (inIndex >= 0 && lineIndex > inIndex)
                 ? stackLine[(inIndex + 4)..lineIndex].Trim()
                 : "<unknown>";
@@ -50,7 +50,7 @@ namespace BoomifyCS.Exceptions
 
         private static string ExtractLineNumber(string stackLine)
         {
-            int lineIndex = stackLine.LastIndexOf(":line");
+            int lineIndex = stackLine.LastIndexOf(":Line");
             return (lineIndex >= 0 && stackLine.Length > lineIndex + 6)
                 ? stackLine[(lineIndex + 6)..].Trim()
                 : "?";

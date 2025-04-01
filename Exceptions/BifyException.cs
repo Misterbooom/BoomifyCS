@@ -34,7 +34,7 @@ namespace BoomifyCS.Exceptions
         public void PrintException()
         {
             string exceptionInfo = $"{this.GetType().Name.Replace("Bify", "")}: {Message}";
-            string fileInfo = $"    File '{FileName}', line {CurrentLine}, column {Column}";
+            string fileInfo = $"    File '{FileName}', Line {CurrentLine}, column {Column}";
 
             ColorConsole.WriteLine(exceptionInfo, Color.IndianRed);
             ColorConsole.WriteLine(fileInfo, Color.OrangeRed);
@@ -56,7 +56,7 @@ namespace BoomifyCS.Exceptions
                     ColorConsole.Write(frame.FilePath, Color.IndianRed);
                     ColorConsole.Write($": ", Color.Red);
                     ColorConsole.Write(frame.FunctionName, Color.Red);
-                    ColorConsole.Write($" (line ", Color.Red);
+                    ColorConsole.Write($" (Line ", Color.Red);
                     ColorConsole.Write(frame.LineNumber.ToString(), Color.Red);
                     ColorConsole.WriteLine(")", Color.Red);
 

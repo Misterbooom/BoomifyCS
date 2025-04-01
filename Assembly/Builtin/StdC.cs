@@ -1,0 +1,42 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BoomifyCS.Assembly.BifyObject;
+using LLVMSharp.Interop;
+
+namespace BoomifyCS.Assembly.Builtin
+{
+    class StdC
+    {
+        public static CFunction DeclarFunction(string name, BifyType[] typeRefs, BifyType returnType)
+        {
+            LLVMTypeRef functionType = LLVMTypeRef.CreateFunction(returnType.LLVMType, typeRefs.Select(item => item.LLVMType).ToArray(), false);
+            LLVMValueRef function = AssemblyCompiler.Instance.Module.AddFunction(name, functionType);
+            var func = new CFunction(function, returnType, typeRefs);
+            func.TypeRef = functionType;
+            return func;
+        }
+    }
+    class CFunction : BifyFunction
+    {
+        public CFunction(LLVMValueRef function, BifyType returnType, BifyType[] typeRefs) : base(function, null, returnType, null)
+        {
+            var arguments = new Dictionary<string, BifyType>();
+            for (int i = 0; i < typeRefs.Length; i++)
+            {
+                arguments.Add($"arg{i}", typeRefs[i]);
+            }
+            FunctionArgs = new FunctionArgs(null);
+            FunctionArgs.SetArguments(arguments);
+            ReturnType = returnType;
+            IsVariadic = false;
+        }
+        public override BifyValue Call(BifyValue[] args)
+        {
+            var res = AssemblyCompiler.Instance.Builder.BuildCall2(TypeRef, llvmValue, [.. args.Select(item => item.GetLLVMValue())]);
+            return ReturnType.CreateValueRef(res);
+        }
+    }
+}

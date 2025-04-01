@@ -21,7 +21,7 @@ namespace BoomifyCS.Ast
             AstNode identifierNode = builder.operandStack.Pop();
 
             int typeStartIndex = (builder.operandStack.Count == 2) ? 1 : 0;
-            AstNode parsedType = builder.ParseCondition(builder.tokens[typeStartIndex..(builder.tokenIndex - 1)]);
+            AstNode parsedType = builder.ParseTokens(builder.tokens[typeStartIndex..(builder.tokenIndex - 1)]);
             AstNode typeNode = BuildPointerToType(identifierNode, parsedType);
 
             if (builder.operandStack.Count == 2)
@@ -33,7 +33,7 @@ namespace BoomifyCS.Ast
             builder.tokenIndex++;
 
             List<Token> valueTokens = builder.tokens[builder.tokenIndex..];
-            AstNode valueNode = builder.ParseCondition(valueTokens);
+            AstNode valueNode = builder.ParseTokens(valueTokens);
             builder.tokenIndex = builder.tokens.Count;
 
             VariableDeclarationValidator.Validate(identifierNode, typeNode, valueNode, valueTokens, flagNode, token);

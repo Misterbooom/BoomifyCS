@@ -16,12 +16,9 @@ namespace BoomifyCS.Ast.Handlers
         public FunctionDeclarationHandler(AstBuilder builder) : base(builder) { }
         public override void HandleToken(Token token)
         {
-            BifyDebug.Log("Handling func");
             AstNode typeNode = builder.operandStack.Pop();
-            BifyDebug.Log($"Type node = {typeNode}");
             List<Token> parametersTokens = builder.GetConditionTokens();
             List<Token> blockTokens = builder.GetBlockTokens();
-
             List<List<Token>> parameterGroups = new List<List<Token>>();
             List<Token> currentGroup = new List<Token>();
 
@@ -51,17 +48,17 @@ namespace BoomifyCS.Ast.Handlers
 
             foreach (var group in parameterGroups)
             {
-                if (group.Count != 2)
+                if (group.Count < 2)
                     continue;
 
-                Token typeToken = group[0];
-                Token nameToken = group[1];
+                List<Token> typeTokens = group.Take(group.Count - 1).ToList();
+                Token nameToken = group.Last();
 
-                AstIdentifier typeIdentifier = new AstIdentifier(typeToken, typeToken.Value);
+                AstNode typeAstNode = builder.ParseTokens(typeTokens);
                 AstIdentifier nameIdentifier = new AstIdentifier(nameToken, nameToken.Value);
 
                 Token concatToken = new Token(TokenType.ADD, "concat");
-                AstBinaryOp concatOp = new AstBinaryOp(concatToken, typeIdentifier, nameIdentifier);
+                AstBinaryOp concatOp = new AstBinaryOp(concatToken, typeAstNode, nameIdentifier);
                 concatNodes.Add(concatOp);
             }
 
@@ -92,7 +89,5 @@ namespace BoomifyCS.Ast.Handlers
             builder.AddOperand(functionNode);
             builder.tokenIndex++;
         }
-
-
     }
 }

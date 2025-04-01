@@ -1,13 +1,6 @@
-﻿void main() {
-    int a = 12;
-    while (a < 100){
-        explode("%d\n",a);
-        if (a == 50){
-            break;
-        }
-        a++;
-        
+﻿
 
-    }
-
+void main() {
+	const char* str = input("Hello: ");
+	explode("User input is '%s'",str);
 }

@@ -19,7 +19,7 @@ namespace BoomifyCS.Ast
         {
             string indent = new(' ', 4 * level);
             string branch = isLeft ? "|- " : "|- ";
-            string treeStr = $"{indent}{branch}{note}{GetType().Name}('{Token.Value}',line - {LineNumber})\n";
+            string treeStr = $"{indent}{branch}{note}{GetType().Name}('{Token.Value}',Line - {LineNumber})\n";
 
             if (Left != null)
             {

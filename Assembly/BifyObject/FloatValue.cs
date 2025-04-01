@@ -7,7 +7,137 @@ namespace BoomifyCS.Assembly.BifyObject
     {
         public FloatValue(LLVMValueRef value) : base(value, new FloatType()) { }
 
-      
+        public override BifyValue Equal(BifyValue other, LLVMBuilderRef builder)
+        {
+            if (this.CompareType(other))
+            {
+                LLVMValueRef result = builder.BuildFCmp(LLVMRealPredicate.LLVMRealOEQ,
+                    this.GetLLVMValue(), other.GetLLVMValue(), "floateqtmp");
+                return new BoolValue(result);
+            }
+            else if (other is IntegerValue)
+            {
+                LLVMValueRef castValue = builder.BuildSIToFP(other.GetLLVMValue(), LLVMTypeRef.Float, "cast_int_to_float");
+                LLVMValueRef result = builder.BuildFCmp(LLVMRealPredicate.LLVMRealOEQ,
+                    this.GetLLVMValue(), castValue, "floateqtmp");
+                return new BoolValue(result);
+            }
+            else
+            {
+                Traceback.Instance.ThrowException(new BifyTypeError($"Cannot compare {this.GetTypeName()} with {other.GetTypeName()}"));
+                return null;
+            }
+        }
+
+        public override BifyValue NotEqual(BifyValue other, LLVMBuilderRef builder)
+        {
+            if (this.CompareType(other))
+            {
+                LLVMValueRef result = builder.BuildFCmp(LLVMRealPredicate.LLVMRealONE,
+                    this.GetLLVMValue(), other.GetLLVMValue(), "floatnetmp");
+                return new BoolValue(result);
+            }
+            else if (other is IntegerValue)
+            {
+                LLVMValueRef castValue = builder.BuildSIToFP(other.GetLLVMValue(), LLVMTypeRef.Float, "cast_int_to_float");
+                LLVMValueRef result = builder.BuildFCmp(LLVMRealPredicate.LLVMRealONE,
+                    this.GetLLVMValue(), castValue, "floatnetmp");
+                return new BoolValue(result);
+            }
+            else
+            {
+                Traceback.Instance.ThrowException(new BifyTypeError($"Cannot compare {this.GetTypeName()} with {other.GetTypeName()}"));
+                return null;
+            }
+        }
+
+        public override BifyValue GreaterThan(BifyValue other, LLVMBuilderRef builder)
+        {
+            if (this.CompareType(other))
+            {
+                LLVMValueRef result = builder.BuildFCmp(LLVMRealPredicate.LLVMRealOGT,
+                    this.GetLLVMValue(), other.GetLLVMValue(), "floatgttmp");
+                return new BoolValue(result);
+            }
+            else if (other is IntegerValue)
+            {
+                LLVMValueRef castValue = builder.BuildSIToFP(other.GetLLVMValue(), LLVMTypeRef.Float, "cast_int_to_float");
+                LLVMValueRef result = builder.BuildFCmp(LLVMRealPredicate.LLVMRealOGT,
+                    this.GetLLVMValue(), castValue, "floatgttmp");
+                return new BoolValue(result);
+            }
+            else
+            {
+                Traceback.Instance.ThrowException(new BifyTypeError($"Cannot compare {this.GetTypeName()} with {other.GetTypeName()}"));
+                return null;
+            }
+        }
+
+        public override BifyValue LessThan(BifyValue other, LLVMBuilderRef builder)
+        {
+            if (this.CompareType(other))
+            {
+                LLVMValueRef result = builder.BuildFCmp(LLVMRealPredicate.LLVMRealOLT,
+                    this.GetLLVMValue(), other.GetLLVMValue(), "floatlttmp");
+                return new BoolValue(result);
+            }
+            else if (other is IntegerValue)
+            {
+                LLVMValueRef castValue = builder.BuildSIToFP(other.GetLLVMValue(), LLVMTypeRef.Float, "cast_int_to_float");
+                LLVMValueRef result = builder.BuildFCmp(LLVMRealPredicate.LLVMRealOLT,
+                    this.GetLLVMValue(), castValue, "floatlttmp");
+                return new BoolValue(result);
+            }
+            else
+            {
+                Traceback.Instance.ThrowException(new BifyTypeError($"Cannot compare {this.GetTypeName()} with {other.GetTypeName()}"));
+                return null;
+            }
+        }
+
+        public override BifyValue GreaterThanOrEqual(BifyValue other, LLVMBuilderRef builder)
+        {
+            if (this.CompareType(other))
+            {
+                LLVMValueRef result = builder.BuildFCmp(LLVMRealPredicate.LLVMRealOGE,
+                    this.GetLLVMValue(), other.GetLLVMValue(), "floatgetmp");
+                return new BoolValue(result);
+            }
+            else if (other is IntegerValue)
+            {
+                LLVMValueRef castValue = builder.BuildSIToFP(other.GetLLVMValue(), LLVMTypeRef.Float, "cast_int_to_float");
+                LLVMValueRef result = builder.BuildFCmp(LLVMRealPredicate.LLVMRealOGE,
+                    this.GetLLVMValue(), castValue, "floatgetmp");
+                return new BoolValue(result);
+            }
+            else
+            {
+                Traceback.Instance.ThrowException(new BifyTypeError($"Cannot compare {this.GetTypeName()} with {other.GetTypeName()}"));
+                return null;
+            }
+        }
+
+        public override BifyValue LessThanOrEqual(BifyValue other, LLVMBuilderRef builder)
+        {
+            if (this.CompareType(other))
+            {
+                LLVMValueRef result = builder.BuildFCmp(LLVMRealPredicate.LLVMRealOLE,
+                    this.GetLLVMValue(), other.GetLLVMValue(), "floatletmp");
+                return new BoolValue(result);
+            }
+            else if (other is IntegerValue)
+            {
+                LLVMValueRef castValue = builder.BuildSIToFP(other.GetLLVMValue(), LLVMTypeRef.Float, "cast_int_to_float");
+                LLVMValueRef result = builder.BuildFCmp(LLVMRealPredicate.LLVMRealOLE,
+                    this.GetLLVMValue(), castValue, "floatletmp");
+                return new BoolValue(result);
+            }
+            else
+            {
+                Traceback.Instance.ThrowException(new BifyTypeError($"Cannot compare {this.GetTypeName()} with {other.GetTypeName()}"));
+                return null;
+            }
+        }
 
         public override BifyValue Add(BifyValue other, LLVMBuilderRef builder)
         {
@@ -98,16 +228,29 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             unsafe
             {
-                LLVMValueRef llvmValue = LLVMValueRef.CreateConstReal(LLVM.FloatType(), (float)value);
-                return new FloatValue(llvmValue);
+                if (value is System.Single)
+                {
+                    LLVMValueRef llvmValue = LLVMValueRef.CreateConstReal(LLVM.FloatType(), (float)value);
+                    return new FloatValue(llvmValue);
+                }
+                else if (value is System.Int32)
+                {
+                    LLVMValueRef llvmValue = LLVMValueRef.CreateConstReal(LLVM.FloatType(), (float)(int)value);
+                    return new FloatValue(llvmValue);
+                }
+                else
+                {
+                    Traceback.Instance.ThrowException(new BifyTypeError("Invalid type for float."));
+                    return null;
+                }
             }
-           
         }
+
         protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
             return new FloatValue(value);
-
         }
+
         public override uint Size()
         {
             return 4;

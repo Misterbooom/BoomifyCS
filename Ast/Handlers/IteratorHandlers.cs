@@ -14,11 +14,11 @@ namespace BoomifyCS.Ast
 
         public override void HandleToken(Token token)
         {
-            int line = Traceback.Instance.line;
+            int line = Traceback.Instance.Line;
 
             List<Token> conditionTokens = builder.GetConditionTokens();
             List<Token> blockTokens = builder.GetBlockTokens();
-            AstNode conditionNode = builder.ParseCondition(conditionTokens);
+            AstNode conditionNode = builder.ParseTokens(conditionTokens);
             AstNode blockNode = builder.ParseBlock(blockTokens);
             AstWhile astWhile = new(token, blockNode, conditionNode);
             Traceback.Instance.SetCurrentLine(line);
@@ -31,7 +31,7 @@ namespace BoomifyCS.Ast
         public ForHandler(AstBuilder builder) : base(builder) { }
         public override void HandleToken(Token token)
         {
-            int line = Traceback.Instance.line;
+            int line = Traceback.Instance.Line;
             List<Token> conditionTokens = builder.GetConditionTokens();
             List<Token> blockTokens = builder.GetBlockTokens();
             var splitedTokens = TokensFormatter.SplitTokensByType(conditionTokens, TokenType.SEMICOLON);
@@ -43,7 +43,7 @@ namespace BoomifyCS.Ast
             List<Token> initTokens = splitedTokens[0];
             List<Token> condition = splitedTokens[1];
             List<Token> increment = splitedTokens[2];
-            AstFor astFor = new(token, builder.ParseBlock(blockTokens), builder.ParseCondition(condition), builder.ParseCondition(increment), builder.ParseCondition(initTokens));
+            AstFor astFor = new(token, builder.ParseBlock(blockTokens), builder.ParseTokens(condition), builder.ParseTokens(increment), builder.ParseTokens(initTokens));
             IteratorStatementValidator.ValidateForStatement(splitedTokens, astFor);
             builder.AddOperand(astFor);
 

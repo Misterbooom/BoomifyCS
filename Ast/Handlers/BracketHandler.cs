@@ -4,6 +4,7 @@ using BoomifyCS.Ast.Handlers;
 using BoomifyCS.Lexer;
 using BoomifyCS.Ast.Validators;
 using BoomifyCS.Parser;
+using BoomifyCS.Exceptions;
 
 namespace BoomifyCS.Ast
 {
@@ -16,7 +17,8 @@ namespace BoomifyCS.Ast
             List<Token> tokensInBrackets = TokensFormatter.GetTokensBetween(builder.tokens, ref builder.tokenIndex, TokenType.LBRACKET, TokenType.RBRACKET);
             if (builder.operandStack.TryPop(out AstNode previousNode))
             {
-                AstNode indexNode = new AstBuilder(tokensInBrackets).BuildNode();
+                BifyDebug.Log($"Tokens in brackets: {tokensInBrackets.TokensToString()}");
+                AstNode indexNode = builder.ParseTokens(tokensInBrackets);
                 IndexOperatorValidator.Validate(previousNode, indexNode);
                 AstIndexOperator astIndexOperator = new(indexNode, previousNode);
                 builder.AddOperand(astIndexOperator);

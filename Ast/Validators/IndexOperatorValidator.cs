@@ -16,6 +16,7 @@ namespace BoomifyCS.Ast.Validators
 
             if (indexNode != null && !IsValidIndexNode(indexNode))
             {
+                BifyDebug.Log($"Index node: {indexNode}");
                 BifySyntaxError error = new(ErrorMessage.InvalidIndexExpression(), "", indexNode.Token.Value);
                 Traceback.Instance.ThrowException(error, indexNode.Token.Column);
             }
@@ -27,6 +28,7 @@ namespace BoomifyCS.Ast.Validators
 
         private static bool IsValidIndexNode(AstNode node) => node is AstNumber || node is AstIdentifier ||
                 node is AstRangeOperator ||
+                node is AstIndexOperator ||
                 node is AstBinaryOp && node.Token.Type != TokenType.COMMA;
     }
 }

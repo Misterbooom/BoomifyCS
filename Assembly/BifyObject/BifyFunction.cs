@@ -29,7 +29,7 @@ namespace BoomifyCS.Assembly.BifyObject
                      TypeRef,
                      GetLLVMValue(),
                      args.Select(item => item.GetLLVMValue()).ToArray(),
-                     "calltmp"
+                     ReturnType is not VoidType? "calltmp":"" 
                  )
             );
         }

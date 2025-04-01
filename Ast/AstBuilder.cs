@@ -58,14 +58,14 @@ namespace BoomifyCS.Ast
         {
             if (node != null)
             {
-                node.LineNumber = Traceback.Instance.line;
+                node.LineNumber = Traceback.Instance.Line;
                 operandStack.Push(node);
             }
         }
 
         public void AddOperator(AstNode node)
         {
-            node.LineNumber = Traceback.Instance.line;
+            node.LineNumber = Traceback.Instance.Line;
             operatorStack.Push(node);
         }
 
@@ -156,7 +156,7 @@ namespace BoomifyCS.Ast
 
         public List<Token> GetBlockTokens() => TokensFormatter.GetTokensBetween(tokens, ref tokenIndex, TokenType.LCUR, TokenType.RCUR);
 
-        public AstNode ParseCondition(List<Token> conditionTokens) => new AstBuilder(conditionTokens).BuildNode();
+        public AstNode ParseTokens(List<Token> conditionTokens) => new AstBuilder(conditionTokens).BuildNode();
 
         public AstNode ParseBlock(List<Token> blockTokens) => new AstBlock(((AstModule)new AstTree(Traceback.Instance.source).ParseTokens(blockTokens)).ChildNodes);
     }

@@ -109,7 +109,7 @@ namespace BoomifyCS.Lexer
             //    return $"Token(type = '{Type}',value = '{Value} tokens - {Tokens.ToString()}')";
 
             //}
-            $"Token(type = '{Type}', value = '{Value}', line = {Line}' column - '{Column}')";
+            $"Token(type = '{Type}', value = '{Value}', Line = {Line}' column - '{Column}')";
 
     }
 

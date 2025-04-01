@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using BoomifyCS.Ast;
+using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
+using LLVMSharp;
 using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.BifyObject
@@ -41,11 +43,20 @@ namespace BoomifyCS.Assembly.BifyObject
                     ExtractArgs(astBinaryOp.Left);
                     ExtractArgs(astBinaryOp.Right);
                 }
-                else if (astBinaryOp.Right is AstIdentifier rightId && astBinaryOp.Left is AstIdentifier leftId)
+                else 
                 {
-                    arguments[rightId.Token.Value] = AssemblyCompiler.Instance.VariableManager.GetBifyType(leftId.Token.Value);
+                    AssemblyCompiler.Instance.Visit(astBinaryOp.Left);
+                    IValue poppedValue = AssemblyCompiler.Instance.StackIValuePop();
+                    if (poppedValue is not BifyType)
+                    {
+                        Traceback.Instance.ThrowException(new BifyTypeError($"{((BifyValue)poppedValue).GetTypeName()} cannot be used as type."));
+
+                    }
+                    BifyDebug.Log($"Argument name: {astBinaryOp.Right.Token.Value}");
+                    arguments[astBinaryOp.Right.Token.Value] = (BifyType)poppedValue;
                 }
             }
         }
+        
     }
 }

@@ -7,6 +7,7 @@ using LLVMSharp.Interop;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
+using System.Threading.Tasks;
 
 namespace BoomifyCS.Assembly
 {
@@ -32,6 +33,17 @@ namespace BoomifyCS.Assembly
         public AstNode NextNode { get; set; }
         public NodeVisitFlag Flag { get; set; } = NodeVisitFlag.NONE;
         public BifyType ReturnType { get; set; }
+        public LLVMValueRef Function
+        {
+            get
+            {
+                unsafe
+                {
+                    return LLVM.GetBasicBlockParent(LLVM.GetInsertBlock(Builder));
+                }
+            }
+        }
+        public LLVMBasicBlockRef ErrorBB;
 
         private readonly Stack<IValue> _stack = new();
 
@@ -100,29 +112,36 @@ namespace BoomifyCS.Assembly
         {
             string fileName = Path.GetFileNameWithoutExtension(filePath);
             Directory.CreateDirectory(outputDirectory);
-            try
-            {
-                Module.PrintToFile(filePath);
-                Console.WriteLine($"LLVM IR written to: {filePath}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error writing LLVM IR: {ex.Message}");
-                return;
-            }
 
+            // Define paths
+            string libPath = Path.Combine(outputDirectory, "stdc.lib");
+            string objPath = Path.Combine(outputDirectory, "stdc.o");   
+            string cSourceFile = "C:\\BoomifyCS\\Assembly\\stdc.c"; 
             string exeFile = Path.Combine(outputDirectory, $"{fileName}.exe");
 
             try
             {
+                string compileCCommand = $"clang -c {cSourceFile} -o {objPath}";
+                Console.WriteLine($"C command: {compileCCommand}");
+                ExecuteCommand(compileCCommand);
+
+                string createLibCommand = $"llvm-ar rcs {libPath} {objPath}";
+                ExecuteCommand(createLibCommand);
+
+                Module.PrintToFile(filePath);
+                Console.WriteLine($"LLVM IR written to: {filePath}");
+
                 if (File.Exists(exeFile))
                 {
                     File.Delete(exeFile);
                 }
-                string clangCommand = $"clang {filePath} -o {exeFile} -nodefaultlibs -lmsvcrt -lkernel32 -luser32 -llegacy_stdio_definitions";
+
+                string clangCommand = $"clang {filePath} -o {exeFile} -nodefaultlibs {libPath} -lmsvcrt -lkernel32 -luser32 -llegacy_stdio_definitions";
                 ExecuteCommand(clangCommand);
+
                 if (!File.Exists(exeFile))
                     throw new FileNotFoundException($"Executable not generated: {exeFile}");
+
                 Console.WriteLine("Running executable...");
                 RunExecutable(exeFile);
             }
@@ -131,6 +150,8 @@ namespace BoomifyCS.Assembly
                 Console.WriteLine($"Error during compilation or execution: {ex.Message}");
             }
         }
+
+
 
         private static void ExecuteCommand(string command)
         {
@@ -146,11 +167,16 @@ namespace BoomifyCS.Assembly
                     RedirectStandardError = true
                 };
 
-                using (Process process = Process.Start(psi))
+                using (Process process = new Process { StartInfo = psi })
                 {
-                    string output = process.StandardOutput.ReadToEnd();
-                    string errorOutput = process.StandardError.ReadToEnd();
+                    process.Start();
+                    Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
+                    Task<string> errorTask = process.StandardError.ReadToEndAsync();
+
                     process.WaitForExit();
+
+                    string output = outputTask.Result;
+                    string errorOutput = errorTask.Result;
 
                     if (!string.IsNullOrEmpty(output))
                     {
@@ -177,7 +203,7 @@ namespace BoomifyCS.Assembly
                     FileName = "cmd.exe",
                     Arguments = $"/K \"{exePath}\"",
                     CreateNoWindow = false,
-                    UseShellExecute = true,
+                    UseShellExecute = false,
                 };
 
                 using (Process process = Process.Start(psi))

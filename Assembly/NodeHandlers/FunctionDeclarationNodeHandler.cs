@@ -35,7 +35,10 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
 
             var function = compiler.Module.AddFunction(functionName, functionType);
+            //compiler.ErrorBB = function.AppendBasicBlock("error");
             var entry = function.AppendBasicBlock("entry");
+
+
             compiler.Builder.PositionAtEnd(entry);
             compiler.VariableManager.EnterLocalScope();
             var bifyFunction = new BifyFunction(function, functionArgs, functionReturnType, functionType);
@@ -44,6 +47,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             SetFunctionArgsName(function, functionArgs.ArgsNames);
             AddFunctionArgsToScope(bifyFunction);
 
+           
 
 
             compiler.Visit(functionDeclNode.blockNode);

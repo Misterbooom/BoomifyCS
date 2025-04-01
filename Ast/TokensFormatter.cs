@@ -125,7 +125,7 @@ namespace BoomifyCS.Ast
                 else if (token.Type == close)
                 {
                     count--;
-                    if (count == 0)
+                    if (count <= 0)
                     {
                         break;
                     }

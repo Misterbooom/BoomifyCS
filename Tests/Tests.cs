@@ -39,7 +39,7 @@ namespace BoomifyCS.Tests
                 catch (Exception e)
                 {
                     Console.WriteLine($"{result.Key}: Failed");
-                    Console.WriteLine($"Line: {Traceback.Instance.line}");
+                    Console.WriteLine($"Line: {Traceback.Instance.Line}");
                     Console.WriteLine(e.Message);
                     throw;
                 }
@@ -73,12 +73,12 @@ namespace BoomifyCS.Tests
     var i = 0;
     while (i < rows) {
         var j = 0;
-        var line = '';
+        var Line = '';
         while (j <= i) {
-            line = line + parse(pascal(i, j), 'string') + ' ';
+            Line = Line + parse(pascal(i, j), 'string') + ' ';
             j = j + 1;
         }
-        explode(line);
+        explode(Line);
         i = i + 1;
     }
     ";

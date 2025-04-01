@@ -24,8 +24,7 @@ namespace BoomifyCS.Ast.Validators
                     "", identifierNode?.Token.Value);
                 Traceback.Instance.ThrowException(error, identifierNode?.Token.Column ?? assignmentToken.Column);
             }
-            //BifyDebug.Log($"Type Node - {typeNode} type token type - {typeNode.Token.Type}");
-            if (typeNode is not AstIdentifier && typeNode.Token.Type != TokenType.POINTER)
+            if (typeNode is not AstIdentifier && typeNode.Token.Type != TokenType.POINTER && typeNode is not AstIndexOperator)
             {
                 BifyTypeError bifyTypeError = new(ErrorMessage.InvalidVariableType(typeNode?.Token.Type.ToString().ToLower()),
                     "", typeNode?.Token.Value);

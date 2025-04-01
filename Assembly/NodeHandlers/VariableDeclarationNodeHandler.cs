@@ -22,7 +22,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             IValue value = compiler.StackIValuePop();
             if (value is not BifyType)
             {
-                Traceback.Instance.ThrowException(new BifyTypeError($"{value.GetType().Name.ToLower()} cannot be used as type."));
+                Traceback.Instance.ThrowException(new BifyTypeError($"{((BifyValue)value).GetTypeName()} cannot be used as type."));
                 return;
             }
             BifyType bifyType = (BifyType)value;
