@@ -55,13 +55,13 @@ namespace BoomifyCS
 
         static void RunInterpreter()
         {
-            Console.OutputEncoding = Encoding.UTF8;
+            Console.OutputEncoding = Encoding.Unicode;
             string file = "C:/BoomifyCS/test.bify";
             Traceback.Instance.FileName = file;
             string code = File.ReadAllText(file);
             MyLexer lexer = new(code);
             List<Token> tokens = lexer.Tokenize();
-            //tokens.WriteTokens();
+            tokens.WriteTokens();
             string[] codeByLine = code.Split('\n');
             AstTree astParser = new(codeByLine);
             AstNode node = astParser.ParseTokens(tokens);

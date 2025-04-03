@@ -15,7 +15,7 @@ namespace BoomifyCS.Assembly
     enum NodeVisitFlag
     {
         NONE,
-        DONT_LOAD_INDEX = 1 << 0,
+        ASSIGNMENT_INDEX = 1 << 0,
     }
 
     class AssemblyCompiler : IDisposable
@@ -129,6 +129,35 @@ namespace BoomifyCS.Assembly
                 ExecuteCommand(createLibCommand);
 
                 Module.PrintToFile(filePath);
+//                File.WriteAllText(filePath, @"
+//; ModuleID = 'test'
+//source_filename = ""test""
+//target datalayout = ""e-m:w-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128""
+
+//@.str = private unnamed_addr constant [19 x i8] c""Starting strlen %s\00"", align 1
+//@.str.1 = private unnamed_addr constant [14 x i8] c""Hello, World!\00"", align 1
+//@.str.2 = private unnamed_addr constant [15 x i8] c""String len: %d\00"", align 1
+
+//define i32 @st(ptr %str_ptr) {
+//entry:
+//  %l = alloca i32, align 4
+//  store i32 0, ptr %l, align 4
+//  %str = load ptr, ptr %str_ptr, align 8     ; Правильное чтение указателя
+//  %call = call i32 (ptr, ...) @printf(ptr @.str, ptr %str)
+//  %retval = load i32, ptr %l, align 4
+//  ret i32 %retval
+//}
+
+//define void @main() {
+//entry:
+//  %str = alloca ptr, align 8                ; Выделяем память для указателя
+//  store ptr @.str.1, ptr %str, align 8       ; Сохраняем адрес строки
+//  %len = call i32 @st(ptr %str)             ; Передаем адрес указателя
+//  %call = call i32 (ptr, ...) @printf(ptr @.str.2, i32 %len)
+//  ret void
+//}
+
+//declare i32 @printf(ptr, ...)");
                 Console.WriteLine($"LLVM IR written to: {filePath}");
 
                 if (File.Exists(exeFile))
@@ -136,7 +165,7 @@ namespace BoomifyCS.Assembly
                     File.Delete(exeFile);
                 }
 
-                string clangCommand = $"clang {filePath} -o {exeFile} -nodefaultlibs {libPath} -lmsvcrt -lkernel32 -luser32 -llegacy_stdio_definitions";
+                string clangCommand = $"clang {filePath} -o {exeFile} -lmsvcrt -lkernel32 -luser32 -llegacy_stdio_definitions";
                 ExecuteCommand(clangCommand);
 
                 if (!File.Exists(exeFile))

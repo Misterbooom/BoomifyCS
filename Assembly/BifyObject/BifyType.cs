@@ -45,6 +45,10 @@ namespace BoomifyCS.Assembly.BifyObject
         
         protected abstract BifyValue CreateByValueRef(LLVMValueRef value);
         public abstract uint Size();
+        public override string ToString()
+        {
+            return $"{Name} ({LLVMType})";
+        }
     }
     class AnyType : BifyType
     {

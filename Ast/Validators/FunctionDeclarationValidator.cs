@@ -53,7 +53,8 @@ namespace BoomifyCS.Ast.Validators
                 else if (binaryOp.Token.Value == "concat")
                 {
                     
-                    return (binaryOp.Left is AstIdentifier || binaryOp.Left is AstIndexOperator && binaryOp.Right is AstIdentifier,binaryOp.Token);
+                    return (binaryOp.Left is AstIdentifier || binaryOp.Left is AstIndexOperator || binaryOp.Left.Token.Type == TokenType.POINTER
+                        && binaryOp.Right is AstIdentifier ,binaryOp.Token);
                 }
                 return (false, binaryOp.Token);
             }

@@ -53,7 +53,7 @@ namespace BoomifyCS.Ast
 
                 case TokenType.IDENTIFIER or TokenType.CONST:
                     return new AstIdentifier(token,token.Value);
-                case TokenType.STRING:
+                case TokenType.STRING or TokenType.CHAR:
                     return new AstString(token, token.Value);
                 case TokenType.BREAK:
                     return new AstBreak(token);

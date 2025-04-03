@@ -1,6 +1,13 @@
 ﻿
-
+int st(char* str){
+	int l = 0;
+	while (str[l] != '\0') {
+		l++;
+	}
+	return l;
+}
 void main() {
-	const char* str = input("Hello:'' ");
-	explode("User input is '%s'",str);
+	char* str = "Hello";
+	int lenght = st(str);
+	explode("Lenght of %s: %d",str,lenght);
 }

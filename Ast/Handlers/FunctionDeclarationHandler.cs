@@ -48,6 +48,7 @@ namespace BoomifyCS.Ast.Handlers
 
             foreach (var group in parameterGroups)
             {
+                BifyDebug.Log($"Group: {group.TokensToString()}");
                 if (group.Count < 2)
                     continue;
 

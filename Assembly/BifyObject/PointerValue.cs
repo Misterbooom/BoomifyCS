@@ -4,6 +4,19 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.BifyObject
 {
+    class AllocaPointer : PointerValue
+    {
+        public AllocaPointer(LLVMValueRef value, BifyPointerType type) : base(value, type) { }
+
+    }
+    class AllocaType : BifyPointerType
+    {
+        public AllocaType(BifyType pointedType) : base(pointedType) { }
+        protected override BifyValue CreateByValueRef(LLVMValueRef value)
+        {
+            return new AllocaPointer(value, this);
+        }
+    }
     class PointerValue : BifyValue
     {
         public PointerValue(LLVMValueRef value, BifyPointerType pointerType)
@@ -24,7 +37,7 @@ namespace BoomifyCS.Assembly.BifyObject
             LLVMValueRef[] indices = new LLVMValueRef[] { other.GetLLVMValue() };
 
             LLVMValueRef newPtr = builder.BuildGEP2(
-                ((BifyPointerType)this.type).PointedType.LLVMType,
+                ((BifyPointerType)this.type).LLVMType,
                 this.GetLLVMValue(),
                 indices,
                 "ptr_add");
@@ -52,14 +65,33 @@ namespace BoomifyCS.Assembly.BifyObject
                 indices,
                 "ptr_sub");
 
-            return new PointerValue(newPtr, (BifyPointerType)this.type);
+            return GetBifyType().CreateValueRef(newPtr);
         }
         public BifyValue Dereference()
         {
-            var loadedValue = AssemblyCompiler.Instance.Builder.BuildLoad2(GetBifyType().LLVMType, this.GetLLVMValue());
-            return ((BifyPointerType)GetBifyType()).
+            var pointerType = (BifyPointerType)GetBifyType();
+            var loadedValue = AssemblyCompiler.Instance.Builder.BuildLoad2(pointerType.PointedType.LLVMType, this.GetLLVMValue(),"dereferenced_ptr");
+            return pointerType.
                 PointedType.
                 CreateValueRef(loadedValue);
+        }
+        public override BifyValue Index(BifyValue indexValue, LLVMBuilderRef builder)
+        {
+            if (indexValue.GetBifyType() is not IntegerType)
+            {
+                Traceback.Instance.ThrowException(
+                    new BifyTypeError("Pointer arithmetic requires an integer offset."));
+                return null;
+            }
+
+            LLVMValueRef[] indices = new LLVMValueRef[] { indexValue.GetLLVMValue() };
+            BifyPointerType pointerType = (BifyPointerType)GetBifyType();
+            LLVMValueRef newPtr = builder.BuildGEP2(
+                pointerType.PointedType.LLVMType,
+                this.GetLLVMValue(),
+                indices,
+                $"ptr_index_{pointerType.PointedType.Name}");
+            return pointerType.CreateValueRef(newPtr);
         }
     }
 

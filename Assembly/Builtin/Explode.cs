@@ -44,7 +44,7 @@ namespace BoomifyCS.Assembly.Builtin
 
             for (int i = 0; i < args.Length; i++)
             {
-                if (args[i].GetLLVMValue().TypeOf == LLVMTypeRef.Float)
+                if (args[i].CompareType(typeof(FloatType)))
                 {
                     unsafe
                     {
@@ -59,8 +59,11 @@ namespace BoomifyCS.Assembly.Builtin
                 else
                 {
                     llvmArgs[i] = args[i].GetLLVMValue();
+                    BifyDebug.Log($"explode arg {i}:{args[i].GetBifyType()} {llvmArgs[i]}");
+
 
                 }
+
             }
 
             AssemblyCompiler.Instance.Builder.BuildCall2(

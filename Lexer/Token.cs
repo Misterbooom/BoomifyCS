@@ -93,7 +93,8 @@ namespace BoomifyCS.Lexer
         CONCAT,
         RANGE,
         INDEX_OPERATOR,
-        POINTER
+        POINTER,
+        CHAR
     }
     public class Token(TokenType type, string value, List<Token> tokens = null)
     {

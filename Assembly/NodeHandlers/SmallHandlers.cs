@@ -8,6 +8,7 @@ using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
+using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
@@ -35,7 +36,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 AstNode child = blockNode.ChildNodes[i];
                 compiler.NextNode = blockNode.ChildNodes.ElementAtOrDefault(i + 1);
                 compiler.Visit(child);
-                if (child is AstContinue || child is AstBreak || child  is AstReturn)
+                if (child is AstContinue || child is AstBreak || child is AstReturn)
                 {
                     return;
                 }
@@ -118,39 +119,16 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 compiler.StackPush(bifyType);
                 return;
             }
-
-            if (variable is not PointerValue)
+            else if (((BifyValue)variable).GetBifyType() is AllocaType allocaType)
+            {
+                LLVMValueRef valueRef = compiler.Builder.BuildLoad2(allocaType.PointedType.LLVMType, variable.GetLLVMValue(), "loaded_" + node.Token.Value);
+                compiler.StackPush(allocaType.PointedType.CreateValueRef(valueRef));
+            }
+            else
             {
                 compiler.StackPush(variable);
-                return;
             }
-
-            if (compiler.Flag.HasFlag(NodeVisitFlag.DONT_LOAD_INDEX))
-            {
-                compiler.StackPush(variable);
-                compiler.Flag &= ~NodeVisitFlag.DONT_LOAD_INDEX;
-                return;
-            }
-
-            var pointerValue = (PointerValue)variable;
-            var pointerType = pointerValue.GetBifyType() as BifyPointerType;
-
-            if (pointerType == null)
-            {
-                compiler.StackPush(variable);
-                return;
-            }
-
-            if (pointerType.PointedType is ArrayType arrayType)
-            {
-                compiler.StackPush(arrayType.CreateValueRef(pointerValue.GetLLVMValue()));
-                return;
-            }
-
-            var loadedValue = compiler.Builder.BuildLoad2(pointerType.PointedType.LLVMType, pointerValue.GetLLVMValue());
-            compiler.StackPush(pointerType.PointedType.CreateValueRef(loadedValue));
         }
-
     }
     class ConstantNodeHandler : NodeHandler
     {
@@ -173,7 +151,17 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 }
                 else if (node is AstString astString)
                 {
-                    compiler.StackPush(new ConstStringType().Create((string)astString.Value));
+                    if (astString.Token.Type == TokenType.STRING)
+                        compiler.StackPush(new ConstStringType().Create((string)astString.Value));
+                    else
+                    {
+                        if (astString.Token.Value.Length > 1)
+                        {
+                            Traceback.Instance.ThrowException(new BifyTypeError("Char type can only have one character"));
+                            return;
+                        }
+                        compiler.StackPush(new CharType().Create(astString.Token.Value[0]));
+                    }
                 }
             }
         }

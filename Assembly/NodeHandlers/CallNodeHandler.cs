@@ -8,6 +8,7 @@ using BoomifyCS.Lexer;
 using LLVMSharp.Interop;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Assembly.BifyObject;
+using System.Numerics;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
@@ -82,6 +83,8 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 {
                     Traceback.Instance.Catch(typeof(BifyTypeError));
                     BifyValue castedArg = providedArg.AutoCast(expectedType, compiler.Builder);
+                    BifyDebug.Log($"Arg {i}: {castedArg}");
+
                     if (castedArg == null || Traceback.Instance.GetError() != null)
                     {
                         string expectedTypeName = expectedType.Name;
@@ -95,6 +98,8 @@ namespace BoomifyCS.Assembly.NodeHandlers
                         providedArgs[i] = castedArg;
                     }
                 }
+                BifyDebug.Log($"Arg {i}: {providedArg}");
+
             }
         }
     }

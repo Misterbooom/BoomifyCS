@@ -21,7 +21,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             compiler.Visit(assignmentOp.ValueNode);
             BifyValue rhsValue = compiler.StackPop();
 
-            compiler.Flag |= NodeVisitFlag.DONT_LOAD_INDEX;
+            compiler.Flag |= NodeVisitFlag.ASSIGNMENT_INDEX;
             compiler.Visit(assignmentOp.IdentifierNode);
             BifyValue lhsPointer = compiler.StackPop();
 

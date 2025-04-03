@@ -55,7 +55,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             {
                 compiler.Builder.BuildRetVoid();
             }
-
+            //function.VerifyFunction(LLVMVerifierFailureAction.LLVMAbortProcessAction);
             compiler.VariableManager.ExitLocalScope();
 
         }
@@ -80,6 +80,8 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 unsafe
                 {
                     BifyValue value = function.FunctionArgs.BifyTypes[i].CreateValueRef(LLVM.GetParam(function.GetLLVMValue(), i));
+                    BifyDebug.Log($"Arg val: {value}");
+                    //BifyValue pointerValue = new AllocaType(value.GetBifyType()).CreateValueRef(value.GetLLVMValue());
                     compiler.VariableManager.RegisterLocalVariable(function.FunctionArgs.ArgsNames[i], value);
                 }
             }

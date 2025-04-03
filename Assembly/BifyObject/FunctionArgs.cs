@@ -53,6 +53,7 @@ namespace BoomifyCS.Assembly.BifyObject
 
                     }
                     BifyDebug.Log($"Argument name: {astBinaryOp.Right.Token.Value}");
+                    BifyDebug.Log($"Arguemnt type: {poppedValue}");
                     arguments[astBinaryOp.Right.Token.Value] = (BifyType)poppedValue;
                 }
             }

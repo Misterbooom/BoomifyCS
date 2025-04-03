@@ -83,7 +83,7 @@ namespace BoomifyCS.Lexer
                 if (currentChar == '"' || currentChar == '\'')
                 {
                     string str = GenerateString();
-                    AddToken(new Token(TokenType.STRING, str));
+                    AddToken(new Token(currentChar == '"' ? TokenType.STRING: TokenType.CHAR, str));
                     UpdateColumn(str.Length);
                 }
                 else if (currentChar == '-' && char.IsDigit(_code[_position + 1]))
@@ -209,27 +209,39 @@ namespace BoomifyCS.Lexer
 
         public string GenerateString()
         {
-            string str = "";
-            char stringChar = ' ';
-            int counter = 0;
+            var result = new System.Text.StringBuilder();
+
+            char quoteChar = _code[_position]; 
+            _position++; 
+
             while (_position < _code.Length)
             {
                 char currentChar = _code[_position];
-                if (currentChar == '"' || currentChar.ToString() == "'")
+
+                if (currentChar == quoteChar)
                 {
-                    if (counter == 0)
-                    {
-                        stringChar = currentChar;
-                        counter++;
-                    }
-                    else if (currentChar == stringChar)
-                    {
-                        counter--;
+                    return result.ToString();
+                }
+
+                if (currentChar == '\\')
+                {
+                    _position++;
+                    if (_position >= _code.Length)
                         break;
-                    }
-                    else
+
+                    char escapeChar = _code[_position];
+                    switch (escapeChar)
                     {
-                        str += currentChar;
+                        case 'n': result.Append('\n'); break;
+                        case 't': result.Append('\t'); break;
+                        case 'r': result.Append('\r'); break;
+                        case '\\': result.Append('\\'); break;
+                        case '"': result.Append('"'); break;
+                        case '\'': result.Append('\''); break;
+                        case '0': result.Append('\0'); break;
+                        default:
+                            result.Append(escapeChar);
+                            break;
                     }
                 }
                 else if (currentChar == '\n')
@@ -238,22 +250,20 @@ namespace BoomifyCS.Lexer
                 }
                 else
                 {
-                    str += currentChar;
+                    result.Append(currentChar);
                 }
                 _position++;
             }
-            if (counter > 0)
-            {
-                Traceback.Instance.ThrowException(new BifySyntaxError(
-                    ErrorMessage.MissingCloseQuotationMark(),
-                    _lines[_lineCount - 1],
-                    stringChar.ToString(),
-                    _lineCount
-                ));
-            }
-            return str;
 
+            Traceback.Instance.ThrowException(new BifySyntaxError(
+                ErrorMessage.MissingCloseQuotationMark(),
+                _lines[_lineCount - 1],
+                quoteChar.ToString(),
+                _lineCount
+            ));
+            return result.ToString();
         }
+
 
         public string GenerateIdentifier()
         {
