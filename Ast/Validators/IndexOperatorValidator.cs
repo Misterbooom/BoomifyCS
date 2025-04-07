@@ -26,7 +26,7 @@ namespace BoomifyCS.Ast.Validators
 
         private static bool IsIndexableNode(AstNode node) => node is AstArray || node is AstIdentifier || node is AstCall || node.Token.Type == TokenType.POINTER;
 
-        private static bool IsValidIndexNode(AstNode node) => node is AstNumber || node is AstIdentifier ||
+        private static bool IsValidIndexNode(AstNode node) => node is AstConstant || node is AstIdentifier ||
                 node is AstRangeOperator ||
                 node is AstIndexOperator ||
                 node is AstBinaryOp && node.Token.Type != TokenType.COMMA;

@@ -48,9 +48,15 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
             //compiler.ErrorBB = function.AppendBasicBlock("error");
             var entry = function.AppendBasicBlock("entry");
-
-
             compiler.Builder.PositionAtEnd(entry);
+
+            if (functionName == "main")
+            {
+                CallNodeHandler.pushFrame.Call([
+                        new IntegerType().Create(Traceback.Instance.Line),
+                        new ConstStringType().Create(Traceback.Instance.FilePath)
+                    ]);
+            }
             compiler.VariableManager.EnterLocalScope();
             var bifyFunction = new BifyFunction(function, functionArgs, functionReturnType, functionType);
             compiler.VariableManager.RegisterGlobalVariable(functionName, bifyFunction);

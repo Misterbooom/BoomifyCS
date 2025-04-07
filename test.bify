@@ -1,4 +1,6 @@
 ﻿
 void main() {
-	test1();
+	int[] arr = [1,2,3,4];
+	int i = 0;
+	arr[4] = 5;
 }

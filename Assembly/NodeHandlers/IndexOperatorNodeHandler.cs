@@ -58,8 +58,9 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 }
                 else
                 {
-                    BifyValue indexedResult = operandBifyValue.Add(indexValue, compiler.Builder);
+                    BifyDebug.Log($"res: {operandBifyValue}");
 
+                    BifyValue indexedResult = operandBifyValue.Index(indexValue, compiler.Builder);
                     compiler.StackPush(indexedResult);
                     compiler.Flag &= ~NodeVisitFlag.ASSIGNMENT_INDEX;
 

@@ -44,6 +44,7 @@ namespace BoomifyCS.Assembly
                 }
             }
         }
+       
         public LLVMBasicBlockRef ErrorBB;
 
         private readonly Stack<IValue> _stack = new();

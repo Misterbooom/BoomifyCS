@@ -15,10 +15,10 @@ namespace BoomifyCS.Assembly.NodeHandlers
 {
     class CallNodeHandler : NodeHandler
     {
-        BifyFunction pushFrame = StdC.DeclarFunction("pushFrame",
+        public static BifyFunction pushFrame = StdC.DeclarFunction("pushFrame",
            [new BifyObject.IntegerType(), new BifyObject.ConstStringType()], new VoidType()
            );
-        BifyFunction popFrame = StdC.DeclarFunction("popFrame",
+        public static BifyFunction popFrame = StdC.DeclarFunction("popFrame",
           [new BifyObject.IntegerType(), new BifyObject.ConstStringType()], new VoidType()
           );
         public CallNodeHandler(AssemblyCompiler compiler) : base(compiler) { }
