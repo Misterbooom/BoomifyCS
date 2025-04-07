@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Markup;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
@@ -119,8 +120,13 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 compiler.StackPush(bifyType);
                 return;
             }
+            
             else if (((BifyValue)variable).GetBifyType() is AllocaType allocaType)
             {
+                if (allocaType.PointedType is ArrayType arrayType){
+                    compiler.StackPush(arrayType.CreateValueRef(variable.GetLLVMValue()));
+                    return;
+                }
                 LLVMValueRef valueRef = compiler.Builder.BuildLoad2(allocaType.PointedType.LLVMType, variable.GetLLVMValue(), "loaded_" + node.Token.Value);
                 compiler.StackPush(allocaType.PointedType.CreateValueRef(valueRef));
             }

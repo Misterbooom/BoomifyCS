@@ -64,14 +64,24 @@ namespace BoomifyCS.Assembly.Builtin
                 
                 );
 
+            var pushFrame = StdC.DeclarFunction("pushFrame",
+                [new BifyObject.IntegerType(), new BifyObject.ConstStringType()], new VoidType()
+                );
+            var popFrame = StdC.DeclarFunction("popFrame",
+              [new BifyObject.IntegerType(), new BifyObject.ConstStringType()], new VoidType()
+              );
+
+
             var errorName = new ConstStringType().Create("ZeroDivisionError");
             var errorMessage = new ConstStringType().Create(ErrorMessage.DivisionByZero());
-            var file = new ConstStringType().Create(Traceback.Instance.FileName);
+            var file = new ConstStringType().Create(Traceback.Instance.FilePath);
 
-
+            pushFrame.Call([line, file]);
             printErrorFunc.Call([errorName,errorMessage,file,line]);
-            AssemblyCompiler.Instance.VariableManager.GetBifyValue("exit").Call([new BifyObject.IntegerType().Create(0)]);
-            
+            popFrame.Call([line, file]);
+
+            //AssemblyCompiler.Instance.VariableManager.GetBifyValue("exit").Call([new BifyObject.IntegerType().Create(0)]);
+
             builder.BuildUnreachable();
             builder.PositionAtEnd(mergeBB);
             BifyValue result = lhs.Div(rhs, builder);
@@ -97,6 +107,9 @@ namespace BoomifyCS.Assembly.Builtin
                 }).ToArray(),
                 "calltmp"
             );
+            //var meta = AssemblyCompiler.Instance.DebugBuilder.CreateDebugLocation(
+            //    (uint)Traceback.Instance.Line
+            //    );
             return ReturnType.CreateValueRef(res);
         }
     }

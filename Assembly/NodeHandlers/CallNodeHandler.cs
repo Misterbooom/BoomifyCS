@@ -9,11 +9,18 @@ using LLVMSharp.Interop;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Assembly.BifyObject;
 using System.Numerics;
+using BoomifyCS.Assembly.Builtin;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
     class CallNodeHandler : NodeHandler
     {
+        BifyFunction pushFrame = StdC.DeclarFunction("pushFrame",
+           [new BifyObject.IntegerType(), new BifyObject.ConstStringType()], new VoidType()
+           );
+        BifyFunction popFrame = StdC.DeclarFunction("popFrame",
+          [new BifyObject.IntegerType(), new BifyObject.ConstStringType()], new VoidType()
+          );
         public CallNodeHandler(AssemblyCompiler compiler) : base(compiler) { }
 
         public override void HandleNode(AstNode node)
@@ -37,8 +44,13 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
                     ValidateAndAutoCastArguments(providedArgs, callable.FunctionArgs.BifyTypes, callable.IsVariadic);
 
+                    pushFrame.Call([
+                        new IntegerType().Create(Traceback.Instance.Line),
+                        new ConstStringType().Create(Traceback.Instance.FilePath)
+                        ]);
                     var call = callable.Call(providedArgs.ToArray());
                     compiler.StackPush(callable.ReturnType.CreateValueRef(call.GetLLVMValue()));
+                    popFrame.Call([]);
                 }
                 else
                 {

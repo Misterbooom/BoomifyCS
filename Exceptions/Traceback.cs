@@ -7,7 +7,7 @@ namespace BoomifyCS.Exceptions
     {
         private static Traceback _instance;
         public int Line = 0;
-        public string FileName = "main";
+        public string FilePath = "main";
         public string[] source;
         public List<CallStackFrame> callStack;
         private Stack<BifyError> stack;
@@ -42,7 +42,7 @@ namespace BoomifyCS.Exceptions
             if (source != null && source.Length > Line - 1)
             {
                 error.CurrentLine = Math.Clamp(Line - 1, 0, source.Length - 1);
-                error.FileName = FileName;
+                error.FileName = FilePath;
                 error.LineTokensString = source[Math.Clamp(Line - 1, 0, source.Length - 1)];
                 error.Column = column;
                 error.CallStack = callStack;

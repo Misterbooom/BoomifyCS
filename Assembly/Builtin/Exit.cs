@@ -25,11 +25,6 @@ namespace BoomifyCS.Assembly.Builtin
             var context = module.Context;
             TypeRef = LLVMTypeRef.CreateFunction(LLVMTypeRef.Void, new LLVMTypeRef[] { LLVMTypeRef.Int32 }, false);
             llvmValue = module.AddFunction("exit", TypeRef);
-            var entry = llvmValue.AppendBasicBlock("entry");
-            builder.PositionAtEnd(entry);
-            var code = llvmValue.GetParam(0);
-            builder.BuildCall2(TypeRef,llvmValue, new LLVMValueRef[] { code });
-            builder.BuildRetVoid();
         }
         public override BifyValue Call(BifyValue[] args)
         {

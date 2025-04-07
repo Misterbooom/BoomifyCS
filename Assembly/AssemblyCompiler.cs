@@ -33,6 +33,7 @@ namespace BoomifyCS.Assembly
         public AstNode NextNode { get; set; }
         public NodeVisitFlag Flag { get; set; } = NodeVisitFlag.NONE;
         public BifyType ReturnType { get; set; }
+        public DebugBuilder DebugBuilder { get; }
         public LLVMValueRef Function
         {
             get
@@ -47,7 +48,7 @@ namespace BoomifyCS.Assembly
 
         private readonly Stack<IValue> _stack = new();
 
-        private AssemblyCompiler()
+        private  AssemblyCompiler()
         {
             LLVM.InitializeX86TargetMC();
             LLVM.InitializeX86Target();
@@ -60,6 +61,8 @@ namespace BoomifyCS.Assembly
             Builder = Context.Handle.CreateBuilder();
             VariableManager = new AssemblyVariableManager();
             Engine = Module.CreateExecutionEngine();
+            DebugBuilder = new DebugBuilder(Module);
+
         }
 
         public static AssemblyCompiler Instance
@@ -115,13 +118,15 @@ namespace BoomifyCS.Assembly
 
             // Define paths
             string libPath = Path.Combine(outputDirectory, "stdc.lib");
-            string objPath = Path.Combine(outputDirectory, "stdc.o");   
-            string cSourceFile = "C:\\BoomifyCS\\Assembly\\stdc.c"; 
+            string objPath = Path.Combine(outputDirectory, "stdc.o");
+            string cSourceFile = "C:\\BoomifyCS\\Assembly\\stdc.c";
             string exeFile = Path.Combine(outputDirectory, $"{fileName}.exe");
+            string irFile = filePath;
+            string objFile = Path.Combine(outputDirectory, $"{fileName}.o");
 
             try
             {
-                string compileCCommand = $"clang -c {cSourceFile} -o {objPath}";
+                string compileCCommand = $"clang -c -g {cSourceFile} -o {objPath}";
                 Console.WriteLine($"C command: {compileCCommand}");
                 ExecuteCommand(compileCCommand);
 
@@ -129,35 +134,6 @@ namespace BoomifyCS.Assembly
                 ExecuteCommand(createLibCommand);
 
                 Module.PrintToFile(filePath);
-//                File.WriteAllText(filePath, @"
-//; ModuleID = 'test'
-//source_filename = ""test""
-//target datalayout = ""e-m:w-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128""
-
-//@.str = private unnamed_addr constant [19 x i8] c""Starting strlen %s\00"", align 1
-//@.str.1 = private unnamed_addr constant [14 x i8] c""Hello, World!\00"", align 1
-//@.str.2 = private unnamed_addr constant [15 x i8] c""String len: %d\00"", align 1
-
-//define i32 @st(ptr %str_ptr) {
-//entry:
-//  %l = alloca i32, align 4
-//  store i32 0, ptr %l, align 4
-//  %str = load ptr, ptr %str_ptr, align 8     ; Правильное чтение указателя
-//  %call = call i32 (ptr, ...) @printf(ptr @.str, ptr %str)
-//  %retval = load i32, ptr %l, align 4
-//  ret i32 %retval
-//}
-
-//define void @main() {
-//entry:
-//  %str = alloca ptr, align 8                ; Выделяем память для указателя
-//  store ptr @.str.1, ptr %str, align 8       ; Сохраняем адрес строки
-//  %len = call i32 @st(ptr %str)             ; Передаем адрес указателя
-//  %call = call i32 (ptr, ...) @printf(ptr @.str.2, i32 %len)
-//  ret void
-//}
-
-//declare i32 @printf(ptr, ...)");
                 Console.WriteLine($"LLVM IR written to: {filePath}");
 
                 if (File.Exists(exeFile))
@@ -165,7 +141,10 @@ namespace BoomifyCS.Assembly
                     File.Delete(exeFile);
                 }
 
-                string clangCommand = $"clang {filePath} -o {exeFile} -lmsvcrt -lkernel32 -luser32 -llegacy_stdio_definitions";
+                //string llcCommand = $"llc -filetype=obj -O0 {irFile} -o {objFile}";
+                //ExecuteCommand(llcCommand);
+
+                string clangCommand = $"clang {irFile} -o {exeFile} -g -gcodeview {libPath} -lmsvcrt -lkernel32 -luser32 -llegacy_stdio_definitions";
                 ExecuteCommand(clangCommand);
 
                 if (!File.Exists(exeFile))

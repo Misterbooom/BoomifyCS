@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define DEBUG_COMPILE
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -12,6 +13,7 @@ using LLVMSharp;
 using LLVMSharp.Interop;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Assembly.BifyObject;
+
 
 namespace BoomifyCS
 {
@@ -36,7 +38,7 @@ namespace BoomifyCS
                 throw;
                 //ProcessStartInfo psi = new ProcessStartInfo
                 //{
-                //    FileName = "python",
+                //    FilePath = "python",
                 //    Arguments = $"C:/BoomifyCS/analyzer.py \"{errorText}\"",
                 //    RedirectStandardOutput = true,
                 //    UseShellExecute = false,
@@ -57,7 +59,7 @@ namespace BoomifyCS
         {
             Console.OutputEncoding = Encoding.Unicode;
             string file = "C:/BoomifyCS/test.bify";
-            Traceback.Instance.FileName = file;
+            Traceback.Instance.FilePath = file;
             string code = File.ReadAllText(file);
             MyLexer lexer = new(code);
             List<Token> tokens = lexer.Tokenize();

@@ -37,7 +37,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             {
                 LLVMValueRef func = LLVM.GetBasicBlockParent(LLVM.GetInsertBlock(compiler.Builder));
 
-                LLVMBasicBlockRef mergeBB = func.AppendBasicBlock("if_merge");
+                LLVMBasicBlockRef mergeBB = nextNode != null ? func.AppendBasicBlock("if_merge") : default;
                 LLVMBasicBlockRef thenBB = func.AppendBasicBlock("if_then");
 
                 int numElseIf = node.ElseIfNodes.Count;
@@ -71,7 +71,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
                 compiler.Builder.PositionAtEnd(thenBB);
                 compiler.Visit(node.BlockNode);
-                if (!IsCurrentBlockTerminated())
+                if (!IsCurrentBlockTerminated() && mergeBB.Handle != IntPtr.Zero)
                 {
                     compiler.Builder.BuildBr(mergeBB);
                 }
@@ -99,7 +99,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
                     compiler.Builder.PositionAtEnd(elseIfBodyBlocks[i]);
                     compiler.Visit(elseIfNode.BlockNode);
-                    if (!IsCurrentBlockTerminated())
+                    if (!IsCurrentBlockTerminated() && mergeBB.Handle != IntPtr.Zero)
                     {
                         compiler.Builder.BuildBr(mergeBB);
                     }
@@ -109,14 +109,16 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 {
                     compiler.Builder.PositionAtEnd(elseBB);
                     compiler.Visit(node.ElseNode.BlockNode);
-                    if (!IsCurrentBlockTerminated())
+                    if (!IsCurrentBlockTerminated() && mergeBB.Handle != IntPtr.Zero)
                     {
                         compiler.Builder.BuildBr(mergeBB);
                     }
                 }
-                mergeBB.MoveAfter(LLVM.GetInsertBlock(compiler.Builder));
-                compiler.Builder.PositionAtEnd(mergeBB);
-               
+                if (mergeBB.Handle != IntPtr.Zero)
+                {
+                    mergeBB.MoveAfter(LLVM.GetInsertBlock(compiler.Builder));
+                    compiler.Builder.PositionAtEnd(mergeBB);
+                }
             }
         }
     }

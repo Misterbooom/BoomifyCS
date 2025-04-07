@@ -1,13 +1,4 @@
 ﻿
-int st(char* str){
-	int l = 0;
-	while (str[l] != '\0') {
-		l++;
-	}
-	return l;
-}
 void main() {
-	char* str = "Hello";
-	int lenght = st(str);
-	explode("Lenght of %s: %d",str,lenght);
+	test1();
 }

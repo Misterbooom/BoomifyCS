@@ -12,12 +12,23 @@ namespace BoomifyCS.Assembly.Builtin
     {
         public static CFunction DeclarFunction(string name, BifyType[] typeRefs, BifyType returnType)
         {
+            var existingFunction = AssemblyCompiler.Instance.Module.GetNamedFunction(name);
             LLVMTypeRef functionType = LLVMTypeRef.CreateFunction(returnType.LLVMType, typeRefs.Select(item => item.LLVMType).ToArray(), false);
+
+            if (existingFunction != null)
+            {
+                var oldFunc = new CFunction(existingFunction, returnType, typeRefs);
+                oldFunc.TypeRef = functionType;
+                return oldFunc;
+            }
+
             LLVMValueRef function = AssemblyCompiler.Instance.Module.AddFunction(name, functionType);
             var func = new CFunction(function, returnType, typeRefs);
+
             func.TypeRef = functionType;
             return func;
         }
+
     }
     class CFunction : BifyFunction
     {
@@ -35,7 +46,7 @@ namespace BoomifyCS.Assembly.Builtin
         }
         public override BifyValue Call(BifyValue[] args)
         {
-            var res = AssemblyCompiler.Instance.Builder.BuildCall2(TypeRef, llvmValue, [.. args.Select(item => item.GetLLVMValue())]);
+            var res = AssemblyCompiler.Instance.Builder.BuildCall2(TypeRef, llvmValue, args.Select(item => item.GetLLVMValue()).ToArray());
             return ReturnType.CreateValueRef(res);
         }
     }
