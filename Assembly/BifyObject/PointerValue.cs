@@ -35,9 +35,10 @@ namespace BoomifyCS.Assembly.BifyObject
             }
 
             LLVMValueRef[] indices = new LLVMValueRef[] { other.GetLLVMValue() };
+            BifyPointerType pointerType = (BifyPointerType)GetBifyType();
 
             LLVMValueRef newPtr = builder.BuildGEP2(
-                ((BifyPointerType)this.type).LLVMType,
+                pointerType.PointedType.LLVMType,
                 this.GetLLVMValue(),
                 indices,
                 "ptr_add");
@@ -58,9 +59,10 @@ namespace BoomifyCS.Assembly.BifyObject
             LLVMValueRef negOffset = builder.BuildSub(zero, other.GetLLVMValue(), "neg_offset");
 
             LLVMValueRef[] indices = new LLVMValueRef[] { negOffset };
+            BifyPointerType pointerType = (BifyPointerType)GetBifyType();
 
             LLVMValueRef newPtr = builder.BuildGEP2(
-                ((BifyPointerType)this.type).PointedType.LLVMType,
+                pointerType.PointedType.LLVMType,
                 this.GetLLVMValue(),
                 indices,
                 "ptr_sub");

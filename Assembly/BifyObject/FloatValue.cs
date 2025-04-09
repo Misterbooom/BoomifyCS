@@ -24,7 +24,9 @@ namespace BoomifyCS.Assembly.BifyObject
             }
             else
             {
-                Traceback.Instance.ThrowException(new BifyTypeError($"Cannot compare {this.GetTypeName()} with {other.GetTypeName()}"));
+                Traceback.Instance.ThrowException(new BifyTypeError(
+                    $"Type error in '==' operation: cannot compare '{this.GetTypeName()}' with '{other.GetTypeName()}'. " +
+                    "Expected operand types: both 'float' or 'float' and 'int'."));
                 return null;
             }
         }
@@ -46,7 +48,9 @@ namespace BoomifyCS.Assembly.BifyObject
             }
             else
             {
-                Traceback.Instance.ThrowException(new BifyTypeError($"Cannot compare {this.GetTypeName()} with {other.GetTypeName()}"));
+                Traceback.Instance.ThrowException(new BifyTypeError(
+                    $"Type error in '!=' operation: cannot compare '{this.GetTypeName()}' with '{other.GetTypeName()}'. " +
+                    "Expected operand types: both 'float' or 'float' and 'int'."));
                 return null;
             }
         }
@@ -68,7 +72,9 @@ namespace BoomifyCS.Assembly.BifyObject
             }
             else
             {
-                Traceback.Instance.ThrowException(new BifyTypeError($"Cannot compare {this.GetTypeName()} with {other.GetTypeName()}"));
+                Traceback.Instance.ThrowException(new BifyTypeError(
+                    $"Type error in '>' operation: cannot compare '{this.GetTypeName()}' with '{other.GetTypeName()}'. " +
+                    "Expected operand types: both 'float' or 'float' and 'int'."));
                 return null;
             }
         }
@@ -90,7 +96,9 @@ namespace BoomifyCS.Assembly.BifyObject
             }
             else
             {
-                Traceback.Instance.ThrowException(new BifyTypeError($"Cannot compare {this.GetTypeName()} with {other.GetTypeName()}"));
+                Traceback.Instance.ThrowException(new BifyTypeError(
+                    $"Type error in '<' operation: cannot compare '{this.GetTypeName()}' with '{other.GetTypeName()}'. " +
+                    "Expected operand types: both 'float' or 'float' and 'int'."));
                 return null;
             }
         }
@@ -112,7 +120,9 @@ namespace BoomifyCS.Assembly.BifyObject
             }
             else
             {
-                Traceback.Instance.ThrowException(new BifyTypeError($"Cannot compare {this.GetTypeName()} with {other.GetTypeName()}"));
+                Traceback.Instance.ThrowException(new BifyTypeError(
+                    $"Type error in '>=' operation: cannot compare '{this.GetTypeName()}' with '{other.GetTypeName()}'. " +
+                    "Expected operand types: both 'float' or 'float' and 'int'."));
                 return null;
             }
         }
@@ -134,7 +144,9 @@ namespace BoomifyCS.Assembly.BifyObject
             }
             else
             {
-                Traceback.Instance.ThrowException(new BifyTypeError($"Cannot compare {this.GetTypeName()} with {other.GetTypeName()}"));
+                Traceback.Instance.ThrowException(new BifyTypeError(
+                    $"Type error in '<=' operation: cannot compare '{this.GetTypeName()}' with '{other.GetTypeName()}'. " +
+                    "Expected operand types: both 'float' or 'float' and 'int'."));
                 return null;
             }
         }
@@ -154,7 +166,9 @@ namespace BoomifyCS.Assembly.BifyObject
             }
             else
             {
-                Traceback.Instance.ThrowException(new BifyArithmeticError("Type mismatch in float addition."));
+                Traceback.Instance.ThrowException(new BifyArithmeticError(
+                    $"Arithmetic error in '+' operation: cannot add '{this.GetTypeName()}' and '{other.GetTypeName()}'. " +
+                    "Expected operand types: both 'float' or 'float' and 'int'."));
                 return null;
             }
         }
@@ -174,7 +188,9 @@ namespace BoomifyCS.Assembly.BifyObject
             }
             else
             {
-                Traceback.Instance.ThrowException(new BifyArithmeticError("Type mismatch in float subtraction."));
+                Traceback.Instance.ThrowException(new BifyArithmeticError(
+                    $"Arithmetic error in '-' operation: cannot subtract '{other.GetTypeName()}' from '{this.GetTypeName()}'. " +
+                    "Expected operand types: both 'float' or 'float' and 'int'."));
                 return null;
             }
         }
@@ -194,7 +210,9 @@ namespace BoomifyCS.Assembly.BifyObject
             }
             else
             {
-                Traceback.Instance.ThrowException(new BifyArithmeticError("Type mismatch in float multiplication."));
+                Traceback.Instance.ThrowException(new BifyArithmeticError(
+                    $"Arithmetic error in '*' operation: cannot multiply '{this.GetTypeName()}' with '{other.GetTypeName()}'. " +
+                    "Expected operand types: both 'float' or 'float' and 'int'."));
                 return null;
             }
         }
@@ -214,7 +232,9 @@ namespace BoomifyCS.Assembly.BifyObject
             }
             else
             {
-                Traceback.Instance.ThrowException(new BifyArithmeticError("Type mismatch in float division."));
+                Traceback.Instance.ThrowException(new BifyArithmeticError(
+                    $"Arithmetic error in '/' operation: cannot divide '{this.GetTypeName()}' by '{other.GetTypeName()}'. " +
+                    "Expected operand types: both 'float' or 'float' and 'int'."));
                 return null;
             }
         }
@@ -240,7 +260,8 @@ namespace BoomifyCS.Assembly.BifyObject
                 }
                 else
                 {
-                    Traceback.Instance.ThrowException(new BifyTypeError("Invalid type for float."));
+                    Traceback.Instance.ThrowException(new BifyTypeError(
+                        $"Type error in 'float' creation: expected a 'float' or 'int' value, but received '{value.GetType().Name}'."));
                     return null;
                 }
             }

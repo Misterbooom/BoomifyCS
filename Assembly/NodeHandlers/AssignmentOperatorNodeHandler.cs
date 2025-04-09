@@ -36,7 +36,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             if (targetValueType is BifyPointerType pointerType)
                 targetValueType = pointerType.PointedType;
 
-            rhsValue = rhsValue.AutoCast(targetValueType, compiler.Builder);
+            rhsValue = rhsValue.ExplicitCast(targetValueType, compiler.Builder);
             BifyValue computedValue;
             BifyPointerType lhsPointerType = lhsPointer.GetBifyType() as BifyPointerType;
             BifyDebug.Log($"pointer type: {lhsPointerType.Name} {targetValueType.LLVMType}");

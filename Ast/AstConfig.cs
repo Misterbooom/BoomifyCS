@@ -5,55 +5,58 @@ namespace BoomifyCS.Ast
 {
     public static class AstConfig
     {
+        // Precedence configuration with higher values indicating higher precedence
         public static readonly Dictionary<TokenType, int> Precedence = new()
         {
-            { TokenType.LPAREN, (int)PrecedenceLevel.Lowest },
-            { TokenType.RPAREN, (int)PrecedenceLevel.Lowest },
-            { TokenType.POW, (int)PrecedenceLevel.Power },
-            { TokenType.MUL, (int)PrecedenceLevel.Product },
-            { TokenType.DIV, (int)PrecedenceLevel.Product },
-            { TokenType.FLOORDIV, (int)PrecedenceLevel.Product },
-            { TokenType.MOD, (int)PrecedenceLevel.Product },
-            { TokenType.ADD, (int)PrecedenceLevel.Sum },
-            { TokenType.SUB, (int)PrecedenceLevel.Sum },
-            { TokenType.GT, (int)PrecedenceLevel.Comparison },
-            { TokenType.LT, (int)PrecedenceLevel.Comparison },
-            { TokenType.GTEQ, (int)PrecedenceLevel.Comparison },
-            { TokenType.LTEQ, (int)PrecedenceLevel.Comparison },
-            { TokenType.EQ, (int)PrecedenceLevel.Equality },
-            { TokenType.NEQ, (int)PrecedenceLevel.Equality },
-            { TokenType.INCREMENT, (int)PrecedenceLevel.Product },
-            { TokenType.DECREMENT, (int)PrecedenceLevel.Product },
-            { TokenType.BITAND, (int)PrecedenceLevel.BitwiseAnd },
-            { TokenType.BITOR, (int)PrecedenceLevel.BitwiseOr },
-            { TokenType.BITXOR, (int)PrecedenceLevel.BitwiseXor },
-            { TokenType.BITNOT, (int)PrecedenceLevel.BitwiseNot },
-            { TokenType.NOT, (int)PrecedenceLevel.BitwiseNot },
-            { TokenType.LSHIFT, (int)PrecedenceLevel.Shift },
-            { TokenType.RSHIFT, (int)PrecedenceLevel.Shift },
-            { TokenType.AND, (int)PrecedenceLevel.And },
-            { TokenType.OR, (int)PrecedenceLevel.Or },
-            { TokenType.COMMA, (int)PrecedenceLevel.Lowest },
-            { TokenType.RANGE, (int)PrecedenceLevel.Range }
+            // Parentheses have the highest precedence, to ensure that expressions inside them are evaluated first
+            { TokenType.LPAREN,   0 },
+            { TokenType.RPAREN,   0 },
+
+            // Arithmetic operators
+            { TokenType.POW,      10 },      // Exponentiation
+            { TokenType.MUL,      9 },       // Multiplication
+            { TokenType.DIV,      9 },       // Division
+            { TokenType.FLOORDIV, 9 },       // Floor division
+            { TokenType.MOD,      9 },       // Modulo
+            { TokenType.ADD,      8 },       // Addition
+            { TokenType.SUB,      8 },       // Subtraction
+
+            // Comparison operators
+            { TokenType.GT,       7 },       // Greater than
+            { TokenType.LT,       7 },       // Less than
+            { TokenType.GTEQ,     7 },       // Greater than or equal to
+            { TokenType.LTEQ,     7 },       // Less than or equal to
+            { TokenType.EQ,       6 },       // Equal to
+            { TokenType.NEQ,      6 },       // Not equal to
+
+            // Boolean operators (AND, OR, NOT have lower precedence than arithmetic)
+            { TokenType.AND,      5 },       // Logical AND
+            { TokenType.OR,       4 },       // Logical OR
+            { TokenType.NOT,      3 },       // Logical NOT
+
+            // Bitwise operators
+            { TokenType.BITAND,   2 },       // Bitwise AND
+            { TokenType.BITOR,    2 },       // Bitwise OR
+            { TokenType.BITXOR,   2 },       // Bitwise XOR
+            { TokenType.BITNOT,   1 },       // Bitwise NOT
+
+            // Increment/Decrement operators
+            { TokenType.INCREMENT, 11 },     // Increment operator (highest precedence for unary operators)
+            { TokenType.DECREMENT, 11 },     // Decrement operator
+
+            // Other operators
+            { TokenType.COMMA,    0 },       // Comma for separating arguments
+            { TokenType.RANGE,    0 },       // Range operator (for slicing/ranges)
         };
 
         private enum PrecedenceLevel
         {
-            Lowest = 0,
-            Sum = 1,
-            Product = 2,
-            Power = 3,
-            Shift = 4,
-            BitwiseNot = 5,   // Unary operator, high precedence (still before AND/OR)
-            BitwiseAnd = 6,   // Higher than BitwiseNot
-            BitwiseXor = 7,   // Higher than BitwiseAnd
-            BitwiseOr = 8,    // Higher than BitwiseXor
-            Equality = 9,
-            Comparison = -1,
-            Range = 11,
-            And = 12,         // Logical AND
-            Or = 13,          // Logical OR
+            Highest = 12,
+            Arithmetic = 8,
+            Comparison = 7,
+            Boolean = 3,
+            Bitwise = 1,
+            Lowest = 0
         }
-
     }
 }

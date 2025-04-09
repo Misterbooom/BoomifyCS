@@ -1,0 +1,111 @@
+﻿using System.Collections.Generic;
+using BoomifyCS.Assembly.BifyObject;
+using BoomifyCS.Ast;
+using BoomifyCS.Exceptions;
+using BoomifyCS.Lexer;
+
+namespace BoomifyCS.Assembly.NodeHandlers
+{
+    class ArrayNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    {
+        public override void HandleNode(AstNode node)
+        {
+            AstArray astArray = (AstArray)node;
+            uint argCount = CountArgs(astArray.ArgumentsNode);
+
+            if (argCount == 0 && compiler.StackCount == 0)
+            {
+                Traceback.Instance.ThrowException(new BifyTypeError("Cannot construct an array: no type provided."));
+                return;
+            }
+
+            // Determine array type
+            ArrayType arrayType;
+            if (compiler.StackCount == 0)
+            {
+                compiler.Visit(astArray.ArgumentsNode);
+                IValue rawTypeValue = compiler.StackElementAt(compiler.StackCount - 1);
+                if (rawTypeValue is not BifyValue typeValue)
+                {
+                    Traceback.Instance.ThrowException(new BifyTypeError("Cannot construct an array: no type provided."));
+                    return;
+                }
+                arrayType = new ArrayType(typeValue.GetBifyType(), 0);
+            }
+            else
+            {
+                BifyType typeOnStack = (BifyType)compiler.StackIValuePop();
+                if (typeOnStack is not ArrayType declaredArrayType)
+                {
+                    Traceback.Instance.ThrowException(new BifyTypeError(
+                        "Cannot construct an array: the type provided is not an array type. " +
+                        "Make sure to define the array type correctly before initialization."));
+                    return;
+                }
+                arrayType = declaredArrayType;
+                compiler.Visit(astArray.ArgumentsNode);
+            }
+
+            // Build and validate array values
+            BifyValue[] values = BuildArrayFromStack(argCount, arrayType);
+            ValidateArgsType(values, arrayType.ItemType);
+
+            if (arrayType.ElementCount == 0)
+            {
+                arrayType.SetElementCount(argCount);
+            }
+
+            compiler.StackPush(arrayType.Create(values));
+        }
+
+        private BifyValue[] BuildArrayFromStack(uint argCount, ArrayType arrayType)
+        {
+            BifyValue[] values = new BifyValue[argCount];
+            for (int i = (int)argCount - 1; i >= 0; i--)
+            {
+                BifyValue value = compiler.StackPop();
+                if (!arrayType.ItemType.CompareType(value.GetBifyType()))
+                {
+                    BifyValue casted = value.ExplicitCast(arrayType.ItemType, AssemblyCompiler.Instance.Builder);
+                    if (casted == null || Traceback.Instance.GetError() != null)
+                    {
+                        Traceback.Instance.ThrowException(new BifyTypeError(
+                            $"Type mismatch at argument {argCount - i}: Expected {arrayType.ItemType.Name} but got {value.GetTypeName()}."));
+                        return [];
+                    }
+                    value = casted;
+                }
+                values[i] = value;
+            }
+            return values;
+        }
+
+        private static void ValidateArgsType(BifyValue[] values, BifyType expectedType)
+        {
+            for (int i = 0; i < values.Length; i++)
+            {
+                BifyValue arg = values[i];
+                if (!expectedType.CompareType(arg.GetBifyType()))
+                {
+                    Traceback.Instance.Catch(typeof(BifyTypeError));
+                    BifyValue casted = arg.ExplicitCast(expectedType, AssemblyCompiler.Instance.Builder);
+                    if (casted == null || Traceback.Instance.GetError() != null)
+                    {
+                        Traceback.Instance.ThrowException(new BifyTypeError(
+                            $"Array element type mismatch at index {i}: expected '{expectedType.Name}', but got '{arg.GetTypeName()}'."));
+                        return;
+                    }
+                    values[i] = casted;
+                }
+            }
+        }
+
+        private static uint CountArgs(AstNode node)
+        {
+            if (node == null) return 0;
+            if (node is AstBinaryOp binaryOp && binaryOp.Token.Type == TokenType.COMMA)
+                return CountArgs(binaryOp.Left) + CountArgs(binaryOp.Right);
+            return 1;
+        }
+    }
+}

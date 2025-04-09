@@ -103,7 +103,7 @@ namespace BoomifyCS.Assembly.Builtin
                     {
                         return item.GetLLVMValue();
                     }
-                    return item.AutoCast(ReturnType, AssemblyCompiler.Instance.Builder).GetLLVMValue();
+                    return item.ExplicitCast(ReturnType, AssemblyCompiler.Instance.Builder).GetLLVMValue();
                 }).ToArray(),
                 "calltmp"
             );

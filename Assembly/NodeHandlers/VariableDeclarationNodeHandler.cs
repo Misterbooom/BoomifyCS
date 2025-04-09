@@ -42,7 +42,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             var loadedValue = loadedIValue as BifyValue;
             BifyDebug.Log($"Var type - {bifyType} Var value type - {loadedValue.GetTypeName()} LLVMVarType: {bifyType.LLVMType} pointer to i8");
 
-            var variableValue = loadedValue.AutoCast(bifyType, compiler.Builder);
+            var variableValue = loadedValue.ExplicitCast(bifyType, compiler.Builder);
             var alloca = compiler.Builder.BuildAlloca(bifyType.LLVMType, varName);
 
             compiler.Builder.BuildStore(variableValue.GetLLVMValue(), alloca);

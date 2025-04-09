@@ -27,32 +27,38 @@ namespace BoomifyCS.Assembly.BifyObject
             return 0;
         }
     }
-    class NullType : BifyType
+    class NullType : BifyPointerType
     {
-        public NullType() : base("null", LLVMTypeRef.Void)
-        { }
-        public override BifyValue Create(object value)
+        public NullType(BifyType pointedType) : base(pointedType) { }
+
+        public static BifyValue Create(BifyType targetPointerType)
         {
-            return new NullValue();
-        }
-        protected override BifyValue CreateByValueRef(LLVMValueRef value)
-        {
-            return new NullValue();
-        }
-        public override uint Size()
-        {
-            return 0;
+            if (targetPointerType is BifyPointerType pointerType)
+            {
+                return new NullValue(pointerType, LLVMValueRef.CreateConstPointerNull(pointerType.LLVMType))
+                {
+                    ValueFlag = ValueFlag.Constant,
+                };
+            }
+            throw new InvalidOperationException("Null can only be assigned to a pointer type.");
         }
 
-    }
-    class NullValue : BifyValue
-    {
-        public NullValue() : base(LLVMValueRef.CreateConstNull(LLVMTypeRef.Void), new NullType())
-        { }
-        public override BifyValue Add(BifyValue other, LLVMBuilderRef builder)
+        public override bool CompareType(BifyType other)
         {
-            return null;
+            return other is BifyPointerType;
+        }
+
+        public override uint Size()
+        {
+            return 8;
         }
     }
+
+    class NullValue : PointerValue
+    {
+        public NullValue(BifyPointerType type, LLVMValueRef valueRef) : base(valueRef, type) { }
+        public NullValue() : base(LLVMValueRef.CreateConstPointerNull(LLVMTypeRef.CreatePointer(LLVMTypeRef.Void, 0)), new NullType(new VoidType())) { }
+    }
+
 
 }

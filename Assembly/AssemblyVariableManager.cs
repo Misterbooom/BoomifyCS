@@ -23,6 +23,7 @@ namespace BoomifyCS.Assembly
             {"input",new Input() },
             {"sizeof",new SizeOf() },
             {"exit",new Exit() },
+            {"null", new NullValue()}
 
         };
 

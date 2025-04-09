@@ -94,7 +94,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 if (!expectedType.CompareType(providedArg.GetBifyType()))
                 {
                     Traceback.Instance.Catch(typeof(BifyTypeError));
-                    BifyValue castedArg = providedArg.AutoCast(expectedType, compiler.Builder);
+                    BifyValue castedArg = providedArg.ExplicitCast(expectedType, compiler.Builder);
                     BifyDebug.Log($"Arg {i}: {castedArg}");
 
                     if (castedArg == null || Traceback.Instance.GetError() != null)

@@ -8,6 +8,7 @@ using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace BoomifyCS.Assembly
 {
@@ -34,6 +35,7 @@ namespace BoomifyCS.Assembly
         public NodeVisitFlag Flag { get; set; } = NodeVisitFlag.NONE;
         public BifyType ReturnType { get; set; }
         public DebugBuilder DebugBuilder { get; }
+        public int StackCount => _stack.Count;
         public LLVMValueRef Function
         {
             get
@@ -92,6 +94,11 @@ namespace BoomifyCS.Assembly
         {
             return _stack.Pop();
         }
+        public IValue StackElementAt(int index)
+        {
+            return _stack.ElementAt(index);
+        }
+
 
         public void Visit(AstNode node)
         {
@@ -207,18 +214,24 @@ namespace BoomifyCS.Assembly
         {
             try
             {
+                
+
                 ProcessStartInfo psi = new ProcessStartInfo
                 {
                     FileName = "cmd.exe",
-                    Arguments = $"/K \"{exePath}\"",
+                    Arguments = $"/C start cmd.exe /K \"{exePath}\"",
                     CreateNoWindow = false,
                     UseShellExecute = false,
                 };
-
+                var stopwatch = new Stopwatch();
                 using (Process process = Process.Start(psi))
                 {
+                    stopwatch.Start();
                     process.WaitForExit();
                 }
+
+                stopwatch.Stop();
+                Console.WriteLine($"Execution time: {stopwatch.ElapsedMilliseconds } ms");
             }
             catch (Exception ex)
             {

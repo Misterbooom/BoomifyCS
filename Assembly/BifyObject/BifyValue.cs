@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks.Sources;
+using BoomifyCS.Assembly.Builtin;
 using BoomifyCS.Exceptions;
 using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.BifyObject
 {
-    
+
     public abstract class BifyValue : IValue
     {
         public ValueFlag ValueFlag
@@ -31,40 +32,12 @@ namespace BoomifyCS.Assembly.BifyObject
         public string GetTypeName() => type.Name;
         public virtual bool CompareType(Type other) => GetBifyType().CompareType(other);
         public virtual bool CompareType(BifyValue other) => GetBifyType().CompareType(other.GetBifyType());
-        public BifyValue AutoCast(BifyType desiredType, LLVMBuilderRef builder)
+   
+        public BifyValue ExplicitCast(BifyType desiredType,LLVMBuilderRef builder)
         {
-            if (desiredType.CompareType(this.type))
-                return this;
-
-            if (desiredType is BifyPointerType desiredPtr)
-            {
-               if (desiredPtr.PointedType.CompareType(GetBifyType()))
-                {
-                    return desiredPtr.CreateValueRef(this.GetLLVMValue());
-                }
-                Traceback.Instance.ThrowException(
-                    new BifyTypeError($"Cannot auto cast {this.GetTypeName()} to {desiredType.Name}")
-                );
-             
-            }
-
-            if (this.type is IntegerType && desiredType is FloatType)
-            {
-                LLVMValueRef floatValue = builder.BuildSIToFP(this.GetLLVMValue(), desiredType.LLVMType, "cast_int_to_float");
-                return new FloatValue(floatValue);
-            }
-            else if (this.type is FloatType && desiredType is IntegerType)
-            {
-                LLVMValueRef intValue = builder.BuildFPToSI(this.GetLLVMValue(), desiredType.LLVMType, "cast_float_to_int");
-                return new IntegerValue(intValue);
-            }
-
-            Traceback.Instance.ThrowException(
-                new BifyTypeError($"Cannot auto cast {this.GetTypeName()} to {desiredType.Name}")
-            );
-            return null;
+            return new ExplicitCastHandler(this).PerformExplicitCast(desiredType,builder);
         }
-        public virtual BifyValue Index(BifyValue indexValue,LLVMBuilderRef builder)
+        public virtual BifyValue Index(BifyValue indexValue, LLVMBuilderRef builder)
         {
             Traceback.Instance.ThrowException(new BifyTypeError($"{GetTypeName()} doesn't support Index"));
             return null;

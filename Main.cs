@@ -58,7 +58,7 @@ namespace BoomifyCS
         static void RunInterpreter()
         {
             Console.OutputEncoding = Encoding.Unicode;
-            string file = "C:/BoomifyCS/test.bify";
+            string file = "C:/BoomifyCS/test.bify";  
             Traceback.Instance.FilePath = file;
             string code = File.ReadAllText(file);
             MyLexer lexer = new(code);

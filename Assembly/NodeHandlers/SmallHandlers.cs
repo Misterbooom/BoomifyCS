@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
@@ -43,70 +42,6 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 }
             }
             compiler.VariableManager.ExitLocalScope();
-        }
-    }
-    class ArrayNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
-    {
-        public override void HandleNode(AstNode node)
-        {
-            AstArray astArray = (AstArray)node;
-            BifyType bifyType = (BifyType)compiler.StackIValuePop();
-
-            if (bifyType is not ArrayType arrayType)
-            {
-                Traceback.Instance.ThrowException(new BifyTypeError("Invalid array type"));
-                return;
-            }
-            uint argCount = CountArgs(astArray.ArgumentsNode);
-            compiler.Visit(astArray.ArgumentsNode);
-
-            List<BifyValue> bifyValues = new List<BifyValue>();
-            for (int i = 0; i < argCount; i++)
-            {
-                bifyValues.Add(compiler.StackPop());
-            }
-            bifyValues.Reverse();
-            ValidateArgsType(bifyValues.ToArray(), arrayType.ItemType);
-            BifyDebug.Log(string.Join(", ", bifyValues));
-            if (arrayType.ElementCount == 0)
-            {
-                arrayType.SetElementCount(argCount);
-            }
-            compiler.StackPush(arrayType.Create(bifyValues.ToArray()));
-
-        }
-        private static void ValidateArgsType(BifyValue[] values, BifyType expectedType)
-        {
-            for (int i = 0; i < values.Length; i++)
-            {
-                var providedArg = values[i];
-                if (!expectedType.CompareType(providedArg.GetBifyType()))
-                {
-                    Traceback.Instance.Catch(typeof(BifyTypeError));
-                    BifyValue castedArg = providedArg.AutoCast(expectedType, AssemblyCompiler.Instance.Builder);
-                    if (castedArg == null || Traceback.Instance.GetError() != null)
-                    {
-                        string expectedTypeName = expectedType.Name;
-                        string providedTypeName = providedArg.GetTypeName();
-                        string errorMessage = $"Type mismatch at argument {i + 1}: Expected {expectedTypeName} but got {providedTypeName}.";
-                        Traceback.Instance.ThrowException(new BifyTypeError(errorMessage));
-                        return;
-                    }
-                    else
-                    {
-                        values[i] = castedArg;
-                    }
-                }
-            }
-        }
-        private static uint CountArgs(AstNode node)
-        {
-            if (node == null) return 0;
-            if (node is AstBinaryOp binaryOp && binaryOp.Token.Type == TokenType.COMMA)
-            {
-                return CountArgs(binaryOp.Left) + CountArgs(binaryOp.Right);
-            }
-            return 1;
         }
     }
     class IdentifierNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)

@@ -37,6 +37,18 @@ namespace BoomifyCS.Assembly.BifyObject
                 return new BifyPointerType(arrayType.ItemType).CreateValueRef(gep);
             }
         }
+        public BifyValue ZeroIndex(LLVMBuilderRef builder)
+        {
+            unsafe
+            {
+                LLVMValueRef zeroIndex = LLVM.ConstInt(LLVM.Int32Type(), 0, 0);
+                LLVMValueRef[] indices = new LLVMValueRef[] { new IntegerValue(zeroIndex).GetLLVMValue() };
+                LLVMValueRef gep = builder.BuildInBoundsGEP2(((ArrayType)GetBifyType()).ItemType.LLVMType, GetLLVMValue(), indices, "arrayIndex");
+                ArrayType arrayType = (ArrayType)GetBifyType();
+                BifyDebug.Log($"Zero index: {gep}");
+                return new BifyPointerType(arrayType.ItemType).CreateValueRef(gep);
+            }
+        }
     }
 
     class ArrayType : BifyType
@@ -120,12 +132,18 @@ namespace BoomifyCS.Assembly.BifyObject
         }
         public override BifyValue Call(BifyValue[] args)
         {
-            if (needToInit)
+            var existedFunction = AssemblyCompiler.Instance.Module.GetNamedFunction("arrayIndexCheck");
+            if (existedFunction == null)
             {
                 var insertBlock = AssemblyCompiler.Instance.Builder.InsertBlock;
                 Init();
-                needToInit = false;
                 AssemblyCompiler.Instance.Builder.PositionAtEnd(insertBlock);
+            }
+            else
+            {
+                llvmValue = existedFunction;
+                TypeRef = LLVMTypeRef.CreateFunction(ReturnType.LLVMType,existedFunction.TypeOf.ParamTypes);
+                BifyDebug.Log($"Setting func value: {llvmValue} type: {TypeRef}");
             }
             if (args.Length != 2)
             {
