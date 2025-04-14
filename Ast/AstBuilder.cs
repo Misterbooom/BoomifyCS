@@ -32,10 +32,7 @@ namespace BoomifyCS.Ast
 
                 tokenIndex++;
             }
-            while (operatorStack.Count > 0)
-            {
-                PopOperator();
-            }
+           
             while (operandStack.Count > 1)
             {
 
@@ -63,10 +60,6 @@ namespace BoomifyCS.Ast
 
                 tokenIndex++;
             }
-            while (operatorStack.Count > 0)
-            {
-                PopOperator();
-            }
             return operandStack.ToArray();
         }
 
@@ -86,88 +79,11 @@ namespace BoomifyCS.Ast
             operatorStack.Push(node);
         }
 
-        public void PopOperator()
-        {
-            AstBinaryOp opNode = (AstBinaryOp)operatorStack.Pop();
-
-            if (opNode.Token.Type == TokenType.NOT)
-            {
-                if (operandStack.Count == 0)
-                    throw new InvalidOperationException("Not enough operands for the NOT operation.");
-
-                AstNode operand = operandStack.Pop();
-                OperandValidator.Validate(operand, operand, opNode);
-                opNode.Left = operand;
-                AddOperand(opNode);
-                return;
-            }
-            else if (opNode.Token.Type == TokenType.MUL)
-            {
-                if (operandStack.Count >= 2 && operandStack.ElementAt(^1).Token.Type != TokenType.CONST)
-                {
-                    AstNode right = operandStack.Pop();
-                    AstNode left = operandStack.Pop();
-                    OperandValidator.Validate(left, right, opNode);
-                    opNode.Left = left;
-                    opNode.Right = right;
-                    AddOperand(opNode);
-                    return;
-                }
-                else if (operandStack.Count == 1 || operandStack.ElementAt(^1).Token.Type == TokenType.CONST)
-                {
-                    AstNode operand = operandStack.Pop();
-                    BifyDebug.Log("Creating pointer");
-                    OperandValidator.Validate(operand, operand, opNode);
-
-                    Token pointerToken = new Token(TokenType.POINTER, "*Pointer");
-                    AstUnaryOperator pointerNode = new AstUnaryOperator(pointerToken, operand);
-                    AddOperand(pointerNode);
-                    return;
-                }
-                else
-                {
-                    throw new InvalidOperationException("Not enough operands for the multiplication or pointer operation.");
-                }
-            }
-            else
-            {
-                if (operandStack.Count < 2)
-                {
-                    BifySyntaxError error = new(ErrorMessage.NotEnoughOperands(opNode.Token.Value), "", opNode.Token.Value);
-                    Traceback.Instance.ThrowException(error, opNode.Token.Column);
-                    return;
-                }
-
-                AstNode right = operandStack.Pop();
-                AstNode left = operandStack.Pop();
-                OperandValidator.Validate(left, right, opNode);
-                opNode.Left = left;
-                opNode.Right = right;
-                AddOperand(opNode);
-            }
-        }
+        
 
 
 
-        public bool ShouldPopOperator(Token token)
-        {
-            if (operatorStack.Count == 0)
-            {
-                return false;
-            }
-
-            AstNode topOperator = operatorStack.Peek();
-            int currentPrecedence = AstConfig.Precedence[token.Type];
-            int topPrecedence = AstConfig.Precedence[topOperator.Token.Type];
-
-            if (token.Type == TokenType.NOT )
-            {
-                return false;
-            }
-
-            bool shouldPop = currentPrecedence <= topPrecedence;
-            return shouldPop;
-        }
+        
 
         public List<Token> GetConditionTokens() => TokensFormatter.GetTokensBetween(tokens, ref tokenIndex, TokenType.LPAREN, TokenType.RPAREN);
 

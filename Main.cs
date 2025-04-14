@@ -68,7 +68,7 @@ namespace BoomifyCS
             AstNode node = astParser.ParseTokens(tokens);
             BifyDebug.Log(node.ToString());
             AssemblyCompiler compiler = AssemblyCompiler.Instance;
-            compiler.Compile(node);
+            //compiler.Compile(node);
         }
     }
 }

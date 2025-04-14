@@ -14,52 +14,7 @@ namespace BoomifyCS.Ast
 
         public override void HandleToken(Token token)
         {
-            builder.operandStack.WriteNodes();
-
-            AstNode flagNode = null;
-
-            AstNode identifierNode = builder.operandStack.Pop();
-
-            int typeStartIndex = (builder.operandStack.Count == 2) ? 1 : 0;
-
-            var tokensBehind = builder.tokens[typeStartIndex..(builder.tokenIndex - 1)];
-            BifyDebug.Log($"Tokens behind: {tokensBehind.TokensToString()}");
-            AstNode parsedType = builder.ParseTokens(tokensBehind);
-
-            (AstNode lastOperand, AstNode typeNode) = SwitchLastPointerOperand(identifierNode, parsedType);
-
-            if (builder.operandStack.Count == 2)
-            {
-                builder.operandStack.Pop();
-                flagNode = builder.operandStack.Pop();
-            }
-
-            if (builder.tokenIndex < builder.tokens.Count)
-            {
-                builder.tokenIndex++;
-            }
-
-            List<Token> valueTokens = builder.tokens[builder.tokenIndex..];
-            AstNode valueNode = builder.ParseTokens(valueTokens);
-
-            builder.tokenIndex = builder.tokens.Count;
-
-            // Fix for CS0103: Ensure typeNode is passed correctly
-            VariableDeclarationValidator.Validate(
-                identifierNode,
-                typeNode,
-                valueNode,
-                valueTokens,
-                flagNode,
-                token
-            );
-
-            AstAssignment astAssignment = new(token, identifierNode, valueNode);
-            AstVarDecl astVarDecl = new(token, astAssignment, typeNode, flagNode);
-
-            builder.operatorStack.Clear();
-            builder.operandStack.Clear();
-            builder.AddOperand(astVarDecl);
+         
         }
         public static (AstNode lastOperand, AstNode finalPointer) SwitchLastPointerOperand(AstNode pointer, AstNode operand)
         {

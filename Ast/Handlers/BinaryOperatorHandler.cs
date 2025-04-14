@@ -12,13 +12,8 @@ namespace BoomifyCS.Ast
 
         public override void HandleToken(Token token)
         {
-            while (builder.operatorStack.Count > 0 && builder.ShouldPopOperator(token))
-            {
-                builder.PopOperator();
-            }
 
-            AstNode operatorNode = new AstBinaryOp(token);
-            builder.AddOperator(operatorNode);
         }
+       
     }
 }
