@@ -55,15 +55,22 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 compiler.StackPush(bifyType);
                 return;
             }
-            
+            else if (compiler.Flag.HasFlag(NodeVisitFlag.ASSIGNMENT_INDEX))
+            {
+                compiler.StackPush(variable);
+                compiler.Flag &= ~NodeVisitFlag.ASSIGNMENT_INDEX;
+                return;
+            }
             else if (((BifyValue)variable).GetBifyType() is AllocaType allocaType)
             {
-                if (allocaType.PointedType is ArrayType arrayType){
+                BifyDebug.Log($"{compiler.Flag}");
+                if (allocaType.PointedType is ArrayType arrayType) {
                     compiler.StackPush(arrayType.CreateValueRef(variable.GetLLVMValue()));
                     return;
                 }
                 LLVMValueRef valueRef = compiler.Builder.BuildLoad2(allocaType.PointedType.LLVMType, variable.GetLLVMValue(), "loaded_" + node.Token.Value);
                 compiler.StackPush(allocaType.PointedType.CreateValueRef(valueRef));
+
             }
             else
             {

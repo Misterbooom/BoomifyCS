@@ -400,6 +400,20 @@ namespace BoomifyCS.Ast
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{nodeIndexStr}\n{operandStr}";
         }
     }
+    public class AstParam(AstNode type,AstNode name,AstNode flag) : AstNode(new Token(TokenType.AND, "Param"))
+    {
+        public AstNode Type = type;
+        public AstNode Name = name;
+        public AstNode Flag = flag;
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
+        {
+            string baseStr = base.StrHelper(level, note);
+            string typeStr = Type?.StrHelper(level + 1, "Type: ");
+            string nameStr = Name?.StrHelper(level + 1, "Name: ");
+            string flagStr = Flag?.StrHelper(level + 1, "Flag: ");
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{typeStr}\n{nameStr}\n{flagStr}";
+        }
+    }
     public class AstConditionStatement(AstNode left = null, AstNode right = null) : AstNode(new Token(TokenType.IDENTIFIER, "Condition statement"), left, right)
     {
 

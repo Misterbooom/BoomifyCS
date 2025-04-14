@@ -13,18 +13,19 @@ namespace BoomifyCS.Ast.Validators
         public static void Validate(AstNode identifierNode, AstNode typeNode,
             AstNode valueNode, List<Token> valueTokens, AstNode flagNode, Token assignmentToken)
         {
-            if (valueTokens.Count == 0 || valueNode == null)
-            {
-                BifySyntaxError error = new(ErrorMessage.EmptyValueAssigned());
-                Traceback.Instance.ThrowException(error, assignmentToken.Column);
-            }
+            //if (valueTokens.Count == 0 || valueNode == null)
+            //{
+            //    //BifySyntaxError error = new(ErrorMessage.EmptyValueAssigned());
+            //    //Traceback.Instance.ThrowException(error, assignmentToken.Column);
+                
+            //}
             if (identifierNode is not AstIdentifier)
             {
                 BifyNameError error = new(ErrorMessage.InvalidVariableName(identifierNode?.Token.Value),
                     "", identifierNode?.Token.Value);
                 Traceback.Instance.ThrowException(error, identifierNode?.Token.Column ?? assignmentToken.Column);
             }
-            if (typeNode is not AstIdentifier && typeNode.Token.Type != TokenType.POINTER && typeNode is not AstIndexOperator)
+            if (typeNode == null  || typeNode is not AstIdentifier && typeNode.Token.Type != TokenType.POINTER && typeNode is not AstIndexOperator)
             {
                 BifyTypeError bifyTypeError = new(ErrorMessage.InvalidVariableType(typeNode?.Token.Type.ToString().ToLower()),
                     "", typeNode?.Token.Value);

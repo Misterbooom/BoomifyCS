@@ -43,52 +43,86 @@ namespace BoomifyCS.Ast.Handlers
                 parameterGroups.Add(currentGroup);
             }
 
-            AstNode parametersNode = null;
-            List<AstBinaryOp> concatNodes = new List<AstBinaryOp>();
+            AstParam[] paramNodes = GetParameters(parameterGroups);
+            AstNode connectedParams = null;
 
-            foreach (var group in parameterGroups)
+            if (paramNodes.Length > 0)
             {
-                BifyDebug.Log($"Group: {group.TokensToString()}");
-                if (group.Count < 2)
-                    continue;
-
-                List<Token> typeTokens = group.Take(group.Count - 1).ToList();
-                Token nameToken = group.Last();
-
-                AstNode typeAstNode = builder.ParseTokens(typeTokens);
-                AstIdentifier nameIdentifier = new AstIdentifier(nameToken, nameToken.Value);
-
-                Token concatToken = new Token(TokenType.ADD, "concat");
-                AstBinaryOp concatOp = new AstBinaryOp(concatToken, typeAstNode, nameIdentifier);
-                concatNodes.Add(concatOp);
-            }
-
-            if (concatNodes.Count > 0)
-            {
-                parametersNode = concatNodes[0];
-                for (int i = 1; i < concatNodes.Count; i++)
+                connectedParams = paramNodes[0];
+                for (int i = 1; i < paramNodes.Length; i++)
                 {
-                    Token commaToken = new Token(TokenType.COMMA, ",");
-                    parametersNode = new AstBinaryOp(commaToken, parametersNode, concatNodes[i]);
+                    connectedParams = new AstBinaryOp(new Token(TokenType.COMMA, ","), connectedParams, paramNodes[i]);
                 }
             }
 
             AstNode blockNode = builder.ParseBlock(blockTokens);
-
-            Traceback.Instance.SetCurrentLine(token.Line);
-
-            FunctionDeclarationValidator.Validate(token, parametersNode, blockNode, typeNode);
-            AstFunctionDecl functionNode = new AstFunctionDecl(
-                token,
-                typeNode,
-                new AstIdentifier(token, token.Value),
-                parametersNode,
-                (AstBlock)blockNode
-            );
+            AstNode nameNode = NodeConventer.TokenToNode(token);
+            FunctionDeclarationValidator.Validate(token, connectedParams, blockNode, typeNode);
+            AstFunctionDecl astFunctionDecl = new(token, typeNode, (AstIdentifier)nameNode, 
+                connectedParams, (AstBlock)blockNode);
             builder.operatorStack.Clear();
             builder.operandStack.Clear();
-            builder.AddOperand(functionNode);
-            builder.tokenIndex++;
+            builder.AddOperand(astFunctionDecl);
+
+
+        }
+        private AstParam[] GetParameters(List<List<Token>> parameterGroups)
+        {
+            List<AstParam> astParams = new List<AstParam>();
+            foreach (var group in parameterGroups)
+            {
+                BifyDebug.Log($"Group: {group.TokensToString()}");
+
+                AstNode[] paramNodes = new AstBuilder(group).BuildWithoutConnecting();
+                //foreach (var node in paramNodes)
+                //{
+                //    BifyDebug.Log($"ParamNode: {node}");
+                //}
+
+
+                AstParam astParam = new AstParam(null, null, null);
+                if (paramNodes.Length > 3 || paramNodes.Length < 2)
+                {
+                    Traceback.Instance.ThrowException(new BifySyntaxError("Invalid Parameter Declaration!"));
+                }
+                AstNode paramName = paramNodes[0];
+                
+                AstNode paramType = paramNodes[1];
+                BifyDebug.Log($"Pointer paramName: {paramName}\nParamType: {paramType}");
+                if (paramName.Token.Type == TokenType.POINTER)
+                {
+                    (AstNode lastOperand, AstNode typeNode) = VariableDeclarationHandler.
+                        SwitchLastPointerOperand(paramName, paramType);
+                    paramName = lastOperand;
+                    paramType = typeNode;
+
+                }
+                if (paramName is not AstIdentifier)
+                {
+                    Traceback.Instance.ThrowException(new BifySyntaxError("Invalid Parameter Name!"));
+                }
+                if (paramType is not AstIdentifier && paramType.Token.Type != TokenType.POINTER)
+                {
+                    Traceback.Instance.ThrowException(new BifySyntaxError("Invalid Parameter Type!"));
+                }
+                astParam.Name = paramName;
+                astParam.Type = paramType;
+                if (paramNodes.Length == 3)
+                {
+                    AstNode paramFlag = paramNodes[2];
+                    if (paramFlag is AstIdentifier)
+                    {
+                        astParam.Flag = paramFlag;
+                    }
+                    else
+                    {
+                        Traceback.Instance.ThrowException(new BifySyntaxError("Invalid Parameter Flag!"));
+                    }
+                }
+              
+                astParams.Add(astParam);
+            }
+            return astParams.ToArray();
         }
     }
 }

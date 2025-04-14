@@ -1,5 +1,8 @@
-﻿
-void main() {
-	int n = [2,null,int];
+﻿int add(const int a,const int b) {
+	return a + b;
+}
+int main() {
+	int res = add(1, 2);
 	
+	return c;
 }

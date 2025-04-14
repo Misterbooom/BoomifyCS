@@ -9,6 +9,7 @@ using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace BoomifyCS.Assembly
 {
@@ -46,12 +47,12 @@ namespace BoomifyCS.Assembly
                 }
             }
         }
-       
+
         public LLVMBasicBlockRef ErrorBB;
 
         private readonly Stack<IValue> _stack = new();
 
-        private  AssemblyCompiler()
+        private AssemblyCompiler()
         {
             LLVM.InitializeX86TargetMC();
             LLVM.InitializeX86Target();
@@ -85,9 +86,9 @@ namespace BoomifyCS.Assembly
             _stack.Push(value);
         }
 
-        public BifyValue StackPop()
+        public void ClearStack()
         {
-            return (BifyValue)_stack.Pop();
+            _stack.Clear();
         }
 
         public IValue StackIValuePop()
@@ -102,6 +103,10 @@ namespace BoomifyCS.Assembly
 
         public void Visit(AstNode node)
         {
+            if (node == null)
+            {
+                return;
+            }
             NodeHandler handler = NodeHandlerFactory.CreateHandler(node, this);
             handler.HandleNode(node);
         }
@@ -210,34 +215,55 @@ namespace BoomifyCS.Assembly
             }
         }
 
+
         private static void RunExecutable(string exePath)
         {
             try
             {
-                
+
 
                 ProcessStartInfo psi = new ProcessStartInfo
                 {
                     FileName = "cmd.exe",
-                    Arguments = $"/C start cmd.exe /K \"{exePath}\"",
-                    CreateNoWindow = false,
+                    Arguments = $"/C {exePath}",
+                    CreateNoWindow = true,
                     UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
                 };
                 var stopwatch = new Stopwatch();
                 using (Process process = Process.Start(psi))
                 {
                     stopwatch.Start();
+                    process.Start();
+                    Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
+                    Task<string> errorTask = process.StandardError.ReadToEndAsync();
+
                     process.WaitForExit();
+                    stopwatch.Stop();
+
+                    string output = outputTask.Result;
+                    string errorOutput = errorTask.Result;
+
+                    if (!string.IsNullOrEmpty(output))
+                    {
+                        Console.WriteLine(output);
+                    }
+                    if (!string.IsNullOrEmpty(errorOutput))
+                    {
+                        Console.WriteLine($"Error: {errorOutput}");
+                    }
+
                 }
 
-                stopwatch.Stop();
-                Console.WriteLine($"Execution time: {stopwatch.ElapsedMilliseconds } ms");
+                Console.WriteLine($"Execution time: {stopwatch.ElapsedMilliseconds} ms");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error running executable: {ex.Message}");
             }
         }
+
 
         private bool _disposed = false;
         public void Dispose()

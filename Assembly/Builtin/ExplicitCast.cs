@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Exceptions;
 using LLVMSharp.Interop;
+using NUnit.Framework.Constraints;
 
 namespace BoomifyCS.Assembly.Builtin
 {
@@ -27,6 +28,9 @@ namespace BoomifyCS.Assembly.Builtin
             if (bifyValue.GetBifyType() is IntegerType && desiredType is FloatType)
                 return CastIntegerToFloat(desiredType, builder);
 
+            if (bifyValue.GetBifyType() is CharType && desiredType is IntegerType)
+                return HandleCharCast((CharValue)bifyValue,builder);
+
             if (bifyValue.GetBifyType() is FloatType && desiredType is IntegerType)
                 return CastFloatToInteger(desiredType, builder);
 
@@ -34,6 +38,11 @@ namespace BoomifyCS.Assembly.Builtin
                 new BifyTypeError($"Cannot explicit cast {bifyValue.GetTypeName()} to {desiredType.Name}")
             );
             return null;
+        }
+        private BifyValue HandleCharCast(CharValue value, LLVMBuilderRef builder)
+        {
+            var res = builder.BuildSExt(value.GetLLVMValue(), LLVMTypeRef.Int32, "char_to_int");
+            return new IntegerValue(res);
         }
 
         private BifyValue HandlePointerCast(BifyPointerType desiredPtr, LLVMBuilderRef builder)

@@ -36,28 +36,46 @@ namespace BoomifyCS.Assembly.BifyObject
 
         private void ExtractArgs(AstNode node)
         {
-            if (node is AstBinaryOp astBinaryOp)
+            if (node == null)
             {
-                if (astBinaryOp.Token.Type == TokenType.COMMA)
+                return;
+            }
+            if (node is AstParam)
+            {
+                var param = (AstParam) node;
+                string name = param.Name.Token.Value;
+                AssemblyCompiler.Instance.Visit(param.Type);
+                IValue value = AssemblyCompiler.Instance.StackIValuePop();
+                if (value is not BifyType)
                 {
-                    ExtractArgs(astBinaryOp.Left);
-                    ExtractArgs(astBinaryOp.Right);
+                    Traceback.Instance.ThrowException(new BifyTypeError($"{value.GetType().Name.ToLower()} cannot be used as type."));
+                    return;
                 }
-                else 
+                BifyType type = (BifyType)value;
+                if (arguments.ContainsKey(name))
                 {
-                    AssemblyCompiler.Instance.Visit(astBinaryOp.Left);
-                    IValue poppedValue = AssemblyCompiler.Instance.StackIValuePop();
-                    if (poppedValue is not BifyType)
+                    Traceback.Instance.ThrowException(new BifyArgumentError($"Duplicate argument '{name}' found."));
+                    return;
+                }
+                if (param.Flag != null)
+                {
+                    if (param.Flag.Token.Type == TokenType.CONST)
                     {
-                        Traceback.Instance.ThrowException(new BifyTypeError($"{((BifyValue)poppedValue).GetTypeName()} cannot be used as type."));
-
+                        type.ValueFlag |= ValueFlag.Constant;
                     }
-                    BifyDebug.Log($"Argument name: {astBinaryOp.Right.Token.Value}");
-                    BifyDebug.Log($"Arguemnt type: {poppedValue}");
-                    arguments[astBinaryOp.Right.Token.Value] = (BifyType)poppedValue;
                 }
+                arguments.Add(name, type);
+            }
+            else if (node.Token.Type == TokenType.COMMA)
+            {
+                ExtractArgs(node.Left);
+                ExtractArgs(node.Right);
+            }
+            else
+            {
+                throw new ArgumentException("Expected an AstParam node.");
             }
         }
-        
+
     }
 }

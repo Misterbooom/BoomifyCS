@@ -14,7 +14,7 @@ namespace BoomifyCS.Ast
             Traceback.Instance.InitializeSource(sourceCode);
         }
 
-        public AstNode ParseTokens(List<Token> tokens)
+        public AstModule ParseTokens(List<Token> tokens)
         {
             int tokenIndex = 0;
             int lineCount = 0;

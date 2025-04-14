@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
@@ -13,53 +9,57 @@ namespace BoomifyCS.Assembly.NodeHandlers
     class UnaryOperatorNodeHandler : NodeHandler
     {
         public UnaryOperatorNodeHandler(AssemblyCompiler compiler) : base(compiler) { }
+
         public override void HandleNode(AstNode node)
         {
             AstUnaryOperator unaryOperator = (AstUnaryOperator)node;
 
             if (unaryOperator.Token.Type == TokenType.POINTER)
-            {  
+            {
                 compiler.Visit(unaryOperator.Operand);
                 IValue value = compiler.StackIValuePop();
 
-                if (value is  BifyType)
+                if (value is BifyType bifyType)
                 {
-                    //return;
-                    BifyType bifyType = (BifyType)value;
-
-
                     compiler.StackPush(new BifyPointerType(bifyType));
                 }
                 else if (value is PointerValue pointer)
                 {
                     compiler.StackPush(pointer.Dereference());
-
                 }
                 else
                 {
                     Traceback.Instance.ThrowException(new BifyTypeError($"Cannot dereference {value.GetType().Name.ToLower()}"));
-
                 }
                 return;
             }
+
             compiler.Visit(unaryOperator.Operand);
-            BifyValue varValue = compiler.StackPop();
-            BifyValue varPtr = compiler.VariableManager.GetBifyValue(unaryOperator.Operand.Token.Value);
-            BifyValue newValue;
+            IValue operandValue = compiler.StackIValuePop();
 
-            if (unaryOperator.Token.Type == TokenType.INCREMENT)
+            if (operandValue is not BifyValue originalValue)
             {
-                newValue = varValue.Add(new IntegerType().Create(1),compiler.Builder);
+                Traceback.Instance.ThrowException(new BifyTypeError("Unary operations can only be applied to runtime values."));
+                return;
             }
-            else
+
+            BifyValue targetPointer = compiler.VariableManager.GetBifyValue(unaryOperator.Operand.Token.Value);
+            if (targetPointer == null || targetPointer.GetBifyType() is not AllocaType)
             {
-                newValue = varValue.Sub(new IntegerType().Create(1), compiler.Builder);
-
+                Traceback.Instance.ThrowException(new BifyTypeError($"Cannot apply unary operator to non-pointer value '{targetPointer.GetTypeName()}'"));
+                return;
             }
-            //compiler.VariableManager.SetLocalVariable(unaryOperator.value.Token.Value,newValue);
-            compiler.Builder.BuildStore(newValue.GetLLVMValue(),varPtr.GetLLVMValue());
 
+            BifyValue one = new IntegerType().Create(1);
+            BifyValue newValue = unaryOperator.Token.Type switch
+            {
+                TokenType.INCREMENT => originalValue.Add(one, compiler.Builder),
+                TokenType.DECREMENT => originalValue.Sub(one, compiler.Builder),
+                _ => throw new NotImplementedException($"Unsupported unary operator '{unaryOperator.Token.Type}'")
+            };
 
+            compiler.Builder.BuildStore(newValue.GetLLVMValue(), targetPointer.GetLLVMValue());
+            compiler.StackPush(newValue);
         }
     }
 }

@@ -23,7 +23,8 @@ namespace BoomifyCS.Assembly
             {"input",new Input() },
             {"sizeof",new SizeOf() },
             {"exit",new Exit() },
-            {"null", new NullValue()}
+            {"null", new NullValue()},
+            {"malloc",StdC.DeclarFunction("malloc",[new IntegerType()],new BifyPointerType(new AnyType())) }
 
         };
 

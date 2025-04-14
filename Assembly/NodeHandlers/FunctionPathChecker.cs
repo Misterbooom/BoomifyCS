@@ -14,6 +14,10 @@ class FunctionPathChecker
     public FunctionPathChecker(BifyType functionType, AstNode node)
     {
         _functionType = functionType;
+        if (node == null)
+        {
+            return;
+        }
         AllPathsReturn = Check(node);
         if (!_functionType.CompareType(new VoidType()) && !AllPathsReturn)
         {

@@ -13,44 +13,88 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
         public override void HandleNode(AstNode node)
         {
-            var varDeclNode = (AstVarDecl)node;
-            var varName = varDeclNode.AssignmentNode.Left.Token.Value;
+            var varDecl = (AstVarDecl)node;
+            var varName = varDecl.AssignmentNode.Left.Token.Value;
 
-            compiler.Visit(varDeclNode.Type);
-            var value = compiler.StackIValuePop();
-
-            if (value is not BifyType bifyType)
+            // Determine variable type  
+            BifyType declaredType;
+            if (varDecl.Type is AstIdentifier && varDecl.Type.Token.Value == "var")
             {
-                Traceback.Instance.ThrowException(new BifyTypeError($"{((BifyValue)value).GetTypeName()} cannot be used as type."));
-                return;
+                if (varDecl.AssignmentNode.Right == null)
+                {
+                    Traceback.Instance.ThrowException(new BifyTypeError(
+                        $"Cannot use 'var' without an initializer for variable '{varName}'."));
+                    return;
+                }
+
+                compiler.Visit(varDecl.AssignmentNode.Right);
+                var inferredValue = compiler.StackIValuePop();
+
+                if (inferredValue is not BifyValue inferredBifyValue)
+                {
+                    Traceback.Instance.ThrowException(new BifyTypeError(
+                        $"Cannot infer type for variable '{varName}' from the initializer."));
+                    return;
+                }
+
+                declaredType = inferredBifyValue.GetBifyType();
+            }
+            else
+            {
+                compiler.Visit(varDecl.Type);
+                var typeResult = compiler.StackIValuePop();
+
+                if (typeResult is not BifyType explicitType)
+                {
+                    var invalidType = (BifyValue)typeResult;
+                    Traceback.Instance.ThrowException(new BifyTypeError(
+                        $"{invalidType.GetTypeName()} cannot be used as a type for variable '{varName}'."));
+                    return;
+                }
+
+                declaredType = explicitType;
             }
 
-            if (bifyType is ArrayType)
+            if (declaredType is ArrayType)
             {
-                compiler.StackPush(bifyType);
+                compiler.StackPush(declaredType);
             }
 
-            compiler.Visit(varDeclNode.AssignmentNode.Right);
-            var loadedIValue = compiler.StackIValuePop();
+            var alloca = compiler.Builder.BuildAlloca(declaredType.LLVMType, varName);
+            var allocaPointer = new AllocaType(declaredType).CreateValueRef(alloca);
 
-            if (loadedIValue is  BifyType incorrectValue)
+            if (varDecl.AssignmentNode.Right != null)
             {
-                Traceback.Instance.ThrowException(new BifyTypeError($"{incorrectValue.Name} cannot be used as variable value."));
-                return;
+                compiler.Visit(varDecl.AssignmentNode.Right);
+                var initValue = compiler.StackIValuePop();
+
+                if (initValue is BifyType invalidValueType)
+                {
+                    Traceback.Instance.ThrowException(new BifyTypeError(
+                        $"Cannot assign type '{invalidValueType.Name}' as value for variable '{varName}'."));
+                    return;
+                }
+
+                var runtimeValue = (BifyValue)initValue;
+                BifyDebug.Log($"Declaring '{varName}' of type {declaredType} with value type {runtimeValue.GetTypeName()}");
+
+                var castedValue = runtimeValue.ExplicitCast(declaredType, compiler.Builder);
+                compiler.Builder.BuildStore(castedValue.GetLLVMValue(), alloca);
+                allocaPointer = new AllocaType(declaredType).CreateValueRef(alloca);
+
+                if (varDecl.Flag?.Token.Type == TokenType.CONST)
+                {
+                    allocaPointer.ValueFlag = ValueFlag.Constant;
+                }
             }
-
-            var loadedValue = loadedIValue as BifyValue;
-            BifyDebug.Log($"Var type - {bifyType} Var value type - {loadedValue.GetTypeName()} LLVMVarType: {bifyType.LLVMType} pointer to i8");
-
-            var variableValue = loadedValue.ExplicitCast(bifyType, compiler.Builder);
-            var alloca = compiler.Builder.BuildAlloca(bifyType.LLVMType, varName);
-
-            compiler.Builder.BuildStore(variableValue.GetLLVMValue(), alloca);
-            var allocaPointer = new AllocaType(bifyType).CreateValueRef(alloca);
-
-            if (varDeclNode.Flag?.Token.Type == TokenType.CONST)
+            else
             {
-                allocaPointer.ValueFlag = ValueFlag.Constant;
+                if (declaredType is not BifyPointerType)
+                {
+                    Traceback.Instance.ThrowException(new BifyTypeError(
+                        $"Variable '{varName}' must be a pointer type when no initializer is provided, but got '{declaredType.Name}'."));
+                    return;
+                }
             }
 
             allocaPointer.ValueFlag |= ValueFlag.Variable;
@@ -58,4 +102,3 @@ namespace BoomifyCS.Assembly.NodeHandlers
         }
     }
 }
-

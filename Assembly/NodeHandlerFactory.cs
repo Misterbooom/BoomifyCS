@@ -12,6 +12,7 @@ namespace BoomifyCS.Assembly
     {
         public static NodeHandler CreateHandler(AstNode node, AssemblyCompiler compiler)
         {
+        
             var conditionStatementHanlder = new ConditionStatementNodeHandler(compiler);
             var loopNodeHandler = new LoopNodeHandler(compiler);
             Traceback.Instance.SetCurrentLine(node.LineNumber);

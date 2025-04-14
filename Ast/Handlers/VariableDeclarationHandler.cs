@@ -21,8 +21,12 @@ namespace BoomifyCS.Ast
             AstNode identifierNode = builder.operandStack.Pop();
 
             int typeStartIndex = (builder.operandStack.Count == 2) ? 1 : 0;
-            AstNode parsedType = builder.ParseTokens(builder.tokens[typeStartIndex..(builder.tokenIndex - 1)]);
-            AstNode typeNode = BuildPointerToType(identifierNode, parsedType);
+
+            var tokensBehind = builder.tokens[typeStartIndex..(builder.tokenIndex - 1)];
+            BifyDebug.Log($"Tokens behind: {tokensBehind.TokensToString()}");
+            AstNode parsedType = builder.ParseTokens(tokensBehind);
+
+            (AstNode lastOperand, AstNode typeNode) = SwitchLastPointerOperand(identifierNode, parsedType);
 
             if (builder.operandStack.Count == 2)
             {
@@ -30,13 +34,25 @@ namespace BoomifyCS.Ast
                 flagNode = builder.operandStack.Pop();
             }
 
-            builder.tokenIndex++;
+            if (builder.tokenIndex < builder.tokens.Count)
+            {
+                builder.tokenIndex++;
+            }
 
             List<Token> valueTokens = builder.tokens[builder.tokenIndex..];
             AstNode valueNode = builder.ParseTokens(valueTokens);
+
             builder.tokenIndex = builder.tokens.Count;
 
-            VariableDeclarationValidator.Validate(identifierNode, typeNode, valueNode, valueTokens, flagNode, token);
+            // Fix for CS0103: Ensure typeNode is passed correctly
+            VariableDeclarationValidator.Validate(
+                identifierNode,
+                typeNode,
+                valueNode,
+                valueTokens,
+                flagNode,
+                token
+            );
 
             AstAssignment astAssignment = new(token, identifierNode, valueNode);
             AstVarDecl astVarDecl = new(token, astAssignment, typeNode, flagNode);
@@ -45,24 +61,35 @@ namespace BoomifyCS.Ast
             builder.operandStack.Clear();
             builder.AddOperand(astVarDecl);
         }
-
- 
-        private AstNode BuildPointerToType(AstNode pointerToName, AstNode name)
+        public static (AstNode lastOperand, AstNode finalPointer) SwitchLastPointerOperand(AstNode pointer, AstNode operand)
         {
-            if (pointerToName == null || pointerToName is not AstUnaryOperator)
-                return name;
+            if (pointer is not AstUnaryOperator pointerNode)
+                return (pointer, operand);
 
-            AstUnaryOperator current = (AstUnaryOperator)pointerToName;
-            while (current.Operand is AstUnaryOperator next && next.Token.Type == TokenType.MUL)
+            AstNode ReplaceLast(AstUnaryOperator node, AstNode replacement, out AstNode lastOperand)
             {
-                current = next;
+                if (node.Operand is AstUnaryOperator nested)
+                {
+                    var replaced = ReplaceLast(nested, replacement, out lastOperand);
+                    return new AstUnaryOperator(node.Token, replaced); 
+                }
+                else
+                {
+                    lastOperand = node.Operand;
+                    return new AstUnaryOperator(node.Token, replacement);
+                }
             }
 
-            if (current.Operand == null)
-            {
-                current.Operand = name;
-            }
-            return pointerToName;
+            var final = ReplaceLast(pointerNode, operand, out var lastOperand);
+            BifyDebug.Log($"Final Pointer: {final}");
+
+            return (lastOperand, final);
         }
+
+
+
+
+
+
     }
 }

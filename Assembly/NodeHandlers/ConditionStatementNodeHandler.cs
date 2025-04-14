@@ -4,6 +4,7 @@ using LLVMSharp.Interop;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
+using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
@@ -16,30 +17,35 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 HandleIfStatement(astIf);
             }
         }
+
         private unsafe bool IsCurrentBlockTerminated()
-        {  
+        {
             var currentBlock = LLVM.GetInsertBlock(compiler.Builder);
-            var termiator = LLVM.GetBasicBlockTerminator(currentBlock);
-            return termiator != null;
+            var terminator = LLVM.GetBasicBlockTerminator(currentBlock);
+            return terminator != null;
         }
 
         private void HandleIfStatement(AstIf node)
         {
             AstNode nextNode = compiler.NextNode;
             compiler.Visit(node.ConditionNode);
-            var conditionValue = compiler.StackPop();
+            IValue conditionIValue = compiler.StackIValuePop();
+            if (conditionIValue is BifyType)
+            {
+                Traceback.Instance.ThrowException(new BifyTypeError("Invalid condition: a type was provided instead of a runtime value."));
+                return;
+            }
+            BifyValue conditionValue = (BifyValue)conditionIValue;
             if (conditionValue is not BoolValue)
             {
                 Traceback.Instance.ThrowException(new BifyTypeError("Condition expression must evaluate to a boolean value."));
+                return;
             }
-
             unsafe
             {
                 LLVMValueRef func = LLVM.GetBasicBlockParent(LLVM.GetInsertBlock(compiler.Builder));
-
                 LLVMBasicBlockRef mergeBB = nextNode != null ? func.AppendBasicBlock("if_merge") : default;
                 LLVMBasicBlockRef thenBB = func.AppendBasicBlock("if_then");
-
                 int numElseIf = node.ElseIfNodes.Count;
                 var elseIfCondBlocks = new List<LLVMBasicBlockRef>();
                 var elseIfBodyBlocks = new List<LLVMBasicBlockRef>();
@@ -48,18 +54,13 @@ namespace BoomifyCS.Assembly.NodeHandlers
                     elseIfCondBlocks.Add(func.AppendBasicBlock($"elseif{i}_cond"));
                     elseIfBodyBlocks.Add(func.AppendBasicBlock($"elseif{i}_body"));
                 }
-
-                LLVMBasicBlockRef elseBB = (node.ElseNode != null)
-                    ? func.AppendBasicBlock("if_else")
-                    : mergeBB;
-
+                LLVMBasicBlockRef elseBB = (node.ElseNode != null) ? func.AppendBasicBlock("if_else") : mergeBB;
                 LLVMValueRef mainCondition = compiler.Builder.BuildICmp(
                     LLVMIntPredicate.LLVMIntEQ,
                     conditionValue.GetLLVMValue(),
                     conditionValue.GetBifyType().Create(1).GetLLVMValue(),
                     "if_condition"
                 );
-
                 if (numElseIf > 0)
                 {
                     compiler.Builder.BuildCondBr(mainCondition, thenBB, elseIfCondBlocks[0]);
@@ -68,23 +69,28 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 {
                     compiler.Builder.BuildCondBr(mainCondition, thenBB, elseBB);
                 }
-
                 compiler.Builder.PositionAtEnd(thenBB);
                 compiler.Visit(node.BlockNode);
                 if (!IsCurrentBlockTerminated() && mergeBB.Handle != IntPtr.Zero)
                 {
                     compiler.Builder.BuildBr(mergeBB);
                 }
-
                 for (int i = 0; i < numElseIf; i++)
                 {
                     compiler.Builder.PositionAtEnd(elseIfCondBlocks[i]);
-                    var elseIfNode = node.ElseIfNodes[i];
+                    AstElseIf elseIfNode = node.ElseIfNodes[i];
                     compiler.Visit(elseIfNode.ConditionNode);
-                    var elseIfConditionValue = compiler.StackPop();
+                    IValue elseIfCondIValue = compiler.StackIValuePop();
+                    if (elseIfCondIValue is BifyType)
+                    {
+                        Traceback.Instance.ThrowException(new BifyTypeError("Invalid else-if condition: a type was provided instead of a runtime value."));
+                        return;
+                    }
+                    BifyValue elseIfConditionValue = (BifyValue)elseIfCondIValue;
                     if (elseIfConditionValue is not BoolValue)
                     {
                         Traceback.Instance.ThrowException(new BifyTypeError("Else-if condition must evaluate to a boolean value."));
+                        return;
                     }
                     LLVMValueRef elseifCondition = compiler.Builder.BuildICmp(
                         LLVMIntPredicate.LLVMIntEQ,
@@ -92,11 +98,8 @@ namespace BoomifyCS.Assembly.NodeHandlers
                         elseIfConditionValue.GetBifyType().Create(1).GetLLVMValue(),
                         $"elseif{i}_condition"
                     );
-                    LLVMBasicBlockRef nextCondOrElse = (i < numElseIf - 1)
-                        ? elseIfCondBlocks[i + 1]
-                        : elseBB;
+                    LLVMBasicBlockRef nextCondOrElse = (i < numElseIf - 1) ? elseIfCondBlocks[i + 1] : elseBB;
                     compiler.Builder.BuildCondBr(elseifCondition, elseIfBodyBlocks[i], nextCondOrElse);
-
                     compiler.Builder.PositionAtEnd(elseIfBodyBlocks[i]);
                     compiler.Visit(elseIfNode.BlockNode);
                     if (!IsCurrentBlockTerminated() && mergeBB.Handle != IntPtr.Zero)
@@ -104,7 +107,6 @@ namespace BoomifyCS.Assembly.NodeHandlers
                         compiler.Builder.BuildBr(mergeBB);
                     }
                 }
-
                 if (node.ElseNode != null)
                 {
                     compiler.Builder.PositionAtEnd(elseBB);

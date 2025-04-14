@@ -53,6 +53,22 @@ namespace BoomifyCS.Ast
             }
             return operandStack.Count > 0 ? operandStack.Pop() : null;
         }
+        public AstNode[] BuildWithoutConnecting()
+        {
+            while (tokenIndex < tokens.Count)
+            {
+                Token token = tokens[tokenIndex];
+                TokenHandler handler = TokenHandlerFactory.CreateHandler(token, this);
+                handler.HandleToken(token);
+
+                tokenIndex++;
+            }
+            while (operatorStack.Count > 0)
+            {
+                PopOperator();
+            }
+            return operandStack.ToArray();
+        }
 
         public void AddOperand(AstNode node)
         {
@@ -61,6 +77,7 @@ namespace BoomifyCS.Ast
                 node.LineNumber = Traceback.Instance.Line;
                 operandStack.Push(node);
             }
+
         }
 
         public void AddOperator(AstNode node)
@@ -86,7 +103,7 @@ namespace BoomifyCS.Ast
             }
             else if (opNode.Token.Type == TokenType.MUL)
             {
-                if (operandStack.Count >= 2)
+                if (operandStack.Count >= 2 && operandStack.ElementAt(^1).Token.Type != TokenType.CONST)
                 {
                     AstNode right = operandStack.Pop();
                     AstNode left = operandStack.Pop();
@@ -96,7 +113,7 @@ namespace BoomifyCS.Ast
                     AddOperand(opNode);
                     return;
                 }
-                else if (operandStack.Count == 1)
+                else if (operandStack.Count == 1 || operandStack.ElementAt(^1).Token.Type == TokenType.CONST)
                 {
                     AstNode operand = operandStack.Pop();
                     BifyDebug.Log("Creating pointer");

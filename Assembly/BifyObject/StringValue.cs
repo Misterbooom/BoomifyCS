@@ -9,53 +9,160 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.BifyObject
 {
-    class CharValue : BifyValue
+    public class CharValue : BifyValue
     {
-        static LLVMTypeRef strCompType;
-        static LLVMValueRef strComp;
-        public CharValue(LLVMValueRef value) : base(value, new CharType())
+        public CharValue(LLVMValueRef value)
+            : base(value, new CharType())
         {
-            if (strCompType.Handle == IntPtr.Zero)
-            {
-                strCompType = LLVMTypeRef.CreateFunction(LLVMTypeRef.Int1,
-                    new LLVMTypeRef[] { LLVMTypeRef.CreatePointer(LLVMTypeRef.Int8, 0), LLVMTypeRef.CreatePointer(LLVMTypeRef.Int8, 0) }
-                );
-            }
-            if (strComp.Handle == IntPtr.Zero)
-            {
-                strComp = AssemblyCompiler.Instance.Module.AddFunction("strcmp", strCompType);
-            }
         }
 
         public override BifyValue Equal(BifyValue other, LLVMBuilderRef builder)
         {
             if (!CompareType(other))
             {
-                Traceback.Instance.ThrowException(new BifyTypeError($"Cannot compare {this.GetTypeName()} with {other.GetTypeName()}"));
+                Traceback.Instance.ThrowException(
+                    new BifyTypeError($"Cannot compare {this.GetTypeName()} with {other.GetTypeName()}"));
                 return null;
             }
-            //var value = builder.BuildCall2(strCompType, strComp, new LLVMValueRef[] { GetLLVMValue(), other.GetLLVMValue() }, "str_comp");
-            //var castedValue = builder.BuildIntCast(value, LLVMTypeRef.Int1, "int32_to_int1");
-            var compareValue = builder.BuildICmp(LLVMIntPredicate.LLVMIntEQ,GetLLVMValue(),other.GetLLVMValue());
-            return new BoolType()
-                .CreateValueRef(compareValue);
 
+            var compareValue = builder.BuildICmp(LLVMIntPredicate.LLVMIntEQ, GetLLVMValue(), other.GetLLVMValue());
+            return new BoolType().CreateValueRef(compareValue);
         }
+
         public override BifyValue NotEqual(BifyValue other, LLVMBuilderRef builder)
         {
             if (!CompareType(other))
             {
-                Traceback.Instance.ThrowException(new BifyTypeError($"Cannot compare {this.GetTypeName()} with {other.GetTypeName()}"));
+                Traceback.Instance.ThrowException(
+                    new BifyTypeError($"Cannot compare {this.GetTypeName()} with {other.GetTypeName()}"));
                 return null;
             }
-            //var value = builder.BuildCall2(strCompType, strComp, new LLVMValueRef[] { GetLLVMValue(), other.GetLLVMValue() }, "str_comp");
-            //var castedValue = builder.BuildIntCast(value, LLVMTypeRef.Int1, "int32_to_int1");
-            var compareValue = builder.BuildICmp(LLVMIntPredicate.LLVMIntNE, GetLLVMValue(), other.GetLLVMValue());
-            return new BoolType()
-                .CreateValueRef(compareValue);
 
+            var compareValue = builder.BuildICmp(LLVMIntPredicate.LLVMIntNE, GetLLVMValue(), other.GetLLVMValue());
+            return new BoolType().CreateValueRef(compareValue);
+        }
+
+        public override BifyValue GreaterThan(BifyValue other, LLVMBuilderRef builder)
+        {
+            if (!this.CompareType(other))
+            {
+                Traceback.Instance.ThrowException(
+                    new BifyTypeError($"Type error in '>' operation: cannot compare '{this.GetTypeName()}' with '{other.GetTypeName()}'. " +
+                                       $"Operands must be of compatible character types."));
+                return null;
+            }
+
+            LLVMValueRef result = builder.BuildICmp(LLVMIntPredicate.LLVMIntSGT, GetLLVMValue(), other.GetLLVMValue(), "chartgttmp");
+            return new BoolValue(result);
+        }
+
+        public override BifyValue LessThan(BifyValue other, LLVMBuilderRef builder)
+        {
+            if (!this.CompareType(other))
+            {
+                Traceback.Instance.ThrowException(
+                    new BifyTypeError($"Type error in '<' operation: cannot compare '{this.GetTypeName()}' with '{other.GetTypeName()}'. " +
+                                       $"Operands must be of compatible character types."));
+                return null;
+            }
+
+            LLVMValueRef result = builder.BuildICmp(LLVMIntPredicate.LLVMIntSLT, GetLLVMValue(), other.GetLLVMValue(), "charlttmp");
+            return new BoolValue(result);
+        }
+
+        public override BifyValue LessThanOrEqual(BifyValue other, LLVMBuilderRef builder)
+        {
+            if (!this.CompareType(other))
+            {
+                Traceback.Instance.ThrowException(
+                    new BifyTypeError($"Type error in '<=' operation: cannot compare '{this.GetTypeName()}' with '{other.GetTypeName()}'. " +
+                                       $"Operands must be of compatible character types."));
+                return null;
+            }
+
+            LLVMValueRef result = builder.BuildICmp(LLVMIntPredicate.LLVMIntSLE, GetLLVMValue(), other.GetLLVMValue(), "charletmp");
+            return new BoolValue(result);
+        }
+
+        public override BifyValue GreaterThanOrEqual(BifyValue other, LLVMBuilderRef builder)
+        {
+            if (!this.CompareType(other))
+            {
+                Traceback.Instance.ThrowException(
+                    new BifyTypeError($"Type error in '>=' operation: cannot compare '{this.GetTypeName()}' with '{other.GetTypeName()}'. " +
+                                       $"Operands must be of compatible character types."));
+                return null;
+            }
+
+            LLVMValueRef result = builder.BuildICmp(LLVMIntPredicate.LLVMIntSGE, GetLLVMValue(), other.GetLLVMValue(), "chargtmp");
+            return new BoolValue(result);
+        }
+
+        public override BifyValue Add(BifyValue other, LLVMBuilderRef builder)
+        {
+            if (this.CompareType(other))
+            {
+                LLVMValueRef result = builder.BuildAdd(GetLLVMValue(), other.GetLLVMValue(), "charaddtmp");
+                return new CharValue(result);
+            }
+            else
+            {
+                Traceback.Instance.ThrowException(
+                    new BifyArithmeticError($"Arithmetic error in addition: cannot add '{this.GetTypeName()}' and '{other.GetTypeName()}'. " +
+                                              $"Operands must both be characters."));
+                return null;
+            }
+        }
+
+        public override BifyValue Sub(BifyValue other, LLVMBuilderRef builder)
+        {
+            if (this.CompareType(other))
+            {
+                LLVMValueRef result = builder.BuildSub(GetLLVMValue(), other.GetLLVMValue(), "charsubtmp");
+                return new CharValue(result);
+            }
+            else
+            {
+                Traceback.Instance.ThrowException(
+                    new BifyArithmeticError($"Arithmetic error in subtraction: cannot subtract '{other.GetTypeName()}' from '{this.GetTypeName()}'. " +
+                                              $"Operands must both be characters."));
+                return null;
+            }
+        }
+
+        public override BifyValue Mul(BifyValue other, LLVMBuilderRef builder)
+        {
+            if (this.CompareType(other))
+            {
+                LLVMValueRef result = builder.BuildMul(GetLLVMValue(), other.GetLLVMValue(), "charmultmp");
+                return new CharValue(result);
+            }
+            else
+            {
+                Traceback.Instance.ThrowException(
+                    new BifyArithmeticError($"Arithmetic error in multiplication: cannot multiply '{this.GetTypeName()}' with '{other.GetTypeName()}'. " +
+                                              $"Operands must both be characters."));
+                return null;
+            }
+        }
+
+        public override BifyValue Div(BifyValue other, LLVMBuilderRef builder)
+        {
+            if (this.CompareType(other))
+            {
+                LLVMValueRef result = builder.BuildSDiv(GetLLVMValue(), other.GetLLVMValue(), "chardivtmp");
+                return new CharValue(result);
+            }
+            else
+            {
+                Traceback.Instance.ThrowException(
+                    new BifyArithmeticError($"Arithmetic error in division: cannot divide '{this.GetTypeName()}' by '{other.GetTypeName()}'. " +
+                                              $"Operands must both be characters."));
+                return null;
+            }
         }
     }
+
     class CharType : BifyType
     {
         public CharType() : base("char", LLVMTypeRef.Int8)
@@ -66,17 +173,18 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             return new CharValue(value);
         }
+       
         public override BifyValue Create(object value)
         {
             unsafe
             {
                 if (value is int intValue)
                 {
-                    return new CharValue(LLVM.ConstInt(LLVMTypeRef.Int8, (ulong)intValue, 0));
+                    return new CharValue(LLVM.ConstInt(LLVMTypeRef.Int8, (ulong)intValue, 1));
                 }
                 else if (value is char charValue)
                 {
-                    return new CharValue(LLVM.ConstInt(LLVMTypeRef.Int8, (ulong)charValue, 0));
+                    return new CharValue(LLVM.ConstInt(LLVMTypeRef.Int8, (ulong)charValue, 1));
                 }
                 else
                 {

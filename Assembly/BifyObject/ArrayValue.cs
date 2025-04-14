@@ -11,7 +11,7 @@ namespace BoomifyCS.Assembly.BifyObject
 {
     class ArrayValue : BifyValue
     {
-        public BifyValue[] Items;
+        public BifyValue[] Items = [];
         public ArrayValue(LLVMValueRef value, ArrayType type) : base(value, type) { }
 
         public override BifyValue Index(BifyValue indexValue, LLVMBuilderRef builder)

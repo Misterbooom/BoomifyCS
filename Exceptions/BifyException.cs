@@ -80,7 +80,7 @@ namespace BoomifyCS.Exceptions
 
             for (int i = 0; i < LineTokensString.Length; i++)
             {
-                if (i == Column - 1)
+                if (i == Column - 1 && InvalidTokensString != null)
                 {
                     ColorConsole.Write(LineTokensString.Substring(i, InvalidTokensString.Length), Color.Red);
 

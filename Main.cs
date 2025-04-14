@@ -34,8 +34,7 @@ namespace BoomifyCS
             {
                 Console.WriteLine("Error!");
                 string errorText = e.ToString();
-                new ErrorWrapper(e).PrintStackTrace();
-                throw;
+                new SimpleErrorWrapper(e).PrintStackTrace();
                 //ProcessStartInfo psi = new ProcessStartInfo
                 //{
                 //    FilePath = "python",

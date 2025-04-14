@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
@@ -18,23 +14,29 @@ namespace BoomifyCS.Assembly.NodeHandlers
             {
                 if (!compiler.ReturnType.CompareType(typeof(VoidType)))
                 {
-                    Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidFunctionReturnType("void",
-                        compiler.ReturnType.Name)));
+                    Traceback.Instance.ThrowException(
+                        new BifyTypeError(ErrorMessage.InvalidFunctionReturnType("void", compiler.ReturnType.Name)));
+                    return;
                 }
                 compiler.Builder.BuildRetVoid();
                 return;
             }
             compiler.Visit(returnNode.ArgumentsNode);
-
-            BifyValue returnValue = compiler.StackPop();
+            IValue returnIValue = compiler.StackIValuePop();
+            if (returnIValue is BifyType)
+            {
+                Traceback.Instance.ThrowException(
+                    new BifyTypeError("Invalid return: a type was provided instead of a runtime value."));
+                return;
+            }
+            BifyValue returnValue = (BifyValue)returnIValue;
             if (!compiler.ReturnType.CompareType(returnValue.GetBifyType()))
             {
-                Traceback.Instance.ThrowException(new BifyTypeError(ErrorMessage.InvalidFunctionReturnType(returnValue.GetTypeName(),
-                    compiler.ReturnType.Name)));
+                Traceback.Instance.ThrowException(
+                    new BifyTypeError(ErrorMessage.InvalidFunctionReturnType(returnValue.GetTypeName(), compiler.ReturnType.Name)));
+                return;
             }
-
             compiler.Builder.BuildRet(returnValue.GetLLVMValue());
-
         }
     }
 }

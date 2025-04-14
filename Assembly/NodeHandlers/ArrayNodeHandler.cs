@@ -19,7 +19,6 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 return;
             }
 
-            // Determine array type
             ArrayType arrayType;
             if (compiler.StackCount == 0)
             {
@@ -46,7 +45,6 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 compiler.Visit(astArray.ArgumentsNode);
             }
 
-            // Build and validate array values
             BifyValue[] values = BuildArrayFromStack(argCount, arrayType);
             ValidateArgsType(values, arrayType.ItemType);
 
@@ -63,19 +61,27 @@ namespace BoomifyCS.Assembly.NodeHandlers
             BifyValue[] values = new BifyValue[argCount];
             for (int i = (int)argCount - 1; i >= 0; i--)
             {
-                BifyValue value = compiler.StackPop();
-                if (!arrayType.ItemType.CompareType(value.GetBifyType()))
+                IValue value = compiler.StackIValuePop();
+                if (value is BifyType bifyType)
                 {
-                    BifyValue casted = value.ExplicitCast(arrayType.ItemType, AssemblyCompiler.Instance.Builder);
+                    Traceback.Instance.ThrowException(new BifyTypeError(
+                        $"Type mismatch at argument {argCount - i}: Expected {arrayType.ItemType.Name} but got {bifyType.Name}."));
+                    return [];
+                }
+                BifyValue bifyValue = (BifyValue)value;
+
+                if (!arrayType.ItemType.CompareType(bifyValue.GetBifyType()))
+                {
+                    BifyValue casted = bifyValue.ExplicitCast(arrayType.ItemType, AssemblyCompiler.Instance.Builder);
                     if (casted == null || Traceback.Instance.GetError() != null)
                     {
                         Traceback.Instance.ThrowException(new BifyTypeError(
-                            $"Type mismatch at argument {argCount - i}: Expected {arrayType.ItemType.Name} but got {value.GetTypeName()}."));
+                            $"Type mismatch at argument {argCount - i}: Expected {arrayType.ItemType.Name} but got {bifyValue.GetTypeName()}."));
                         return [];
                     }
-                    value = casted;
+                    bifyValue= casted;
                 }
-                values[i] = value;
+                values[i] = bifyValue;
             }
             return values;
         }

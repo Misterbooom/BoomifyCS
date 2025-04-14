@@ -39,6 +39,7 @@ namespace BoomifyCS.Exceptions
 
         public void ThrowException(BifyError error, int column = 0)
         {
+
             if (source != null && source.Length > Line - 1)
             {
                 error.CurrentLine = Math.Clamp(Line - 1, 0, source.Length - 1);

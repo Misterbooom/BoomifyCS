@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BoomifyCS.Ast;
 using BoomifyCS.Lexer;
 using LLVMSharp.Interop;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Assembly.BifyObject;
-using System.Numerics;
 using BoomifyCS.Assembly.Builtin;
 
 namespace BoomifyCS.Assembly.NodeHandlers
@@ -16,45 +12,51 @@ namespace BoomifyCS.Assembly.NodeHandlers
     class CallNodeHandler : NodeHandler
     {
         public static BifyFunction pushFrame = StdC.DeclarFunction("pushFrame",
-           [new BifyObject.IntegerType(), new BifyObject.ConstStringType()], new VoidType()
-           );
+            new BifyType[] { new IntegerType(), new ConstStringType() }, new VoidType());
         public static BifyFunction popFrame = StdC.DeclarFunction("popFrame",
-          [new BifyObject.IntegerType(), new BifyObject.ConstStringType()], new VoidType()
-          );
+            new BifyType[] { new IntegerType(), new ConstStringType() }, new VoidType());
         public CallNodeHandler(AssemblyCompiler compiler) : base(compiler) { }
 
         public override void HandleNode(AstNode node)
         {
             if (node is AstCall callNode)
             {
-                string callableName = callNode.CallableName.Token.Value;
-                if (compiler.VariableManager.GetVariable(callableName) is BifyFunction callable)
+                compiler.Visit(callNode.CallableName);
+                IValue callableIValue = compiler.StackIValuePop();
+
+                if (callableIValue is BifyFunction callable)
                 {
                     if (callNode.ArgumentsNode != null)
                         compiler.Visit(callNode.ArgumentsNode);
-                    List<BifyValue> providedArgs = new List<BifyValue>();
-
-                    for (int i = 0; i < CountArgs(callNode.ArgumentsNode); i++)
-                    {
-                        BifyValue arg = compiler.StackPop();
-                        providedArgs.Add(arg);
-                    }
-                    providedArgs.Reverse();
-
+                    List<BifyValue> providedArgs = GetArguments(CountArgs(callNode.ArgumentsNode));
 
                     ValidateAndAutoCastArguments(providedArgs, callable.FunctionArgs.BifyTypes, callable.IsVariadic);
-
-                    pushFrame.Call([
+                    pushFrame.Call(new BifyValue[]
+                    {
                         new IntegerType().Create(Traceback.Instance.Line),
                         new ConstStringType().Create(Traceback.Instance.FilePath)
-                        ]);
+                    });
                     var call = callable.Call(providedArgs.ToArray());
                     compiler.StackPush(callable.ReturnType.CreateValueRef(call.GetLLVMValue()));
-                    popFrame.Call([]);
+                    popFrame.Call(new BifyValue[0]);
+                }
+                else if (callableIValue is BifyType callableType)
+                {
+                    if (callNode.ArgumentsNode != null)
+                        compiler.Visit(callNode.ArgumentsNode);
+                    List<BifyValue> providedArgs = GetArguments(CountArgs(callNode.ArgumentsNode));
+                    if (providedArgs.Count > 1)
+                    {
+                        Traceback.Instance.ThrowException(new BifyArgumentError($"Expected 1 argument but got {providedArgs.Count}."));
+                        return;
+                    }
+
+                    BifyValue castedValue = providedArgs[0].ExplicitCast(callableType,compiler.Builder);
+                    compiler.StackPush(castedValue);
                 }
                 else
                 {
-                    Traceback.Instance.ThrowException(new BifyNameError($"Function '{callableName}' is not defined."));
+                    Traceback.Instance.ThrowException(new BifyTypeError($"Cannot call a non-callable type '{callableIValue.GetType().Name}'."));
                 }
             }
             else
@@ -62,7 +64,23 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 Traceback.Instance.ThrowException(new BifyTypeError("Expected an AstCall node."));
             }
         }
-
+        private List<BifyValue> GetArguments(int count)
+        {
+            List<BifyValue> providedArgs = new List<BifyValue>();
+            for (int i = 0; i < count; i++)
+            {
+                IValue argIValue = compiler.StackIValuePop();
+                if (argIValue is BifyType)
+                {
+                    Traceback.Instance.ThrowException(new BifyTypeError("Invalid argument: a type was provided instead of a runtime value."));
+                    return [];
+                }
+                BifyValue arg = (BifyValue)argIValue;
+                providedArgs.Add(arg);
+            }
+            providedArgs.Reverse();
+            return providedArgs;
+        }
         private static int CountArgs(AstNode node)
         {
             if (node == null) return 0;
@@ -85,18 +103,14 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 Traceback.Instance.ThrowException(new BifyArgumentError($"Expected at least {expectedArgsType.Length} arguments but got {providedArgs.Count}."));
                 return;
             }
-
             for (int i = 0; i < expectedArgsType.Length; i++)
             {
                 BifyType expectedType = expectedArgsType[i];
                 BifyValue providedArg = providedArgs[i];
-
                 if (!expectedType.CompareType(providedArg.GetBifyType()))
                 {
                     Traceback.Instance.Catch(typeof(BifyTypeError));
                     BifyValue castedArg = providedArg.ExplicitCast(expectedType, compiler.Builder);
-                    BifyDebug.Log($"Arg {i}: {castedArg}");
-
                     if (castedArg == null || Traceback.Instance.GetError() != null)
                     {
                         string expectedTypeName = expectedType.Name;
@@ -110,10 +124,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                         providedArgs[i] = castedArg;
                     }
                 }
-                BifyDebug.Log($"Arg {i}: {providedArg}");
-
             }
         }
     }
-
 }

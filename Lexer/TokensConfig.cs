@@ -117,6 +117,7 @@ namespace BoomifyCS.Lexer
             { "--", TokenType.DECREMENT},
             { "++",TokenType.INCREMENT},
             { "identifier", TokenType.IDENTIFIER },
+            { "class", TokenType.CLASS },
             { "=", TokenType.ASSIGN},
             { "[",TokenType.LBRACKET },
         };

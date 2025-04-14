@@ -4,6 +4,7 @@ using LLVMSharp.Interop;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
+using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
@@ -14,41 +15,33 @@ namespace BoomifyCS.Assembly.NodeHandlers
         public override void HandleNode(AstNode node)
         {
             if (node is AstFor astFor)
-            {
                 HandleFor(astFor);
-            }
             else if (node is AstWhile astWhile)
-            {
                 HandleWhile(astWhile);
-            }
         }
 
         private unsafe LLVMValueRef EvaluateBooleanCondition(AstNode conditionNode, string conditionName)
         {
             compiler.Visit(conditionNode);
-            var conditionValue = compiler.StackPop();
+            IValue conditionIValue = compiler.StackIValuePop();
+            if (conditionIValue is BifyType)
+            {
+                Traceback.Instance.ThrowException(new BifyTypeError("Condition expression provided a type instead of a runtime value."));
+                return default;
+            }
+            BifyValue conditionValue = (BifyValue)conditionIValue;
             if (conditionValue.GetBifyType().GetType() != typeof(BoolType))
             {
-                Traceback.Instance.ThrowException(
-                    new BifyTypeError("Condition expression must evaluate to a boolean value."));
+                Traceback.Instance.ThrowException(new BifyTypeError("Condition expression must evaluate to a boolean value."));
                 return default;
             }
             return conditionValue.GetLLVMValue();
-        }
-
-        private unsafe void EnsureBlockTerminated(LLVMBasicBlockRef mergeBB)
-        {
-            if (!IsCurrentBlockTerminated())
-            {
-                compiler.Builder.BuildBr(mergeBB);
-            }
         }
 
         private unsafe bool IsCurrentBlockTerminated()
         {
             var currentBlock = LLVM.GetInsertBlock(compiler.Builder);
             var lastInstruction = LLVM.GetLastInstruction(currentBlock);
-            BifyDebug.Log($"Last inst: {(IntPtr)lastInstruction}");
             var terminator = LLVM.GetBasicBlockTerminator(currentBlock);
             return terminator != null;
         }
@@ -61,23 +54,19 @@ namespace BoomifyCS.Assembly.NodeHandlers
         private unsafe void HandleWhile(AstWhile astWhile)
         {
             LLVMValueRef func = LLVM.GetBasicBlockParent(LLVM.GetInsertBlock(compiler.Builder));
-
             LLVMBasicBlockRef conditionBB = func.AppendBasicBlock("while.cond");
             LLVMBasicBlockRef bodyBB = func.AppendBasicBlock("while.body");
             LLVMBasicBlockRef mergeBB = func.AppendBasicBlock("while.end");
             LoopContext loopContext = new LoopContext(conditionBB, mergeBB, bodyBB);
             compiler.LoopManager.AddLoop(loopContext);
             compiler.Builder.BuildBr(conditionBB);
-
             PositionBuilderAt(bodyBB);
             compiler.Visit(astWhile.BlockNode);
             compiler.LoopManager.PopLoop();
             compiler.Builder.BuildBr(conditionBB);
-
             PositionBuilderAt(conditionBB);
             LLVMValueRef conditionLLVM = EvaluateBooleanCondition(astWhile.ConditionNode, "while_condition");
             compiler.Builder.BuildCondBr(conditionLLVM, bodyBB, mergeBB);
-
             PositionBuilderAt(mergeBB);
         }
 
@@ -95,34 +84,23 @@ namespace BoomifyCS.Assembly.NodeHandlers
         {
             LLVMValueRef func = LLVM.GetBasicBlockParent(LLVM.GetInsertBlock(compiler.Builder));
             var (conditionBB, bodyBB, mergeBB, incrementBB) = CreateForLoopBlocks(func);
-
-            ((AstBlock)astFor.BlockNode).ChildNodes.Add(
-                new AstContinue(new Lexer.Token(Lexer.TokenType.CONTINUE, "continue")));
-
+            ((AstBlock)astFor.BlockNode).ChildNodes.Add(new AstContinue(new Token(TokenType.CONTINUE, "continue")));
             LoopContext loopContext = new LoopContext(conditionBB, mergeBB, incrementBB);
             compiler.LoopManager.AddLoop(loopContext);
-
             compiler.VariableManager.EnterLocalScope();
             compiler.Visit(astFor.InitNode);
             compiler.Builder.BuildBr(conditionBB);
-
             PositionBuilderAt(bodyBB);
             compiler.Visit(astFor.BlockNode);
             compiler.LoopManager.PopLoop();
             if (compiler.LoopManager.GetCurrentBranch() == 0)
-            {
                 compiler.Builder.BuildBr(incrementBB);
-            }
-
             PositionBuilderAt(incrementBB);
             compiler.Visit(astFor.IncrementNode);
             compiler.Builder.BuildBr(conditionBB);
-
             PositionBuilderAt(conditionBB);
             LLVMValueRef conditionLLVM = EvaluateBooleanCondition(astFor.ConditionNode, "for_condition");
-          
             compiler.Builder.BuildCondBr(conditionLLVM, bodyBB, mergeBB);
-
             PositionBuilderAt(mergeBB);
             compiler.VariableManager.ExitLocalScope();
         }

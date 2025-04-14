@@ -3,83 +3,139 @@ using System.IO;
 
 namespace BoomifyCS.Exceptions
 {
-    class ErrorWrapper
+    public class SimpleErrorWrapper
     {
         private readonly Exception _exception;
 
-        public ErrorWrapper(Exception exception) => _exception = exception;
-
-        public void PrintStackTrace()
+        public SimpleErrorWrapper(Exception exception)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
+            _exception = exception;
+        }
+
+        /// <summary>
+        /// Prints the detailed traceback and code snippets using improved colors.
+        /// </summary>
+        /// <param name="contextLines">Number of code lines before and after the error line to display.</param>
+        public void PrintStackTrace(int contextLines = 2)
+        {
+            // Save the original console color.
+            ConsoleColor originalColor = Console.ForegroundColor;
+
+            // Use a bright header color.
+            Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine("Traceback (most recent call last):");
+            Console.WriteLine();
 
-            var traceLines = _exception.StackTrace?
-                .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)
-                ?? Array.Empty<string>();
+            // Print the exception details.
+            PrintException(_exception, contextLines);
 
-            foreach (var line in traceLines)
+            // Restore the console color.
+            Console.ForegroundColor = originalColor;
+        }
+
+        private void PrintException(Exception ex, int contextLines)
+        {
+            // Check if the stack trace exists.
+            if (!string.IsNullOrEmpty(ex.StackTrace))
             {
-                string trimmed = line.Trim();
-                if (!string.IsNullOrWhiteSpace(trimmed))
-                {
-                    string file = ExtractFile(trimmed);
-                    string lineNumber = ExtractLineNumber(trimmed);
-                    string method = ExtractMethod(trimmed);
+                string[] lines = ex.StackTrace.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
 
-                    Console.WriteLine($"  File \"{file}\", Line {lineNumber}, in {method}");
-                    if (file != "<unknown>" && int.TryParse(lineNumber, out int numLine))
+                foreach (var line in lines)
+                {
+                    string trimmed = line.Trim();
+                    // Attempt to parse stack trace lines that have a file and line indicator.
+                    if (trimmed.Contains(" in ") && trimmed.Contains(":line "))
                     {
-                        PrintCodeSnippet(file, numLine);
+                        int inIndex = trimmed.IndexOf(" in ");
+                        int lineIndex = trimmed.IndexOf(":line ");
+                        string methodInfo = trimmed.Substring(0, inIndex);
+                        string filePath = trimmed.Substring(inIndex + 4, lineIndex - (inIndex + 4));
+                        string lineNumberStr = trimmed.Substring(lineIndex + 6).Trim();
+
+                        // Print file, line, and method info using improved colors.
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.Write("  File \"");
+                        Console.ForegroundColor = ConsoleColor.DarkCyan;
+                        Console.Write(filePath);
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.Write("\", line ");
+                        Console.ForegroundColor = ConsoleColor.Magenta;
+                        Console.Write(lineNumberStr);
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.Write(", in ");
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine(methodInfo);
+
+                        // Display code snippet if possible.
+                        if (File.Exists(filePath) && int.TryParse(lineNumberStr, out int lineNumber))
+                        {
+                            PrintCodeSnippet(filePath, lineNumber, contextLines);
+                        }
+                    }
+                    else
+                    {
+                        // Fallback for lines that do not contain file and line info.
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.WriteLine("  " + trimmed);
                     }
                 }
             }
-
-            Console.WriteLine($"{_exception.GetType().Name}: {_exception.Message}");
-            Console.ResetColor();
-        }
-
-        private static string ExtractFile(string stackLine)
-        {
-            int inIndex = stackLine.IndexOf(" in ");
-            int lineIndex = stackLine.LastIndexOf(":Line");
-            return (inIndex >= 0 && lineIndex > inIndex)
-                ? stackLine[(inIndex + 4)..lineIndex].Trim()
-                : "<unknown>";
-        }
-
-        private static string ExtractLineNumber(string stackLine)
-        {
-            int lineIndex = stackLine.LastIndexOf(":Line");
-            return (lineIndex >= 0 && stackLine.Length > lineIndex + 6)
-                ? stackLine[(lineIndex + 6)..].Trim()
-                : "?";
-        }
-
-        private static string ExtractMethod(string stackLine)
-        {
-            int atIndex = stackLine.IndexOf("at ");
-            int inIndex = stackLine.IndexOf(" in ");
-            return (atIndex >= 0 && inIndex > atIndex)
-                ? stackLine[(atIndex + 3)..inIndex].Trim()
-                : stackLine.Trim();
-        }
-
-        private static void PrintCodeSnippet(string fileName, int errorLine)
-        {
-            if (!File.Exists(fileName))
+            else
             {
-                Console.WriteLine("  (source file not found)");
-                return;
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.WriteLine("  (No stack trace available)");
             }
 
-            string[] lines = File.ReadAllLines(fileName);
-            int targetIndex = errorLine - 1;
-            if (targetIndex >= 0 && targetIndex < lines.Length)
+            // Print the exception type and message.
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"{ex.GetType().Name}: {ex.Message}");
+            Console.WriteLine();
+
+            // Recursively print inner exception details if they exist.
+            if (ex.InnerException != null)
             {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"> {errorLine}| {lines[targetIndex]}");
-                Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Inner Exception:");
+                PrintException(ex.InnerException, contextLines);
+            }
+        }
+
+        /// <summary>
+        /// Prints a snippet of the source code around the given error line.
+        /// </summary>
+        /// <param name="filePath">The path of the source file.</param>
+        /// <param name="errorLine">The error line number in the file.</param>
+        /// <param name="contextLines">Number of context lines before and after the error line.</param>
+        private void PrintCodeSnippet(string filePath, int errorLine, int contextLines)
+        {
+            try
+            {
+                string[] sourceLines = File.ReadAllLines(filePath);
+                int targetIndex = errorLine - 1;
+                int startIndex = Math.Max(0, targetIndex - contextLines);
+                int endIndex = Math.Min(sourceLines.Length - 1, targetIndex + contextLines);
+
+                for (int i = startIndex; i <= endIndex; i++)
+                {
+                    // Highlight the error line.
+                    if (i == targetIndex)
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkYellow;
+                        Console.Write("> ");
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.Gray;
+                        Console.Write("  ");
+                    }
+                    Console.WriteLine($"{i + 1,4}: {sourceLines[i]}");
+                }
+                Console.WriteLine();
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine("  (Could not read source file: " + ex.Message + ")");
             }
         }
     }

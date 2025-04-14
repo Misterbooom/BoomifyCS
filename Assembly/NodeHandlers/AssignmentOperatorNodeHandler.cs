@@ -16,55 +16,66 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
         public override void HandleNode(AstNode node)
         {
-            AstAssignmentOperator assignmentOp = node as AstAssignmentOperator;
+            AstAssignmentOperator assignmentOperatorNode = (AstAssignmentOperator)node;
+            AllocaPointer allocaPointer = GetAllocaPointer(assignmentOperatorNode);
+            BifyType targetType = ((AllocaType)allocaPointer.GetBifyType()).PointedType;
+            BifyValue operandValue = GetOperandValue(assignmentOperatorNode);
+            BifyValue dereferencedValue = allocaPointer.Dereference();
 
-            compiler.Visit(assignmentOp.ValueNode);
-            BifyValue rhsValue = compiler.StackPop();
+            BifyValue resultValue = Calculate(dereferencedValue, operandValue, assignmentOperatorNode.Token.Type)
+                .ExplicitCast(targetType,compiler.Builder);
+            compiler.Builder.BuildStore(resultValue.GetLLVMValue(), allocaPointer.GetLLVMValue());
 
-            compiler.Flag |= NodeVisitFlag.ASSIGNMENT_INDEX;
-            compiler.Visit(assignmentOp.IdentifierNode);
-            BifyValue lhsPointer = compiler.StackPop();
 
-            if (lhsPointer.ValueFlag.HasFlag(ValueFlag.Constant))
-            {
-                Traceback.Instance.ThrowException(new BifyTypeError("Cannot assign to const variable"));
-                return;
-            }
-            Console.WriteLine($"Variable Flag - {lhsPointer.ValueFlag}");
 
-            BifyType targetValueType = lhsPointer.GetBifyType();
-            if (targetValueType is BifyPointerType pointerType)
-                targetValueType = pointerType.PointedType;
-
-            rhsValue = rhsValue.ExplicitCast(targetValueType, compiler.Builder);
-            BifyValue computedValue;
-            BifyPointerType lhsPointerType = lhsPointer.GetBifyType() as BifyPointerType;
-            BifyDebug.Log($"pointer type: {lhsPointerType.Name} {targetValueType.LLVMType}");
-            BifyValue lhsLoadedValue = targetValueType.CreateValueRef(
-                compiler.Builder.BuildLoad2(targetValueType.LLVMType, lhsPointer.GetLLVMValue(), "load_lhs"));
-
-            switch (assignmentOp.Token.Type)
+        }
+        private BifyValue Calculate(BifyValue lhs,BifyValue rhs,TokenType token)
+        {
+            switch (token)
             {
                 case TokenType.ADDE:
-                    computedValue = lhsLoadedValue.Add(rhsValue, compiler.Builder);
-                    break;
+                    return lhs.Add(rhs, compiler.Builder);
                 case TokenType.SUBE:
-                    computedValue = lhsLoadedValue.Sub(rhsValue, compiler.Builder);
-                    break;
+                    return lhs.Sub(rhs, compiler.Builder);
                 case TokenType.MULE:
-                    computedValue = lhsLoadedValue.Mul(rhsValue, compiler.Builder);
-                    break;
+                    return lhs.Mul(rhs, compiler.Builder);
                 case TokenType.DIVE:
-                    computedValue = lhsLoadedValue.Div(rhsValue, compiler.Builder);
-                    break;
+                    return lhs.Div(rhs, compiler.Builder);
                 case TokenType.ASSIGN:
-                    computedValue = targetValueType.CreateValueRef(rhsValue.GetLLVMValue());
-                    break;
+                    return rhs;
                 default:
-                    throw new NotImplementedException($"{assignmentOp.Token}");
+                    throw new NotSupportedException($"Operator {token} is not supported.");
             }
-            BifyDebug.Log($"Computed Value - {computedValue}");
-            compiler.Builder.BuildStore(computedValue.GetLLVMValue(), lhsPointer.GetLLVMValue());
         }
+        private AllocaPointer GetAllocaPointer(AstAssignmentOperator assignmentOperatorNode)
+        {
+            compiler.Flag |= NodeVisitFlag.ASSIGNMENT_INDEX;
+            compiler.Visit(assignmentOperatorNode.IdentifierNode);
+            IValue iValue = compiler.StackIValuePop();
+            if (iValue is BifyType bifyType)
+            {
+                Traceback.Instance.ThrowException(new BifyTypeError($"{bifyType.Name} cannot be used as type."));
+                return null;
+            }
+            AllocaPointer targetAlloca = iValue as AllocaPointer;
+            if (targetAlloca == null)
+            {
+                throw new NotSupportedException($"Assignment operator is not supported for {((BifyValue)iValue).GetBifyType().GetType()}");
+            }
+            return targetAlloca;
+        }
+        private BifyValue GetOperandValue(AstAssignmentOperator assignmentOperatorNode)
+        {
+            compiler.Visit(assignmentOperatorNode.ValueNode);
+            IValue iValue = compiler.StackIValuePop();
+            if (iValue is BifyType bifyType)
+            {
+                Traceback.Instance.ThrowException(new BifyTypeError($"{bifyType.Name} cannot be used as type."));
+                return null;
+            }
+            return (BifyValue)iValue;
+
+        }
+
     }
 }
