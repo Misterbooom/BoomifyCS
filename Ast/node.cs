@@ -295,6 +295,10 @@ namespace BoomifyCS.Ast
             string valueStr = value?.StrHelper(level + 1, "Value: ");
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{valueStr}";
         }
+        public AstUnaryOperator Update(AstNode newOperand)
+        {
+            return new AstUnaryOperator(this.Token, newOperand);
+        }
     }
     public class AstFunctionDecl(Token token, AstNode typeNode, AstIdentifier functionNameNode, AstNode argumentsNode, AstBlock blockNode) : AstNode(token)
     {

@@ -4,16 +4,18 @@ using BoomifyCS.Ast.Validators;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 using BoomifyCS.Parser;
-using BoomifyCS.Ast.Handlers;
 using System.Linq;
+
 namespace BoomifyCS.Ast
 {
     class AstBuilder
     {
         public int tokenIndex = 0;
         public List<Token> tokens;
-        public readonly Stack<AstNode> operatorStack = new();
-        public readonly Stack<AstNode> operandStack = new();
+        // Хранит текущий узел, созданный обработчиком
+        public AstNode? CurrentNode { get; set; }
+        // Собираем все разобранные узлы в списке
+        public List<AstNode> Nodes { get; set; } = new List<AstNode>();
 
         public AstBuilder(List<Token> tokens)
         {
@@ -22,68 +24,58 @@ namespace BoomifyCS.Ast
 
         public AstNode BuildNode()
         {
-  
             while (tokenIndex < tokens.Count)
             {
                 Token token = tokens[tokenIndex];
-                //BifyDebug.Log($"Token: {token}");
-                TokenHandler handler = TokenHandlerFactory.CreateHandler(token, this);
+                var handler = TokenHandlerFactory.CreateHandler(token, this);
                 handler.HandleToken(token);
 
-                tokenIndex++;
+                if (CurrentNode != null)
+                {
+                    Nodes.Add(CurrentNode);
+                    CurrentNode = null;
+                }
             }
-           
-            while (operandStack.Count > 1)
+            if (Nodes.Count > 1)
             {
-
-                AstNode right = operandStack.Pop();
-                AstNode left = operandStack.Pop();
-
-                AstNode combinedNode = new AstBinaryOp(new Token(TokenType.ADD, "concat"));
-
-                OperandValidator.Validate(left, right, combinedNode);
-
-                combinedNode.Left = left;
-                combinedNode.Right = right;
-
-                AddOperand(combinedNode);
+                Nodes.WriteNodes();
+                new BifySyntaxError("Multiple nodes generated—this likely indicates ambiguous or incomplete syntax. Please check your input for missing operators or delimiters.").Throw();
             }
-            return operandStack.Count > 0 ? operandStack.Pop() : null;
+            return Nodes.Count == 1 ? Nodes[0] : null;
         }
-        public AstNode[] BuildWithoutConnecting()
+
+        public Token GetPreviousToken()
         {
-            while (tokenIndex < tokens.Count)
+            if (tokenIndex == 0)
+                return null;
+            return tokens[tokenIndex - 1];
+        }
+        public Token Peek()
+        {
+            return tokens[tokenIndex];
+        }
+
+        public Token NextToken()
+        {
+            return tokens[tokenIndex++];
+        }
+
+        public bool IsAtEnd() => tokenIndex >= tokens.Count;
+
+        public Token Consume(TokenType type, string message = "Unexpected token")
+        {
+            if (Peek().Type == type)
             {
-                Token token = tokens[tokenIndex];
-                TokenHandler handler = TokenHandlerFactory.CreateHandler(token, this);
-                handler.HandleToken(token);
-
-                tokenIndex++;
+                return NextToken();
             }
-            return operandStack.ToArray();
-        }
-
-        public void AddOperand(AstNode node)
-        {
-            if (node != null)
+            else
             {
-                node.LineNumber = Traceback.Instance.Line;
-                operandStack.Push(node);
+                new BifySyntaxError(message).Throw();
+                return null;
+
             }
-
         }
-
-        public void AddOperator(AstNode node)
-        {
-            node.LineNumber = Traceback.Instance.Line;
-            operatorStack.Push(node);
-        }
-
-        
-
-
-
-        
+       
 
         public List<Token> GetConditionTokens() => TokensFormatter.GetTokensBetween(tokens, ref tokenIndex, TokenType.LPAREN, TokenType.RPAREN);
 

@@ -1,32 +1,32 @@
-    using BoomifyCS.Lexer;
-using BoomifyCS.Ast.Validators;
+﻿using BoomifyCS.Ast;
 using BoomifyCS.Ast.Handlers;
 using BoomifyCS.Exceptions;
-namespace BoomifyCS.Ast
-{
-    static class TokenHandlerFactory
-    {
-        public static TokenHandler CreateHandler(Token token, AstBuilder builder)
-        {
-            Traceback.Instance.SetCurrentLine(token.Line);
-            return token.Type switch
-            {
-                TokenType.IF => new IfHandler(builder),
-                TokenType.ELSE => new ElseStatementHandler(builder),
-                TokenType.WHILE => new IteratorHandlers(builder),
-                TokenType.IDENTIFIER => new IdentifierHandler(builder),
-                TokenType.DOT => new DotHandler(builder),
-                TokenType.LBRACKET => new BracketHandler(builder),
-                TokenType.RETURN => new ReturnHandler(builder),
-                _ when TokenConfig.assignmentOperators.ContainsValue(token.Type) => new AssignmentOperatorHandler(builder),
-                _ when TokenConfig.binaryOperators.ContainsValue(token.Type) => new BinaryOperatorHandler(builder),
-                TokenType.INCREMENT or TokenType.DECREMENT  => new UnaryOperatorHandler(builder),
-                TokenType.LPAREN => new ParenthesisHandler(builder),
-                TokenType.FOR => new ForHandler(builder),
+using BoomifyCS.Lexer;
 
-                TokenType.FUNCTIONDECL => new FunctionDeclarationHandler(builder),
-                _ => new DefaultTokenHandler(builder),
-            };
-        }
+static class TokenHandlerFactory
+{
+    public static TokenHandler CreateHandler(Token token, AstBuilder builder)
+    {
+        Traceback.Instance.SetCurrentLine(token.Line);
+        return token.Type switch
+        {
+            _ when TokenConfig.binaryOperators.ContainsValue(token.Type) => new BinaryOperatorHandler(builder),
+            _ when TokenConfig.assignmentOperators.ContainsValue(token.Type) => new AssignmentOperatorHandler(builder),
+            TokenType.IDENTIFIER => new IdentifierHandler(builder),
+            _ => new DefaultTokenHandler(builder),
+
+        };
+
     }
+
 }
+class DefaultTokenHandler : TokenHandler { 
+    public DefaultTokenHandler(AstBuilder builder): base(builder) { }
+    public override void HandleToken(Token token)
+    {
+        builder.CurrentNode = NodeConventer.TokenToNode(token);
+        builder.NextToken();
+    }
+
+}
+

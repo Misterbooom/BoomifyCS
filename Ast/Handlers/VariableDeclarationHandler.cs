@@ -1,50 +1,70 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using BoomifyCS.Ast.Handlers;
-using BoomifyCS.Lexer;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using BoomifyCS.Ast.Validators;
-using BoomifyCS.Parser;
 using BoomifyCS.Exceptions;
+using BoomifyCS.Lexer;
 
-namespace BoomifyCS.Ast
+namespace BoomifyCS.Ast.Handlers
 {
-    class VariableDeclarationHandler : TokenHandler
+    class VariableDeclarationHandler(AstBuilder builder) : TokenHandler(builder)
     {
-        public VariableDeclarationHandler(AstBuilder builder) : base(builder) { }
-
         public override void HandleToken(Token token)
         {
-         
-        }
-        public static (AstNode lastOperand, AstNode finalPointer) SwitchLastPointerOperand(AstNode pointer, AstNode operand)
-        {
-            if (pointer is not AstUnaryOperator pointerNode)
-                return (pointer, operand);
 
-            AstNode ReplaceLast(AstUnaryOperator node, AstNode replacement, out AstNode lastOperand)
+            GetVariableInfo(out AstNode identifierNode, out AstNode typeNode, out AstNode flagNode);
+            AstNode valueNode = null;
+            List<Token> valueTokens = [];
+
+            if (identifierNode is AstUnaryOperator unaryOperator)
             {
-                if (node.Operand is AstUnaryOperator nested)
-                {
-                    var replaced = ReplaceLast(nested, replacement, out lastOperand);
-                    return new AstUnaryOperator(node.Token, replaced); 
-                }
-                else
-                {
-                    lastOperand = node.Operand;
-                    return new AstUnaryOperator(node.Token, replacement);
-                }
+                var (lastOperand,finalPointer) = SwitchLastOperand(unaryOperator, identifierNode);
+                identifierNode = lastOperand;
+                typeNode = finalPointer;
             }
+            if (token.Type == TokenType.ASSIGN)
+            {
+                builder.NextToken();
+                valueTokens = builder.tokens[builder.tokenIndex..];
+                valueNode = builder.ParseTokens(valueTokens);
+                if (valueNode == null)
+                {
+                    new BifySyntaxError(ErrorMessage.EmptyValueAssigned()).Throw();
+                }
 
-            var final = ReplaceLast(pointerNode, operand, out var lastOperand);
-            BifyDebug.Log($"Final Pointer: {final}");
+            }
+            builder.tokenIndex = builder.tokens.Count;
 
-            return (lastOperand, final);
+            VariableDeclarationValidator.Validate(identifierNode, typeNode, valueNode, valueTokens, flagNode, token);
+            AstAssignment astAssignment = new(token, identifierNode, valueNode);
+            builder.Nodes.Clear();
+            builder.CurrentNode = new AstVarDecl(token,astAssignment,typeNode,flagNode);
+
+
         }
 
-
-
-
-
-
+        private void GetVariableInfo(out AstNode identifierNode, out AstNode typeNode, out AstNode flagNode)
+        {
+            if (builder.Nodes.Count == 2)
+            {
+                typeNode = builder.Nodes[0];
+                identifierNode = builder.Nodes[1];
+                flagNode = null;
+            }
+            else if (builder.Nodes.Count == 3)
+            {
+                flagNode = builder.Nodes[0];
+                typeNode = builder.Nodes[1];
+                identifierNode = builder.Nodes[2];
+            }
+            else
+            {
+                identifierNode = null;
+                typeNode = null;
+                flagNode = null;
+            }
+        }
     }
 }

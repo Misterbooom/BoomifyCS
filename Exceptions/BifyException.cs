@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 using System.Text;
 using BoomifyCS.Lexer;
 using ColorConsole = Colorful.Console;
@@ -67,7 +68,15 @@ namespace BoomifyCS.Exceptions
                 ColorConsole.WriteLine(new string('-', 35), Color.Gray);
             }
         }
-
+        public T Throw<T>()
+        {
+            Traceback.Instance.ThrowException(this);
+            return default(T);
+        }
+        public void Throw()
+        {
+            Traceback.Instance.ThrowException(this);
+        }
         public void WriteLineTokens(int indentInt)
         {
             StringBuilder builder = new();
