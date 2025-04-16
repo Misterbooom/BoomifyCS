@@ -28,7 +28,6 @@ namespace BoomifyCS.Ast
                     currentLine.Add(new Token(TokenType.LCUR,"{"));
                     currentLine.AddRange(tokensInCur);
                     currentLine.Add(new Token(TokenType.RCUR, "}"));
-
                     if (nextToken != null && nextToken.Type != TokenType.ELSE)
                     {
                         lines.Add(new List<Token>(currentLine));

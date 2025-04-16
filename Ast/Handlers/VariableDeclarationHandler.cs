@@ -14,14 +14,15 @@ namespace BoomifyCS.Ast.Handlers
         public override void HandleToken(Token token)
         {
             GetVariableInfo(builder,out AstNode identifierNode, out AstNode typeNode, out AstNode flagNode);
+          
             AstNode valueNode = null;
             List<Token> valueTokens = [];
 
-           
-            if (token.Type == TokenType.ASSIGN)
+            BifyDebug.Log($"Curenct token :{builder.Peek()}");
+            if (!builder.IsAtEnd())
             {
-                builder.NextToken();
                 valueTokens = builder.tokens[builder.tokenIndex..];
+                BifyDebug.Log($"Curenct token :{builder.Peek()}");
                 valueNode = builder.ParseTokens(valueTokens);
                 if (valueNode == null)
                 {

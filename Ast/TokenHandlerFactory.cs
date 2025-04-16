@@ -17,6 +17,7 @@ static class TokenHandlerFactory
             TokenType.FOR => new ForHandler(builder),
             TokenType.BREAK or TokenType.CONTINUE => new BreakContinueHandler(builder),
             TokenType.RETURN => new ReturnHandler(builder),
+            TokenType.IF => new ConditionHandler(builder),
             _ => new DefaultTokenHandler(builder),
 
         };

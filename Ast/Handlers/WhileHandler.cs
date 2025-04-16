@@ -13,21 +13,15 @@ namespace BoomifyCS.Ast.Handlers
     {
         public override void HandleToken(Token token)
         {
-            builder.tokenIndex++;
             AstNode conditionNode = builder.ParseTokens(builder.GetConditionTokens());
-            if (builder.GetNextToken()?.Type != TokenType.LCUR)
-            {
-                new BifySyntaxError("While body not found!").Throw();
-            }
-            AstNode blockNode = builder.ParseBlock(builder.GetBlockTokens());
+            AstNode blockNode = builder.HandleBody("While");
             AstWhile astWhile = new AstWhile(token, blockNode, conditionNode);
             LoopValidator.ValidateWhileStatement(astWhile);
-            
+
             builder.CurrentNode = astWhile;
             builder.MoveToEnd();
-
-
-
         }
+
+        
     }
 }

@@ -216,7 +216,7 @@ namespace BoomifyCS.Ast
         public override string ToString() => StrHelper();
         public void AddElseIfNode(AstElseIf astElseIf) => ElseIfNodes.Add(astElseIf);
     }
-    public class AstElse(Token token, AstNode blockNode) : AstNode(token, blockNode)
+    public class AstElse(Token token, AstNode blockNode) : AstNode(token)
     {
         public AstNode BlockNode = blockNode;
 
@@ -299,7 +299,7 @@ namespace BoomifyCS.Ast
         }
         public AstUnaryOperator Update(AstNode newOperand)
         {
-            return new AstUnaryOperator(this.Token, newOperand);
+            return new AstUnaryOperator(this.Token, newOperand,isPrefix);
         }
     }
     public class AstFunctionDecl(Token token, AstNode typeNode, AstIdentifier functionNameNode, AstNode argumentsNode, AstBlock blockNode) : AstNode(token)

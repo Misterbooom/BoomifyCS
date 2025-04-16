@@ -12,9 +12,9 @@ namespace BoomifyCS.Ast.Handlers
     {
         public override void HandleToken(Token token)
         {
-            BifyDebug.Log($"{string.Join(",", builder.Nodes.Select(node => node.ToString()))}");
 
-            GetVariableInfo(builder, out var identifierNode, out var typeNode, out var flagNode); // Log this info
+            GetVariableInfo(builder, out var identifierNode, out var typeNode, out var flagNode);
+        
             if (identifierNode is not AstIdentifier id)
             {
                 new BifySyntaxError($"Invalid identifier name '{identifierNode?.Token?.Value}'. Expected a valid name like `x`, `value`, etc.").Throw();
@@ -33,14 +33,7 @@ namespace BoomifyCS.Ast.Handlers
             List<List<Token>> splitedTokens = TokensFormatter.SplitTokensByType(builder.GetConditionTokens(), TokenType.COMMA);
             AstParam[] parametersNodes = BuildParameters(splitedTokens);
             AstBinaryOp parameters = ConnectParameters(parametersNodes);
-
-
-            if (builder.GetNextToken()?.Type != TokenType.LCUR)
-
-            {
-                new BifySyntaxError("Function body not found!").Throw();
-            }
-            AstBlock blockNode = (AstBlock)builder.ParseBlock(builder.GetBlockTokens());
+            AstBlock blockNode = builder.HandleBody("Function");
 
             AstNode functionNode = new AstFunctionDecl(token,typeNode,(AstIdentifier)identifierNode,parameters,blockNode);
             builder.CurrentNode = functionNode;

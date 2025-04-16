@@ -220,8 +220,6 @@ namespace BoomifyCS.Assembly
         {
             try
             {
-
-
                 ProcessStartInfo psi = new ProcessStartInfo
                 {
                     FileName = "cmd.exe",
@@ -231,11 +229,17 @@ namespace BoomifyCS.Assembly
                     RedirectStandardOutput = true,
                     RedirectStandardError = true
                 };
+
                 var stopwatch = new Stopwatch();
                 using (Process process = Process.Start(psi))
                 {
+                    if (process == null)
+                    {
+                        Console.WriteLine("Не удалось запустить процесс.");
+                        return;
+                    }
+
                     stopwatch.Start();
-                    process.Start();
                     Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
                     Task<string> errorTask = process.StandardError.ReadToEndAsync();
 
@@ -254,15 +258,15 @@ namespace BoomifyCS.Assembly
                         Console.WriteLine($"Error: {errorOutput}");
                     }
 
+                    Console.WriteLine($"Execution time: {stopwatch.ElapsedMilliseconds} ms");
                 }
-
-                Console.WriteLine($"Execution time: {stopwatch.ElapsedMilliseconds} ms");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error running executable: {ex.Message}");
             }
         }
+
 
 
         private bool _disposed = false;

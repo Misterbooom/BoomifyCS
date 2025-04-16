@@ -71,12 +71,16 @@ namespace BoomifyCS.Ast
         }
         public Token Peek()
         {
-            return tokenIndex < tokens.Count ? tokens[tokenIndex] : null;
+            Token token = tokenIndex < tokens.Count ? tokens[tokenIndex] : null;
+            Traceback.Instance.SetCurrentLine(token == null ? Traceback.Instance.Line : token.Line);
+            return token;
         }
 
         public Token NextToken()
         {
-            return tokens[tokenIndex++];
+            Token token = tokens[tokenIndex++];
+            Traceback.Instance.SetCurrentLine(token.Line);
+            return token;
         }
 
         public bool IsAtEnd() => tokenIndex >= tokens.Count;
@@ -109,7 +113,7 @@ namespace BoomifyCS.Ast
         }
         public Token GetNextToken()
         {
-            if (tokenIndex >= tokens.Count)
+            if (tokenIndex + 1 >= tokens.Count)
             {
                 return null;
             }
@@ -120,12 +124,32 @@ namespace BoomifyCS.Ast
         {
             tokenIndex = tokens.Count;
         }
+        public AstBlock HandleBody(string name)
+        {
+            if (IsAtEnd())
+            {
+                throw new IndexOutOfRangeException("While handling the body, the token index goes out of range!");
+            }
+            List<Token> bodyTokens = null;
+            if (GetNextToken()?.Type == TokenType.LCUR)
+            {
+                bodyTokens = GetBlockTokens();
+            }
+            if (bodyTokens == null)
+            {
+                new BifySyntaxError($"{name} body not found.").Throw();
+            }
+
+            AstBlock blockNode = ParseBlock(bodyTokens);
+            tokenIndex++;
+            return blockNode;
+        }
         public List<Token> GetConditionTokens() => TokensFormatter.GetTokensBetween(tokens, ref tokenIndex, TokenType.LPAREN, TokenType.RPAREN);
 
         public List<Token> GetBlockTokens() => TokensFormatter.GetTokensBetween(tokens, ref tokenIndex, TokenType.LCUR, TokenType.RCUR);
 
         public AstNode ParseTokens(List<Token> conditionTokens) => new AstBuilder(conditionTokens).BuildNode();
 
-        public AstNode ParseBlock(List<Token> blockTokens) => new AstBlock(((AstModule)new AstTree(Traceback.Instance.source).ParseTokens(blockTokens)).ChildNodes);
+        public AstBlock ParseBlock(List<Token> blockTokens) => new AstBlock(((AstModule)new AstTree(Traceback.Instance.source).ParseTokens(blockTokens)).ChildNodes);
     }
 }

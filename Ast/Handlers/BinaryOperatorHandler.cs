@@ -70,6 +70,7 @@ namespace BoomifyCS.Ast.Handlers
             while (!builder.IsAtEnd())
             {
                 Token next = builder.Peek();
+                
                 BifyDebug.Log($"Next token: {next}");
                 if (binaryOpToken.Type == TokenType.MUL && next.Type == TokenType.ASSIGN )
                 {

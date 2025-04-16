@@ -1,7 +1,12 @@
-﻿int* main(int a){
-	for (int a = 5;i < 5;i++){
-		i++;
+﻿void main(){
+	if (12 == 2){
 		break;
+	}
+	else if (12 == 3){
+		break;
+	}
+	else{
+		continue;
 	}
 	return;
 }

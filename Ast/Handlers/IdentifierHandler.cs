@@ -2,6 +2,7 @@
 using BoomifyCS.Exceptions;
 using System.Collections.Generic;
 using BoomifyCS.Parser;
+using System.Linq;
 
 namespace BoomifyCS.Ast.Handlers
 {
@@ -30,35 +31,40 @@ namespace BoomifyCS.Ast.Handlers
         {
             builder.Nodes.Add(new AstIdentifier(token, token.Value));
             builder.tokenIndex++;
-            ProcessPointerTokens();
-            Token possibleFunctionName = TokensFormatter.GetTokenOrNull(builder.tokens, builder.tokenIndex);
-            if (possibleFunctionName != null && possibleFunctionName.Type == TokenType.IDENTIFIER)
+            TokenType stopTokenType = TokenType.NULL;
+            List<Token> tokens = [];
+            while (!builder.IsAtEnd())
             {
-                builder.Nodes.Add(new AstIdentifier(possibleFunctionName, possibleFunctionName.Value));
-                builder.tokenIndex++;
-                if (!builder.IsAtEnd() && builder.Peek().Type == TokenType.LPAREN)
+                Token t = builder.NextToken();
+                if (t.Type == TokenType.ASSIGN || t.Type == TokenType.LPAREN)
                 {
-                    new FunctionHandler(builder).HandleToken(token);
-                    return;
+                    stopTokenType = t.Type;
+                    break;
                 }
-                else
-                {
-                    new VariableDeclarationHandler(builder).HandleToken(token);
-                    return;
-                }
+                tokens.Add(t);
             }
-            new VariableDeclarationHandler(builder).HandleToken(token);
+            if (tokens.Count == 0)
+            {
+                new BifySyntaxError($"Invalid function declaration.").Throw();
+            } 
+            builder.Nodes.Add(builder.ParseTokens(tokens));
+
+            if (stopTokenType == TokenType.LPAREN)
+            {
+                builder.tokenIndex--;
+                new FunctionHandler(builder).HandleToken(token);
+            }
+            else
+            {
+                new VariableDeclarationHandler(builder).HandleToken(new Token(TokenType.ASSIGN,"="));
+            }
+
+
         }
 
-        private void ProcessPointerTokens()
-        {
-            while (!builder.IsAtEnd() && builder.Peek().Type == TokenType.MUL)
-            {
-                Token pointerToken = builder.NextToken();
-                pointerToken.Type = TokenType.POINTER;
-                builder.Nodes.Add(new AstUnaryOperator(pointerToken, null, true));
-            }
-        }
+        
+
+       
 
         private bool IsNextTokenFunctionCall()
         {

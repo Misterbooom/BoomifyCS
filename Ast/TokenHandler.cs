@@ -17,15 +17,19 @@ namespace BoomifyCS.Ast.Handlers
         public abstract void HandleToken(Token token);
         protected static (AstNode lastOperand, AstNode finalPointer) SwitchLastOperand(AstNode pointer, AstNode operand)
         {
+
             if (pointer is not AstUnaryOperator pointerNode)
-                return (pointer, operand); 
+            {
+                return (pointer, operand);
+            }
 
             static AstNode ReplaceLast(AstUnaryOperator node, AstNode replacement, out AstNode lastOperand)
             {
+
                 if (node.Operand is AstUnaryOperator nested)
                 {
                     var replaced = ReplaceLast(nested, replacement, out lastOperand);
-                    return node.Update(replaced); 
+                    return node.Update(replaced);
                 }
                 else
                 {
@@ -35,6 +39,7 @@ namespace BoomifyCS.Ast.Handlers
             }
 
             var final = ReplaceLast(pointerNode, operand, out var lastOperand);
+
             return (lastOperand, final is AstUnaryOperator unaryOperator ? unaryOperator.Operand : final);
         }
         protected static void GetVariableInfo(AstBuilder builder, out AstNode identifierNode, out AstNode typeNode, out AstNode flagNode)
@@ -59,10 +64,12 @@ namespace BoomifyCS.Ast.Handlers
             }
             if (identifierNode is AstUnaryOperator unaryOperator)
             {
-                var (lastOperand, finalPointer) = SwitchLastOperand(unaryOperator, identifierNode);
+                var (lastOperand, finalPointer) = SwitchLastOperand(unaryOperator, typeNode);
                 identifierNode = lastOperand;
                 typeNode = finalPointer;
             }
+
+
         }
 
 

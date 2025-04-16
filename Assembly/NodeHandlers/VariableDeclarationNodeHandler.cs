@@ -16,7 +16,6 @@ namespace BoomifyCS.Assembly.NodeHandlers
             var varDecl = (AstVarDecl)node;
             var varName = varDecl.AssignmentNode.Left.Token.Value;
 
-            // Determine variable type  
             BifyType declaredType;
             if (varDecl.Type is AstIdentifier && varDecl.Type.Token.Value == "var")
             {
