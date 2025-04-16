@@ -281,13 +281,15 @@ namespace BoomifyCS.Ast
         {
             string baseStr = base.StrHelper(level, note);
             string argumentsStr = ArgumentsNode != null ? ArgumentsNode?.StrHelper(level + 2, "Arguments: ") : "";
-            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{argumentsStr}";
+            string callableNameStr = CallableName?.StrHelper(level + 1, "Callable: ");
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{callableNameStr}{argumentsStr}";
 
         }
     }
-    public class AstUnaryOperator(Token token, AstNode value) : AstNode(token)
+    public class AstUnaryOperator(Token token, AstNode value,bool isPrefix = false) : AstNode(token)
     {
         public AstNode Operand = value;
+        public bool IsPrefix = isPrefix;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {

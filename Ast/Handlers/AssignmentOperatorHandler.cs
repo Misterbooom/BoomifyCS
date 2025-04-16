@@ -45,7 +45,7 @@ namespace BoomifyCS.Ast.Handlers
                 }
                 builder.Nodes.Clear();
                 builder.CurrentNode = new AstAssignmentOperator(identifierNode.Token, identifierNode, valueNode);
-                builder.tokenIndex = builder.tokens.Count;
+                builder.MoveToEnd();
 
             }
             else

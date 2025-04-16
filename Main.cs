@@ -57,15 +57,24 @@ namespace BoomifyCS
         static void RunInterpreter()
         {
             Console.OutputEncoding = Encoding.Unicode;
-            string file = "C:/BoomifyCS/test.bify";  
+            string file = "C:/BoomifyCS/test.bify";
             Traceback.Instance.FilePath = file;
             string code = File.ReadAllText(file);
+
+            Stopwatch stopwatch = new();
+            stopwatch.Start();
             MyLexer lexer = new(code);
             List<Token> tokens = lexer.Tokenize();
-            tokens.WriteTokens();
+            stopwatch.Stop();
+            Console.WriteLine($"Tokenization completed in {stopwatch.ElapsedMilliseconds} ms.");
+
             string[] codeByLine = code.Split('\n');
+            stopwatch.Restart();
             AstTree astParser = new(codeByLine);
             AstNode node = astParser.ParseTokens(tokens);
+            stopwatch.Stop();
+            Console.WriteLine($"AST parsing completed in {stopwatch.ElapsedMilliseconds} ms.");
+
             BifyDebug.Log(node.ToString());
             AssemblyCompiler compiler = AssemblyCompiler.Instance;
             //compiler.Compile(node);

@@ -13,17 +13,11 @@ namespace BoomifyCS.Ast.Handlers
     {
         public override void HandleToken(Token token)
         {
-
-            GetVariableInfo(out AstNode identifierNode, out AstNode typeNode, out AstNode flagNode);
+            GetVariableInfo(builder,out AstNode identifierNode, out AstNode typeNode, out AstNode flagNode);
             AstNode valueNode = null;
             List<Token> valueTokens = [];
 
-            if (identifierNode is AstUnaryOperator unaryOperator)
-            {
-                var (lastOperand,finalPointer) = SwitchLastOperand(unaryOperator, identifierNode);
-                identifierNode = lastOperand;
-                typeNode = finalPointer;
-            }
+           
             if (token.Type == TokenType.ASSIGN)
             {
                 builder.NextToken();
@@ -35,7 +29,7 @@ namespace BoomifyCS.Ast.Handlers
                 }
 
             }
-            builder.tokenIndex = builder.tokens.Count;
+            builder.MoveToEnd();
 
             VariableDeclarationValidator.Validate(identifierNode, typeNode, valueNode, valueTokens, flagNode, token);
             AstAssignment astAssignment = new(token, identifierNode, valueNode);
@@ -43,28 +37,10 @@ namespace BoomifyCS.Ast.Handlers
             builder.CurrentNode = new AstVarDecl(token,astAssignment,typeNode,flagNode);
 
 
+
+
         }
 
-        private void GetVariableInfo(out AstNode identifierNode, out AstNode typeNode, out AstNode flagNode)
-        {
-            if (builder.Nodes.Count == 2)
-            {
-                typeNode = builder.Nodes[0];
-                identifierNode = builder.Nodes[1];
-                flagNode = null;
-            }
-            else if (builder.Nodes.Count == 3)
-            {
-                flagNode = builder.Nodes[0];
-                typeNode = builder.Nodes[1];
-                identifierNode = builder.Nodes[2];
-            }
-            else
-            {
-                identifierNode = null;
-                typeNode = null;
-                flagNode = null;
-            }
-        }
+
     }
 }

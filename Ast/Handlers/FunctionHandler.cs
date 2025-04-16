@@ -1,0 +1,91 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Metadata.Ecma335;
+using BoomifyCS.Ast.Validators;
+using BoomifyCS.Exceptions;
+using BoomifyCS.Lexer;
+
+namespace BoomifyCS.Ast.Handlers
+{
+    class FunctionHandler(AstBuilder builder) : TokenHandler(builder)
+    {
+        public override void HandleToken(Token token)
+        {
+            BifyDebug.Log($"{string.Join(",", builder.Nodes.Select(node => node.ToString()))}");
+
+            GetVariableInfo(builder, out var identifierNode, out var typeNode, out var flagNode); // Log this info
+            if (identifierNode is not AstIdentifier id)
+            {
+                new BifySyntaxError($"Invalid identifier name '{identifierNode?.Token?.Value}'. Expected a valid name like `x`, `value`, etc.").Throw();
+            }
+            if (typeNode is not AstIdentifier type && typeNode.Token.Type != TokenType.POINTER)
+            {
+                new BifySyntaxError($"Invalid type '{typeNode?.Token?.Value}'. Make sure the function has a valid type like `int`, `float`, etc.").Throw();
+            }
+            if (flagNode != null && flagNode is not AstIdentifier flag)
+            {
+                new BifySyntaxError($"Invalid flag '{flagNode?.Token?.Value}'. Flags should be simple identifiers like `const`, etc.").Throw();
+            }
+
+
+
+            List<List<Token>> splitedTokens = TokensFormatter.SplitTokensByType(builder.GetConditionTokens(), TokenType.COMMA);
+            AstParam[] parametersNodes = BuildParameters(splitedTokens);
+            AstBinaryOp parameters = ConnectParameters(parametersNodes);
+
+
+            if (builder.GetNextToken()?.Type != TokenType.LCUR)
+
+            {
+                new BifySyntaxError("Function body not found!").Throw();
+            }
+            AstBlock blockNode = (AstBlock)builder.ParseBlock(builder.GetBlockTokens());
+
+            AstNode functionNode = new AstFunctionDecl(token,typeNode,(AstIdentifier)identifierNode,parameters,blockNode);
+            builder.CurrentNode = functionNode;
+            builder.tokenIndex++;
+            builder.Nodes.Clear();
+
+
+        }
+        private AstBinaryOp ConnectParameters(AstParam[] parametersNodes)
+        {
+            AstBinaryOp binaryOp = null;
+            Token commaToken = new Token(TokenType.COMMA, ",");
+            for (int i = 0; i < parametersNodes.Length; i++)
+            {
+                if (i == 0)
+                {
+                    binaryOp = new AstBinaryOp(commaToken, parametersNodes[i], null);
+                }
+                else
+                {
+                    binaryOp = new AstBinaryOp(commaToken, parametersNodes[i], binaryOp);
+                }
+            }
+            return binaryOp;
+        }
+        private AstParam[] BuildParameters(List<List<Token>> splitedTokens)
+        {
+            int paramIndex = 0;
+            List<AstParam> parameters = new List<AstParam>();
+            foreach (var group in splitedTokens)
+            {
+                AstBuilder b = new AstBuilder(group);
+                AstVarDecl parametersNode = b.BuildNode() as AstVarDecl;
+
+                if (parametersNode == null)
+                {
+                    new BifySyntaxError($"Parameter #{paramIndex + 1}: Invalid parameter declaration.").Throw();
+                }
+
+                AstParam param = new AstParam(parametersNode.Type, parametersNode.AssignmentNode.Left, parametersNode.Flag);
+                BifyDebug.Log($"Param: {paramIndex + 1}: {param}");
+                parameters.Add(param);
+                paramIndex++;
+            }
+            return parameters.ToArray();
+        }
+    }
+}

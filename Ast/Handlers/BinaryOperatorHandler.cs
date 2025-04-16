@@ -32,7 +32,11 @@ namespace BoomifyCS.Ast.Handlers
             {
                 builder.tokenIndex++;
                 AstNode operand = ParsePrimary();
-                builder.CurrentNode = new AstUnaryOperator(token, operand);
+                if (token.Type == TokenType.MUL)
+                {
+                    token.Type = TokenType.POINTER;
+                }
+                builder.CurrentNode = new AstUnaryOperator(token, operand,true);
                 return;
             }
 
@@ -51,7 +55,7 @@ namespace BoomifyCS.Ast.Handlers
                 {
                     newToken.Type = TokenType.POINTER;
                 }
-                builder.CurrentNode = new AstUnaryOperator(newToken, right);
+                builder.CurrentNode = new AstUnaryOperator(newToken, right,true);
             }
             else
             {
@@ -66,13 +70,13 @@ namespace BoomifyCS.Ast.Handlers
             while (!builder.IsAtEnd())
             {
                 Token next = builder.Peek();
-                if (binaryOpToken.Type == TokenType.MUL && next.Type == TokenType.ASSIGN)
+                BifyDebug.Log($"Next token: {next}");
+                if (binaryOpToken.Type == TokenType.MUL && next.Type == TokenType.ASSIGN )
                 {
                     isUnary = true;
                     break;
                 }
-                BifyDebug.Log($"Next token: {next}");
-              
+
                 if (!AstConfig.Precedence.TryGetValue(next.Type, out int prec) || prec < minPrecedence)
                     break;
                 Token op = builder.NextToken();
@@ -81,35 +85,76 @@ namespace BoomifyCS.Ast.Handlers
             }
             return left;
         }
+        private bool CheckFunctionDeclaration()
+        {
+            return false;
+        }
 
-        private AstNode ParsePrimary()
+
+        public AstNode ParsePrimary()
         {
             if (builder.IsAtEnd())
             {
-                new BifySyntaxError("Unexpected end of expression. Please check that your expression is complete.").Throw();
+                new BifySyntaxError($"Unexpected end of expression. Please check that your expression is complete.: {builder.GetPreviousToken()}").Throw();
             }
+
             Token token = builder.NextToken();
-            var res = token.Type switch
+
+            AstNode baseNode = token.Type switch
             {
-                TokenType.IDENTIFIER => new IdentifierHandler(builder).ParseIdentfierOrCall(token,true),
+                TokenType.IDENTIFIER or TokenType.CONST => new IdentifierHandler(builder).ParseIdentfier(token, true),
                 TokenType.NUMBER => NodeConventer.TokenToNode(token),
                 TokenType.LPAREN => ParseParenthesizedExpression(),
                 TokenType.SUB or TokenType.MUL => HandleUnaryOperator(token),
-
+                TokenType.LBRACKET => new ArrayHandler(builder).GetArrayNode(token),
+                TokenType.STRING => NodeConventer.TokenToNode(token),
                 _ => new BifySyntaxError($"Unexpected token '{token.Value}' found in expression. Verify your syntax and try again.").Throw<AstNode>()
             };
-           
-            return res;
+
+            return ParsePostfix(baseNode);
         }
 
-        private AstNode HandleUnaryOperator(Token opToken)
+        public AstNode ParsePostfix(AstNode expr)
+        {
+            while (!builder.IsAtEnd())
+            {
+                Token next = builder.Peek();
+                BifyDebug.Log($"Next postfix token: {next}");
+                if (next.Type == TokenType.LPAREN)
+                {
+                    var args = builder.ParseTokens(builder.GetConditionTokens());
+                    expr = new AstCall(next, expr, args);
+                }
+                else if (next.Type == TokenType.LBRACKET)
+                {
+                    var indexTokens = TokensFormatter.GetTokensBetween(builder.tokens, ref builder.tokenIndex,
+                                TokenType.LBRACKET, TokenType.RBRACKET);
+
+                    var indexNode = builder.ParseTokens(indexTokens);
+
+                    expr = new AstIndexOperator(expr, indexNode);
+                }
+                else if (next.Type == TokenType.INCREMENT || next.Type == TokenType.DECREMENT)
+                {
+                    expr = new AstUnaryOperator(next, expr);
+                }
+                else
+                {
+                    break;
+                }
+                builder.tokenIndex++;
+            }
+            return expr;
+        }
+
+        private AstNode  HandleUnaryOperator(Token opToken)
         {
             AstNode operand = ParsePrimary();
             if (opToken.Type == TokenType.MUL)
             {
                 opToken.Type = TokenType.POINTER;
             }
-            return new AstUnaryOperator(opToken, operand);
+            return new AstUnaryOperator(opToken, operand,true);
         }
 
         private AstNode ParseParenthesizedExpression()
@@ -117,6 +162,7 @@ namespace BoomifyCS.Ast.Handlers
             builder.tokenIndex--;
             List<Token> innerTokens = builder.GetConditionTokens();
             AstNode node = builder.ParseTokens(innerTokens);
+            builder.tokenIndex++;
             return node;
         }
     }

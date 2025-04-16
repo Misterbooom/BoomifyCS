@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 namespace BoomifyCS.Exceptions
 {
     public class Traceback
@@ -35,6 +36,7 @@ namespace BoomifyCS.Exceptions
             }
             return stack.Pop();
         }
+        public void TrackPop() => track.Pop();
         public void SetCurrentLine(int currentLine) => Line = currentLine;
 
         public void ThrowException(BifyError error, int column = 0)
@@ -49,10 +51,9 @@ namespace BoomifyCS.Exceptions
                 error.CallStack = callStack;
                 foreach (Type type in track)
                 {
-                    if (type.IsAssignableFrom(error.GetType()))
+                    if (type == error.GetType())
                     {
                         stack.Push(error);
-                        track.Pop();
                         return;
                     }
                     else

@@ -28,6 +28,7 @@ namespace BoomifyCS.Ast
         }
         private AstNode ParseLine(List<Token> line, ref int tokenIndex, ref int lineCount)
         {
+            BifyDebug.Log($"Line {lineCount}: {line.TokensToString()}");
             AstBuilder builder = new(line);
             return builder.BuildNode();
         }

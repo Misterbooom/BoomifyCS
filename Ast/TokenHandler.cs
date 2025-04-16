@@ -1,6 +1,7 @@
 ﻿using System;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
+using LLVMSharp;
 
 namespace BoomifyCS.Ast.Handlers
 {
@@ -35,6 +36,33 @@ namespace BoomifyCS.Ast.Handlers
 
             var final = ReplaceLast(pointerNode, operand, out var lastOperand);
             return (lastOperand, final is AstUnaryOperator unaryOperator ? unaryOperator.Operand : final);
+        }
+        protected static void GetVariableInfo(AstBuilder builder, out AstNode identifierNode, out AstNode typeNode, out AstNode flagNode)
+        {
+            if (builder.Nodes.Count == 2)
+            {
+                typeNode = builder.Nodes[0];
+                identifierNode = builder.Nodes[1];
+                flagNode = null;
+            }
+            else if (builder.Nodes.Count == 3)
+            {
+                flagNode = builder.Nodes[0];
+                typeNode = builder.Nodes[1];
+                identifierNode = builder.Nodes[2];
+            }
+            else
+            {
+                identifierNode = null;
+                typeNode = null;
+                flagNode = null;
+            }
+            if (identifierNode is AstUnaryOperator unaryOperator)
+            {
+                var (lastOperand, finalPointer) = SwitchLastOperand(unaryOperator, identifierNode);
+                identifierNode = lastOperand;
+                typeNode = finalPointer;
+            }
         }
 
 

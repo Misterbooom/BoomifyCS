@@ -95,6 +95,18 @@ namespace BoomifyCS.Assembly
                 return null;
             }
         }
+        public BifyType TryGetBifyType(string type)
+        {
+            Traceback.Instance.Catch(typeof(BifyUndefinedError));
+            IValue value = GetVariable(type);
+            Traceback.Instance.TrackPop();
+
+            if (value is BifyType bifyType)
+            {
+                return bifyType;
+            }
+            return null;
+        }
 
         public void RegisterLocalVariable(string name, IValue variable)
         {
