@@ -200,6 +200,8 @@ namespace BoomifyCS.Assembly.BifyObject
     }
     class ConstStringType : BifyType
     {
+        private static readonly Dictionary<string, LLVMValueRef> GlobalStringCache = new();
+
         public ConstStringType()
             : base("string", LLVMTypeRef.CreatePointer(LLVMTypeRef.Int8, 0))
         {
@@ -207,17 +209,26 @@ namespace BoomifyCS.Assembly.BifyObject
 
         public override BifyValue Create(object value)
         {
-            var stringValue = AssemblyCompiler.Instance.Builder.BuildGlobalStringPtr(
-                ((string)value), (string)value);
-            var pointerType = new BifyPointerType(new CharType());
-            return pointerType.CreateValueRef(stringValue);
-        }
+            string stringValue = (string)value;
 
+            if (GlobalStringCache.TryGetValue(stringValue, out LLVMValueRef existingValue))
+            {
+                var pointerType = new BifyPointerType(new CharType());
+                return pointerType.CreateValueRef(existingValue);
+            }
+
+            var newStringValue = AssemblyCompiler.Instance.Builder.BuildGlobalStringPtr(stringValue, stringValue);
+            GlobalStringCache[stringValue] = newStringValue;
+
+            var newPointerType = new BifyPointerType(new CharType());
+            return newPointerType.CreateValueRef(newStringValue);
+        }
 
         protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
             return new BifyPointerType(new CharType()).CreateValueRef(value);
-        }   
+        }
+
         public override uint Size()
         {
             return 1;

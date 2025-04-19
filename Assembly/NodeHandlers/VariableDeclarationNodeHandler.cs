@@ -75,9 +75,13 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 }
 
                 var runtimeValue = (BifyValue)initValue;
-                BifyDebug.Log($"Declaring '{varName}' of type {declaredType} with value type {runtimeValue.GetTypeName()}");
+                BifyDebug.Log($"Declaring '{varName}' of type {declaredType} with value  {runtimeValue}");
 
                 var castedValue = runtimeValue.ExplicitCast(declaredType, compiler.Builder);
+                if (castedValue == null)
+                {
+                    new BifyTypeError($"Failed to explicitly cast variable '{varName}' from type '{runtimeValue.GetTypeName()}' to the target type '{declaredType.Name}'. Ensure the types are compatible or provide a valid cast.").Throw();
+                }
                 compiler.Builder.BuildStore(castedValue.GetLLVMValue(), alloca);
                 allocaPointer = new AllocaType(declaredType).CreateValueRef(alloca);
 

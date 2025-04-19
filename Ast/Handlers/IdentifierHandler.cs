@@ -46,7 +46,7 @@ namespace BoomifyCS.Ast.Handlers
             if (tokens.Count == 0)
             {
                 new BifySyntaxError($"Invalid function declaration.").Throw();
-            } 
+            }
             builder.Nodes.Add(builder.ParseTokens(tokens));
 
             if (stopTokenType == TokenType.LPAREN)

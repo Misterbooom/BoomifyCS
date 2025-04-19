@@ -40,10 +40,11 @@ namespace BoomifyCS.Ast.Handlers
 
             var final = ReplaceLast(pointerNode, operand, out var lastOperand);
 
-            return (lastOperand, final is AstUnaryOperator unaryOperator ? unaryOperator.Operand : final);
+            return (lastOperand, final );
         }
         protected static void GetVariableInfo(AstBuilder builder, out AstNode identifierNode, out AstNode typeNode, out AstNode flagNode)
         {
+
             if (builder.Nodes.Count == 2)
             {
                 typeNode = builder.Nodes[0];
@@ -62,11 +63,14 @@ namespace BoomifyCS.Ast.Handlers
                 typeNode = null;
                 flagNode = null;
             }
+            BifyDebug.Log($"Identifier: {identifierNode};TypeNode: {typeNode}");
             if (identifierNode is AstUnaryOperator unaryOperator)
             {
                 var (lastOperand, finalPointer) = SwitchLastOperand(unaryOperator, typeNode);
                 identifierNode = lastOperand;
                 typeNode = finalPointer;
+                BifyDebug.Log($"Identifier: {identifierNode};TypeNode: {typeNode}");
+
             }
 
 

@@ -62,6 +62,10 @@ namespace BoomifyCS.Assembly.NodeHandlers
             {
                 throw new NotSupportedException($"Assignment operator is not supported for {((BifyValue)iValue).GetBifyType().GetType()}");
             }
+            if (targetAlloca.ValueFlag.HasFlag(ValueFlag.Constant))
+            {
+                new BifyTypeError("Assigning to constant variable!").Throw();
+            }
             return targetAlloca;
         }
         private BifyValue GetOperandValue(AstAssignmentOperator assignmentOperatorNode)

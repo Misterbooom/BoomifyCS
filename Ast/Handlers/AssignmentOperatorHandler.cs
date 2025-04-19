@@ -44,7 +44,7 @@ namespace BoomifyCS.Ast.Handlers
                     new BifySyntaxError(ErrorMessage.EmptyValueAssigned()).Throw();
                 }
                 builder.Nodes.Clear();
-                builder.CurrentNode = new AstAssignmentOperator(identifierNode.Token, identifierNode, valueNode);
+                builder.CurrentNode = new AstAssignmentOperator(token, identifierNode, valueNode);
                 builder.MoveToEnd();
 
             }

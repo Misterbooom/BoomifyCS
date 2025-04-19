@@ -30,6 +30,7 @@ namespace BoomifyCS.Lexer
             { "||", TokenType.OR},
             { "//",TokenType.COMMENT},
             {"const",TokenType.CONST },
+            {"class",TokenType.CLASS}
 
 
         };

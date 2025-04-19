@@ -1,12 +1,3 @@
-﻿void main(){
-	if (12 == 2){
-		break;
-	}
-	else if (12 == 3){
-		break;
-	}
-	else{
-		continue;
-	}
-	return;
+﻿class Dummy{
+	int helloBro;
 }

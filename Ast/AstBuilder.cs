@@ -13,7 +13,19 @@ namespace BoomifyCS.Ast
     {
         public int tokenIndex = 0;
         public List<Token> tokens;
-        public AstNode? CurrentNode { get; set; }
+        public AstNode? CurrentNode
+        {
+            get => _currentNode;
+            set
+            {
+                _currentNode = value;
+                if (_currentNode != null)
+                {
+                    _currentNode.LineNumber = Traceback.Instance.Line;
+                }
+            }
+        }
+        private AstNode? _currentNode;
         public List<AstNode> Nodes { get; set; } = new List<AstNode>();
 
         public AstBuilder(List<Token> tokens)

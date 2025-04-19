@@ -185,6 +185,7 @@ namespace BoomifyCS.Assembly
                     CreateNoWindow = true,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
+                    RedirectStandardInput = true,
                     RedirectStandardError = true
                 };
 
@@ -220,14 +221,17 @@ namespace BoomifyCS.Assembly
         {
             try
             {
-                ProcessStartInfo psi = new ProcessStartInfo
+                Console.WriteLine("Press Enter to start the executable...");
+                Console.ReadLine();
+                var psi = new ProcessStartInfo
                 {
-                    FileName = "cmd.exe",
-                    Arguments = $"/C {exePath}",
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
+                    FileName = exePath,
+                    Arguments = "",
+                    UseShellExecute = true,    
+                    CreateNoWindow = false,   
+                    RedirectStandardOutput = false,
+                    RedirectStandardError = false,
+                    RedirectStandardInput = false
                 };
 
                 var stopwatch = new Stopwatch();
@@ -235,7 +239,8 @@ namespace BoomifyCS.Assembly
                 {
                     if (process == null)
                     {
-                        Console.WriteLine("Не удалось запустить процесс.");
+                        Console.WriteLine("Failed to start the process.");
+                        Environment.Exit(1); // Emergency exit
                         return;
                     }
 
@@ -264,6 +269,7 @@ namespace BoomifyCS.Assembly
             catch (Exception ex)
             {
                 Console.WriteLine($"Error running executable: {ex.Message}");
+                Environment.Exit(1); 
             }
         }
 

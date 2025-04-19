@@ -427,5 +427,18 @@ namespace BoomifyCS.Ast
     public class AstRangeOperator(Token token) : AstBinaryOp(token)
     {
     }
+    public class AstClass(Token token,AstNode nameNode,AstNode bodyNode): AstNode(token)
+    {
+        AstNode NameNode = nameNode;
+        AstNode BodyNode = bodyNode;
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
+        {
+            string nameStr = NameNode?.StrHelper(level + 1, "Name: ");
+            string bodyStr = BodyNode?.StrHelper(level + 1, "Body: ");
+            string baseStr = base.StrHelper(level, note);
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{nameStr}\n{bodyStr}";
+
+        }
+    }
 }
 

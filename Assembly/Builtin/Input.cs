@@ -14,9 +14,8 @@ namespace BoomifyCS.Assembly.Builtin
         public Input() : base(null, null, null, null)
         {
             FunctionArgs = new FunctionArgs(null);
-            ReturnType = new ConstStringType();
+            ReturnType = new BifyPointerType(new CharType());
             IsVariadic = false;
-            // Expect one string parameter for the prompt.
             FunctionArgs.SetArguments(new Dictionary<string, BifyType> { { "prompt", new BifyPointerType(new CharType())} });
         }
 
@@ -38,6 +37,9 @@ namespace BoomifyCS.Assembly.Builtin
 
             var entry = llvmValue.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            var printFunction = AssemblyCompiler.Instance.VariableManager.GetBifyValue("explode");
+            var prompt = new BifyPointerType(new CharType()).CreateValueRef(llvmValue.GetParam(0));
+            printFunction.Call([prompt]);
 
             var bufferType = LLVMTypeRef.CreateArray(LLVMTypeRef.Int8, 256);
             var textVar = builder.BuildAlloca(bufferType, "text");
@@ -45,7 +47,7 @@ namespace BoomifyCS.Assembly.Builtin
             var zero = LLVMValueRef.CreateConstInt(LLVMTypeRef.Int32, 0, false);
             var textPtr = builder.BuildGEP2(bufferType, textVar, new LLVMValueRef[] { zero, zero }, "textPtr");
 
-            var formatStr = builder.BuildGlobalStringPtr("%s", "scanf_fmt");
+            var formatStr = new ConstStringType().Create("%s").GetLLVMValue();
 
             builder.BuildCall2(scanfType, scanfFunc, new LLVMValueRef[] { formatStr, textPtr }, "callscanf");
 
@@ -63,9 +65,7 @@ namespace BoomifyCS.Assembly.Builtin
                 AssemblyCompiler.Instance.Builder.PositionAtEnd(entryBlock);
             }
 
-            var printFunction = AssemblyCompiler.Instance.VariableManager.GetBifyValue("explode");
-            var prompt = (PointerValue)args[0];
-            printFunction.Call([prompt]);
+     
 
             return new ConstStringType().CreateValueRef(
                 AssemblyCompiler.Instance.Builder.BuildCall2(TypeRef, llvmValue, args.Select(i => i.GetLLVMValue()).ToArray())

@@ -18,11 +18,9 @@ namespace BoomifyCS.Ast.Handlers
             AstNode valueNode = null;
             List<Token> valueTokens = [];
 
-            BifyDebug.Log($"Curenct token :{builder.Peek()}");
             if (!builder.IsAtEnd())
             {
                 valueTokens = builder.tokens[builder.tokenIndex..];
-                BifyDebug.Log($"Curenct token :{builder.Peek()}");
                 valueNode = builder.ParseTokens(valueTokens);
                 if (valueNode == null)
                 {
