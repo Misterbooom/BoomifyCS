@@ -221,14 +221,12 @@ namespace BoomifyCS.Assembly
         {
             try
             {
-                Console.WriteLine("Press Enter to start the executable...");
-                Console.ReadLine();
                 var psi = new ProcessStartInfo
                 {
-                    FileName = exePath,
-                    Arguments = "",
-                    UseShellExecute = true,    
-                    CreateNoWindow = false,   
+                    FileName = "cmd.exe",
+                    Arguments = $"/k \"{exePath}\"",
+                    UseShellExecute = true,
+                    CreateNoWindow = false,
                     RedirectStandardOutput = false,
                     RedirectStandardError = false,
                     RedirectStandardInput = false
@@ -240,36 +238,24 @@ namespace BoomifyCS.Assembly
                     if (process == null)
                     {
                         Console.WriteLine("Failed to start the process.");
-                        Environment.Exit(1); // Emergency exit
+                        Environment.Exit(1); 
                         return;
                     }
 
                     stopwatch.Start();
-                    Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
-                    Task<string> errorTask = process.StandardError.ReadToEndAsync();
-
+      
                     process.WaitForExit();
+               
                     stopwatch.Stop();
 
-                    string output = outputTask.Result;
-                    string errorOutput = errorTask.Result;
-
-                    if (!string.IsNullOrEmpty(output))
-                    {
-                        Console.WriteLine(output);
-                    }
-                    if (!string.IsNullOrEmpty(errorOutput))
-                    {
-                        Console.WriteLine($"Error: {errorOutput}");
-                    }
-
                     Console.WriteLine($"Execution time: {stopwatch.ElapsedMilliseconds} ms");
+                    Console.WriteLine("Process has exited but remains open.");
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error running executable: {ex.Message}");
-                Environment.Exit(1); 
+                Environment.Exit(1);
             }
         }
 

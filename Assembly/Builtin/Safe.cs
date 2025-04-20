@@ -54,32 +54,19 @@ namespace BoomifyCS.Assembly.Builtin
             BifyValue line = integer.CreateValueRef(llvmValue.GetParam(2));
             builder.PositionAtEnd(entry);
             BifyValue compareToZero = rhs.Equal(ReturnType.Create(0), builder);
-            BifyDebug.Log($"Compare to zero: {compareToZero};LHS:{lhs}; RHS:{rhs}");
             var zeroBB = llvmValue.AppendBasicBlock("zero");
             var mergeBB = llvmValue.AppendBasicBlock("merge");
             builder.BuildCondBr(compareToZero.GetLLVMValue(), zeroBB, mergeBB);
             builder.PositionAtEnd(zeroBB);
-            var printErrorFunc = StdC.DeclarFunction("printError",
-                [new ConstStringType(), new ConstStringType(), new ConstStringType(),new BifyObject.IntegerType()], new VoidType()
-                
-                );
+           
 
-            var pushFrame = StdC.DeclarFunction("pushFrame",
-                [new BifyObject.IntegerType(), new BifyObject.ConstStringType()], new VoidType()
-                );
-            var popFrame = StdC.DeclarFunction("popFrame",
-              [new BifyObject.IntegerType(), new BifyObject.ConstStringType()], new VoidType()
-              );
 
 
             var errorName = new ConstStringType().Create("ZeroDivisionError");
             var errorMessage = new ConstStringType().Create(ErrorMessage.DivisionByZero());
             var file = new ConstStringType().Create(Traceback.Instance.FilePath);
 
-            pushFrame.Call([line, file]);
-            printErrorFunc.Call([errorName,errorMessage,file,line]);
-            popFrame.Call([line, file]);
-
+            StdC.RaiseError(new BifyZeroDivisionError("Division by zero!"));
             //AssemblyCompiler.Instance.VariableManager.GetBifyValue("exit").Call([new BifyObject.IntegerType().Create(0)]);
 
             builder.BuildUnreachable();

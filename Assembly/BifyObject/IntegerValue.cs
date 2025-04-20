@@ -226,6 +226,10 @@ namespace BoomifyCS.Assembly.BifyObject
     {
         public IntegerType() : base("int", LLVMTypeRef.Int32) { }
 
+        public override BifyValue DefaultValue()
+        {
+            return Create(0);
+        }
         public override BifyValue Create(object value)
         {
             LLVMValueRef llvmValue = LLVMValueRef.CreateConstInt(LLVMType, (ulong)(int)value, false);

@@ -12,7 +12,7 @@ static class TokenHandlerFactory
         {
             _ when TokenConfig.binaryOperators.ContainsValue(token.Type) => new BinaryOperatorHandler(builder),
             _ when TokenConfig.assignmentOperators.ContainsValue(token.Type) => new AssignmentOperatorHandler(builder),
-            TokenType.IDENTIFIER => new IdentifierHandler(builder),
+            TokenType.IDENTIFIER or TokenType.CONSTRUCTOR => new IdentifierHandler(builder),
             TokenType.WHILE => new WhileHandler(builder),
             TokenType.FOR => new ForHandler(builder),
             TokenType.BREAK or TokenType.CONTINUE => new BreakContinueHandler(builder),

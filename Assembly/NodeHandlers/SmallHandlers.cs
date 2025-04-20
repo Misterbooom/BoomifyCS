@@ -63,7 +63,6 @@ namespace BoomifyCS.Assembly.NodeHandlers
             }
             else if (((BifyValue)variable).GetBifyType() is AllocaType allocaType)
             {
-                BifyDebug.Log($"{compiler.Flag}");
                 if (allocaType.PointedType is ArrayType arrayType) {
                     compiler.StackPush(arrayType.CreateValueRef(variable.GetLLVMValue()));
                     return;

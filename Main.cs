@@ -77,7 +77,7 @@ namespace BoomifyCS
 
             BifyDebug.Log(node.ToString());
             AssemblyCompiler compiler = AssemblyCompiler.Instance;
-            //compiler.Compile(node);
+            compiler.Compile(node);
         }
     }
 }

@@ -71,7 +71,6 @@ namespace BoomifyCS.Ast.Handlers
             {
                 Token next = builder.Peek();
                 
-                BifyDebug.Log($"Next token: {next}");
                 if (binaryOpToken.Type == TokenType.MUL && next.Type == TokenType.ASSIGN )
                 {
                     isUnary = true;
@@ -111,7 +110,7 @@ namespace BoomifyCS.Ast.Handlers
                 TokenType.STRING => NodeConventer.TokenToNode(token),
                 _ => new BifySyntaxError($"Unexpected token '{token.Value}' found in expression. Verify your syntax and try again.").Throw<AstNode>()
             };
-
+            baseNode.LineNumber = token.Line;
             return ParsePostfix(baseNode);
         }
 
@@ -120,7 +119,6 @@ namespace BoomifyCS.Ast.Handlers
             while (!builder.IsAtEnd())
             {
                 Token next = builder.Peek();
-                BifyDebug.Log($"Next postfix token: {next}");
                 if (next.Type == TokenType.LPAREN)
                 {
                     var args = builder.ParseTokens(builder.GetConditionTokens());
@@ -133,7 +131,7 @@ namespace BoomifyCS.Ast.Handlers
 
                     var indexNode = builder.ParseTokens(indexTokens);
 
-                    expr = new AstIndexOperator(expr, indexNode);
+                    expr = new AstIndexOperator(indexNode, expr);
                 }
                 else if (next.Type == TokenType.INCREMENT || next.Type == TokenType.DECREMENT)
                 {
@@ -143,6 +141,7 @@ namespace BoomifyCS.Ast.Handlers
                 {
                     break;
                 }
+                expr.LineNumber = next.Line;
                 builder.tokenIndex++;
             }
             return expr;
@@ -164,6 +163,12 @@ namespace BoomifyCS.Ast.Handlers
             List<Token> innerTokens = builder.GetConditionTokens();
             AstNode node = builder.ParseTokens(innerTokens);
             builder.tokenIndex++;
+            if (node?.Token.Type == TokenType.POINTER || node is AstIdentifier)
+            {
+                AstNode valueNode = ParsePrimary();
+                AstCast castNode = new(node.Token, node, valueNode);
+                return castNode;
+            }
             return node;
         }
     }

@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BoomifyCS.Exceptions;
 using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.BifyObject
 {
     public abstract class BifyType : IValue
     {
-        public string Name { get; }
+        public string Name { get; protected set; }
         public LLVMTypeRef LLVMType { get; protected set; }
         public ValueFlag ValueFlag = ValueFlag.None;
 
@@ -24,7 +25,11 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             return null;
         }
-
+        public virtual BifyValue DefaultValue()
+        {
+            new BifyTypeError($"{Name} doesn't have default value!").Throw();
+            return null;
+        }
         public virtual bool CompareType(BifyType other)
         {
             return this.GetType() == other.GetType();
@@ -50,12 +55,14 @@ namespace BoomifyCS.Assembly.BifyObject
             return $"{Name} ({LLVMType})";
         }
     }
-    class AnyType : BifyType
+    class AnyType : BifyPointerType
     {
-        public AnyType() : base("any", LLVMTypeRef.Void) { }
+        public AnyType() : base(new VoidType()) {
+            Name = "Any";
+        }
         protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
-            throw new NotImplementedException();
+            return new AnyValue(value, this);
         }
         public override BifyValue Create(object value)
         {
@@ -67,7 +74,13 @@ namespace BoomifyCS.Assembly.BifyObject
         }
         public override uint Size()
         {
-            throw new NotImplementedException();
+            return 8;
+        }
+    }
+    class AnyValue : PointerValue
+    {
+        public AnyValue(LLVMValueRef value, BifyPointerType pointerType) : base(value, pointerType)
+        {
         }
 
     }

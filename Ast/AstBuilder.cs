@@ -47,6 +47,7 @@ namespace BoomifyCS.Ast
 
                 if (CurrentNode != null)
                 {
+                    CurrentNode.LineNumber = CurrentNode.Token.Line;
                     Nodes.Add(CurrentNode);
                     CurrentNode = null;
                 }
@@ -58,28 +59,11 @@ namespace BoomifyCS.Ast
             }
             return Nodes.Count == 1 ? Nodes[0] : null;
         }
-        public AstNode[] BuildMultipleNodes()
-        {
-            while (tokenIndex < tokens.Count)
-            {
-                Token token = tokens[tokenIndex];
-                var handler = TokenHandlerFactory.CreateHandler(token, this);
-                handler.HandleToken(token);
-
-                if (CurrentNode != null)
-                {
-                    Nodes.Add(CurrentNode);
-                    CurrentNode = null;
-                }
-            }
-
-            return Nodes.ToArray();
-        }
+        
         public Token GetPreviousToken()
         {
-            if (tokenIndex == 0)
-                return null;
-            return tokens[tokenIndex - 1];
+            
+            return TokensFormatter.GetTokenOrNull(tokens,tokenIndex - 1);
         }
         public Token Peek()
         {

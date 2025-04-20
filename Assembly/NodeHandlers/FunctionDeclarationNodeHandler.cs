@@ -35,16 +35,16 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
 
             var function = compiler.Module.AddFunction(functionName, functionType);
-            var subroutineType = compiler.DebugBuilder.CreateSubroutineType(
-                    compiler.DebugBuilder.CreateParametersType(functionArgs.BifyTypes)
-                );
+            //var subroutineType = compiler.DebugBuilder.CreateSubroutineType(
+            //        compiler.DebugBuilder.CreateParametersType(functionArgs.BifyTypes)
+            //    );
 
-            var debugInfo = compiler.DebugBuilder.CreateFunctionDebugInfo(
-                functionName, functionName, (uint)Traceback.Instance.Line,
-                subroutineType
-            );
-            function.SetMetadata((uint)LLVMMetadataKind.LLVMDISubprogramMetadataKind,
-                compiler.Context.Handle.MetadataAsValue(debugInfo));
+            //var debugInfo = compiler.DebugBuilder.CreateFunctionDebugInfo(
+            //    functionName, functionName, (uint)Traceback.Instance.Line,
+            //    subroutineType
+            //);
+            //function.SetMetadata((uint)LLVMMetadataKind.LLVMDISubprogramMetadataKind,
+            //    compiler.Context.Handle.MetadataAsValue(debugInfo));
 
             //compiler.ErrorBB = function.AppendBasicBlock("error");
             var entry = function.AppendBasicBlock("entry");

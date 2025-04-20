@@ -15,55 +15,60 @@ namespace BoomifyCS.Assembly.NodeHandlers
         public override void HandleNode(AstNode node)
         {
             AstIndexOperator indexOperatorNode = (AstIndexOperator)node;
-            compiler.Visit(indexOperatorNode.OperandNode);
-            IValue operandIValue = compiler.StackIValuePop();
-            if (operandIValue is BifyType operandType)
+            bool loadResultPointer = true;
+            if (compiler.Flag.HasFlag(NodeVisitFlag.ASSIGNMENT_INDEX))
             {
-                uint indexValue = 0;
-                if (indexOperatorNode.IndexNode != null)
-                {
-                    if (indexOperatorNode.IndexNode is AstNumber indexNumber)
-                        indexValue = (uint)(int)indexNumber.Value;
-                    else
-                    {
-                        Traceback.Instance.ThrowException(new BifyParsingError("Index operator currently supports only numeric literal indexes."));
-                        return;
-                    }
-                }
-                ArrayType arrayType = new ArrayType(operandType, indexValue);
-                compiler.StackPush(arrayType);
+                loadResultPointer = false;
+                compiler.Flag &= ~NodeVisitFlag.ASSIGNMENT_INDEX;
             }
-            else if (operandIValue is BifyValue operandBifyValue)
+            compiler.Visit(indexOperatorNode.TargetNode);
+            IValue iValue = compiler.StackIValuePop();
+            if (iValue is BifyType type)
             {
-                compiler.Visit(indexOperatorNode.IndexNode);
-                IValue indexIValue = compiler.StackIValuePop();
-                if (indexIValue is BifyType)
+                HandleArrayType(type, indexOperatorNode.IndexNode);
+            }
+            else if (iValue is BifyValue targetValue)
+            {
+                HandleIndexing(targetValue, indexOperatorNode.IndexNode,loadResultPointer);
+            }
+        }
+        private void HandleIndexing(BifyValue targetValue,AstNode indexNode,bool loadResultPointer)
+        {
+            compiler.Visit(indexNode);
+            IValue iValue = compiler.StackIValuePop();
+
+            if (iValue is BifyType)
+            {
+                new BifyTypeError("Invalid index: a type was provided instead of a runtime value.").Throw();
+            }
+            BifyValue indexValue = (BifyValue)iValue;
+            PointerValue indexedResult = targetValue.Index(indexValue, compiler.Builder) as PointerValue;
+            if (indexedResult == null)
+            {
+                new BifyTypeError("Indexing operation must return a pointer type.").Throw(); 
+            }
+            
+            compiler.StackPush(loadResultPointer ? indexedResult.Dereference() : indexedResult);
+            
+
+        }
+        private void HandleArrayType(BifyType targetType,AstNode indexNode)
+        {
+            uint elementCount = 0;
+            if (indexNode != null)
+            {
+                if (indexNode is AstNumber numberNode)
                 {
-                    Traceback.Instance.ThrowException(new BifyTypeError("Invalid index: a type was provided instead of a runtime value."));
-                    return;
+                    elementCount = (uint)(int)numberNode.Value;
                 }
-                BifyValue indexValue = (BifyValue)indexIValue;
-                BifyValue indexedResult = operandBifyValue.Index(indexValue, compiler.Builder);
-              
-                if (!indexedResult.CompareType(typeof(BifyPointerType)))
-                {
-                    Traceback.Instance.ThrowException(new BifyTypeError("Indexing operation must return a pointer type."));
-                    return;
-                }
-                PointerValue pointerValue = (PointerValue)indexedResult;
-                BifyDebug.Log($"Return value while indexing: {indexedResult} index result type: {indexedResult.GetBifyType()}");
-                if (!compiler.Flag.HasFlag(NodeVisitFlag.ASSIGNMENT_INDEX))
-                    compiler.StackPush(pointerValue.Dereference());
                 else
                 {
-                    compiler.StackPush(indexedResult);
-                    compiler.Flag &= ~NodeVisitFlag.ASSIGNMENT_INDEX;
+                    new BifyParsingError("Index operator currently supports only numeric literal indexes.").Throw();
                 }
             }
-            else
-            {
-                throw new NotImplementedException();
-            }
+            ArrayType arrayType = new ArrayType(targetType, elementCount);
+            compiler.StackPush(arrayType);
+            
         }
     }
 }

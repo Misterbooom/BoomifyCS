@@ -1,3 +1,5 @@
-﻿class Dummy{
-	int helloBro;
+﻿
+class Dummy{
+	constructor(int pam){
+	}
 }

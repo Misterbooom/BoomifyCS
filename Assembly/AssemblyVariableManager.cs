@@ -24,8 +24,11 @@ namespace BoomifyCS.Assembly
             {"sizeof",new SizeOf() },
             {"exit",new Exit() },
             {"null", new NullValue()},
-            {"malloc",StdC.DeclarFunction("malloc",[new IntegerType()],new BifyPointerType(new AnyType())) }
-
+            {"malloc",StdC.DeclarFunction("malloc",[new IntegerType()],new AnyType()) },
+            {"calloc",StdC.DeclarFunction("calloc",[new IntegerType(), new IntegerType()],new AnyType()) },
+            {"realloc",StdC.DeclarFunction("realloc",[new AnyType(), new IntegerType()],new AnyType()) },
+            {"free",StdC.DeclarFunction("free",[new AnyType()],new VoidType()) },
+            { "any", new AnyType()},
         };
 
         private readonly Stack<Dictionary<string, IValue>> localScopes = new();

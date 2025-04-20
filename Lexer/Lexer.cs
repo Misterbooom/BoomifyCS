@@ -4,6 +4,7 @@ using System;
 using System.Text;
 using System.Text.RegularExpressions;
 using BoomifyCS.Exceptions;
+using System.Linq;
 
 namespace BoomifyCS.Lexer
 {
@@ -60,7 +61,7 @@ namespace BoomifyCS.Lexer
                 {
                     if (parenthesesStack.Count == 0)
                     {
-                        Traceback.Instance.ThrowException(new BifySyntaxError(ErrorMessage.UnmatchedClosingParenthesis(), "", ")"),column);
+                        Traceback.Instance.ThrowException(new BifySyntaxError(ErrorMessage.UnmatchedClosingParenthesis(), "", ")"), column);
                     }
                     parenthesesStack.Pop();
                 }
@@ -83,7 +84,7 @@ namespace BoomifyCS.Lexer
                 if (currentChar == '"' || currentChar == '\'')
                 {
                     string str = GenerateString();
-                    AddToken(new Token(currentChar == '"' ? TokenType.STRING: TokenType.CHAR, str));
+                    AddToken(new Token(currentChar == '"' ? TokenType.STRING : TokenType.CHAR, str));
                     UpdateColumn(str.Length);
                 }
                 else if (currentChar == '-' && char.IsDigit(_code[_position + 1]))
@@ -105,8 +106,17 @@ namespace BoomifyCS.Lexer
                         SkipComment();
                         continue;
                     }
-                    AddToken(new Token(multichar.Value, multichar.Key));
-                    UpdateColumn(multichar.Key.Length);
+                    string identifier = multichar.Key.All(Char.IsLetter) ? GenerateIdentifier() : multichar.Key;
+                    //if (identifier != multichar.Key)
+                    //{
+                    //    AddToken(new Token(TokenType.IDENTIFIER, identifier));
+                    //    UpdateColumn(identifier.Length);
+                    //}
+                    //else
+                    //{
+                        AddToken(new Token(multichar.Value, multichar.Key));
+                        UpdateColumn(multichar.Key.Length);
+                    //}
                 }
                 else if (TokenConfig.singleCharTokens.TryGetValue(currentChar, out TokenType tokenType))
                 {
@@ -192,6 +202,8 @@ namespace BoomifyCS.Lexer
         }
         public KeyValuePair<string, TokenType> GenerateMultiChar()
         {
+            KeyValuePair<string, TokenType>? longestMatch = null;
+
             foreach (KeyValuePair<string, TokenType> kvp in TokenConfig.multiCharTokens)
             {
                 if (_position + kvp.Key.Length <= _code.Length)
@@ -199,11 +211,20 @@ namespace BoomifyCS.Lexer
                     string match = _code.Substring(_position, kvp.Key.Length);
                     if (match == kvp.Key)
                     {
-                        _position += match.Length - 1;
-                        return kvp;
+                        if (longestMatch == null || kvp.Key.Length > longestMatch.Value.Key.Length)
+                        {
+                            longestMatch = kvp;
+                        }
                     }
                 }
             }
+
+            if (longestMatch != null)
+            {
+                _position += longestMatch.Value.Key.Length - 1;
+                return longestMatch.Value;
+            }
+
             return new KeyValuePair<string, TokenType>(" ", TokenType.WHITESPACE);
         }
 
@@ -211,8 +232,8 @@ namespace BoomifyCS.Lexer
         {
             var result = new System.Text.StringBuilder();
 
-            char quoteChar = _code[_position]; 
-            _position++; 
+            char quoteChar = _code[_position];
+            _position++;
 
             while (_position < _code.Length)
             {

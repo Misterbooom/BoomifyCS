@@ -173,7 +173,11 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             return new CharValue(value);
         }
-       
+        public override BifyValue DefaultValue()
+        {
+            return Create(0);
+        }
+
         public override BifyValue Create(object value)
         {
             unsafe

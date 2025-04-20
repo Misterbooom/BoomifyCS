@@ -55,6 +55,14 @@ namespace BoomifyCS.Assembly.Builtin
 
             if (bifyValue.GetBifyType() is ArrayType arrayType)
                 return HandleArrayPointerCast(arrayType, desiredPtr, builder);
+            if (bifyValue.GetBifyType().CompareType(typeof(AnyType)))
+            {
+                return desiredPtr.CreateValueRef(bifyValue.GetLLVMValue());
+            }
+            if (desiredPtr is AnyType)
+            {
+                return new AnyType().CreateValueRef(bifyValue.GetLLVMValue());
+            }
 
             return null;
         }

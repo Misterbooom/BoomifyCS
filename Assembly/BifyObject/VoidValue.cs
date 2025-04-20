@@ -59,6 +59,13 @@ namespace BoomifyCS.Assembly.BifyObject
         public NullValue(BifyPointerType type, LLVMValueRef valueRef) : base(valueRef, type) { }
         public NullValue() : base(LLVMValueRef.CreateConstPointerNull(LLVMTypeRef.CreatePointer(LLVMTypeRef.Void, 0)), new NullType(new VoidType())) { }
     }
+    class TypeValue: BifyValue
+    {
+        public TypeValue(BifyType bifyType) : base(null, bifyType)
+        {
+
+        }
+    }
 
 
 }

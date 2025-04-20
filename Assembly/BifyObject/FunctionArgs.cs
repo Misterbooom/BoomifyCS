@@ -33,6 +33,21 @@ namespace BoomifyCS.Assembly.BifyObject
 
             arguments = new Dictionary<string, BifyType>(newArguments);
         }
+        public void PrependArgument(string name, BifyType argument)
+        {
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentException("Argument name cannot be null or empty.", nameof(name));
+            if (argument == null)
+                throw new ArgumentNullException(nameof(argument), "Argument cannot be null.");
+
+            var newArguments = new Dictionary<string, BifyType> { { name, argument } };
+            foreach (var kvp in arguments)
+            {
+                newArguments.Add(kvp.Key, kvp.Value);
+            }
+
+            arguments = newArguments;
+        }
 
         private void ExtractArgs(AstNode node)
         {
@@ -42,7 +57,7 @@ namespace BoomifyCS.Assembly.BifyObject
             }
             if (node is AstParam)
             {
-                var param = (AstParam) node;
+                var param = (AstParam)node;
                 string name = param.Name.Token.Value;
                 AssemblyCompiler.Instance.Visit(param.Type);
                 IValue value = AssemblyCompiler.Instance.StackIValuePop();

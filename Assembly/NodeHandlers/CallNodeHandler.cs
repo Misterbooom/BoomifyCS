@@ -28,10 +28,6 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 {
                     HandleFunctionCall(callNode, callable);
                 }
-                else if (callableIValue is BifyType callableType)
-                {
-                    HandleCast(callNode,callableType);
-                }
                 else
                 {
                     Traceback.Instance.ThrowException(new BifyTypeError($"Cannot call a non-callable type '{((BifyValue)callableIValue).GetTypeName()}'."));
@@ -57,30 +53,30 @@ namespace BoomifyCS.Assembly.NodeHandlers
             compiler.StackPush(callable.ReturnType.CreateValueRef(call.GetLLVMValue()));
             popFrame.Call(new BifyValue[0]);
         }
-        private void HandleCast(AstCall callNode,BifyType callableType)
-        {
-            if (callNode.ArgumentsNode != null)
-                compiler.Visit(callNode.ArgumentsNode);
-            List<BifyValue> providedArgs = GetArguments(CountArgs(callNode.ArgumentsNode));
-            if (providedArgs.Count > 1)
-            {
-                Traceback.Instance.ThrowException(new BifyArgumentError($"Expected 1 argument but got {providedArgs.Count}."));
-                return;
-            }
+        //private void HandleCast(AstCall callNode,BifyType callableType)
+        //{
+        //    if (callNode.ArgumentsNode != null)
+        //        compiler.Visit(callNode.ArgumentsNode);
+        //    List<BifyValue> providedArgs = GetArguments(CountArgs(callNode.ArgumentsNode));
+        //    if (providedArgs.Count > 1)
+        //    {
+        //        Traceback.Instance.ThrowException(new BifyArgumentError($"Expected 1 argument but got {providedArgs.Count}."));
+        //        return;
+        //    }
 
-            BifyValue castedValue = providedArgs[0].ExplicitCast(callableType, compiler.Builder);
-            compiler.StackPush(castedValue);
-        }
+        //    BifyValue castedValue = providedArgs[0].ExplicitCast(callableType, compiler.Builder);
+        //    compiler.StackPush(castedValue);
+        //}
         private List<BifyValue> GetArguments(int count)
         {
             List<BifyValue> providedArgs = new List<BifyValue>();
             for (int i = 0; i < count; i++)
             {
                 IValue argIValue = compiler.StackIValuePop();
-                if (argIValue is BifyType)
+                if (argIValue is BifyType type)
                 {
-                    Traceback.Instance.ThrowException(new BifyTypeError("Invalid argument: a type was provided instead of a runtime value."));
-                    return [];
+                    providedArgs.Add(new TypeValue(type));
+                    continue;
                 }
                 BifyValue arg = (BifyValue)argIValue;
                 providedArgs.Add(arg);

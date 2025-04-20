@@ -13,6 +13,7 @@ namespace BoomifyCS.Assembly.BifyObject
         public BoolValue(LLVMValueRef value) : base(value, new BoolType())
         {
         }
+        
 
         public override BifyValue Equal(BifyValue other, LLVMBuilderRef builder)
         {
@@ -53,6 +54,10 @@ namespace BoomifyCS.Assembly.BifyObject
     {
         public BoolType() : base("bool", LLVMTypeRef.Int1)
         {
+        }
+        public override BifyValue DefaultValue()
+        {
+            return Create(false);
         }
 
         public override BifyValue Create(object value)

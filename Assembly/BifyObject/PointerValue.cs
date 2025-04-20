@@ -99,7 +99,10 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             PointedType = pointedType;
         }
-
+        public override BifyValue DefaultValue()
+        {
+            return NullType.Create(this);
+        }
         public override bool CompareType(BifyType other)
         {
             if (other is BifyPointerType otherPtr)
@@ -167,7 +170,6 @@ namespace BoomifyCS.Assembly.BifyObject
             {
                 llvmValue = existedFunction;
                 TypeRef = LLVMTypeRef.CreateFunction(ReturnType.LLVMType, existedFunction.TypeOf.ParamTypes);
-                BifyDebug.Log($"Using function: {llvmValue} with type: {TypeRef}");
             }
             if (args.Length != 1)
             {

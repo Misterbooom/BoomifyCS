@@ -25,7 +25,7 @@ namespace BoomifyCS.Assembly.BifyObject
             this.llvmValue = value;
             this.type = type;
         }
-
+       
         public LLVMValueRef GetLLVMValue() => llvmValue;
         public void SetLLVMValue(LLVMValueRef value) => llvmValue = value;
         public BifyType GetBifyType() => type;

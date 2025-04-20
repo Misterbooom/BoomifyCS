@@ -11,7 +11,22 @@ namespace BoomifyCS.Ast
         public Token Token { get; set; } = token;
         public AstNode Left { get; set; } = left;
         public AstNode Right { get; set; } = right;
-        public int LineNumber;
+        private int _lineNumber;
+        public int LineNumber { 
+            
+            get {
+                if (_lineNumber == 0)
+                {
+                    return Token.Line;
+                }
+                return _lineNumber;
+            }
+            set
+            {
+                _lineNumber = value;
+            } 
+        
+        }
 
         public override string ToString() => StrHelper();
 
@@ -397,12 +412,12 @@ namespace BoomifyCS.Ast
     public class AstIndexOperator(AstNode nodeIndex, AstNode operandNode) : AstNode(new Token(TokenType.NUMBER, "UNKNOWN"))
     {
         public AstNode IndexNode = nodeIndex;
-        public AstNode OperandNode = operandNode;
+        public AstNode TargetNode = operandNode;
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note, isLeft);
             string nodeIndexStr = IndexNode?.StrHelper(level + 1, "IndexNode: ");
-            string operandStr = OperandNode?.StrHelper(level + 1, "Operand: ");
+            string operandStr = TargetNode?.StrHelper(level + 1, "Operand: ");
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{nodeIndexStr}\n{operandStr}";
         }
     }
@@ -429,14 +444,27 @@ namespace BoomifyCS.Ast
     }
     public class AstClass(Token token,AstNode nameNode,AstNode bodyNode): AstNode(token)
     {
-        AstNode NameNode = nameNode;
-        AstNode BodyNode = bodyNode;
+        public AstNode NameNode = nameNode;
+        public AstNode BodyNode = bodyNode;
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string nameStr = NameNode?.StrHelper(level + 1, "Name: ");
             string bodyStr = BodyNode?.StrHelper(level + 1, "Body: ");
             string baseStr = base.StrHelper(level, note);
             return baseStr + $"{new String(' ', 4 * (level + 1))}\n{nameStr}\n{bodyStr}";
+
+        }
+    }
+    public class AstCast(Token token, AstNode typeNode, AstNode valueNode) : AstNode(token) { 
+        public AstNode TypeNode = typeNode;
+        public AstNode ValueNode = valueNode;
+        public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
+        {
+            string typeStr = TypeNode?.StrHelper(level + 1, "Type: ");
+            string valueStr = ValueNode?.StrHelper(level + 1, "Value: ");
+            string baseStr = base.StrHelper(level, note);
+            return baseStr + $"{new String(' ', 4 * (level + 1))}\n{typeStr}\n{valueStr}";
+
 
         }
     }

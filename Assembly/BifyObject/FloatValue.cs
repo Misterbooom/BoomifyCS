@@ -244,6 +244,10 @@ namespace BoomifyCS.Assembly.BifyObject
     {
         public FloatType() : base("float", LLVMTypeRef.Float) { }
 
+        public override BifyValue DefaultValue()
+        {
+            return Create(0);
+        }
         public override BifyValue Create(object value)
         {
             unsafe

@@ -5,6 +5,7 @@ using BoomifyCS.Assembly.NodeHandlers;
 
 using System.Data;
 using BoomifyCS.Exceptions;
+using BoomifyCS.Assembly.NodeHandlers.ClassHandler;
 
 namespace BoomifyCS.Assembly
 {
@@ -37,6 +38,8 @@ namespace BoomifyCS.Assembly
                 AstIndexOperator => new IndexOperatorNodeHandler(compiler),
                 AstArray => new ArrayNodeHandler(compiler),
                 AstBreak or AstContinue => new BreakContinueNodeHandler(compiler),
+                AstClass => new ClassNodeHandler(compiler),
+                AstCast => new CastNodeHandler(compiler),
                 _ => throw new SyntaxErrorException($"Unhandled node - {node.GetType().Name}")
             };
         }

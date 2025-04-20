@@ -14,6 +14,14 @@ namespace BoomifyCS.Ast.Handlers
 
         public override void HandleToken(Token token)
         {
+            if (token.Type == TokenType.CONSTRUCTOR)
+            {
+                builder.Nodes.Add(new AstIdentifier(token,token.Value));
+                builder.Nodes.Add(new AstIdentifier(token, token.Value));
+
+                new FunctionHandler(builder).HandleToken(token);
+                return;
+            }
             if (builder.IsType(token))
             {
                 HandleTypeDeclaration(token);
@@ -45,7 +53,7 @@ namespace BoomifyCS.Ast.Handlers
             }
             if (tokens.Count == 0)
             {
-                new BifySyntaxError($"Invalid function declaration.").Throw();
+                return;
             }
             builder.Nodes.Add(builder.ParseTokens(tokens));
 

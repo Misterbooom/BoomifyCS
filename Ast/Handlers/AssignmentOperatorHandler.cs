@@ -33,8 +33,9 @@ namespace BoomifyCS.Ast.Handlers
         private void HandleAssignment(Token token)
         {
             var node = builder.Nodes[0];
-            if (node is AstIdentifier identifierNode)
+            if (node is AstIdentifier || node is AstIndexOperator)
             {
+                var identifierNode = node; // Assign the node to a variable named identifierNode
                 builder.NextToken();
                 var valueTokens = builder.tokens[builder.tokenIndex..];
                 BifyDebug.Log($"ValueTokens: {valueTokens.TokensToString()}");
@@ -46,13 +47,11 @@ namespace BoomifyCS.Ast.Handlers
                 builder.Nodes.Clear();
                 builder.CurrentNode = new AstAssignmentOperator(token, identifierNode, valueNode);
                 builder.MoveToEnd();
-
             }
             else
             {
-                new BifySyntaxError("Assignment operator must follow an identifier.").Throw();
+                new BifySyntaxError("Assignment operator must follow an identifier or index operator.").Throw();
             }
-           
         }
     }
 }
