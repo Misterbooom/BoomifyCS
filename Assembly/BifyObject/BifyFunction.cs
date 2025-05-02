@@ -14,6 +14,7 @@ namespace BoomifyCS.Assembly.BifyObject
         public BifyType ReturnType;
         public LLVMTypeRef TypeRef;
         public bool IsVariadic;
+        public bool IsMethod = false;
         public BifyFunction(LLVMValueRef value, FunctionArgs args, BifyType returnType, LLVMTypeRef type, bool isVariadic = false) 
             : base(value,new FunctionType(type))
         {

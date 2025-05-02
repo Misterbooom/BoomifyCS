@@ -37,7 +37,9 @@ namespace BoomifyCS.Lexer
             while (_position < _code.Length)
             {
                 char currentChar = _code[_position];
+                int tempPos = _position;
                 KeyValuePair<string, TokenType> multichar = GenerateMultiChar();
+                _position = tempPos;
                 if (currentChar == '\n')
                 {
                     _lineCount++;
@@ -99,6 +101,21 @@ namespace BoomifyCS.Lexer
                     AddToken(new Token(TokenType.NUMBER, digit));
                     UpdateColumn(digit.Length);
                 }
+                else if (IsIdentifier(currentChar))
+                {
+                    string identifier = GenerateIdentifier();
+                    if (TokenConfig.multiCharTokens.TryGetValue(identifier, out TokenType tokenType))
+                    {
+                        AddToken(new Token(tokenType, identifier));
+                    }
+                    else
+                    {
+                        AddToken(new Token(TokenType.IDENTIFIER, identifier));
+                    }
+                    UpdateColumn(identifier.Length);
+
+
+                }
                 else if (multichar.Key != " ")
                 {
                     if (multichar.Value == TokenType.COMMENT)
@@ -106,29 +123,17 @@ namespace BoomifyCS.Lexer
                         SkipComment();
                         continue;
                     }
-                    string identifier = multichar.Key.All(Char.IsLetter) ? GenerateIdentifier() : multichar.Key;
-                    //if (identifier != multichar.Key)
-                    //{
-                    //    AddToken(new Token(TokenType.IDENTIFIER, identifier));
-                    //    UpdateColumn(identifier.Length);
-                    //}
-                    //else
-                    //{
-                        AddToken(new Token(multichar.Value, multichar.Key));
-                        UpdateColumn(multichar.Key.Length);
-                    //}
+                    AddToken(new Token(multichar.Value, multichar.Key));
+                    _position += multichar.Key.Length - 1;  
+                    UpdateColumn(multichar.Key.Length);
                 }
+               
                 else if (TokenConfig.singleCharTokens.TryGetValue(currentChar, out TokenType tokenType))
                 {
                     AddToken(new Token(tokenType, currentChar.ToString()));
                     UpdateColumn(currentChar);
                 }
-                else if (IsIdentifier(currentChar))
-                {
-                    string identifier = GenerateIdentifier();
-                    AddToken(new Token(TokenType.IDENTIFIER, identifier));
-                    UpdateColumn(identifier.Length);
-                }
+
                 else
                 {
                     if (!char.IsWhiteSpace(currentChar))
@@ -203,6 +208,7 @@ namespace BoomifyCS.Lexer
         public KeyValuePair<string, TokenType> GenerateMultiChar()
         {
             KeyValuePair<string, TokenType>? longestMatch = null;
+            int startPosition = _position;
 
             foreach (KeyValuePair<string, TokenType> kvp in TokenConfig.multiCharTokens)
             {
@@ -221,12 +227,14 @@ namespace BoomifyCS.Lexer
 
             if (longestMatch != null)
             {
+                string match = longestMatch.Value.Key;
                 _position += longestMatch.Value.Key.Length - 1;
                 return longestMatch.Value;
             }
 
             return new KeyValuePair<string, TokenType>(" ", TokenType.WHITESPACE);
         }
+
 
         public string GenerateString()
         {

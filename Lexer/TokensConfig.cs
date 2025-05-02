@@ -29,6 +29,7 @@ namespace BoomifyCS.Lexer
             { "&&", TokenType.AND },
             { "||", TokenType.OR},
             { "//",TokenType.COMMENT},
+            { "new", TokenType.NEW},
             {"const",TokenType.CONST },
             {"constructor",TokenType.CONSTRUCTOR },
             {"class",TokenType.CLASS}
@@ -82,7 +83,9 @@ namespace BoomifyCS.Lexer
             { "&&", TokenType.AND },
             { "||", TokenType.OR },
             { "!", TokenType.NOT },
-            { ",", TokenType.COMMA }
+            { ",", TokenType.COMMA },
+            //{ ".", TokenType.DOT },
+
         };
 
         public readonly static Dictionary<string, TokenType> comparisonOperators = new()

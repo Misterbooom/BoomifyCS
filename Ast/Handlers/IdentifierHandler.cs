@@ -16,7 +16,7 @@ namespace BoomifyCS.Ast.Handlers
         {
             if (token.Type == TokenType.CONSTRUCTOR)
             {
-                builder.Nodes.Add(new AstIdentifier(token,token.Value));
+                builder.Nodes.Add(new AstIdentifier(new Token(TokenType.IDENTIFIER,"void"),"void"));
                 builder.Nodes.Add(new AstIdentifier(token, token.Value));
 
                 new FunctionHandler(builder).HandleToken(token);

@@ -59,7 +59,6 @@ namespace BoomifyCS.Assembly.Builtin
                 else
                 {
                     llvmArgs[i] = args[i].GetLLVMValue();
-                    BifyDebug.Log($"explode arg {i}:{args[i].GetBifyType()} {llvmArgs[i]}");
 
 
                 }

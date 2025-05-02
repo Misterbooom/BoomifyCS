@@ -22,16 +22,36 @@ namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
             ClassAttributeManager attributeManager = new(classNode);
             ClassAttribute[] attributes = attributeManager.GetAttributes();
             LLVMTypeRef named = compiler.Context.Handle.CreateNamedStruct(classNode.NameNode.Token.Value);
-            LLVMTypeRef[] elementTypes = attributes.Select(i => i.Type.LLVMType).ToArray();
+            LLVMTypeRef[] elementTypes = attributes.Select(i => i.Value.GetBifyType().LLVMType).ToArray();
             named.StructSetBody(elementTypes, false);
-            ClassType classValue = new ClassType(classNode.NameNode.Token.Value, LLVMTypeRef.CreatePointer(named,0));
-            ClassMethodManager methodManager = new(classNode, classValue);
-            foreach (ClassAttribute attribute in attributes)
-            {
-                Console.WriteLine("Attribute: " + attribute.ToString());
-            }
+            ClassType classType = new ClassType(classNode.NameNode.Token.Value, named);
+            ClassMethodManager methodManager = new(classNode, classType);
+            classType.ClassAttributes = attributes;
             ClassMethod[] methods = methodManager.GetMethods();
+            classType.ClassMethods = methods;
+            classType.Constructor = methods.Where(i => i.Name == "constructor").ToArray();
+            compiler.VariableManager.RegisterGlobalVariable(classNode.NameNode.Token.Value, classType);
+        }
+
+    }
+    class ClassInitFunction : BifyFunction
+    {
+        public ClassInitFunction(ClassType classType) : base(null, null, classType, null)
+        {
+            Init();
+        }
+        public void Init()
+        {
+            var compiler = AssemblyCompiler.Instance;
+            TypeRef = LLVMTypeRef.CreateFunction(ReturnType.LLVMType, []);
+            llvmValue = compiler.Module.AddFunction($"{ReturnType.Name}.Init", TypeRef);
+            var entry = llvmValue.AppendBasicBlock("entry");
+            compiler.Builder.PositionAtEnd(entry);
+
+            compiler.Builder.BuildRetVoid();
+
 
         }
+
     }
 }

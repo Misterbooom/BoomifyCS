@@ -29,9 +29,10 @@ namespace BoomifyCS.Assembly
             {"realloc",StdC.DeclarFunction("realloc",[new AnyType(), new IntegerType()],new AnyType()) },
             {"free",StdC.DeclarFunction("free",[new AnyType()],new VoidType()) },
             { "any", new AnyType()},
+            { "__log",new Log()},
         };
 
-        private readonly Stack<Dictionary<string, IValue>> localScopes = new();
+        private Stack<Dictionary<string, IValue>> localScopes = new();
         public AssemblyVariableManager()
         {
 
@@ -158,7 +159,8 @@ namespace BoomifyCS.Assembly
         public override string ToString()
         {
             var globalVars = string.Join(", ", globalVariables.Keys);
-            var localVars = string.Join(", ", localScopes.Peek().Keys);
+            localScopes.TryPeek(out var localScope);
+            var localVars = string.Join(", ", localScope == null ? "" : localScope.Keys);
             return $"Global Variables: [{globalVars}], Local Variables: [{localVars}]";
         }
     }

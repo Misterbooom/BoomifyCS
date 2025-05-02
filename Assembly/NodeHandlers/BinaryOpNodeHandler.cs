@@ -21,6 +21,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 compiler.Visit(node.Right);
                 return;
             }
+           
             else if (node.Token.Type == TokenType.NOT)
             {
                 compiler.Visit(node.Left);
@@ -53,7 +54,6 @@ namespace BoomifyCS.Assembly.NodeHandlers
                     return;
                 }
                 BifyValue lhs = (BifyValue)lhsI;
-                BifyDebug.Log($"{rhs},{lhs}");
                 BifyValue result = BinaryVal(lhs, rhs, node.Token.Type);
                 compiler.StackPush(result);
             }

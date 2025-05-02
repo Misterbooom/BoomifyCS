@@ -1,4 +1,5 @@
-﻿using BoomifyCS.Exceptions;
+﻿using System;
+using BoomifyCS.Exceptions;
 using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.BifyObject
@@ -232,8 +233,15 @@ namespace BoomifyCS.Assembly.BifyObject
         }
         public override BifyValue Create(object value)
         {
-            LLVMValueRef llvmValue = LLVMValueRef.CreateConstInt(LLVMType, (ulong)(int)value, false);
-            return new IntegerValue(llvmValue);
+            if (value is int or long or short or byte or uint)
+            {
+                LLVMValueRef llvmValue = LLVMValueRef.CreateConstInt(LLVMType, Convert.ToUInt64(value), true);
+                return new IntegerValue(llvmValue);
+            }
+            throw new Exception(
+                $"Invalid type for IntegerValue creation: '{value.GetType().Name}'. Supported types are int, long, short, and byte."
+            );
+            return null;
         }
         protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {

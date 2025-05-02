@@ -34,32 +34,41 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 return;
             }
 
+            compiler.Flag |= NodeVisitFlag.ASSIGNMENT_INDEX;
             compiler.Visit(unaryOperator.Operand);
             IValue operandValue = compiler.StackIValuePop();
-
-            if (operandValue is not BifyValue originalValue)
+            if (operandValue is AllocaPointer alloca)
             {
-                Traceback.Instance.ThrowException(new BifyTypeError("Unary operations can only be applied to runtime values."));
-                return;
+                HandleUnaryWithVariable(unaryOperator.Token.Type, alloca, unaryOperator.IsPrefix);
             }
-
-            BifyValue targetPointer = compiler.VariableManager.GetBifyValue(unaryOperator.Operand.Token.Value);
-            if (targetPointer == null || targetPointer.GetBifyType() is not AllocaType)
+        }
+        private void HandleUnaryWithVariable(TokenType tokenType, AllocaPointer allocaPointer, bool isPrefix)
+        {
+            BifyValue loadedValue = allocaPointer.Dereference();
+            BifyValue result = CalculateResult(tokenType, loadedValue);
+            compiler.Builder.BuildStore(result.GetLLVMValue(), allocaPointer.GetLLVMValue());
+            if (isPrefix)
             {
-                Traceback.Instance.ThrowException(new BifyTypeError($"Cannot apply unary operator to non-pointer value '{targetPointer.GetTypeName()}'"));
-                return;
+                compiler.StackPush(result);
             }
-
+            else
+            {
+                compiler.StackPush(loadedValue);
+            }
+        }
+        private BifyValue CalculateResult(TokenType tokenType, BifyValue operandValue)
+        {
             BifyValue one = new IntegerType().Create(1);
-            BifyValue newValue = unaryOperator.Token.Type switch
+            switch (tokenType)
             {
-                TokenType.INCREMENT => originalValue.Add(one, compiler.Builder),
-                TokenType.DECREMENT => originalValue.Sub(one, compiler.Builder),
-                _ => throw new NotImplementedException($"Unsupported unary operator '{unaryOperator.Token.Type}'")
-            };
-
-            compiler.Builder.BuildStore(newValue.GetLLVMValue(), targetPointer.GetLLVMValue());
-            compiler.StackPush(newValue);
+                case TokenType.INCREMENT:
+                    return operandValue.Add(one, compiler.Builder);
+                case TokenType.DECREMENT:
+                    return operandValue.Sub(one, compiler.Builder);
+                default:
+                    Traceback.Instance.ThrowException(new BifyTypeError($"Invalid unary operator '{tokenType}'"));
+                    return null;
+            }
         }
     }
 }

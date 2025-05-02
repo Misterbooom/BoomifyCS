@@ -94,7 +94,7 @@ namespace BoomifyCS.Assembly.Builtin
                 }).ToArray(),
                 "calltmp"
             );
-            //var meta = AssemblyCompiler.Instance.DebugBuilder.CreateDebugLocation(
+            //var meta = AssemblyCompiler.Instance.DEBUG_COMPILEBuilder.CreateDEBUG_COMPILELocation(
             //    (uint)Traceback.Instance.Line
             //    );
             return ReturnType.CreateValueRef(res);

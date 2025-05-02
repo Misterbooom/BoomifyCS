@@ -35,16 +35,16 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
 
             var function = compiler.Module.AddFunction(functionName, functionType);
-            //var subroutineType = compiler.DebugBuilder.CreateSubroutineType(
-            //        compiler.DebugBuilder.CreateParametersType(functionArgs.BifyTypes)
+            //var subroutineType = compiler.DEBUG_COMPILEBuilder.CreateSubroutineType(
+            //        compiler.DEBUG_COMPILEBuilder.CreateParametersType(functionArgs.BifyTypes)
             //    );
 
-            //var debugInfo = compiler.DebugBuilder.CreateFunctionDebugInfo(
+            //var DEBUG_COMPILEInfo = compiler.DEBUG_COMPILEBuilder.CreateFunctionDEBUG_COMPILEInfo(
             //    functionName, functionName, (uint)Traceback.Instance.Line,
             //    subroutineType
             //);
             //function.SetMetadata((uint)LLVMMetadataKind.LLVMDISubprogramMetadataKind,
-            //    compiler.Context.Handle.MetadataAsValue(debugInfo));
+            //    compiler.Context.Handle.MetadataAsValue(DEBUG_COMPILEInfo));
 
             //compiler.ErrorBB = function.AppendBasicBlock("error");
             var entry = function.AppendBasicBlock("entry");
@@ -65,12 +65,13 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
 
 
-
-            compiler.Visit(functionDeclNode.blockNode);
             if (!functionPathChecker.AllPathsReturn && functionReturnType.CompareType(new VoidType()))
             {
-                compiler.Builder.BuildRetVoid();
+                AstBlock blockNode = (AstBlock)functionDeclNode.blockNode;
+                blockNode.ChildNodes.Add(new AstReturn(new Lexer.Token(Lexer.TokenType.RETURN,"return"), null));
             }
+            compiler.Visit(functionDeclNode.blockNode);
+           
             //function.VerifyFunction(LLVMVerifierFailureAction.LLVMAbortProcessAction);
             compiler.VariableManager.ExitLocalScope();
             compiler.ClearStack();
@@ -81,12 +82,14 @@ namespace BoomifyCS.Assembly.NodeHandlers
         {
             for (uint i = 0; i < function.FunctionArgs.ArgsNames.Length; i++)
             {
+
                 unsafe
                 {
                     BifyValue paramValue = function.FunctionArgs.BifyTypes[i].CreateValueRef(LLVM.GetParam(function.GetLLVMValue(), i));
                     var alloca = compiler.Builder.BuildAlloca(paramValue.GetBifyType().LLVMType, function.FunctionArgs.ArgsNames[i]);
                     compiler.Builder.BuildStore(paramValue.GetLLVMValue(), alloca);
                     BifyValue allocaPointer = new AllocaType(paramValue.GetBifyType()).CreateValueRef(alloca);
+                    allocaPointer.ValueFlag = paramValue.ValueFlag;
                     compiler.VariableManager.RegisterLocalVariable(function.FunctionArgs.ArgsNames[i], allocaPointer);
                 }
             }

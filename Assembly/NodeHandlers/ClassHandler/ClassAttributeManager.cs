@@ -10,16 +10,7 @@ using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
 {
-    struct ClassAttribute
-    {
-        public string Name;
-        public BifyValue Value;
-        public BifyType Type;
-        public override string ToString()
-        {
-            return $"{Name}(value:{Value};type:{Type})";
-        }
-    }
+   
     class ClassAttributeManager
     {
         private AstClass classNode;
@@ -45,11 +36,7 @@ namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
             var variableHandler = new VariableDeclarationNodeHandler(AssemblyCompiler.Instance);
             BifyType attributeType = variableHandler.DetermineVariableType(node,varName);
             BifyValue attributeValue = variableHandler.GetVariableValue(node, varName,attributeType);
-            ClassAttribute attribute = new ClassAttribute();
-            attribute.Name = varName;
-            attribute.Value = attributeValue;
-            attribute.Type = attributeType;
-
+            ClassAttribute attribute = new ClassAttribute(varName,attributeValue);
             return attribute;
         }
        

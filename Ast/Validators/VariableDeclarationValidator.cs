@@ -23,7 +23,6 @@ namespace BoomifyCS.Ast.Validators
             {
                 BifyTypeError bifyTypeError = new(ErrorMessage.InvalidVariableType(typeNode?.Token.Value),
                     "", typeNode?.Token.Value);
-                BifyDebug.Log($"Type type: {typeNode.Token.Type}");
                 Traceback.Instance.ThrowException(bifyTypeError, typeNode?.Token.Column ?? assignmentToken.Column);
             }
             if (flagNode !=  null && flagNode is not AstIdentifier && flagNode.Token.Type != TokenType.CONST )

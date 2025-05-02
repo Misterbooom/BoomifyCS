@@ -63,13 +63,11 @@ namespace BoomifyCS.Ast.Handlers
                 typeNode = null;
                 flagNode = null;
             }
-            BifyDebug.Log($"Identifier: {identifierNode};TypeNode: {typeNode}");
             if (identifierNode is AstUnaryOperator unaryOperator)
             {
                 var (lastOperand, finalPointer) = SwitchLastOperand(unaryOperator, typeNode);
                 identifierNode = lastOperand;
                 typeNode = finalPointer;
-                BifyDebug.Log($"Identifier: {identifierNode};TypeNode: {typeNode}");
 
             }
 

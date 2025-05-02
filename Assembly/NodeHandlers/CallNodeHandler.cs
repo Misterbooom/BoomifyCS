@@ -42,17 +42,21 @@ namespace BoomifyCS.Assembly.NodeHandlers
         {
             if (callNode.ArgumentsNode != null)
                 compiler.Visit(callNode.ArgumentsNode);
-            List<BifyValue> providedArgs = GetArguments(CountArgs(callNode.ArgumentsNode));
+            List<BifyValue> providedArgs = GetArguments(CountArgs(callNode.ArgumentsNode) + (callable.IsMethod == true ? 1 : 0));
             ValidateAndAutoCastArguments(providedArgs, callable.FunctionArgs.BifyTypes, callable.IsVariadic);
+#if DEBUG_COMPILE
             pushFrame.Call(new BifyValue[]
             {
                         new BifyObject.IntegerType().Create(Traceback.Instance.Line),
                         new ConstStringType().Create(Traceback.Instance.FilePath)
             });
+#endif
             var call = callable.Call(providedArgs.ToArray());
             compiler.StackPush(callable.ReturnType.CreateValueRef(call.GetLLVMValue()));
+#if DEBUG_COMPILE
             popFrame.Call(new BifyValue[0]);
-        }
+#endif
+            }
         //private void HandleCast(AstCall callNode,BifyType callableType)
         //{
         //    if (callNode.ArgumentsNode != null)
@@ -67,7 +71,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
         //    BifyValue castedValue = providedArgs[0].ExplicitCast(callableType, compiler.Builder);
         //    compiler.StackPush(castedValue);
         //}
-        private List<BifyValue> GetArguments(int count)
+        public List<BifyValue> GetArguments(int count)
         {
             List<BifyValue> providedArgs = new List<BifyValue>();
             for (int i = 0; i < count; i++)
@@ -84,7 +88,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             providedArgs.Reverse();
             return providedArgs;
         }
-        private static int CountArgs(AstNode node)
+        public static int CountArgs(AstNode node)
         {
             if (node == null) return 0;
             if (node is AstBinaryOp binaryOp && binaryOp.Token.Type == TokenType.COMMA)
@@ -94,7 +98,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             return 1;
         }
 
-        private void ValidateAndAutoCastArguments(List<BifyValue> providedArgs, BifyType[] expectedArgsType, bool isVariadic)
+        public void ValidateAndAutoCastArguments(List<BifyValue> providedArgs, BifyType[] expectedArgsType, bool isVariadic)
         {
             if (!isVariadic && providedArgs.Count != expectedArgsType.Length)
             {

@@ -52,7 +52,7 @@ namespace BoomifyCS.Assembly.BifyObject
         public abstract uint Size();
         public override string ToString()
         {
-            return $"{Name} ({LLVMType})";
+            return $"{ValueFlag} {Name} ({LLVMType})";
         }
     }
     class AnyType : BifyPointerType

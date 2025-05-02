@@ -74,7 +74,6 @@ namespace BoomifyCS.Ast.Handlers
                 }
 
                 AstParam param = new AstParam(parametersNode.Type, parametersNode.AssignmentNode.Left, parametersNode.Flag);
-                BifyDebug.Log($"Param: {paramIndex + 1}: {param}");
                 parameters.Add(param);
                 paramIndex++;
             }

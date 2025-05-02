@@ -43,8 +43,6 @@ namespace BoomifyCS.Assembly.NodeHandlers
                     $"Failed to cast value of type '{bifyValue.GetTypeName()}' to target type '{bifyType.Name}'. "
                 ).Throw();
             }
-            BifyDebug.Log($"BifyValue:{ bifyValue}");
-            BifyDebug.Log($"Casted value: {castedValue}");
 
             compiler.StackPush(castedValue);
         }

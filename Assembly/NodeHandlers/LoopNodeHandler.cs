@@ -20,7 +20,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 HandleWhile(astWhile);
         }
 
-        private unsafe LLVMValueRef EvaluateBooleanCondition(AstNode conditionNode, string conditionName)
+        public  unsafe LLVMValueRef EvaluateBooleanCondition(AstNode conditionNode, string conditionName)
         {
             compiler.Visit(conditionNode);
             IValue conditionIValue = compiler.StackIValuePop();
@@ -61,7 +61,10 @@ namespace BoomifyCS.Assembly.NodeHandlers
             compiler.LoopManager.AddLoop(loopContext);
             compiler.Builder.BuildBr(conditionBB);
             PositionBuilderAt(bodyBB);
+
+            compiler.VariableManager.EnterLocalScope();
             compiler.Visit(astWhile.BlockNode);
+            compiler.VariableManager.ExitLocalScope();
             compiler.LoopManager.PopLoop();
             compiler.Builder.BuildBr(conditionBB);
             PositionBuilderAt(conditionBB);

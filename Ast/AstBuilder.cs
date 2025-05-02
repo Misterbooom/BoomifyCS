@@ -27,6 +27,7 @@ namespace BoomifyCS.Ast
         }
         private AstNode? _currentNode;
         public List<AstNode> Nodes { get; set; } = new List<AstNode>();
+        private static List<string> typeTable = [];
 
         public AstBuilder(List<Token> tokens)
         {
@@ -98,14 +99,12 @@ namespace BoomifyCS.Ast
         public bool IsType(Token token)
         {
             AssemblyCompiler compiler = AssemblyCompiler.Instance;
-            if (compiler.VariableManager.TryGetBifyType(token.Value) != null)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+           
+             return compiler.VariableManager.TryGetBifyType(token.Value) != null || typeTable.Contains(token.Value) || token.Value == "var";
+        }
+        public void AddType(string name)
+        {
+            typeTable.Add(name);
         }
         public Token GetNextToken()
         {
@@ -140,6 +139,7 @@ namespace BoomifyCS.Ast
             tokenIndex++;
             return blockNode;
         }
+
         public List<Token> GetConditionTokens() => TokensFormatter.GetTokensBetween(tokens, ref tokenIndex, TokenType.LPAREN, TokenType.RPAREN);
 
         public List<Token> GetBlockTokens() => TokensFormatter.GetTokensBetween(tokens, ref tokenIndex, TokenType.LCUR, TokenType.RCUR);

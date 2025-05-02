@@ -1,4 +1,4 @@
-﻿#define DEBUG_COMPILE
+﻿#define DEBUG_COMPILE 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -34,7 +34,8 @@ namespace BoomifyCS
             {
                 Console.WriteLine("Error!");
                 string errorText = e.ToString();
-                new SimpleErrorWrapper(e).PrintStackTrace();
+                //new SimpleErrorWrapper(e).PrintStackTrace();
+                throw;
                 //ProcessStartInfo psi = new ProcessStartInfo
                 //{
                 //    FilePath = "python",

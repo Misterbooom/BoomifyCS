@@ -45,7 +45,6 @@ namespace BoomifyCS.Assembly.BifyObject
                 LLVMValueRef[] indices = new LLVMValueRef[] { new IntegerValue(zeroIndex).GetLLVMValue() };
                 LLVMValueRef gep = builder.BuildInBoundsGEP2(((ArrayType)GetBifyType()).ItemType.LLVMType, GetLLVMValue(), indices, "arrayIndex");
                 ArrayType arrayType = (ArrayType)GetBifyType();
-                BifyDebug.Log($"Zero index: {gep}");
                 return new BifyPointerType(arrayType.ItemType).CreateValueRef(gep);
             }
         }
@@ -143,7 +142,6 @@ namespace BoomifyCS.Assembly.BifyObject
             {
                 llvmValue = existedFunction;
                 TypeRef = LLVMTypeRef.CreateFunction(ReturnType.LLVMType,existedFunction.TypeOf.ParamTypes);
-                BifyDebug.Log($"Setting func value: {llvmValue} type: {TypeRef}");
             }
             if (args.Length != 2)
             {

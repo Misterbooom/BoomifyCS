@@ -10,16 +10,12 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
 {
-    struct ClassMethod
-    {
-        public string Name;
-        public BifyFunction Function;
-    }
+
     class ClassMethodManager
     {
         private AstClass classNode;
         private ClassType classType;
-        AssemblyCompiler compiler = AssemblyCompiler.Instance;
+        AssemblyCompiler compiler => AssemblyCompiler.Instance;
         public ClassMethodManager(AstClass classNode, ClassType classType)
         {
 
@@ -39,7 +35,7 @@ namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
         public ClassMethod HandleMethod(AstFunctionDecl methodNode)
         {
             string functionName = methodNode.functionNameNode.Name;
-            functionName = $"{classNode.NameNode.Token.Value}.{functionName}";
+
             compiler.Visit(methodNode.typeNode);
             IValue value = compiler.StackIValuePop();
             if (value is not BifyType)
@@ -60,17 +56,17 @@ namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
                 functionArgs.LLVMTypes
             );
 
-            var function = compiler.Module.AddFunction(functionName, functionType);
-            //var subroutineType = compiler.DebugBuilder.CreateSubroutineType(
-            //        compiler.DebugBuilder.CreateParametersType(functionArgs.BifyTypes)
+            var function = compiler.Module.AddFunction($"{classNode.NameNode.Token.Value}.{functionName}", functionType);
+            //var subroutineType = compiler.DEBUG_COMPILEBuilder.CreateSubroutineType(
+            //        compiler.DEBUG_COMPILEBuilder.CreateParametersType(functionArgs.BifyTypes)
             //    );
 
-            //var debugInfo = compiler.DebugBuilder.CreateFunctionDebugInfo(
+            //var DEBUG_COMPILEInfo = compiler.DEBUG_COMPILEBuilder.CreateFunctionDEBUG_COMPILEInfo(
             //    functionName, functionName, (uint)Traceback.Instance.Line,
             //    subroutineType
             //);
             //function.SetMetadata((uint)LLVMMetadataKind.LLVMDISubprogramMetadataKind,
-            //    compiler.Context.Handle.MetadataAsValue(debugInfo));
+            //    compiler.Context.Handle.MetadataAsValue(DEBUG_COMPILEInfo));
 
             //compiler.ErrorBB = function.AppendBasicBlock("error");
             var entry = function.AppendBasicBlock("entry");
@@ -78,23 +74,23 @@ namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
 
             compiler.VariableManager.EnterLocalScope();
             var bifyFunction = new BifyFunction(function, functionArgs, functionReturnType, functionType);
-            compiler.VariableManager.RegisterGlobalVariable(functionName, bifyFunction);
 
             AddFunctionArgsToScope(bifyFunction);
-
-            compiler.Visit(methodNode.blockNode);
             if (!functionPathChecker.AllPathsReturn && functionReturnType.CompareType(new VoidType()))
             {
-                compiler.Builder.BuildRetVoid();
+                AstBlock blockNode = (AstBlock)methodNode.blockNode;
+                blockNode.ChildNodes.Add(new AstReturn(new Lexer.Token(Lexer.TokenType.RETURN, "return"), null));
             }
+            compiler.Visit(methodNode.blockNode);
+           
             compiler.ClearStack();
+            BifyDebug.Log($"Variable manager before exit : {compiler.VariableManager}");
 
-            // Fix for Problem 2: Ensure a ClassMethod is returned
-            return new ClassMethod
-            {
-                Name = functionName,
-                Function = bifyFunction
-            };
+            compiler.VariableManager.ExitLocalScope();
+            BifyDebug.Log($"Variable manager after exit : {compiler.VariableManager}");
+
+            bifyFunction.IsMethod = true;
+            return new ClassMethod(functionName, bifyFunction);
         }
 
         private unsafe void AddFunctionArgsToScope(BifyFunction function)
@@ -102,9 +98,13 @@ namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
             for (uint i = 0; i < function.FunctionArgs.ArgsNames.Length; i++)
             {
                 BifyValue paramValue = function.FunctionArgs.BifyTypes[i].CreateValueRef(LLVM.GetParam(function.GetLLVMValue(), i));
+
+
                 var alloca = compiler.Builder.BuildAlloca(paramValue.GetBifyType().LLVMType, function.FunctionArgs.ArgsNames[i]);
                 compiler.Builder.BuildStore(paramValue.GetLLVMValue(), alloca);
                 BifyValue allocaPointer = new AllocaType(paramValue.GetBifyType()).CreateValueRef(alloca);
+                allocaPointer.ValueFlag = paramValue.ValueFlag;
+
                 compiler.VariableManager.RegisterLocalVariable(function.FunctionArgs.ArgsNames[i], allocaPointer);
             }
         }

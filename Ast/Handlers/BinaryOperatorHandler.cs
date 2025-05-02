@@ -1,6 +1,7 @@
 ﻿using BoomifyCS.Lexer;
 using BoomifyCS.Exceptions;
 using System.Collections.Generic;
+using System;
 
 namespace BoomifyCS.Ast.Handlers
 {
@@ -91,7 +92,7 @@ namespace BoomifyCS.Ast.Handlers
         }
 
 
-        public AstNode ParsePrimary()
+        public AstNode ParsePrimary(bool handlePostfix = true)
         {
             if (builder.IsAtEnd())
             {
@@ -105,13 +106,17 @@ namespace BoomifyCS.Ast.Handlers
                 TokenType.IDENTIFIER or TokenType.CONST => new IdentifierHandler(builder).ParseIdentfier(token, true),
                 TokenType.NUMBER => NodeConventer.TokenToNode(token),
                 TokenType.LPAREN => ParseParenthesizedExpression(),
-                TokenType.SUB or TokenType.MUL => HandleUnaryOperator(token),
+                TokenType.SUB or TokenType.MUL or TokenType.INCREMENT or TokenType.DECREMENT or TokenType.NOT=> HandleUnaryOperator(token),
                 TokenType.LBRACKET => new ArrayHandler(builder).GetArrayNode(token),
                 TokenType.STRING => NodeConventer.TokenToNode(token),
+                TokenType.NEW => new NewHandler(builder).ParseNewExpression(token),
                 _ => new BifySyntaxError($"Unexpected token '{token.Value}' found in expression. Verify your syntax and try again.").Throw<AstNode>()
             };
             baseNode.LineNumber = token.Line;
-            return ParsePostfix(baseNode);
+            if (handlePostfix)
+                return ParsePostfix(baseNode);
+            else
+                return baseNode;
         }
 
         public AstNode ParsePostfix(AstNode expr)
@@ -136,6 +141,12 @@ namespace BoomifyCS.Ast.Handlers
                 else if (next.Type == TokenType.INCREMENT || next.Type == TokenType.DECREMENT)
                 {
                     expr = new AstUnaryOperator(next, expr);
+                }
+                else if (next.Type == TokenType.DOT)
+                {
+                    builder.NextToken();
+                    expr = new AstMemberAccess(next, expr,ParsePrimary(false));
+                    builder.tokenIndex--;
                 }
                 else
                 {

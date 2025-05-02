@@ -29,19 +29,17 @@ namespace BoomifyCS.Assembly.NodeHandlers
         {
             AstBlock blockNode = (AstBlock)node;
             var locals = compiler.VariableManager.GetLocals();
-            compiler.VariableManager.EnterLocalScope();
             compiler.VariableManager.SetCurrentLocalScope(locals);
             for (int i = 0; i < blockNode.ChildNodes.Count; i++)
             {
                 AstNode child = blockNode.ChildNodes[i];
-                compiler.NextNode = blockNode.ChildNodes.ElementAtOrDefault(i + 1);
+                compiler.IsLastNode = i + 1 > blockNode.ChildNodes.Count;
                 compiler.Visit(child);
                 if (child is AstContinue || child is AstBreak || child is AstReturn)
                 {
                     return;
                 }
             }
-            compiler.VariableManager.ExitLocalScope();
         }
     }
     class IdentifierNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)

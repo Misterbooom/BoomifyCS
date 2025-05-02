@@ -32,9 +32,9 @@ namespace BoomifyCS.Assembly
         public LLVMBuilderRef Builder { get; }
         public LLVMExecutionEngineRef Engine { get; }
         public LoopManager LoopManager { get; } = new();
-        public AstNode NextNode { get; set; }
         public NodeVisitFlag Flag { get; set; } = NodeVisitFlag.NONE;
         public BifyType ReturnType { get; set; }
+        public bool IsLastNode;
         public DebugBuilder DebugBuilder { get; }
         public int StackCount => _stack.Count;
         public LLVMValueRef Function
@@ -100,7 +100,20 @@ namespace BoomifyCS.Assembly
             return _stack.ElementAt(index);
         }
 
-
+        public T StackPop<T>(string errroMessage)
+        {
+            if (_stack.Count == 0)
+            {
+                throw new InvalidOperationException("Stack is empty.");
+            }
+            T poppedValue = (T)_stack.Pop();
+            if (poppedValue is not T)
+            {
+                new BifyTypeError(errroMessage).Throw();
+                return default;
+            }
+            return poppedValue;
+        }
         public void Visit(AstNode node)
         {
             if (node == null)

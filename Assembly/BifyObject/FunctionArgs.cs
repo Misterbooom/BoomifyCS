@@ -57,7 +57,7 @@ namespace BoomifyCS.Assembly.BifyObject
             }
             if (node is AstParam)
             {
-                var param = (AstParam)node;
+                AstParam param = (AstParam)node;
                 string name = param.Name.Token.Value;
                 AssemblyCompiler.Instance.Visit(param.Type);
                 IValue value = AssemblyCompiler.Instance.StackIValuePop();

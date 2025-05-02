@@ -40,6 +40,8 @@ namespace BoomifyCS.Assembly
                 AstBreak or AstContinue => new BreakContinueNodeHandler(compiler),
                 AstClass => new ClassNodeHandler(compiler),
                 AstCast => new CastNodeHandler(compiler),
+                AstNew => new NewNodeHandler(compiler),
+                AstMemberAccess => new MemberAccessNodeHandler(compiler),
                 _ => throw new SyntaxErrorException($"Unhandled node - {node.GetType().Name}")
             };
         }

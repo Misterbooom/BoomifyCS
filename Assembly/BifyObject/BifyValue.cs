@@ -32,7 +32,13 @@ namespace BoomifyCS.Assembly.BifyObject
         public string GetTypeName() => type.Name;
         public virtual bool CompareType(Type other) => GetBifyType().CompareType(other);
         public virtual bool CompareType(BifyValue other) => GetBifyType().CompareType(other.GetBifyType());
-   
+        
+        public virtual BifyValue GetAttribute(string name, LLVMBuilderRef builder)
+        {
+            Traceback.Instance.ThrowException(new BifyAttributeError($"{GetTypeName() + ToString()} doesn't support dot operator."));
+            return null;
+        }
+      
         public BifyValue ExplicitCast(BifyType desiredType,LLVMBuilderRef builder)
         {
             return new ExplicitCastHandler(this).PerformExplicitCast(desiredType,builder);
@@ -111,7 +117,7 @@ namespace BoomifyCS.Assembly.BifyObject
         }
         public override string ToString()
         {
-            return $"{GetTypeName()}({llvmValue})";
+            return $"{ValueFlag} {GetTypeName()}({llvmValue})";
         }
     }
 }

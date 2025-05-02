@@ -1,5 +1,28 @@
-﻿
-class Dummy{
-	constructor(int pam){
+﻿class Array{
+	int size;
+	int* data;
+	int capacity;
+	constructor(int capacity){
+		this.capacity = capacity;
+		this.data = malloc(sizeof(int) * capacity);
 	}
+	void add(int x){
+		if (this.size >= this.capacity){
+			int newCapacity = this.capacity * 2;
+			this.data = realloc(this.data, sizeof(int) * newCapacity);
+			this.capacity = newCapacity;
+		}
+		else{
+			this.data[this.size] = x;
+			this.size++;
+		}
+	}
+
+}
+int main(){
+	var arr = new Array(10);
+	arr.add(12);
+	explode("First : %d",arr.data[0]);
+
+	return 0;
 }

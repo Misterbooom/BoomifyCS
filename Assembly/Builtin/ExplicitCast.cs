@@ -77,7 +77,6 @@ namespace BoomifyCS.Assembly.Builtin
 
 
                 var res = ((ArrayValue)arrayType.CreateValueRef(arr.GetLLVMValue())).ZeroIndex(builder);
-                BifyDebug.Log($"Casting arr to pointer: {res};Array el pointer: {arrayType.ItemType}");
                 return res;
             }
 

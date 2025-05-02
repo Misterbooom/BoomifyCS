@@ -22,6 +22,7 @@ namespace BoomifyCS.Ast.Handlers
             AstNode bodyNode = builder.HandleBody("Class");
             VerifyClassBody((AstBlock)bodyNode);
             builder.CurrentNode = new AstClass(token, nameNode, bodyNode);
+            builder.AddType(identifierToken.Value);
         }
         private void VerifyClassBody(AstBlock body)
         {

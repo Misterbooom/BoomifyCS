@@ -16,7 +16,6 @@ namespace BoomifyCS.Ast.Handlers
         }
         public AstNode GetArrayNode(Token token)
         {
-            BifyDebug.Log($"Previous Node: {builder.CurrentNode}");
             var tokensInBrackets = TokensFormatter.GetTokensBetween(builder.tokens, ref builder.tokenIndex,
                TokenType.LBRACKET, TokenType.RBRACKET);
 

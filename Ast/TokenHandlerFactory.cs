@@ -19,6 +19,7 @@ static class TokenHandlerFactory
             TokenType.RETURN => new ReturnHandler(builder),
             TokenType.IF => new ConditionHandler(builder),
             TokenType.CLASS => new ClassHandler(builder),
+            TokenType.NEW => new NewHandler(builder),
             _ => new DefaultTokenHandler(builder),
 
         };

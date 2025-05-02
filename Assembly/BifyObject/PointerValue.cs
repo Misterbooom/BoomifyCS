@@ -15,7 +15,8 @@ namespace BoomifyCS.Assembly.BifyObject
 
     class AllocaType : BifyPointerType
     {
-        public AllocaType(BifyType pointedType) : base(pointedType) { }
+        public AllocaType(BifyType pointedType) : base(pointedType) {
+        }
         protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
             return new AllocaPointer(value, this);
@@ -31,7 +32,9 @@ namespace BoomifyCS.Assembly.BifyObject
 
         private void CheckNull(string operation)
         {
+#if DEBUG_COMPILE
             nullPointerCheck.Call(new BifyValue[] { this });
+#endif
         }
 
         public override BifyValue Add(BifyValue other, LLVMBuilderRef builder)
@@ -71,7 +74,10 @@ namespace BoomifyCS.Assembly.BifyObject
             CheckNull("pointer dereference");
             var pointerType = (BifyPointerType)GetBifyType();
             LLVMValueRef loadedValue = AssemblyCompiler.Instance.Builder.BuildLoad2(pointerType.PointedType.LLVMType, GetLLVMValue(), "dereferenced_ptr");
-            return pointerType.PointedType.CreateValueRef(loadedValue);
+
+            var dereferenced = pointerType.PointedType.CreateValueRef(loadedValue);
+            dereferenced.ValueFlag = ValueFlag.None;
+            return dereferenced;
         }
 
         public override BifyValue Index(BifyValue indexValue, LLVMBuilderRef builder)
@@ -114,7 +120,7 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             throw new NotImplementedException("Create method not implemented in Pointer type");
         }
-
+        
         protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
             return new PointerValue(value, this);
@@ -151,7 +157,7 @@ namespace BoomifyCS.Assembly.BifyObject
             var elseBlock = llvmValue.AppendBasicBlock("else");
             compiler.Builder.BuildCondBr(condition, thenBlock, elseBlock);
             compiler.Builder.PositionAtEnd(thenBlock);
-            StdC.RaiseError(new BifyNullError("Null pointer encountered"));
+            StdC.RaiseError(new BifyNullError("Null pointer encountered."));
             compiler.Builder.BuildUnreachable();
             compiler.Builder.PositionAtEnd(elseBlock);
             compiler.Builder.BuildRetVoid();
