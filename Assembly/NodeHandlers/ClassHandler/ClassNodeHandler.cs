@@ -28,9 +28,8 @@ namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
             compiler.CurrentClass = classType;
             ClassMethodManager methodManager = new(classNode, classType);
             classType.ClassAttributes = attributes;
-            ClassMethod[] methods = methodManager.GetMethods();
-            classType.ClassMethods = methods;
-            classType.Constructor = methods.Where(i => i.Name == "constructor").ToArray();
+            methodManager.AddMethodsToClass(ref classType);
+           
             compiler.VariableManager.RegisterGlobalVariable(classNode.NameNode.Token.Value, classType);
             compiler.CurrentClass = null;
         }

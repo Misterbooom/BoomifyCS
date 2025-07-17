@@ -55,13 +55,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
         
         private BifyFunction GetConstructor(ClassType classType)
         {
-            foreach (ClassMember classMember in classType.ClassMethods)
-            {
-                if (classMember is ClassMethod && classMember.Name.Contains("constructor"))
-                {
-                    return (BifyFunction)classMember.Value;
-                }
-            }
+            
             return null;
         }
     }

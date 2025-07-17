@@ -41,9 +41,13 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 {
                     compiler.StackPush(pointerValue.Dereference());
                 }
-                else if (memberValue is BifyFunction function)
+                else if (memberValue is BifyMethodRef)
                 {
                     compiler.StackPush(memberValue);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Unexpected type of class member: '{memberValue.GetType()}'");
                 }
 
             }

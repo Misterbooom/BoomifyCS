@@ -24,13 +24,29 @@ namespace BoomifyCS.Assembly.NodeHandlers
             {
                 compiler.Visit(callNode.CallableName);
                 IValue callableIValue = compiler.StackIValuePop();
+                if (callableIValue == null)
+                {
+                    throw new InvalidOperationException("Callable value is null. This should not happen.");
+                }
 
                 if (callableIValue is BifyFunction callable)
                 {
                     HandleFunctionCall(callNode, callable);
                 }
+                else if (callableIValue is BifyMethodRef methodRef)
+                {
+                    if (callNode.ArgumentsNode != null)
+                        compiler.Visit(callNode.ArgumentsNode);
+
+                    List<BifyValue> providedArgs = GetArguments(CountArgs(callNode.ArgumentsNode));
+                    BifyFunction resolvedMethod = methodRef.Resolve(providedArgs.Select(i => i.GetBifyType()).ToArray());
+
+                    providedArgs = providedArgs.Prepend(resolvedMethod.ParentClass).ToList();
+                    HandleFunctionCall(callNode, resolvedMethod,providedArgs);
+                }
                 else
                 {
+
                     Traceback.Instance.ThrowException(new BifyTypeError($"Cannot call a non-callable type '{((BifyValue)callableIValue).GetTypeName()}'."));
                 }
             }
@@ -49,7 +65,12 @@ namespace BoomifyCS.Assembly.NodeHandlers
             {
                 providedArgs = providedArgs.Prepend(callable.ParentClass).ToList();
             }
-            ValidateAndAutoCastArguments(providedArgs, callable.FunctionArgs.BifyTypes, callable.IsVariadic,callable.IsMethod);
+            HandleFunctionCall(callNode, callable, providedArgs);
+        }
+        private void HandleFunctionCall(AstCall callNode, BifyFunction callable, List<BifyValue> providedArgs)
+        {
+
+            ValidateAndAutoCastArguments(providedArgs, callable.FunctionArgs.BifyTypes, callable.IsVariadic, callable.IsMethod);
 #if (DEBUG_COMPILE)
             pushFrame.Call(new BifyValue[]
             {
@@ -58,7 +79,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             });
 #endif
             Console.WriteLine($"Function: {callable.GetType()}");
-            foreach ( var arg in providedArgs)
+            foreach (var arg in providedArgs)
             {
                 Console.WriteLine($"Arg: {arg}");
             }
@@ -110,7 +131,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             return 1;
         }
 
-        public void ValidateAndAutoCastArguments(List<BifyValue> providedArgs, BifyType[] expectedArgsType, bool isVariadic,bool isMethod)
+        public void ValidateAndAutoCastArguments(List<BifyValue> providedArgs, BifyType[] expectedArgsType, bool isVariadic, bool isMethod)
         {
             int decrease = isMethod ? 1 : 0;
             if (!isVariadic && providedArgs.Count != expectedArgsType.Length)
@@ -127,6 +148,15 @@ namespace BoomifyCS.Assembly.NodeHandlers
             {
                 BifyType expectedType = expectedArgsType[i];
                 BifyValue providedArg = providedArgs[i];
+                if (providedArg == null)
+                {
+                    throw new ArgumentException($"Argument {i + 1} is null.");
+                }
+                if (expectedType == null)
+                {
+                    throw new ArgumentException($"Expected type for argument {i + 1} is null.");
+                }
+
                 if (!expectedType.CompareType(providedArg.GetBifyType()))
                 {
                     Traceback.Instance.Catch(typeof(BifyTypeError));

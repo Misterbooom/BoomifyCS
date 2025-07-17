@@ -48,6 +48,34 @@ namespace BoomifyCS.Assembly.BifyObject
 
             arguments = newArguments;
         }
+        public bool HasSameTypes(FunctionArgs other)
+        {
+            
+            return HasSameTypes(other.BifyTypes);
+        }
+        public bool HasSameTypes(BifyType[] other, int start = 0)
+        {
+            if (other == null)
+                return false;
+
+            var thisTypes = this.BifyTypes;
+
+            if (start < 0 || start > thisTypes.Length)
+                return false;
+
+            int sliceLength = thisTypes.Length - start;
+            if (sliceLength != other.Length)
+                return false;
+
+            for (int i = 0; i < other.Length; i++)
+            {
+                if (!thisTypes[i + start].CompareType(other[i]))
+                    return false;
+            }
+
+            return true;
+        }
+
 
         private void ExtractArgs(AstNode node)
         {

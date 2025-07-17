@@ -1,9 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using BoomifyCS.Assembly.NodeHandlers.ClassHandler;
+﻿using BoomifyCS.Assembly.NodeHandlers.ClassHandler;
 using BoomifyCS.Exceptions;
 using LLVMSharp;
 using LLVMSharp.Interop;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace BoomifyCS.Assembly.BifyObject
 {
@@ -32,30 +34,68 @@ namespace BoomifyCS.Assembly.BifyObject
             : base(name, value) { }
     }
 
+    class BifyMethodRef : BifyValue
+    {
+        public string MethodName { get; }
+        public ClassValue ClassValue { get; }
+        private List<BifyFunction> overloads = new();
+
+        public BifyMethodRef(string methodName, ClassValue classType, List<BifyFunction> overloads)
+            : base(null, overloads.First().GetBifyType())
+        {
+            MethodName = methodName;
+            ClassValue = classType;
+            this.overloads = overloads;
+        }
+        public BifyFunction Resolve(BifyType[] types)
+        {
+            foreach (var overload in overloads)
+            {
+                if (overload.FunctionArgs.HasSameTypes(types,1))
+                {
+                    overload.IsMethod = true;
+                    overload.ParentClass = ClassValue;
+
+                    return overload;
+                }
+            }
+            return new BifyTypeError(
+                $"No matching overload for method '{MethodName}' with types {string.Join(", ", types.Select(t => t.Name))}."
+            ).Throw<BifyFunction>();
+        }
+
+    }
     class ClassMethod : ClassMember
     {
-        public ClassMethod(string name, BifyFunction value)
-            : base(name, value) { }
-        public BifyFunction GetBifyFunction()
+        private List<BifyFunction> overloads = new();
+
+        public ClassMethod(string name, BifyFunction firstOverload)
+            : base(name, firstOverload)
         {
-            if (Value is not BifyFunction function)
-            {
-                throw new InvalidOperationException(
-                    $"Expected BifyFunction, but got {Value.GetType().Name} for method '{Name}'"
-                );
-            }
-            return function;
+            overloads.Add(firstOverload);
         }
-        public bool HasSameParameters(ClassMethod other)
+        public void AddOverload(BifyFunction overload)
         {
-            int paramCount1 = this.GetBifyFunction().FunctionArgs.ArgsNames.Length;
-            int paramCount2 = other.GetBifyFunction().FunctionArgs.ArgsNames.Length;
-            if (paramCount1 != paramCount2)
-                return false;
-           
-            return true;
+            if (overloads.Any(x => x.FunctionArgs.HasSameTypes(overload.FunctionArgs)))
+            {
+                Traceback.Instance.ThrowException(new BifyAttributeError(
+                    $"Overload for method with same parameters '{Name}' already exists."
+                ));
+            }
+            overloads.Add(overload);
+        }
+        public BifyMethodRef GetMethodRef(ClassValue classValue)
+        {
+            return new BifyMethodRef(Name, classValue, overloads);
+        }
+        public IEnumerable<BifyFunction> GetOverloads() => overloads;
+
+        public override string ToString()
+        {
+            return $"{Name}(overloads: {overloads.Count})";
         }
     }
+
 
     class ClassValue : BifyValue
     {
@@ -63,6 +103,8 @@ namespace BoomifyCS.Assembly.BifyObject
 
         public override BifyValue GetAttribute(string name, BifyType other, LLVMBuilderRef builder)
         {
+
+
             var classType = (ClassType)GetBifyType();
 
             for (int i = 0; i < classType.ClassAttributes.Length; i++)
@@ -73,76 +115,74 @@ namespace BoomifyCS.Assembly.BifyObject
                     if (!HasAccess(attribute.Value.ValueFlag, other))
                     {
                         Traceback.Instance.ThrowException(new BifyAttributeError(
-                            $"Access to attribute '{attribute.Name}' is denied because it is not accessible."
+                            $"Access to attribute '{attribute.Name}' is denied because it is {GetAccessLevel(attribute.Value.ValueFlag)}"
                         ));
                     }
 
                     var gepResult = builder.BuildGEP2(classType.StructType, GetLLVMValue(), new LLVMValueRef[]
                     {
-                new IntegerType().Create(0).GetLLVMValue(),
-                new IntegerType().Create(i).GetLLVMValue()
+                        new IntegerType().Create(0).GetLLVMValue(),
+                        new IntegerType().Create(i).GetLLVMValue()
                     });
 
                     return new AllocaType(attribute.Value.GetBifyType()).CreateValueRef(gepResult);
                 }
             }
 
-            foreach (var method in classType.ClassMethods)
+            if (classType.ClassMethods.TryGetValue(name, out var method))
             {
-                if (method.Name == name)
-                {
-                    if (!HasAccess(method.Value.ValueFlag, other))
-                    {
-                        Traceback.Instance.ThrowException(new BifyAttributeError(
-                            $"Access to method '{method.Name}' is denied because it is not accessible."
-                        ));
-                    }
 
-                    ((BifyFunction)method.Value).ParentClass = this;
-                    return method.Value;
+                if (!HasAccess(method.Value.ValueFlag, other))
+                {
+                    Traceback.Instance.ThrowException(new BifyAttributeError(
+                        $"Access to method '{method.Name}' is denied because it is {GetAccessLevel(method.Value.ValueFlag)}"
+                    ));
                 }
+
+                return method.GetMethodRef(this);
+
+
             }
 
             Traceback.Instance.ThrowException(new BifyAttributeError(
                 $"{GetTypeName()} doesn't have attribute or method '{name}'"
             ));
-            return null;
+
+            return null!;
         }
+
         private bool HasAccess(ValueFlag flags, BifyType accessorType)
         {
             var access = flags & ValueFlag.AccessMask;
 
             return access switch
             {
-                ValueFlag.Private => accessorType == null ?  false: accessorType.CompareType(GetBifyType()),
+                ValueFlag.Private => accessorType != null && accessorType.CompareType(GetBifyType()),
                 ValueFlag.Public => true,
-                ValueFlag.Protected => accessorType == null ? false : accessorType.CompareType(GetBifyType()),
+                ValueFlag.Protected => accessorType != null && accessorType.CompareType(GetBifyType()),
                 _ => false
             };
         }
 
-
-        public BifyValue GetMethod(string name)
+        private static string GetAccessLevel(ValueFlag flags)
         {
-            ClassType classType = (ClassType)GetBifyType();
-            foreach (var method in classType.ClassMethods)
+            var access = flags & ValueFlag.AccessMask;
+            return access switch
             {
-                if (method.Name == name)
-                {
-                    return method.Value;
-                }
-            }
-
-            Traceback.Instance.ThrowException(new BifyAttributeError($"{GetTypeName()} doesn't have method {name}"));
-            return null;
+                ValueFlag.Private => "private",
+                ValueFlag.Public => "public",
+                ValueFlag.Protected => "protected",
+                _ => "unknown"
+            };
         }
+
     }
 
     class ClassType : BifyType
     {
         public ClassAttribute[] ClassAttributes = Array.Empty<ClassAttribute>();
-        public ClassMethod[] ClassMethods = Array.Empty<ClassMethod>();
-        public ClassMethod[] Constructor = Array.Empty<ClassMethod>();
+        public Dictionary<string, ClassMethod> ClassMethods = new();
+        public Dictionary<string, List<ClassMethod>> Constructor = new();
         public LLVMTypeRef StructType;
         private LLVMValueRef classInitFunction;
         private LLVMTypeRef classInitFunctionType;
@@ -153,6 +193,19 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             StructType = structType;
             ClassName = name;
+        }
+
+        public void AddMethod(ClassMethod method)
+        {
+            if (!ClassMethods.TryGetValue(method.Name, out var classMethod))
+            {
+                classMethod = new ClassMethod(method.Name, method.Value as BifyFunction ?? throw new InvalidOperationException("Method value is not bifyFunction."));
+                ClassMethods[method.Name] = classMethod;
+            }
+            else
+            {
+                classMethod.AddOverload(method.Value as BifyFunction ?? throw new InvalidOperationException("Method value is not bifyFunction."));
+            }
         }
 
         public override uint Size()
@@ -169,14 +222,12 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             throw new NotImplementedException();
         }
+
         public override bool CompareType(BifyType other)
         {
-            if (other is not ClassType classType)
-            {
-                return false;
-            }
-            return classType.ClassName == this.ClassName;
+            return other is ClassType classType && classType.ClassName == this.ClassName;
         }
+
         public ClassValue InitClass()
         {
             var entryBlock = AssemblyCompiler.Instance.Builder.InsertBlock;
@@ -190,9 +241,8 @@ namespace BoomifyCS.Assembly.BifyObject
             }
             AssemblyCompiler.Instance.Builder.PositionAtEnd(entryBlock);
             var classValue = (ClassValue)CreateValueRef(
-                AssemblyCompiler.Instance.Builder.BuildCall2(classInitFunctionType, classInitFunction, new LLVMValueRef[] { }, "classInit")
-
-                );
+                AssemblyCompiler.Instance.Builder.BuildCall2(classInitFunctionType, classInitFunction, Array.Empty<LLVMValueRef>(), "classInit")
+            );
             return classValue;
         }
 

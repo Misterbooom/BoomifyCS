@@ -1,9 +1,30 @@
-﻿int a(){
-    int a = 5;
-    int b = 5;
-    return a / b;
-} 
-void main() {
-    int a = 5 / 0;
+﻿class Printer{
+	constructor(){
+	
+	}
+	public void print(int a){
+		explode("int a = %d\n", a);
+	}
+	public void print(char* a){
+		explode("char* a = %s\n", a);
+	}
+
+	public void print(float a){
+		explode("float a = %f\n", a);
+	}
+	public void print(bool a){
+		if (a){
+			explode("bool a = true\n");
+		}else{
+			explode("bool a = false\n");
+		}
+	}
+}
+void main(){
+	Printer d = new Printer();
+	d.print(1);
+	d.print("hello");
+	d.print(3.1415);
+	d.print(true);
 
 }
