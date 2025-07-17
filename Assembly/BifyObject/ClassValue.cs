@@ -34,40 +34,93 @@ namespace BoomifyCS.Assembly.BifyObject
 
     class ClassMethod : ClassMember
     {
-        public ClassMethod(string name, BifyValue value)
+        public ClassMethod(string name, BifyFunction value)
             : base(name, value) { }
+        public BifyFunction GetBifyFunction()
+        {
+            if (Value is not BifyFunction function)
+            {
+                throw new InvalidOperationException(
+                    $"Expected BifyFunction, but got {Value.GetType().Name} for method '{Name}'"
+                );
+            }
+            return function;
+        }
+        public bool HasSameParameters(ClassMethod other)
+        {
+            int paramCount1 = this.GetBifyFunction().FunctionArgs.ArgsNames.Length;
+            int paramCount2 = other.GetBifyFunction().FunctionArgs.ArgsNames.Length;
+            if (paramCount1 != paramCount2)
+                return false;
+           
+            return true;
+        }
     }
 
     class ClassValue : BifyValue
     {
         public ClassValue(LLVMValueRef value, BifyType type) : base(value, type) { }
 
-        public override BifyValue GetAttribute(string name, LLVMBuilderRef builder)
+        public override BifyValue GetAttribute(string name, BifyType other, LLVMBuilderRef builder)
         {
-            ClassType classType = (ClassType)GetBifyType();
-            foreach (var attribute in classType.ClassAttributes)
+            var classType = (ClassType)GetBifyType();
+
+            for (int i = 0; i < classType.ClassAttributes.Length; i++)
             {
+                var attribute = classType.ClassAttributes[i];
                 if (attribute.Name == name)
                 {
-                    LLVMValueRef gepResult = builder.BuildGEP2(classType.StructType, GetLLVMValue(),
-                        [
-                                   new IntegerType().Create(0).GetLLVMValue(),
-                                   new IntegerType().Create(Array.IndexOf(classType.ClassAttributes, attribute)).GetLLVMValue()
-                       ]);
-                    return new BifyPointerType(attribute.Value.GetBifyType()).CreateValueRef(gepResult);
+                    if (!HasAccess(attribute.Value.ValueFlag, other))
+                    {
+                        Traceback.Instance.ThrowException(new BifyAttributeError(
+                            $"Access to attribute '{attribute.Name}' is denied because it is not accessible."
+                        ));
+                    }
+
+                    var gepResult = builder.BuildGEP2(classType.StructType, GetLLVMValue(), new LLVMValueRef[]
+                    {
+                new IntegerType().Create(0).GetLLVMValue(),
+                new IntegerType().Create(i).GetLLVMValue()
+                    });
+
+                    return new AllocaType(attribute.Value.GetBifyType()).CreateValueRef(gepResult);
                 }
             }
+
             foreach (var method in classType.ClassMethods)
             {
                 if (method.Name == name)
                 {
+                    if (!HasAccess(method.Value.ValueFlag, other))
+                    {
+                        Traceback.Instance.ThrowException(new BifyAttributeError(
+                            $"Access to method '{method.Name}' is denied because it is not accessible."
+                        ));
+                    }
+
+                    ((BifyFunction)method.Value).ParentClass = this;
                     return method.Value;
                 }
             }
 
-            Traceback.Instance.ThrowException(new BifyAttributeError($"{GetTypeName()} doesn't have attribute '{name}'"));
+            Traceback.Instance.ThrowException(new BifyAttributeError(
+                $"{GetTypeName()} doesn't have attribute or method '{name}'"
+            ));
             return null;
         }
+        private bool HasAccess(ValueFlag flags, BifyType accessorType)
+        {
+            var access = flags & ValueFlag.AccessMask;
+
+            return access switch
+            {
+                ValueFlag.Private => accessorType == null ?  false: accessorType.CompareType(GetBifyType()),
+                ValueFlag.Public => true,
+                ValueFlag.Protected => accessorType == null ? false : accessorType.CompareType(GetBifyType()),
+                _ => false
+            };
+        }
+
 
         public BifyValue GetMethod(string name)
         {
@@ -93,11 +146,13 @@ namespace BoomifyCS.Assembly.BifyObject
         public LLVMTypeRef StructType;
         private LLVMValueRef classInitFunction;
         private LLVMTypeRef classInitFunctionType;
+        public string ClassName { get; private set; }
 
         public ClassType(string name, LLVMTypeRef structType)
             : base(name, LLVMTypeRef.CreatePointer(structType, 0))
         {
             StructType = structType;
+            ClassName = name;
         }
 
         public override uint Size()
@@ -114,15 +169,24 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             throw new NotImplementedException();
         }
-
+        public override bool CompareType(BifyType other)
+        {
+            if (other is not ClassType classType)
+            {
+                return false;
+            }
+            return classType.ClassName == this.ClassName;
+        }
         public ClassValue InitClass()
         {
             var entryBlock = AssemblyCompiler.Instance.Builder.InsertBlock;
             if (classInitFunction == null)
             {
+                AssemblyCompiler.Instance.CurrentClass = this;
                 var (initFunction, initFunctionType) = new ClassInitializer(this).InitClass();
                 classInitFunction = initFunction;
                 classInitFunctionType = initFunctionType;
+                AssemblyCompiler.Instance.CurrentClass = null;
             }
             AssemblyCompiler.Instance.Builder.PositionAtEnd(entryBlock);
             var classValue = (ClassValue)CreateValueRef(

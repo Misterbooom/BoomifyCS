@@ -1,4 +1,4 @@
-﻿#define DEBUG_COMPILE 
+﻿#define DEBUG_COMPILE
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,7 +13,46 @@ using LLVMSharp;
 using LLVMSharp.Interop;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Assembly.BifyObject;
+using System.Drawing;
 
+//class Array
+//{
+//    int size;
+//    private int* data;
+//    int capacity;
+//    constructor(int capacity)
+//    {
+//        this.capacity = capacity;
+//        this.data = malloc(sizeof(int) * capacity);
+//    }
+//    void add(int x)
+//    {
+//        if (this.size >= this.capacity)
+//        {
+//            int newCapacity = this.capacity * 2;
+//            this.data = realloc(this.data, sizeof(int) * newCapacity);
+//            this.capacity = newCapacity;
+//        }
+//        else
+//        {
+//            this.data[this.size] = x;
+//            this.size++;
+//        }
+//    }
+//    void set(int x, int i)
+//    {
+//        this.data[i] = x;
+//    }
+
+//}
+//int main()
+//{
+//    var arr = new Array(10);
+//    arr.add(12);
+//    explode("First : %d", arr.data[0]);
+
+//    return 0;
+//}
 
 namespace BoomifyCS
 {
@@ -58,7 +97,7 @@ namespace BoomifyCS
         static void RunInterpreter()
         {
             Console.OutputEncoding = Encoding.Unicode;
-            string file = "C:/BoomifyCS/test.bify";
+            string file = "C:/Projects/BoomifyCS/test.bify";
             Traceback.Instance.FilePath = file;
             string code = File.ReadAllText(file);
 
@@ -66,6 +105,7 @@ namespace BoomifyCS
             stopwatch.Start();
             MyLexer lexer = new(code);
             List<Token> tokens = lexer.Tokenize();
+            tokens.WriteTokens();
             stopwatch.Stop();
             Console.WriteLine($"Tokenization completed in {stopwatch.ElapsedMilliseconds} ms.");
 
@@ -79,6 +119,11 @@ namespace BoomifyCS
             BifyDebug.Log(node.ToString());
             AssemblyCompiler compiler = AssemblyCompiler.Instance;
             compiler.Compile(node);
+            //Console.Write("\x1b[38;2;255;0;0mThis is bright red\x1b[0m\n");
+            //Console.Write("\x1b[38;2;0;255;0mThis is bright green\x1b[0m\n");
+            //Console.Write("\x1b[38;2;0;0;255mThis is bright blue\x1b[0m\n");
+            //Colorful.Console.WriteLine("This Is Red from colorful",Color.Red);
+
         }
     }
 }

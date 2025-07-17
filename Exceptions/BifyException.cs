@@ -8,10 +8,23 @@ using ColorConsole = Colorful.Console;
 
 namespace BoomifyCS.Exceptions
 {
+    public static class AnsiColorHelper
+    {
+        public static void WriteLine(string text, Color color)
+        {
+            Console.Write($"\x1b[38;2;{color.R};{color.G};{color.B}m{text}\x1b[0m\n");
+        }
+
+        public static void Write(string text, Color color)
+        {
+            Console.Write($"\x1b[38;2;{color.R};{color.G};{color.B}m{text}\x1b[0m");
+        }
+    }
+
     public abstract class BifyError
     {
         public int CurrentLine { get; set; }
-        public int Column { get; set; } // Added property for column tracking
+        public int Column { get; set; } 
         public List<CallStackFrame> CallStack { get; set; } = new();
         public string LineTokensString { get; set; } = "";
         public string InvalidTokensString { get; set; }
@@ -37,8 +50,8 @@ namespace BoomifyCS.Exceptions
             string exceptionInfo = $"{this.GetType().Name.Replace("Bify", "")}: {Message}";
             string fileInfo = $"    File '{FileName}', Line {CurrentLine}, column {Column}";
 
-            ColorConsole.WriteLine(exceptionInfo, Color.IndianRed);
-            ColorConsole.WriteLine(fileInfo, Color.OrangeRed);
+            AnsiColorHelper.WriteLine(exceptionInfo, Color.IndianRed);
+            AnsiColorHelper.WriteLine(fileInfo, Color.OrangeRed);
 
             WriteLineTokens(10);
             PrintCallStack();
@@ -51,23 +64,26 @@ namespace BoomifyCS.Exceptions
                 foreach (var frame in CallStack)
                 {
                     Console.Write(new string(' ', 4));
-                    ColorConsole.WriteLine(new string('-', 35), Color.Gray);
+                    AnsiColorHelper.WriteLine(new string('-', 35), Color.Gray);
 
-                    ColorConsole.Write($"    at ", Color.Red);
-                    ColorConsole.Write(frame.FilePath, Color.IndianRed);
-                    ColorConsole.Write($": ", Color.Red);
-                    ColorConsole.Write(frame.FunctionName, Color.Red);
-                    ColorConsole.Write($" (Line ", Color.Red);
-                    ColorConsole.Write(frame.LineNumber.ToString(), Color.Red);
-                    ColorConsole.WriteLine(")", Color.Red);
+                    AnsiColorHelper.Write("    at ", Color.Red);
+                    AnsiColorHelper.Write(frame.FilePath, Color.IndianRed);
+                    AnsiColorHelper.Write(": ", Color.Red);
+                    AnsiColorHelper.Write(frame.FunctionName, Color.Red);
+                    AnsiColorHelper.Write(" (Line ", Color.Red);
+                    AnsiColorHelper.Write(frame.LineNumber.ToString(), Color.Red);
+                    AnsiColorHelper.WriteLine(")", Color.Red);
 
-                    ColorConsole.WriteLine($"        {frame.CodeLine}", Color.Red);
+                    AnsiColorHelper.WriteLine($"        {frame.CodeLine}", Color.Red);
                 }
 
                 Console.Write(new string(' ', 4));
-                ColorConsole.WriteLine(new string('-', 35), Color.Gray);
+                AnsiColorHelper.WriteLine(new string('-', 35), Color.Gray);
             }
         }
+
+       
+
         public T Throw<T>()
         {
             Traceback.Instance.ThrowException(this);
@@ -91,16 +107,15 @@ namespace BoomifyCS.Exceptions
             {
                 if (i == Column - 1 && InvalidTokensString != null)
                 {
-                    ColorConsole.Write(LineTokensString.Substring(i, InvalidTokensString.Length), Color.Red);
+                    AnsiColorHelper.Write(LineTokensString.Substring(i, InvalidTokensString.Length), Color.Red);
 
                     i += InvalidTokensString.Length - 1;
                 }
                 else
                 {
-                    ColorConsole.Write(LineTokensString[i], Color.White);
+                    AnsiColorHelper.Write(LineTokensString[i].ToString(), Color.LightGray);
                 }
             }
-
 
             Console.Write("\n");
         }

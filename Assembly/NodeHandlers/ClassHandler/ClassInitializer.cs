@@ -15,7 +15,7 @@ namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
         {
             this.classType = classType;
         }
-        public (LLVMValueRef,LLVMTypeRef) InitClass()
+        public (LLVMValueRef, LLVMTypeRef) InitClass()
         {
             LLVMTypeRef initFunctionType = LLVMTypeRef.CreateFunction(LLVMTypeRef.CreatePointer(classType.LLVMType, 0), []);
 
@@ -27,13 +27,13 @@ namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
             SetAttributesValue(classValue);
 
             AssemblyCompiler.Instance.Builder.BuildRet(classValue.GetLLVMValue());
-            return (initFunction,initFunctionType);
+            return (initFunction, initFunctionType);
         }
         private void SetAttributesValue(ClassValue classValue)
         {
             foreach (var classAttribute in classType.ClassAttributes)
             {
-                BifyValue attributePointer = classValue.GetAttribute(classAttribute.Name, AssemblyCompiler.Instance.Builder);
+                BifyValue attributePointer = classValue.GetAttribute(classAttribute.Name, AssemblyCompiler.Instance.CurrentClass, AssemblyCompiler.Instance.Builder);
                 AssemblyCompiler.Instance.Builder.BuildStore(classAttribute.Value.GetLLVMValue(), attributePointer.GetLLVMValue());
             }
         }

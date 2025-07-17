@@ -37,6 +37,7 @@ namespace BoomifyCS.Assembly
         public bool IsLastNode;
         public DebugBuilder DebugBuilder { get; }
         public int StackCount => _stack.Count;
+        public BifyType CurrentClass;
         public LLVMValueRef Function
         {
             get
@@ -47,6 +48,7 @@ namespace BoomifyCS.Assembly
                 }
             }
         }
+        public LLVMBasicBlockRef FunctionEntryBB { get; private set; }
 
         public LLVMBasicBlockRef ErrorBB;
 
@@ -80,6 +82,29 @@ namespace BoomifyCS.Assembly
                 }
             }
         }
+        public void PositionBeforeTerminator(LLVMBasicBlockRef block)
+        {
+            unsafe
+            {
+                if (block.Handle == IntPtr.Zero)
+                {
+                    throw new ArgumentException("Block handle is invalid.");
+                }
+                var terminator = LLVM.GetBasicBlockTerminator(block);
+                if (terminator != null)
+                {
+                    Builder.PositionBefore(terminator);
+                }
+            
+            }
+
+            
+        }
+        public void SetFunctionEntryBB(LLVMBasicBlockRef entryBB)
+        {
+            FunctionEntryBB = entryBB;
+            Builder.PositionAtEnd(entryBB);
+        }
 
         public void StackPush(IValue value)
         {
@@ -102,17 +127,24 @@ namespace BoomifyCS.Assembly
 
         public T StackPop<T>(string errroMessage)
         {
-            if (_stack.Count == 0)
+            try
             {
-                throw new InvalidOperationException("Stack is empty.");
+                if (_stack.Count == 0)
+                {
+                    throw new InvalidOperationException("Stack is empty.");
+                }
+                T poppedValue = (T)_stack.Pop();
+                if (poppedValue is not T)
+                {
+                    new BifyTypeError(errroMessage).Throw();
+                    return default;
+                }
+                return poppedValue;
             }
-            T poppedValue = (T)_stack.Pop();
-            if (poppedValue is not T)
-            {
-                new BifyTypeError(errroMessage).Throw();
-                return default;
+            catch (InvalidCastException){
+                new BifyTypeError(errroMessage).Throw(); return default;
             }
-            return poppedValue;
+            
         }
         public void Visit(AstNode node)
         {
@@ -145,7 +177,7 @@ namespace BoomifyCS.Assembly
             // Define paths
             string libPath = Path.Combine(outputDirectory, "stdc.lib");
             string objPath = Path.Combine(outputDirectory, "stdc.o");
-            string cSourceFile = "C:\\BoomifyCS\\Assembly\\stdc.c";
+            string cSourceFile = "C:\\Projects\\BoomifyCS\\Assembly\\stdc.c";
             string exeFile = Path.Combine(outputDirectory, $"{fileName}.exe");
             string irFile = filePath;
             string objFile = Path.Combine(outputDirectory, $"{fileName}.o");
@@ -170,7 +202,7 @@ namespace BoomifyCS.Assembly
                 //string llcCommand = $"llc -filetype=obj -O0 {irFile} -o {objFile}";
                 //ExecuteCommand(llcCommand);
 
-                string clangCommand = $"clang {irFile} -o {exeFile} -g -gcodeview {libPath} -lmsvcrt -lkernel32 -luser32 -llegacy_stdio_definitions";
+                string clangCommand = $"clang -O3 {irFile} -o {exeFile} -g -gcodeview {libPath} -lmsvcrt -lkernel32 -luser32 -llegacy_stdio_definitions";
                 ExecuteCommand(clangCommand);
 
                 if (!File.Exists(exeFile))
@@ -237,8 +269,9 @@ namespace BoomifyCS.Assembly
                 var psi = new ProcessStartInfo
                 {
                     FileName = "cmd.exe",
-                    Arguments = $"/k \"{exePath}\"",
-                    UseShellExecute = true,
+                    Arguments = $"/k \"chcp 65001 >nul && {exePath}\"",
+
+                    UseShellExecute = false,
                     CreateNoWindow = false,
                     RedirectStandardOutput = false,
                     RedirectStandardError = false,
@@ -263,6 +296,7 @@ namespace BoomifyCS.Assembly
 
                     Console.WriteLine($"Execution time: {stopwatch.ElapsedMilliseconds} ms");
                     Console.WriteLine("Process has exited but remains open.");
+                    Console.WriteLine($"Exit code = {process.ExitCode}");
                 }
             }
             catch (Exception ex)

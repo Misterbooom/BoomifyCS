@@ -11,33 +11,34 @@ namespace BoomifyCS.Assembly.Builtin
 {
     class StdC
     {
-        public static void RaiseError(BifyError bifyError)
+        public static void RaiseError(BifyError bifyError, BifyValue line = null)
         {
             var printErrorFunc = StdC.DeclarFunction("printError",
             [new ConstStringType(), new ConstStringType(), new ConstStringType(), new BifyObject.IntegerType()], new VoidType()
 
             );
+
             printErrorFunc.Call([
                 new ConstStringType().Create(bifyError.GetType().Name.Replace("Bify","")),
                 new ConstStringType().Create(bifyError.Message),
                 new ConstStringType().Create(Traceback.Instance.FilePath),
-                new BifyObject.IntegerType().Create(Traceback.Instance.Line)
+                line ?? new BifyObject.IntegerType().Create(Traceback.Instance.Line)
             ]);
 
         }
         public static CFunction DeclarFunction(string name, BifyType[] typeRefs, BifyType returnType)
         {
             LLVMTypeRef functionType = LLVMTypeRef.CreateFunction(returnType.LLVMType, typeRefs.Select(item => item.LLVMType).ToArray(), false);
-            var func = new CFunction(name,returnType, typeRefs,functionType);
+            var func = new CFunction(name, returnType, typeRefs, functionType);
             return func;
         }
-      
+
 
     }
     class CFunction : BifyFunction
     {
         private string name;
-        public CFunction(string name,BifyType returnType, BifyType[] typeRefs,LLVMTypeRef functionType) : base(null, null, returnType, functionType)
+        public CFunction(string name, BifyType returnType, BifyType[] typeRefs, LLVMTypeRef functionType) : base(null, null, returnType, functionType)
         {
             var arguments = new Dictionary<string, BifyType>();
             this.name = name;

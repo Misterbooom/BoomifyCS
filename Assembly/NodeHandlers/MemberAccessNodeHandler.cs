@@ -30,7 +30,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             }
             BifyValue bifyValue = (BifyValue)iValue;
             string memberName = ((AstIdentifier)node.Right).Name;
-            BifyValue memberValue = bifyValue.GetAttribute(memberName, compiler.Builder);
+            BifyValue memberValue = bifyValue.GetAttribute(memberName,compiler.CurrentClass, compiler.Builder);
             if (!loadMemberPointer)
             {
                 compiler.StackPush(memberValue);
@@ -43,7 +43,6 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 }
                 else if (memberValue is BifyFunction function)
                 {
-                    compiler.StackPush(bifyValue);
                     compiler.StackPush(memberValue);
                 }
 

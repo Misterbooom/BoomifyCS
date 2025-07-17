@@ -29,5 +29,9 @@ namespace BoomifyCS.Assembly.Builtin
 
             return ReturnType.CreateValueRef(null);
         }
+        public static void RealTimeLog(string message)
+        {
+            AssemblyCompiler.Instance.VariableManager.GetBifyValue("explode").Call([new ConstStringType().Create(message)]);
+        }
     }
 }

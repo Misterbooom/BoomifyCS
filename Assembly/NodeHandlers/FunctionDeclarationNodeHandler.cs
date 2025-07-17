@@ -18,8 +18,8 @@ namespace BoomifyCS.Assembly.NodeHandlers
         public override void HandleNode(AstNode node)
         {
             AstFunctionDecl functionDeclNode = node as AstFunctionDecl;
-            string functionName = functionDeclNode.functionNameNode.Name;
-            compiler.Visit(functionDeclNode.typeNode);
+            string functionName = functionDeclNode.FunctionNameNode.Name;
+            compiler.Visit(functionDeclNode.TypeNode);
             IValue value = compiler.StackIValuePop();
             if (value is not BifyType)
             {
@@ -29,8 +29,8 @@ namespace BoomifyCS.Assembly.NodeHandlers
             BifyType functionReturnType = (BifyType)value;
             compiler.ReturnType = functionReturnType;
 
-            var functionArgs = new FunctionArgs(functionDeclNode.argumentsNode);
-            var functionPathChecker = new FunctionPathChecker(functionReturnType, functionDeclNode.blockNode);
+            var functionArgs = new FunctionArgs(functionDeclNode.ArgumentsNode);
+            var functionPathChecker = new FunctionPathChecker(functionReturnType, functionDeclNode.BlockNode);
             var functionType = LLVMTypeRef.CreateFunction(functionReturnType.LLVMType, functionArgs.LLVMTypes);
 
 
@@ -48,17 +48,23 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
             //compiler.ErrorBB = function.AppendBasicBlock("error");
             var entry = function.AppendBasicBlock("entry");
+            compiler.SetFunctionEntryBB(entry);
+
             compiler.Builder.PositionAtEnd(entry);
 
-            if (functionName == "main")
-            {
-                CallNodeHandler.pushFrame.Call([
-                        new IntegerType().Create(Traceback.Instance.Line),
-                        new ConstStringType().Create(Traceback.Instance.FilePath)
-                    ]);
-            }
+//            if (functionName == "main")
+//            {
+//#if DEBUG_COMPILE
+//                CallNodeHandler.pushFrame.Call([
+//                        new IntegerType().Create(Traceback.Instance.Line),
+//                        new ConstStringType().Create(Traceback.Instance.FilePath)
+//                    ]);
+//#endif
+//            }
             compiler.VariableManager.EnterLocalScope();
             var bifyFunction = new BifyFunction(function, functionArgs, functionReturnType, functionType);
+            FlagProcessor.SetFlags(FlagContext.Function, bifyFunction.GetBifyType(), ((AstFlag)functionDeclNode.FlagNode).Flags);
+
             compiler.VariableManager.RegisterGlobalVariable(functionName, bifyFunction);
 
             AddFunctionArgsToScope(bifyFunction);
@@ -67,10 +73,10 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
             if (!functionPathChecker.AllPathsReturn && functionReturnType.CompareType(new VoidType()))
             {
-                AstBlock blockNode = (AstBlock)functionDeclNode.blockNode;
+                AstBlock blockNode = (AstBlock)functionDeclNode.BlockNode;
                 blockNode.ChildNodes.Add(new AstReturn(new Lexer.Token(Lexer.TokenType.RETURN,"return"), null));
             }
-            compiler.Visit(functionDeclNode.blockNode);
+            compiler.Visit(functionDeclNode.BlockNode);
            
             //function.VerifyFunction(LLVMVerifierFailureAction.LLVMAbortProcessAction);
             compiler.VariableManager.ExitLocalScope();

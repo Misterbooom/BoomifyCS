@@ -141,7 +141,7 @@ namespace BoomifyCS.Assembly.BifyObject
             else
             {
                 llvmValue = existedFunction;
-                TypeRef = LLVMTypeRef.CreateFunction(ReturnType.LLVMType,existedFunction.TypeOf.ParamTypes);
+                TypeRef = LLVMTypeRef.CreateFunction(ReturnType.LLVMType,existedFunction.TypeOf.GetParamTypes());
             }
             if (args.Length != 2)
             {

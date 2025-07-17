@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using BoomifyCS.Assembly.BifyObject;
+using BoomifyCS.Exceptions;
 using LLVMSharp;
 using LLVMSharp.Interop;
 
@@ -65,10 +66,10 @@ namespace BoomifyCS.Assembly.Builtin
                 AssemblyCompiler.Instance.Builder.PositionAtEnd(entryBlock);
             }
 
-     
-
+            var res = AssemblyCompiler.Instance.Builder.BuildCall2(TypeRef, llvmValue, args.Select(i => i.GetLLVMValue()).ToArray(),"_");
+            BifyDebug.Log($"Input function log :{res}");
             return new ConstStringType().CreateValueRef(
-                AssemblyCompiler.Instance.Builder.BuildCall2(TypeRef, llvmValue, args.Select(i => i.GetLLVMValue()).ToArray())
+                res
                 );
         }
     }

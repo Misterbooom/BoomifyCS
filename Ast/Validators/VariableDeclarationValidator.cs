@@ -25,12 +25,7 @@ namespace BoomifyCS.Ast.Validators
                     "", typeNode?.Token.Value);
                 Traceback.Instance.ThrowException(bifyTypeError, typeNode?.Token.Column ?? assignmentToken.Column);
             }
-            if (flagNode !=  null && flagNode is not AstIdentifier && flagNode.Token.Type != TokenType.CONST )
-            {
-                BifyTypeError bifyTypeError = new(ErrorMessage.InvalidVariableType(typeNode?.Token.Type.ToString().ToLower()),
-                    "", typeNode?.Token.Value);
-                Traceback.Instance.ThrowException(bifyTypeError, typeNode?.Token.Column ?? assignmentToken.Column);
-            }
+          
         }
     }
     class AssignmentOperatorValidator

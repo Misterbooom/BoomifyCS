@@ -43,8 +43,8 @@ namespace BoomifyCS.Assembly.Builtin
         public void Init()
         {
             var integer = new BifyObject.IntegerType();
-            TypeRef = LLVMTypeRef.CreateFunction(ReturnType.LLVMType, new LLVMTypeRef[] { ReturnType.LLVMType, ReturnType.LLVMType,integer.LLVMType });
-            llvmValue = AssemblyCompiler.Instance.Module.AddFunction("safeDiv_" + ReturnType.Name , TypeRef);
+            TypeRef = LLVMTypeRef.CreateFunction(ReturnType.LLVMType, new LLVMTypeRef[] { ReturnType.LLVMType, ReturnType.LLVMType, integer.LLVMType });
+            llvmValue = AssemblyCompiler.Instance.Module.AddFunction("safeDiv_" + ReturnType.Name, TypeRef);
             var builder = AssemblyCompiler.Instance.Builder;
             var entry = llvmValue.AppendBasicBlock("entry");
 
@@ -58,15 +58,15 @@ namespace BoomifyCS.Assembly.Builtin
             var mergeBB = llvmValue.AppendBasicBlock("merge");
             builder.BuildCondBr(compareToZero.GetLLVMValue(), zeroBB, mergeBB);
             builder.PositionAtEnd(zeroBB);
-           
+
 
 
 
             var errorName = new ConstStringType().Create("ZeroDivisionError");
             var errorMessage = new ConstStringType().Create(ErrorMessage.DivisionByZero());
             var file = new ConstStringType().Create(Traceback.Instance.FilePath);
-
-            StdC.RaiseError(new BifyZeroDivisionError("Division by zero!"));
+            Log.RealTimeLog($"Division by zero at {Traceback.Instance.FilePath}:{line}\n");
+            StdC.RaiseError(new BifyZeroDivisionError("Division by zero!"), line);
             //AssemblyCompiler.Instance.VariableManager.GetBifyValue("exit").Call([new BifyObject.IntegerType().Create(0)]);
 
             builder.BuildUnreachable();

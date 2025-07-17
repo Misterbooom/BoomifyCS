@@ -13,7 +13,7 @@ namespace BoomifyCS.Ast.Handlers
     {
         public override void HandleToken(Token token)
         {
-            GetVariableInfo(builder,out AstNode identifierNode, out AstNode typeNode, out AstNode flagNode);
+            GetVariableInfo(builder,out AstNode identifierNode, out AstNode typeNode, out AstFlag flagNode);
           
             AstNode valueNode = null;
             List<Token> valueTokens = [];

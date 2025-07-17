@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LLVMSharp;
 using LLVMSharp.Interop;
-
+#nullable enable
 namespace BoomifyCS.Assembly.BifyObject
 {
     class BifyFunction : BifyValue
@@ -15,6 +15,7 @@ namespace BoomifyCS.Assembly.BifyObject
         public LLVMTypeRef TypeRef;
         public bool IsVariadic;
         public bool IsMethod = false;
+        public ClassValue? ParentClass;
         public BifyFunction(LLVMValueRef value, FunctionArgs args, BifyType returnType, LLVMTypeRef type, bool isVariadic = false) 
             : base(value,new FunctionType(type))
         {

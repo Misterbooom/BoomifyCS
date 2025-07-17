@@ -31,26 +31,25 @@ namespace BoomifyCS.Assembly.NodeHandlers
             CallNodeHandler callNodeHandler = new CallNodeHandler(compiler);
             compiler.Visit(argumentsNode);
             List<BifyValue> arguments = callNodeHandler.GetArguments(CallNodeHandler.CountArgs(argumentsNode));
-            foreach (var member in classType.ClassAttributes)
-            {
-                Console.WriteLine($"Class member: {member}");
-            }
             BifyFunction constructor = GetConstructor(classType);
             ClassValue classValue = classType.InitClass();
-            arguments = arguments.Prepend(classValue).ToList();
-            foreach (var argument in arguments)
-            {
-                Console.WriteLine($"Argument: {argument}");
-            }
+
+           
             if (constructor == null && arguments.Count > 0)
             {
+                BifyDebug.Log($"Argumetns count : {arguments.Count}");
                 Traceback.Instance.ThrowException(new BifyAttributeError($"Class {classType.Name} doesn't have constructor."));
             }
-            else
+            else if (constructor != null)
             {
+                arguments = arguments.Prepend(classValue).ToList();
+                //foreach (var argument in arguments)
+                //{
+                //    Console.WriteLine($"Argument: {argument}");
+                //}
+                callNodeHandler.ValidateAndAutoCastArguments(arguments, constructor.FunctionArgs.BifyTypes, false, true);
                 constructor.Call(arguments.ToArray());
             }
-            callNodeHandler.ValidateAndAutoCastArguments(arguments, constructor.FunctionArgs.BifyTypes, false);
             AssemblyCompiler.Instance.StackPush(classValue);
         }
         

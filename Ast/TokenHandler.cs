@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 using LLVMSharp;
@@ -42,36 +43,33 @@ namespace BoomifyCS.Ast.Handlers
 
             return (lastOperand, final );
         }
-        protected static void GetVariableInfo(AstBuilder builder, out AstNode identifierNode, out AstNode typeNode, out AstNode flagNode)
+        protected static void GetVariableInfo(AstBuilder builder, out AstNode identifierNode, out AstNode typeNode, out AstFlag flagNode)
         {
+            identifierNode = null;
+            typeNode = null;
+            var flagNodes = new List<AstNode>();
 
-            if (builder.Nodes.Count == 2)
+            int count = builder.Nodes.Count;
+            flagNode = default;
+            if (count < 2)
+                return;
+
+            typeNode = builder.Nodes[count - 2];
+            identifierNode = builder.Nodes[count - 1];
+
+            for (int i = 0; i < count - 2; i++)
             {
-                typeNode = builder.Nodes[0];
-                identifierNode = builder.Nodes[1];
-                flagNode = null;
+                var flagCandidate = builder.Nodes[i];
+                flagNodes.Add(flagCandidate);
             }
-            else if (builder.Nodes.Count == 3)
-            {
-                flagNode = builder.Nodes[0];
-                typeNode = builder.Nodes[1];
-                identifierNode = builder.Nodes[2];
-            }
-            else
-            {
-                identifierNode = null;
-                typeNode = null;
-                flagNode = null;
-            }
+
             if (identifierNode is AstUnaryOperator unaryOperator)
             {
                 var (lastOperand, finalPointer) = SwitchLastOperand(unaryOperator, typeNode);
                 identifierNode = lastOperand;
                 typeNode = finalPointer;
-
             }
-
-
+            flagNode = new AstFlag(identifierNode.Token,flagNodes);
         }
 
 

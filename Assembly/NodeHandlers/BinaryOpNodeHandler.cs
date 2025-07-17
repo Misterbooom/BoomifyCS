@@ -21,7 +21,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 compiler.Visit(node.Right);
                 return;
             }
-           
+
             else if (node.Token.Type == TokenType.NOT)
             {
                 compiler.Visit(node.Left);
@@ -70,11 +70,13 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 case TokenType.MUL:
                     return lhs.Mul(rhs, compiler.Builder);
                 case TokenType.DIV:
+#if DEBUG_COMPILE
                     if (rhs.CompareType(typeof(IntegerType)) || rhs.CompareType(typeof(FloatType)))
                     {
                         return SafeDiv.Instance(lhs.GetBifyType())
-                            .Call(new BifyValue[] { lhs, rhs, new IntegerType().Create(Traceback.Instance.Line) });
+                            .Call([lhs, rhs, new IntegerType().Create(Traceback.Instance.Line)]);
                     }
+#endif
                     return lhs.Div(rhs, compiler.Builder);
                 case TokenType.EQ:
                     return lhs.Equal(rhs, compiler.Builder);
@@ -95,9 +97,11 @@ namespace BoomifyCS.Assembly.NodeHandlers
                     }
                     return new BoolValue(compiler.Builder.BuildOr(lhs.GetLLVMValue(), rhs.GetLLVMValue(), "or"));
                 case TokenType.AND:
+
+                    
                     if (!lhs.CompareType(typeof(BoolType)) || !rhs.CompareType(typeof(BoolType)))
                     {
-                        Traceback.Instance.ThrowException(new BifyTypeError($"Cannot compare {lhs.GetTypeName()} with {rhs.GetTypeName()}"));
+                        Traceback.Instance.ThrowException(new BifyTypeError($"Cannot 'and' {lhs.GetTypeName()} with {rhs.GetTypeName()}"));
                     }
                     return new BoolValue(compiler.Builder.BuildAnd(lhs.GetLLVMValue(), rhs.GetLLVMValue(), "and"));
                 default:

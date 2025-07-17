@@ -76,6 +76,7 @@ void popFrame(){
 void printError(const char *errorName, const char *message, const char *file, int line)
 {
 	char exceptionInfo[256];
+	pushFrame(line, file);
 	snprintf(exceptionInfo, sizeof(exceptionInfo), "%s: %s", errorName, message);
 
 	printf("\033[38;2;255;0;0m%s\033[0m\n", exceptionInfo);

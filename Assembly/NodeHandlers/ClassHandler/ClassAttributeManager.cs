@@ -36,6 +36,8 @@ namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
             var variableHandler = new VariableDeclarationNodeHandler(AssemblyCompiler.Instance);
             BifyType attributeType = variableHandler.DetermineVariableType(node,varName);
             BifyValue attributeValue = variableHandler.GetVariableValue(node, varName,attributeType);
+            attributeValue.ValueFlag |= ValueFlag.Private;
+            FlagProcessor.SetFlags(FlagContext.ClassAttribute, attributeValue.GetBifyType(), node.Flag.Flags);
             ClassAttribute attribute = new ClassAttribute(varName,attributeValue);
             return attribute;
         }

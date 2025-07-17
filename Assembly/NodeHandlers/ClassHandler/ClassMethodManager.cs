@@ -28,15 +28,34 @@ namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
             foreach (AstNode child in ((AstBlock)classNode.BodyNode).ChildNodes)
             {
                 if (child is AstFunctionDecl function)
-                    methods.Add(HandleMethod(function));
+                {
+                    ClassMethod classMethod = HandleMethod(function);
+                    if (methods.Any(m => m.Name == classMethod.Name))
+                    {
+                        ProcessMethodOverloading(classMethod,ref methods);
+                    }
+                    else
+                    {
+                        methods.Add(classMethod);
+                    }
+                }
             }
             return methods.ToArray();
         }
+        private void ProcessMethodOverloading(ClassMethod newMethod, ref List<ClassMethod> existingMethods)
+        {
+            if (existingMethods.Any(newMethod.HasSameParameters)){
+                BifyDebug.Log($"{newMethod.GetBifyFunction().FunctionArgs}");
+                new BifyArgumentError($"Method '{newMethod.Name}' is overloaded with the same parameters.").Throw();
+            }
+            existingMethods.Add(newMethod);
+        }
+        
         public ClassMethod HandleMethod(AstFunctionDecl methodNode)
         {
-            string functionName = methodNode.functionNameNode.Name;
+            string functionName = methodNode.FunctionNameNode.Name;
 
-            compiler.Visit(methodNode.typeNode);
+            compiler.Visit(methodNode.TypeNode);
             IValue value = compiler.StackIValuePop();
             if (value is not BifyType)
             {
@@ -46,8 +65,8 @@ namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
             BifyType functionReturnType = (BifyType)value;
             compiler.ReturnType = functionReturnType;
 
-            var functionArgs = new FunctionArgs(methodNode.argumentsNode);
-            var functionPathChecker = new FunctionPathChecker(functionReturnType, methodNode.blockNode);
+            var functionArgs = new FunctionArgs(methodNode.ArgumentsNode);
+            var functionPathChecker = new FunctionPathChecker(functionReturnType, methodNode.BlockNode);
 
             functionArgs.PrependArgument("this", classType);
 
@@ -71,18 +90,21 @@ namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
             //compiler.ErrorBB = function.AppendBasicBlock("error");
             var entry = function.AppendBasicBlock("entry");
             compiler.Builder.PositionAtEnd(entry);
+            compiler.SetFunctionEntryBB(entry);
 
             compiler.VariableManager.EnterLocalScope();
             var bifyFunction = new BifyFunction(function, functionArgs, functionReturnType, functionType);
+            bifyFunction.ValueFlag |= ValueFlag.Private;
+            FlagProcessor.SetFlags(FlagContext.Method, bifyFunction.GetBifyType(), methodNode.FlagNode.Flags);
 
             AddFunctionArgsToScope(bifyFunction);
             if (!functionPathChecker.AllPathsReturn && functionReturnType.CompareType(new VoidType()))
             {
-                AstBlock blockNode = (AstBlock)methodNode.blockNode;
+                AstBlock blockNode = (AstBlock)methodNode.BlockNode;
                 blockNode.ChildNodes.Add(new AstReturn(new Lexer.Token(Lexer.TokenType.RETURN, "return"), null));
             }
-            compiler.Visit(methodNode.blockNode);
-           
+            compiler.Visit(methodNode.BlockNode);
+
             compiler.ClearStack();
             BifyDebug.Log($"Variable manager before exit : {compiler.VariableManager}");
 

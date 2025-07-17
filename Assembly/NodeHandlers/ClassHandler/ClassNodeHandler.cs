@@ -25,12 +25,14 @@ namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
             LLVMTypeRef[] elementTypes = attributes.Select(i => i.Value.GetBifyType().LLVMType).ToArray();
             named.StructSetBody(elementTypes, false);
             ClassType classType = new ClassType(classNode.NameNode.Token.Value, named);
+            compiler.CurrentClass = classType;
             ClassMethodManager methodManager = new(classNode, classType);
             classType.ClassAttributes = attributes;
             ClassMethod[] methods = methodManager.GetMethods();
             classType.ClassMethods = methods;
             classType.Constructor = methods.Where(i => i.Name == "constructor").ToArray();
             compiler.VariableManager.RegisterGlobalVariable(classNode.NameNode.Token.Value, classType);
+            compiler.CurrentClass = null;
         }
 
     }

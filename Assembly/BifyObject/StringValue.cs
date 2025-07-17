@@ -34,7 +34,7 @@ namespace BoomifyCS.Assembly.BifyObject
             if (!CompareType(other))
             {
                 Traceback.Instance.ThrowException(
-                    new BifyTypeError($"Cannot compare {this.GetTypeName()} with {other.GetTypeName()}"));
+                    new BifyTypeError($"Cannot  compare {this.GetTypeName()} with {other.GetTypeName()} {this}"));
                 return null;
             }
 
@@ -222,6 +222,7 @@ namespace BoomifyCS.Assembly.BifyObject
             }
 
             var newStringValue = AssemblyCompiler.Instance.Builder.BuildGlobalStringPtr(stringValue, stringValue);
+            BifyDebug.Log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA " + newStringValue.ToString());
             GlobalStringCache[stringValue] = newStringValue;
 
             var newPointerType = new BifyPointerType(new CharType());

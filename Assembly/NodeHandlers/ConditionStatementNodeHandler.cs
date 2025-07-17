@@ -60,7 +60,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
         private void EmitBranch(AstNode condition, LLVMBasicBlockRef trueBlock, LLVMBasicBlockRef falseBlock)
         {
             compiler.Visit(condition);
-            var boolVal = compiler.StackPop<BoolValue>("Condition must be boolean");
+            var boolVal = compiler.StackPop<BoolValue>("Condition must be boolean.");
             compiler.Builder.BuildCondBr(boolVal.GetLLVMValue(), trueBlock, falseBlock);
         }
 

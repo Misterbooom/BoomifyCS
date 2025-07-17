@@ -32,7 +32,7 @@ namespace BoomifyCS.Assembly.BifyObject
 
         private void CheckNull(string operation)
         {
-#if DEBUG_COMPILE
+#if (DEBUG_COMPILE)
             nullPointerCheck.Call(new BifyValue[] { this });
 #endif
         }
@@ -74,7 +74,7 @@ namespace BoomifyCS.Assembly.BifyObject
             CheckNull("pointer dereference");
             var pointerType = (BifyPointerType)GetBifyType();
             LLVMValueRef loadedValue = AssemblyCompiler.Instance.Builder.BuildLoad2(pointerType.PointedType.LLVMType, GetLLVMValue(), "dereferenced_ptr");
-
+            
             var dereferenced = pointerType.PointedType.CreateValueRef(loadedValue);
             dereferenced.ValueFlag = ValueFlag.None;
             return dereferenced;
@@ -175,7 +175,7 @@ namespace BoomifyCS.Assembly.BifyObject
             else
             {
                 llvmValue = existedFunction;
-                TypeRef = LLVMTypeRef.CreateFunction(ReturnType.LLVMType, existedFunction.TypeOf.ParamTypes);
+                TypeRef = LLVMTypeRef.CreateFunction(ReturnType.LLVMType, existedFunction.TypeOf.GetParamTypes());
             }
             if (args.Length != 1)
             {

@@ -14,6 +14,7 @@ namespace BoomifyCS.Ast.Handlers
 
         public override void HandleToken(Token token)
         {
+            
             binaryOpToken = token;
 
             if (builder.Nodes.Count == 0)
@@ -108,7 +109,7 @@ namespace BoomifyCS.Ast.Handlers
                 TokenType.LPAREN => ParseParenthesizedExpression(),
                 TokenType.SUB or TokenType.MUL or TokenType.INCREMENT or TokenType.DECREMENT or TokenType.NOT=> HandleUnaryOperator(token),
                 TokenType.LBRACKET => new ArrayHandler(builder).GetArrayNode(token),
-                TokenType.STRING => NodeConventer.TokenToNode(token),
+                TokenType.STRING or TokenType.CHAR => NodeConventer.TokenToNode(token),
                 TokenType.NEW => new NewHandler(builder).ParseNewExpression(token),
                 _ => new BifySyntaxError($"Unexpected token '{token.Value}' found in expression. Verify your syntax and try again.").Throw<AstNode>()
             };

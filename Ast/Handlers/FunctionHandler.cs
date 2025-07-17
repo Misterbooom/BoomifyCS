@@ -23,11 +23,7 @@ namespace BoomifyCS.Ast.Handlers
             {
                 new BifySyntaxError($"Invalid type '{typeNode?.Token?.Value}'. Make sure the function has a valid type like `int`, `float`, etc.").Throw();
             }
-            if (flagNode != null && flagNode is not AstIdentifier flag)
-            {
-                new BifySyntaxError($"Invalid flag '{flagNode?.Token?.Value}'. Flags should be simple identifiers like `const`, etc.").Throw();
-            }
-
+            
 
 
             List<List<Token>> splitedTokens = TokensFormatter.SplitTokensByType(builder.GetConditionTokens(), TokenType.COMMA);
@@ -35,7 +31,7 @@ namespace BoomifyCS.Ast.Handlers
             AstBinaryOp parameters = ConnectParameters(parametersNodes);
             AstBlock blockNode = builder.HandleBody("Function");
 
-            AstNode functionNode = new AstFunctionDecl(token,typeNode,(AstIdentifier)identifierNode,parameters,blockNode);
+            AstNode functionNode = new AstFunctionDecl(token,typeNode,(AstIdentifier)identifierNode,parameters,blockNode,flagNode);
             builder.CurrentNode = functionNode;
             builder.tokenIndex++;
             builder.Nodes.Clear();

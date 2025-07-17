@@ -9,6 +9,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
 {
     class VariableDeclarationNodeHandler : NodeHandler
     {
+        private bool isValueVisited = false;
         public VariableDeclarationNodeHandler(AssemblyCompiler compiler) : base(compiler) { }
 
         public override void HandleNode(AstNode node)
@@ -49,6 +50,8 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 }
 
                 declaredType = inferredBifyValue.GetBifyType();
+                compiler.StackPush(inferredBifyValue);
+                isValueVisited = true;
             }
             else
             {
@@ -76,25 +79,28 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
         private BifyValue? AllocateVariable(AstVarDecl varDecl, string varName, BifyType declaredType)
         {
+            var insertBlock = compiler.Builder.InsertBlock;
+            compiler.PositionBeforeTerminator(compiler.FunctionEntryBB);
             var alloca = compiler.Builder.BuildAlloca(declaredType.LLVMType, varName);
+            compiler.Builder.PositionAtEnd(insertBlock);
             var allocaPointer = new AllocaType(declaredType).CreateValueRef(alloca);
-            var variableValue = GetVariableValue(varDecl, varName,declaredType);
-            allocaPointer = new AllocaType(declaredType).CreateValueRef(alloca);
+            var variableValue = GetVariableValue(varDecl, varName, declaredType);
 
             compiler.Builder.BuildStore(variableValue.GetLLVMValue(), alloca);
-
-            if (varDecl.Flag?.Token.Type == TokenType.CONST)
-            {
-                allocaPointer.ValueFlag = ValueFlag.Constant;
-            }
+            FlagProcessor.SetFlags(FlagContext.Variable, allocaPointer.GetBifyType(), ((AstFlag)varDecl.Flag).Flags);
             allocaPointer.ValueFlag |= ValueFlag.Variable;
             return allocaPointer;
         }
+
+     
         public BifyValue GetVariableValue(AstVarDecl varDecl, string varName, BifyType declaredType)
         {
             if (varDecl.AssignmentNode.Right != null)
             {
-                compiler.Visit(varDecl.AssignmentNode.Right);
+                if (!isValueVisited)
+                {
+                    compiler.Visit(varDecl.AssignmentNode.Right);
+                }
                 var initValue = compiler.StackIValuePop();
 
                 if (initValue is BifyType invalidValueType)

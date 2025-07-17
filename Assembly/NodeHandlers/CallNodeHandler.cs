@@ -6,6 +6,7 @@ using LLVMSharp.Interop;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Assembly.Builtin;
+using System.Linq;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
@@ -42,21 +43,32 @@ namespace BoomifyCS.Assembly.NodeHandlers
         {
             if (callNode.ArgumentsNode != null)
                 compiler.Visit(callNode.ArgumentsNode);
-            List<BifyValue> providedArgs = GetArguments(CountArgs(callNode.ArgumentsNode) + (callable.IsMethod == true ? 1 : 0));
-            ValidateAndAutoCastArguments(providedArgs, callable.FunctionArgs.BifyTypes, callable.IsVariadic);
-#if DEBUG_COMPILE
+
+            List<BifyValue> providedArgs = GetArguments(CountArgs(callNode.ArgumentsNode));
+            if (callable.IsMethod)
+            {
+                providedArgs = providedArgs.Prepend(callable.ParentClass).ToList();
+            }
+            ValidateAndAutoCastArguments(providedArgs, callable.FunctionArgs.BifyTypes, callable.IsVariadic,callable.IsMethod);
+#if (DEBUG_COMPILE)
             pushFrame.Call(new BifyValue[]
             {
                         new BifyObject.IntegerType().Create(Traceback.Instance.Line),
                         new ConstStringType().Create(Traceback.Instance.FilePath)
             });
 #endif
+            Console.WriteLine($"Function: {callable.GetType()}");
+            foreach ( var arg in providedArgs)
+            {
+                Console.WriteLine($"Arg: {arg}");
+            }
             var call = callable.Call(providedArgs.ToArray());
+            call.GetLLVMValue().Name = "callRet";
             compiler.StackPush(callable.ReturnType.CreateValueRef(call.GetLLVMValue()));
-#if DEBUG_COMPILE
+#if (DEBUG_COMPILE)
             popFrame.Call(new BifyValue[0]);
 #endif
-            }
+        }
         //private void HandleCast(AstCall callNode,BifyType callableType)
         //{
         //    if (callNode.ArgumentsNode != null)
@@ -98,16 +110,17 @@ namespace BoomifyCS.Assembly.NodeHandlers
             return 1;
         }
 
-        public void ValidateAndAutoCastArguments(List<BifyValue> providedArgs, BifyType[] expectedArgsType, bool isVariadic)
+        public void ValidateAndAutoCastArguments(List<BifyValue> providedArgs, BifyType[] expectedArgsType, bool isVariadic,bool isMethod)
         {
+            int decrease = isMethod ? 1 : 0;
             if (!isVariadic && providedArgs.Count != expectedArgsType.Length)
             {
-                Traceback.Instance.ThrowException(new BifyArgumentError($"Expected {expectedArgsType.Length} arguments but got {providedArgs.Count}."));
+                Traceback.Instance.ThrowException(new BifyArgumentError($"Expected {expectedArgsType.Length - decrease} arguments but got {providedArgs.Count - decrease}."));
                 return;
             }
             else if (isVariadic && providedArgs.Count < expectedArgsType.Length)
             {
-                Traceback.Instance.ThrowException(new BifyArgumentError($"Expected at least {expectedArgsType.Length} arguments but got {providedArgs.Count}."));
+                Traceback.Instance.ThrowException(new BifyArgumentError($"Expected at least {expectedArgsType.Length - decrease} arguments but got {providedArgs.Count - decrease}."));
                 return;
             }
             for (int i = 0; i < expectedArgsType.Length; i++)

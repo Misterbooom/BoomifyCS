@@ -10,11 +10,16 @@
     <FileVersion>1.0.0.0</FileVersion>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);DEBUG_COMPILE</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="LLVMSharp" Version="16.0.0" />
+    <PackageReference Include="libLLVM" Version="20.1.2" />
+    <PackageReference Include="LLVMSharp" Version="20.1.2" />
+    <PackageReference Include="LLVMSharp.Interop" Version="20.1.2" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Nunit" Version="4.1.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
@@ -24,5 +29,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Traceback\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bin\Debug\libLLVM.dll" />
+    <None Include="bin\Debug\net8.0\libLLVM.dll" />
   </ItemGroup>
 </Project>

@@ -26,12 +26,14 @@ namespace BoomifyCS.Ast
             }
         }
         private AstNode? _currentNode;
+        public bool IsHandlingLine = true;
         public List<AstNode> Nodes { get; set; } = new List<AstNode>();
         private static List<string> typeTable = [];
 
-        public AstBuilder(List<Token> tokens)
+        public AstBuilder(List<Token> tokens, bool isHandlingLine = true)
         {
             this.tokens = tokens;
+            this.IsHandlingLine = isHandlingLine;
         }
 
         public AstNode BuildNode()
@@ -56,15 +58,22 @@ namespace BoomifyCS.Ast
             if (Nodes.Count > 1)
             {
                 Nodes.WriteNodes();
-                new BifySyntaxError("Multiple nodes generated—this likely indicates ambiguous or incomplete syntax. Please check your input for missing operators or delimiters.").Throw();
+                if (!IsHandlingLine)
+                {
+                    new BifySyntaxError("Invalid Syntax! Check your input for missing operators or delimiters.").Throw();
+                }
+                else
+                {
+                    HandleInvalidSyntax();
+                }
             }
             return Nodes.Count == 1 ? Nodes[0] : null;
         }
-        
+
         public Token GetPreviousToken()
         {
-            
-            return TokensFormatter.GetTokenOrNull(tokens,tokenIndex - 1);
+
+            return TokensFormatter.GetTokenOrNull(tokens, tokenIndex - 1);
         }
         public Token Peek()
         {
@@ -99,8 +108,8 @@ namespace BoomifyCS.Ast
         public bool IsType(Token token)
         {
             AssemblyCompiler compiler = AssemblyCompiler.Instance;
-           
-             return compiler.VariableManager.TryGetBifyType(token.Value) != null || typeTable.Contains(token.Value) || token.Value == "var";
+
+            return compiler.VariableManager.TryGetBifyType(token.Value) != null || typeTable.Contains(token.Value) || token.Value == "var";
         }
         public void AddType(string name)
         {
@@ -144,8 +153,21 @@ namespace BoomifyCS.Ast
 
         public List<Token> GetBlockTokens() => TokensFormatter.GetTokensBetween(tokens, ref tokenIndex, TokenType.LCUR, TokenType.RCUR);
 
-        public AstNode ParseTokens(List<Token> conditionTokens) => new AstBuilder(conditionTokens).BuildNode();
+        public AstNode ParseTokens(List<Token> conditionTokens) => new AstBuilder(conditionTokens, false).BuildNode();
 
         public AstBlock ParseBlock(List<Token> blockTokens) => new AstBlock(((AstModule)new AstTree(Traceback.Instance.source).ParseTokens(blockTokens)).ChildNodes);
+        private void HandleInvalidSyntax()
+        {
+            if (Nodes.Count == 2)
+            {
+                Nodes.WriteNodes();
+                if (Nodes[0].Token.Type == TokenType.POINTER || Nodes[0] is AstIdentifier)
+                {
+                    new BifySyntaxError($"Invalid variable declaration syntax. '{Nodes[0].Token.Value}' is not a type").Throw();
+                }
+                new BifySyntaxError("Opa 2 node").Throw();
+            }
+            new BifySyntaxError("Invalid Syntax! Check your input for missing operators or delimiters.").Throw();
+        }
     }
 }
