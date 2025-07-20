@@ -1,30 +1,23 @@
 ﻿class Printer{
-	constructor(){
-	
+	int integer;
+	char* string;
+	public constructor(int a){
+		this.integer = a;
 	}
-	public void print(int a){
-		explode("int a = %d\n", a);
+	public constructor(char* b){
+		this.string = b;
 	}
-	public void print(char* a){
-		explode("char* a = %s\n", a);
+	public void print(int a ){
+		explode("Integer: %d\n", a);
+	}
+	public void print(char* b){
+		explode("String: %s", b);
 	}
 
-	public void print(float a){
-		explode("float a = %f\n", a);
-	}
-	public void print(bool a){
-		if (a){
-			explode("bool a = true\n");
-		}else{
-			explode("bool a = false\n");
-		}
-	}
 }
 void main(){
-	Printer d = new Printer();
-	d.print(1);
-	d.print("hello");
-	d.print(3.1415);
-	d.print(true);
+
+	Printer p2 = new Printer("Test String");
+	p2.print(12);
 
 }

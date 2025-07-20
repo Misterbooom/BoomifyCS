@@ -42,6 +42,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                     BifyFunction resolvedMethod = methodRef.Resolve(providedArgs.Select(i => i.GetBifyType()).ToArray());
 
                     providedArgs = providedArgs.Prepend(resolvedMethod.ParentClass).ToList();
+
                     HandleFunctionCall(callNode, resolvedMethod,providedArgs);
                 }
                 else

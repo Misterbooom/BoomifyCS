@@ -31,10 +31,10 @@ namespace BoomifyCS.Assembly.NodeHandlers
             CallNodeHandler callNodeHandler = new CallNodeHandler(compiler);
             compiler.Visit(argumentsNode);
             List<BifyValue> arguments = callNodeHandler.GetArguments(CallNodeHandler.CountArgs(argumentsNode));
-            BifyFunction constructor = GetConstructor(classType);
             ClassValue classValue = classType.InitClass();
+            BifyMethodRef constructor = GetConstructor(classType,classValue);
 
-           
+
             if (constructor == null && arguments.Count > 0)
             {
                 BifyDebug.Log($"Argumetns count : {arguments.Count}");
@@ -42,21 +42,21 @@ namespace BoomifyCS.Assembly.NodeHandlers
             }
             else if (constructor != null)
             {
-                arguments = arguments.Prepend(classValue).ToList();
-                //foreach (var argument in arguments)
-                //{
-                //    Console.WriteLine($"Argument: {argument}");
-                //}
-                callNodeHandler.ValidateAndAutoCastArguments(arguments, constructor.FunctionArgs.BifyTypes, false, true);
-                constructor.Call(arguments.ToArray());
+                
+                BifyFunction overload = constructor.Resolve([.. arguments.Select(x => x.GetBifyType())]);
+
+                arguments = [.. arguments.Prepend(classValue)];
+
+                callNodeHandler.ValidateAndAutoCastArguments(arguments, overload.FunctionArgs.BifyTypes, false, true);
+                overload.Call([.. arguments]);
             }
             AssemblyCompiler.Instance.StackPush(classValue);
         }
         
-        private BifyFunction GetConstructor(ClassType classType)
+        private BifyMethodRef GetConstructor(ClassType classType,ClassValue classValue)
         {
-            
-            return null;
+            //BifyDebug.Log($"[GetConstructor] Getting constructor for class {classType.Name} Current class is : {(compiler.CurrentClass == null ? "None" : compiler.CurrentClass)}");
+            return classType.GetMethod("constructor", compiler.CurrentClass).GetMethodRef(classValue);
         }
     }
 }

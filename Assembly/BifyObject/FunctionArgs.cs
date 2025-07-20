@@ -55,27 +55,50 @@ namespace BoomifyCS.Assembly.BifyObject
         }
         public bool HasSameTypes(BifyType[] other, int start = 0)
         {
+            Console.WriteLine($"[HasSameTypes] Called with start={start}, other.Length={(other == null ? "null" : other.Length.ToString())}");
+
             if (other == null)
+            {
+                Console.WriteLine("[HasSameTypes] Other array is null.");
                 return false;
+            }
 
             var thisTypes = this.BifyTypes;
+            Console.WriteLine($"[HasSameTypes] thisTypes.Length={thisTypes.Length}");
 
             if (start < 0 || start > thisTypes.Length)
+            {
+                Console.WriteLine($"[HasSameTypes] Invalid start index: {start}");
                 return false;
+            }
 
             int sliceLength = thisTypes.Length - start;
+            Console.WriteLine($"[HasSameTypes] sliceLength={sliceLength}");
+
             if (sliceLength != other.Length)
+            {
+                Console.WriteLine($"[HasSameTypes] Length mismatch: sliceLength={sliceLength}, other.Length={other.Length}");
                 return false;
+            }
 
             for (int i = 0; i < other.Length; i++)
             {
-                if (!thisTypes[i + start].CompareType(other[i]))
+                bool compareResult = thisTypes[i + start].CompareType(other[i]);
+                Console.WriteLine($"[HasSameTypes] Comparing thisTypes[{i + start}] ({thisTypes[i + start]}) with other[{i}] ({other[i]}): {compareResult}");
+                if (!compareResult)
+                {
+                    Console.WriteLine($"[HasSameTypes] Type mismatch at index {i}: {thisTypes[i + start]} vs {other[i]}");
                     return false;
+                }
             }
 
+            Console.WriteLine("[HasSameTypes] All types match.");
             return true;
         }
-
+        public override string ToString()
+        {
+            return string.Join(", ", arguments.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
+        }
 
         private void ExtractArgs(AstNode node)
         {

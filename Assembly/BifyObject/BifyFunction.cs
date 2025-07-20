@@ -35,6 +35,10 @@ namespace BoomifyCS.Assembly.BifyObject
                  )
             );
         }
+        public override string ToString()
+        {
+            return $"{(IsMethod ? ParentClass?.GetTypeName() + "." : "")}{GetTypeName()}({FunctionArgs}) -> {ReturnType}";
+        }
     }
     class FunctionType : BifyType
     {

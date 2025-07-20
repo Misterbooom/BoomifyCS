@@ -51,7 +51,9 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             foreach (var overload in overloads)
             {
-                if (overload.FunctionArgs.HasSameTypes(types,1))
+                BifyDebug.Log($"Overload: {overload}");
+
+                if (overload.FunctionArgs.HasSameTypes(types, 1))
                 {
                     overload.IsMethod = true;
                     overload.ParentClass = ClassValue;
@@ -59,8 +61,12 @@ namespace BoomifyCS.Assembly.BifyObject
                     return overload;
                 }
             }
+            if (types.Length < 1 || types[0] is ClassType)
+            {
+                throw new ArgumentException("First type can't be a ClassType here");
+            }
             return new BifyTypeError(
-                $"No matching overload for method '{MethodName}' with types {string.Join(", ", types.Select(t => t.Name))}."
+                $"No matching overload for method '{MethodName}' with types: {string.Join(", ", types[0..].Select(t => t.Name))}."
             ).Throw<BifyFunction>();
         }
 
@@ -68,14 +74,22 @@ namespace BoomifyCS.Assembly.BifyObject
     class ClassMethod : ClassMember
     {
         private List<BifyFunction> overloads = new();
-
+        private ValueFlag methodAccessFlag;
         public ClassMethod(string name, BifyFunction firstOverload)
             : base(name, firstOverload)
         {
             overloads.Add(firstOverload);
+            methodAccessFlag = firstOverload.ValueFlag & ValueFlag.AccessMask;
         }
         public void AddOverload(BifyFunction overload)
         {
+            if (overload.ValueFlag != methodAccessFlag)
+            {
+                Traceback.Instance.ThrowException(new BifyAttributeError(
+                    $"Overload for method '{Name}' has different access level than the first overload."
+                ));
+            }
+
             if (overloads.Any(x => x.FunctionArgs.HasSameTypes(overload.FunctionArgs)))
             {
                 Traceback.Instance.ThrowException(new BifyAttributeError(
@@ -103,19 +117,17 @@ namespace BoomifyCS.Assembly.BifyObject
 
         public override BifyValue GetAttribute(string name, BifyType other, LLVMBuilderRef builder)
         {
-
-
-            var classType = (ClassType)GetBifyType();
+            ClassType classType = (ClassType)GetBifyType();
 
             for (int i = 0; i < classType.ClassAttributes.Length; i++)
             {
                 var attribute = classType.ClassAttributes[i];
                 if (attribute.Name == name)
                 {
-                    if (!HasAccess(attribute.Value.ValueFlag, other))
+                    if (!classType.HasAccess(attribute.Value.ValueFlag, other))
                     {
                         Traceback.Instance.ThrowException(new BifyAttributeError(
-                            $"Access to attribute '{attribute.Name}' is denied because it is {GetAccessLevel(attribute.Value.ValueFlag)}"
+                            $"Access to attribute '{attribute.Name}' is denied because it is {ClassType.GetAccessLevel(attribute.Value.ValueFlag)}"
                         ));
                     }
 
@@ -129,52 +141,17 @@ namespace BoomifyCS.Assembly.BifyObject
                 }
             }
 
-            if (classType.ClassMethods.TryGetValue(name, out var method))
+            var method = classType.GetMethod(name, other);
+            if (method != null)
             {
-
-                if (!HasAccess(method.Value.ValueFlag, other))
-                {
-                    Traceback.Instance.ThrowException(new BifyAttributeError(
-                        $"Access to method '{method.Name}' is denied because it is {GetAccessLevel(method.Value.ValueFlag)}"
-                    ));
-                }
-
                 return method.GetMethodRef(this);
-
-
             }
 
-            Traceback.Instance.ThrowException(new BifyAttributeError(
-                $"{GetTypeName()} doesn't have attribute or method '{name}'"
-            ));
-
-            return null!;
+            return new BifyAttributeError(
+                $"{GetTypeName()} doesn't have attribute or method '{name}'").Throw<BifyValue>();
         }
 
-        private bool HasAccess(ValueFlag flags, BifyType accessorType)
-        {
-            var access = flags & ValueFlag.AccessMask;
 
-            return access switch
-            {
-                ValueFlag.Private => accessorType != null && accessorType.CompareType(GetBifyType()),
-                ValueFlag.Public => true,
-                ValueFlag.Protected => accessorType != null && accessorType.CompareType(GetBifyType()),
-                _ => false
-            };
-        }
-
-        private static string GetAccessLevel(ValueFlag flags)
-        {
-            var access = flags & ValueFlag.AccessMask;
-            return access switch
-            {
-                ValueFlag.Private => "private",
-                ValueFlag.Public => "public",
-                ValueFlag.Protected => "protected",
-                _ => "unknown"
-            };
-        }
 
     }
 
@@ -249,6 +226,46 @@ namespace BoomifyCS.Assembly.BifyObject
         protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
             return new ClassValue(value, this);
+        }
+        public ClassMethod? GetMethod(string name, BifyType other)
+        {
+            if (ClassMethods.TryGetValue(name, out var method))
+            {
+                if (!HasAccess(method.Value.ValueFlag, other))
+                {
+                    Traceback.Instance.ThrowException(new BifyAttributeError(
+                        $"Access to method '{method.Name}' is denied because it is {ClassType.GetAccessLevel(method.Value.ValueFlag)}"
+                    ));
+                }
+
+                return method;
+            }
+
+            return null;
+        }
+        public bool HasAccess(ValueFlag flags, BifyType accessorType)
+        {
+            var access = flags & ValueFlag.AccessMask;
+
+            return access switch
+            {
+                ValueFlag.Private => accessorType != null && accessorType.CompareType(this),
+                ValueFlag.Public => true,
+                ValueFlag.Protected => accessorType != null && accessorType.CompareType(this),
+                _ => false
+            };
+        }
+
+        public static string GetAccessLevel(ValueFlag flags)
+        {
+            var access = flags & ValueFlag.AccessMask;
+            return access switch
+            {
+                ValueFlag.Private => "private",
+                ValueFlag.Public => "public",
+                ValueFlag.Protected => "protected",
+                _ => "unknown"
+            };
         }
     }
 }
