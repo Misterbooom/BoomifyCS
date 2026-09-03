@@ -4,102 +4,57 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 using BoomifyCS.Ast;
 using BoomifyCS.Lexer;
 using BoomifyCS.Parser;
 using BoomifyCS.Assembly;
-using LLVMSharp;
-using LLVMSharp.Interop;
 using BoomifyCS.Exceptions;
-using BoomifyCS.Assembly.BifyObject;
-using System.Drawing;
-
-//class Array
-//{
-//    int size;
-//    private int* data;
-//    int capacity;
-//    constructor(int capacity)
-//    {
-//        this.capacity = capacity;
-//        this.data = malloc(sizeof(int) * capacity);
-//    }
-//    void add(int x)
-//    {
-//        if (this.size >= this.capacity)
-//        {
-//            int newCapacity = this.capacity * 2;
-//            this.data = realloc(this.data, sizeof(int) * newCapacity);
-//            this.capacity = newCapacity;
-//        }
-//        else
-//        {
-//            this.data[this.size] = x;
-//            this.size++;
-//        }
-//    }
-//    void set(int x, int i)
-//    {
-//        this.data[i] = x;
-//    }
-
-//}
-//int main()
-//{
-//    var arr = new Array(10);
-//    arr.add(12);
-//    explode("First : %d", arr.data[0]);
-
-//    return 0;
-//}
+using System.CommandLine;
+using System.Threading.Tasks;
 
 namespace BoomifyCS
 {
     internal class Program
     {
-        static void Main(string[] args)
-        {
-            Run(args);
-        }
-
-        static void Run(string[] args)
+        static Task<int> Main(string[] args)
         {
             try
             {
-                RunInterpreter();
+                Argument<FileInfo> inputArgument = new Argument<FileInfo>("input").AcceptExistingOnly();
+                Option<FileInfo> outputOption = new Option<FileInfo>("input",aliases: ["--output", "--o"]).AcceptExistingOnly();
+                Option<bool> execOption = new Option<bool>("--exec", "--exec");
+                var rootCommand = new RootCommand("BoomifyCS Compiler")
+                {
+                    inputArgument,
+                    outputOption,
+                    execOption
+                };
+                rootCommand.SetAction(result =>
+                {
+                    FileInfo input= result.GetValue(inputArgument);
+                    FileInfo output = result.GetValue(outputOption);
+                    bool exec = result.GetValue(execOption);
+                    CompilerFlags compilerFlags = CompilerFlags.NONE;
+                    if (exec)
+                        compilerFlags = compilerFlags | CompilerFlags.EXECUTE;
+                    
+                    string outPath = output?.FullName ?? Path.ChangeExtension(input.FullName, ".out");
+                    Console.WriteLine($"Compiling {outPath}");
+                    RunCompiler(input.FullName, outPath, compilerFlags);
+                });
+                return Task.FromResult(rootCommand.Parse(args).Invoke());
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                Console.WriteLine("Error!");
-                string errorText = e.ToString();
-                //new SimpleErrorWrapper(e).PrintStackTrace();
-                throw;
-                //ProcessStartInfo psi = new ProcessStartInfo
-                //{
-                //    FilePath = "python",
-                //    Arguments = $"C:/BoomifyCS/analyzer.py \"{errorText}\"",
-                //    RedirectStandardOutput = true,
-                //    UseShellExecute = false,
-                //    CreateNoWindow = true
-                //};
-
-                //using (Process process = Process.Start(psi))
-                //{
-                //    string output = await process.StandardOutput.ReadToEndAsync();
-                //    process.WaitForExit();
-                //    Console.WriteLine("Error analysis:");
-                //    Console.WriteLine(output);
-                //}
+                return Task.FromException<int>(exception);
             }
         }
 
-        static void RunInterpreter()
+        static void RunCompiler(string filePath, string outputFilePath, CompilerFlags flags)
         {
             Console.OutputEncoding = Encoding.Unicode;
-            string file = "C:/Projects/BoomifyCS/test.bify";
-            Traceback.Instance.FilePath = file;
-            string code = File.ReadAllText(file);
+            Traceback.Instance.FilePath = filePath;
+            string code = File.ReadAllText(filePath);
 
             Stopwatch stopwatch = new();
             stopwatch.Start();
@@ -118,12 +73,12 @@ namespace BoomifyCS
 
             BifyDebug.Log(node.ToString());
             AssemblyCompiler compiler = AssemblyCompiler.Instance;
-            compiler.Compile(node);
+            compiler.Compile(node, filePath, outputFilePath, flags);
             //Console.Write("\x1b[38;2;255;0;0mThis is bright red\x1b[0m\n");
             //Console.Write("\x1b[38;2;0;255;0mThis is bright green\x1b[0m\n");
             //Console.Write("\x1b[38;2;0;0;255mThis is bright blue\x1b[0m\n");
             //Colorful.Console.WriteLine("This Is Red from colorful",Color.Red);
-
         }
+        
     }
 }

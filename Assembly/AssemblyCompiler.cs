@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using LLVMSharp;
 using LLVMSharp.Interop;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
-using System.Threading.Tasks;
 using System.Linq;
-using System.Runtime.InteropServices;
+using NUnit.Framework.Internal;
 
 namespace BoomifyCS.Assembly
 {
@@ -20,6 +18,12 @@ namespace BoomifyCS.Assembly
         ASSIGNMENT_INDEX = 1 << 0,
     }
 
+    [Flags]
+    enum CompilerFlags
+    {
+        NONE, 
+        EXECUTE = 1 << 0
+    }
     class AssemblyCompiler : IDisposable
     {
         private static AssemblyCompiler _instance;
@@ -38,6 +42,7 @@ namespace BoomifyCS.Assembly
         public DebugBuilder DebugBuilder { get; }
         public int StackCount => _stack.Count;
         public BifyType CurrentClass;
+
         public LLVMValueRef Function
         {
             get
@@ -48,6 +53,7 @@ namespace BoomifyCS.Assembly
                 }
             }
         }
+
         public LLVMBasicBlockRef FunctionEntryBB { get; private set; }
 
         public LLVMBasicBlockRef ErrorBB;
@@ -56,19 +62,17 @@ namespace BoomifyCS.Assembly
 
         private AssemblyCompiler()
         {
-            LLVM.InitializeX86TargetMC();
-            LLVM.InitializeX86Target();
-            LLVM.InitializeX86TargetInfo();
-            LLVM.InitializeX86AsmParser();
-            LLVM.InitializeX86AsmPrinter();
-
+            LLVM.InitializeAllTargetInfos();
+            LLVM.InitializeAllTargets();
+            LLVM.InitializeAllTargetMCs();
+            LLVM.InitializeAllAsmParsers();
+            LLVM.InitializeAllAsmPrinters();
             Context = new LLVMContext();
             Module = Context.Handle.CreateModuleWithName("test");
             Builder = Context.Handle.CreateBuilder();
             VariableManager = new AssemblyVariableManager();
             Engine = Module.CreateExecutionEngine();
             DebugBuilder = new DebugBuilder(Module);
-
         }
 
         public static AssemblyCompiler Instance
@@ -82,6 +86,7 @@ namespace BoomifyCS.Assembly
                 }
             }
         }
+
         public void PositionBeforeTerminator(LLVMBasicBlockRef block)
         {
             unsafe
@@ -90,16 +95,15 @@ namespace BoomifyCS.Assembly
                 {
                     throw new ArgumentException("Block handle is invalid.");
                 }
+
                 var terminator = LLVM.GetBasicBlockTerminator(block);
                 if (terminator != null)
                 {
                     Builder.PositionBefore(terminator);
                 }
-            
             }
-
-            
         }
+
         public void SetFunctionEntryBB(LLVMBasicBlockRef entryBB)
         {
             FunctionEntryBB = entryBB;
@@ -120,6 +124,7 @@ namespace BoomifyCS.Assembly
         {
             return _stack.Pop();
         }
+
         public IValue StackElementAt(int index)
         {
             return _stack.ElementAt(index);
@@ -133,182 +138,176 @@ namespace BoomifyCS.Assembly
                 {
                     throw new InvalidOperationException("Stack is empty.");
                 }
+
                 T poppedValue = (T)_stack.Pop();
                 if (poppedValue is not T)
                 {
                     new BifyTypeError(errroMessage).Throw();
                     return default;
                 }
+
                 return poppedValue;
             }
-            catch (InvalidCastException){
-                new BifyTypeError(errroMessage).Throw(); return default;
+            catch (InvalidCastException)
+            {
+                new BifyTypeError(errroMessage).Throw();
+                return default;
             }
-            
         }
+
         public void Visit(AstNode node)
         {
             if (node == null)
             {
                 return;
             }
+
             NodeHandler handler = NodeHandlerFactory.CreateHandler(node, this);
             handler.HandleNode(node);
         }
 
-        public void Compile(AstNode node)
+        public void Compile(AstNode node, string filePath, string outputFilePath, CompilerFlags flags)
         {
             Visit(node);
-            BifyDebug.Log($"Module:\n{Module}");
+            // BifyDebug.Log($"Module:\n{Module}");
             LLVMValueRef mainFunction = Module.GetNamedFunction("main");
             if (mainFunction.Handle == IntPtr.Zero)
             {
                 Console.WriteLine("Main function not found.");
                 return;
             }
-            CompileFile("test.ll", "output");
-        }
 
-        private void CompileFile(string filePath, string outputDirectory)
-        {
-            string fileName = Path.GetFileNameWithoutExtension(filePath);
-            Directory.CreateDirectory(outputDirectory);
-
-            // Define paths
-            string libPath = Path.Combine(outputDirectory, "stdc.lib");
-            string objPath = Path.Combine(outputDirectory, "stdc.o");
-            string cSourceFile = "C:\\Projects\\BoomifyCS\\Assembly\\stdc.c";
-            string exeFile = Path.Combine(outputDirectory, $"{fileName}.exe");
-            string irFile = filePath;
-            string objFile = Path.Combine(outputDirectory, $"{fileName}.o");
-
-            try
+            if (Path.GetExtension(outputFilePath) == ".o")
             {
-                string compileCCommand = $"clang -c -g {cSourceFile} -o {objPath}";
-                Console.WriteLine($"C command: {compileCCommand}");
-                ExecuteCommand(compileCCommand);
-
-                string createLibCommand = $"llvm-ar rcs {libPath} {objPath}";
-                ExecuteCommand(createLibCommand);
-
-                Module.PrintToFile(filePath);
-                Console.WriteLine($"LLVM IR written to: {filePath}");
-
-                if (File.Exists(exeFile))
-                {
-                    File.Delete(exeFile);
-                }
-
-                //string llcCommand = $"llc -filetype=obj -O0 {irFile} -o {objFile}";
-                //ExecuteCommand(llcCommand);
-
-                string clangCommand = $"clang -O3 {irFile} -o {exeFile} -g -gcodeview {libPath} -lmsvcrt -lkernel32 -luser32 -llegacy_stdio_definitions";
-                ExecuteCommand(clangCommand);
-
-                if (!File.Exists(exeFile))
-                    throw new FileNotFoundException($"Executable not generated: {exeFile}");
-
-                Console.WriteLine("Running executable...");
-                RunExecutable(exeFile);
+                GenerateObjectFile(filePath, outputFilePath);
             }
-            catch (Exception ex)
+            else if (Path.GetExtension(outputFilePath) == ".out" || Path.GetExtension(outputFilePath) == "")
             {
-                Console.WriteLine($"Error during compilation or execution: {ex.Message}");
+                GenerateExecutable(filePath, outputFilePath, flags);
+            }
+            else
+            {
+                Console.WriteLine($"Invalid output file extension: {Path.GetExtension(outputFilePath)}");
             }
         }
 
-
-
-        private static void ExecuteCommand(string command)
+        private void GenerateObjectFile(string filePath, string outputFilePath)
         {
-            try
+            unsafe
             {
-                ProcessStartInfo psi = new ProcessStartInfo
+                LLVMTargetMachineRef targetMachine = CreateTargetMachine();
+                targetMachine.EmitToFile(Module, outputFilePath, LLVMCodeGenFileType.LLVMObjectFile);
+                LLVM.DisposeTargetMachine(targetMachine);
+            }
+        }
+
+        // TODO: Add windows support
+        private void GenerateExecutable(string filePath, string outputFilePath, CompilerFlags flags)
+        {
+            string tempObjFile = Path.GetTempFileName() + ".o";
+
+            GenerateObjectFile(filePath, tempObjFile);
+            LinkLibraries(tempObjFile, outputFilePath);
+
+            if (File.Exists(tempObjFile))
+            {
+                File.Delete(tempObjFile);
+            }
+
+            if (flags.HasFlag(CompilerFlags.EXECUTE))
+            {
+                BifyDebug.Log("Running executable: " + outputFilePath);
+                var processInfo = new System.Diagnostics.ProcessStartInfo
                 {
-                    FileName = "cmd.exe",
-                    Arguments = $"/C {command}",
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
+                    FileName = outputFilePath,
                     RedirectStandardOutput = true,
-                    RedirectStandardInput = true,
-                    RedirectStandardError = true
-                };
-
-                using (Process process = new Process { StartInfo = psi })
-                {
-                    process.Start();
-                    Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
-                    Task<string> errorTask = process.StandardError.ReadToEndAsync();
-
-                    process.WaitForExit();
-
-                    string output = outputTask.Result;
-                    string errorOutput = errorTask.Result;
-
-                    if (!string.IsNullOrEmpty(output))
-                    {
-                        Console.WriteLine(output);
-                    }
-                    if (!string.IsNullOrEmpty(errorOutput))
-                    {
-                        Console.WriteLine($"Error: {errorOutput}");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error executing command: {ex.Message}");
-            }
-        }
-
-
-        private static void RunExecutable(string exePath)
-        {
-            try
-            {
-                var psi = new ProcessStartInfo
-                {
-                    FileName = "cmd.exe",
-                    Arguments = $"/k \"chcp 65001 >nul && {exePath}\"",
-
+                    RedirectStandardError = true,
                     UseShellExecute = false,
-                    CreateNoWindow = false,
-                    RedirectStandardOutput = false,
-                    RedirectStandardError = false,
-                    RedirectStandardInput = false
+                    CreateNoWindow = true
                 };
 
-                var stopwatch = new Stopwatch();
-                using (Process process = Process.Start(psi))
+                using var process = new System.Diagnostics.Process { StartInfo = processInfo };
+    
+                process.OutputDataReceived += (sender, args) => {
+                    if (args.Data != null) Console.WriteLine(args.Data);
+                };
+                process.ErrorDataReceived += (sender, args) => {
+                    if (args.Data != null) Console.Error.WriteLine(args.Data);
+                };
+
+                process.Start();
+
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+
+                process.WaitForExit();
+    
+                if (process.ExitCode != 0)
                 {
-                    if (process == null)
-                    {
-                        Console.WriteLine("Failed to start the process.");
-                        Environment.Exit(1); 
-                        return;
-                    }
-
-                    stopwatch.Start();
-      
-                    process.WaitForExit();
-               
-                    stopwatch.Stop();
-
-                    Console.WriteLine($"Execution time: {stopwatch.ElapsedMilliseconds} ms");
-                    Console.WriteLine("Process has exited but remains open.");
-                    Console.WriteLine($"Exit code = {process.ExitCode}");
+                    BifyDebug.Log($"Process ended up with error. Code: {process.ExitCode}");
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error running executable: {ex.Message}");
-                Environment.Exit(1);
             }
         }
 
+        private void LinkLibraries(string objectFilePath, string outputFilePath)
+        {
+            string stdcPath = "/home/artur/RiderProjects/BoomifyCS/Assembly/stdc.c";
+            
+            var processInfo = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "clang",
+                Arguments = $"\"{objectFilePath}\" \"{stdcPath}\" -o \"{outputFilePath}\"",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
 
+            using var process = System.Diagnostics.Process.Start(processInfo);
+            process?.WaitForExit();
+
+            if (process != null && process.ExitCode != 0)
+            {
+                string error = process.StandardError.ReadToEnd();
+                throw new InvalidOperationException($"Clang compilation and linking failed:\n{error}");
+            }
+            Console.WriteLine("Successfully compiled.");
+        }
+
+        private unsafe LLVMTargetMachineRef CreateTargetMachine()
+        {
+            sbyte* targetTriple = LLVM.GetDefaultTargetTriple();
+            LLVMTarget* target;
+            sbyte* error = null;
+
+            if (LLVM.GetTargetFromTriple(targetTriple, &target, &error) != 0)
+            {
+                string message = new string(error);
+                LLVM.DisposeMessage(error);
+                throw new InvalidOperationException($"Error selecting target: {message}");
+            }
+
+            LLVMTargetMachineRef targetMachine;
+
+            fixed (byte* cpuPtr = "generic\0"u8)
+            fixed (byte* featuresPtr = "\0"u8)
+            {
+                targetMachine = LLVM.CreateTargetMachine(
+                    target,
+                    targetTriple,
+                    (sbyte*)cpuPtr,
+                    (sbyte*)featuresPtr,
+                    LLVMCodeGenOptLevel.LLVMCodeGenLevelDefault,
+                    LLVMRelocMode.LLVMRelocDefault,
+                    LLVMCodeModel.LLVMCodeModelDefault
+                );
+            }
+
+            return targetMachine;
+        }
 
         private bool _disposed = false;
+
         public void Dispose()
         {
             if (!_disposed)

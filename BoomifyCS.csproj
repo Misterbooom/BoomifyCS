@@ -17,11 +17,13 @@
     <Content Include=".gitignore" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="libLLVM" Version="20.1.2" />
+    <PackageReference Include="libLLVM" Version="23.1.0" />
+    <PackageReference Include="libLLVM.runtime.linux-x64" Version="23.1.0" />
     <PackageReference Include="LLVMSharp" Version="20.1.2" />
     <PackageReference Include="LLVMSharp.Interop" Version="20.1.2" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Nunit" Version="4.1.0" />
+    <PackageReference Include="System.CommandLine" Version="3.0.0-preview.7.26381.103" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>

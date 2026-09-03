@@ -1,21 +1,17 @@
 ﻿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <windows.h>
-#include <dbghelp.h>
 #include "stdc.h"
 
-#pragma comment(lib, "dbghelp.lib")
 void writeLine(int space, const char *file, int targetLine)
 {
 	char res[256] = "";
-	for (int i = 0; i < space && i < sizeof(res) - 1; i++)
+	for (int i = 0; i < space && strlen(res) < sizeof(res) - 1; i++)
 	{
-		strcat_s(res,sizeof(res) - 1," ");
+		strncat(res, " ", sizeof(res) - strlen(res) - 1);
 	}
 
-	FILE *fptr;  
-	fopen_s(&fptr,file, "r");
+	FILE *fptr = fopen(file, "r");
 	if (fptr == NULL)
 	{
 		perror("Error opening file");
@@ -29,8 +25,7 @@ void writeLine(int space, const char *file, int targetLine)
 		currentLine++;
 		if (currentLine == targetLine)
 		{
-			// strncat(res, line, sizeof(res) - strlen(res) - 1);
-			strcat_s(res,sizeof(res) - strlen(res) - 1,line);
+			strncat(res, line, sizeof(res) - strlen(res) - 1);
 			break;
 		}
 	}
@@ -51,19 +46,20 @@ void printStackTrace()
 		writeLine(10, frame.file, frame.line);
 	}
 }
-void pushFrame(int line,const char* file) {
+
+void pushFrame(int line, const char* file) {
 	StackFrame stackFrame;
 	stackFrame.line = line;
 	stackFrame.file = file;
 	if (top == STACK_SIZE - 1){
-		printError("StackOverflow","Recursion depth exceeded!",file,line);
+		printError("StackOverflow", "Recursion depth exceeded!", file, line);
 	}
 	else{
 		top += 1;
 		stack[top] = stackFrame;
-
 	}
 }
+
 void popFrame(){
 	if (top == -1){
 		return;
@@ -83,11 +79,3 @@ void printError(const char *errorName, const char *message, const char *file, in
 	printStackTrace();
 	exit(1);
 }
-
-
-
-// int main()
-// {
-// 	printError("Error", "Error message", "stdc.c", 2);
-// 	return 0;
-// }
