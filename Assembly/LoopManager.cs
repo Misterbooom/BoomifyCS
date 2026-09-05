@@ -1,68 +1,56 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BoomifyCS.Exceptions;
+﻿using System.Collections.Generic;
 using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly
 {
-    class LoopContext
+    class LoopContext(LLVMBasicBlockRef conditionBb, LLVMBasicBlockRef mergeBb, LLVMBasicBlockRef continueBb)
     {
-        public LLVMBasicBlockRef ConditionBB;
-        public LLVMBasicBlockRef MergeBB;
-        public LLVMBasicBlockRef ContinueBB;
-        public LoopContext(LLVMBasicBlockRef conditionBB, LLVMBasicBlockRef mergeBB, LLVMBasicBlockRef continueBB)
-        {
-            ConditionBB = conditionBB;
-            MergeBB = mergeBB;
-            ContinueBB = continueBB;
-        }
-
+        public LLVMBasicBlockRef ConditionBb = conditionBb;
+        public LLVMBasicBlockRef MergeBb = mergeBb;
+        public LLVMBasicBlockRef ContinueBb = continueBb;
     }
     class LoopManager
     {
-        private Stack<LoopContext> loopsStack = [];
-        private Stack<int> branches = [];
+        private readonly Stack<LoopContext> _loopsStack = [];
+        private readonly Stack<int> _branches = [];
         public LoopManager()
         {
         }
         public void AddLoop(LoopContext loopContext)
         {
-            loopsStack.Push(loopContext);
+            _loopsStack.Push(loopContext);
         }
         public LoopContext GetCurrentLoop()
         {
-            if (loopsStack.Count == 0)
+            if (_loopsStack.Count == 0)
             {
                 return null;
             }
-            return loopsStack.Peek();
+            return _loopsStack.Peek();
         }
         public void PopLoop()
         {
-            loopsStack.Pop();
+            _loopsStack.Pop();
         }
         public void AddBranch()
         {
-            branches.Push(1);
+            _branches.Push(1);
         }
         public void PopBranch()
         {
-            branches.Pop();
+            _branches.Pop();
         }
         public void ClearBranches()
         {
-            branches.Clear();
+            _branches.Clear();
         }
         public int GetCurrentBranch()
         {
-            if (branches.Count == 0)
+            if (_branches.Count == 0)
             {
                 return 0;
             }
-            return branches.Peek();
+            return _branches.Peek();
         }
     }
 }

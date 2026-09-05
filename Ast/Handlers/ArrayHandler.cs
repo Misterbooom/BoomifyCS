@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BoomifyCS.Exceptions;
-using BoomifyCS.Lexer;
+﻿using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Ast.Handlers
 {
@@ -12,16 +6,17 @@ namespace BoomifyCS.Ast.Handlers
     {
         public override void HandleToken(Token token)
         {
-            builder.CurrentNode = GetArrayNode(token);
+            Builder.CurrentNode = GetArrayNode(token);
         }
         public AstNode GetArrayNode(Token token)
         {
-            var tokensInBrackets = TokensFormatter.GetTokensBetween(builder.tokens, ref builder.tokenIndex,
+            Builder.TokenIndex -= 1; //idk some shit that works otherwise you get error
+            var tokensInBrackets = TokensFormatter.GetTokensBetween(Builder.Tokens, ref Builder.TokenIndex,
                TokenType.LBRACKET, TokenType.RBRACKET);
 
-            AstNode valueNode = builder.ParseTokens(tokensInBrackets);
+            AstNode valueNode = Builder.ParseTokens(tokensInBrackets);
 
-            builder.tokenIndex++;
+            Builder.TokenIndex++;
             return new AstArray(token, valueNode);
         }
     }

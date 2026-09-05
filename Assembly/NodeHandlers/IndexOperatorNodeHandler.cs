@@ -1,28 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using BoomifyCS.Ast;
-using BoomifyCS.Lexer;
-using LLVMSharp.Interop;
+﻿using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Assembly.BifyObject;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class IndexOperatorNodeHandler : NodeHandler
+    class IndexOperatorNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
-        public IndexOperatorNodeHandler(AssemblyCompiler compiler) : base(compiler) { }
-
         public override void HandleNode(AstNode node)
         {
             AstIndexOperator indexOperatorNode = (AstIndexOperator)node;
             bool loadResultPointer = true;
-            if (compiler.Flag.HasFlag(NodeVisitFlag.ASSIGNMENT_INDEX))
+            if (Compiler.Flag.HasFlag(NodeVisitFlag.ASSIGNMENT_INDEX))
             {
                 loadResultPointer = false;
-                compiler.Flag &= ~NodeVisitFlag.ASSIGNMENT_INDEX;
+                Compiler.Flag &= ~NodeVisitFlag.ASSIGNMENT_INDEX;
             }
-            compiler.Visit(indexOperatorNode.TargetNode);
-            IValue iValue = compiler.StackIValuePop();
+            Compiler.Visit(indexOperatorNode.TargetNode);
+            IValue iValue = Compiler.StackIValuePop();
             if (iValue is BifyType type)
             {
                 HandleArrayType(type, indexOperatorNode.IndexNode);
@@ -34,21 +28,21 @@ namespace BoomifyCS.Assembly.NodeHandlers
         }
         private void HandleIndexing(BifyValue targetValue,AstNode indexNode,bool loadResultPointer)
         {
-            compiler.Visit(indexNode);
-            IValue iValue = compiler.StackIValuePop();
+            Compiler.Visit(indexNode);
+            IValue iValue = Compiler.StackIValuePop();
 
             if (iValue is BifyType)
             {
                 new BifyTypeError("Invalid index: a type was provided instead of a runtime value.").Throw();
             }
             BifyValue indexValue = (BifyValue)iValue;
-            PointerValue indexedResult = targetValue.Index(indexValue, compiler.Builder) as PointerValue;
+            PointerValue indexedResult = targetValue.Index(indexValue, Compiler.Builder) as PointerValue;
             if (indexedResult == null)
             {
                 new BifyTypeError("Indexing operation must return a pointer type.").Throw(); 
             }
             
-            compiler.StackPush(loadResultPointer ? indexedResult.Dereference() : indexedResult);
+            Compiler.StackPush(loadResultPointer ? indexedResult.Dereference() : indexedResult);
             
 
         }
@@ -67,7 +61,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 }
             }
             ArrayType arrayType = new ArrayType(targetType, elementCount);
-            compiler.StackPush(arrayType);
+            Compiler.StackPush(arrayType);
             
         }
     }

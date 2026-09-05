@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using BoomifyCS.Ast;
 using BoomifyCS.Lexer;
-using LLVMSharp.Interop;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Assembly.Builtin;
@@ -10,20 +9,19 @@ using System.Linq;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class CallNodeHandler : NodeHandler
+    class CallNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
-        public static BifyFunction pushFrame = StdC.DeclarFunction("pushFrame",
+        public static readonly BifyFunction PushFrame = StdC.DeclarFunction("pushFrame",
             new BifyType[] { new IntegerType(), new ConstStringType() }, new VoidType());
-        public static BifyFunction popFrame = StdC.DeclarFunction("popFrame",
+        public static readonly BifyFunction PopFrame = StdC.DeclarFunction("popFrame",
             [], new VoidType());
-        public CallNodeHandler(AssemblyCompiler compiler) : base(compiler) { }
 
         public override void HandleNode(AstNode node)
         {
             if (node is AstCall callNode)
             {
-                compiler.Visit(callNode.CallableName);
-                IValue callableIValue = compiler.StackIValuePop();
+                Compiler.Visit(callNode.CallableName);
+                IValue callableIValue = Compiler.StackIValuePop();
                 if (callableIValue == null)
                 {
                     throw new InvalidOperationException("Callable value is null. This should not happen.");
@@ -36,7 +34,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 else if (callableIValue is BifyMethodRef methodRef)
                 {
                     if (callNode.ArgumentsNode != null)
-                        compiler.Visit(callNode.ArgumentsNode);
+                        Compiler.Visit(callNode.ArgumentsNode);
 
                     List<BifyValue> providedArgs = GetArguments(CountArgs(callNode.ArgumentsNode));
                     BifyFunction resolvedMethod = methodRef.Resolve(providedArgs.Select(i => i.GetBifyType()).ToArray());
@@ -59,7 +57,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
         private void HandleFunctionCall(AstCall callNode, BifyFunction callable)
         {
             if (callNode.ArgumentsNode != null)
-                compiler.Visit(callNode.ArgumentsNode);
+                Compiler.Visit(callNode.ArgumentsNode);
 
             List<BifyValue> providedArgs = GetArguments(CountArgs(callNode.ArgumentsNode));
             if (callable.IsMethod)
@@ -73,7 +71,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
             ValidateAndAutoCastArguments(providedArgs, callable.FunctionArgs.BifyTypes, callable.IsVariadic, callable.IsMethod);
 #if (DEBUG_COMPILE)
-            pushFrame.Call(new BifyValue[]
+            PushFrame.Call(new BifyValue[]
             {
                         new BifyObject.IntegerType().Create(Traceback.Instance.Line),
                         new ConstStringType().Create(Traceback.Instance.FilePath)
@@ -85,10 +83,10 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 Console.WriteLine($"Arg: {arg}");
             }
             var call = callable.Call(providedArgs.ToArray());
-            call.GetLLVMValue().Name = "callRet";
-            compiler.StackPush(callable.ReturnType.CreateValueRef(call.GetLLVMValue()));
+            call.GetLlvmValue().Name = "callRet";
+            Compiler.StackPush(callable.ReturnType.CreateValueRef(call.GetLlvmValue()));
 #if (DEBUG_COMPILE)
-            popFrame.Call(new BifyValue[0]);
+            PopFrame.Call(new BifyValue[0]);
 #endif
         }
         //private void HandleCast(AstCall callNode,BifyType callableType)
@@ -110,7 +108,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             List<BifyValue> providedArgs = new List<BifyValue>();
             for (int i = 0; i < count; i++)
             {
-                IValue argIValue = compiler.StackIValuePop();
+                IValue argIValue = Compiler.StackIValuePop();
                 if (argIValue is BifyType type)
                 {
                     providedArgs.Add(new TypeValue(type));
@@ -161,7 +159,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 if (!expectedType.CompareType(providedArg.GetBifyType()))
                 {
                     Traceback.Instance.Catch(typeof(BifyTypeError));
-                    BifyValue castedArg = providedArg.ExplicitCast(expectedType, compiler.Builder);
+                    BifyValue castedArg = providedArg.ExplicitCast(expectedType, Compiler.Builder);
                     if (castedArg == null || Traceback.Instance.GetError() != null)
                     {
                         string expectedTypeName = expectedType.Name;

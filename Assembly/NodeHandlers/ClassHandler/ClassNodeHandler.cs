@@ -1,58 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿﻿using System.Linq;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
 {
-    class ClassNodeHandler : NodeHandler
+    class ClassNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
-        public ClassNodeHandler(AssemblyCompiler compiler) : base(compiler)
-        {
-
-        }
         public override void HandleNode(AstNode node)
         {
             AstClass classNode = (AstClass)node;
 
             ClassAttributeManager attributeManager = new(classNode);
-            ClassAttribute[] attributes = attributeManager.GetAttributes();
-            LLVMTypeRef named = compiler.Context.Handle.CreateNamedStruct(classNode.NameNode.Token.Value);
-            LLVMTypeRef[] elementTypes = attributes.Select(i => i.Value.GetBifyType().LLVMType).ToArray();
+            var attributes = attributeManager.GetAttributes();
+            LLVMTypeRef named = Compiler.Context.Handle.CreateNamedStruct(classNode.NameNode.Token.Value);
+            LLVMTypeRef[] elementTypes = [.. attributes.Select(i => i.Key.Type.LlvmType)];
             named.StructSetBody(elementTypes, false);
-            ClassType classType = new ClassType(classNode.NameNode.Token.Value, named);
-            compiler.CurrentClass = classType;
+            ClassType classType = new(classNode.NameNode.Token.Value, named);
+            Compiler.CurrentClass = classType;
             ClassMethodManager methodManager = new(classNode, classType);
-            classType.ClassAttributes = attributes;
+            classType.SetClassAttributes(attributes);
             methodManager.AddMethodsToClass(ref classType);
            
-            compiler.VariableManager.RegisterGlobalVariable(classNode.NameNode.Token.Value, classType);
-            compiler.CurrentClass = null;
+            Compiler.VariableManager.RegisterGlobalVariable(classNode.NameNode.Token.Value, classType);
+            Compiler.CurrentClass = null;
         }
 
     }
-    class ClassInitFunction : BifyFunction
-    {
-        public ClassInitFunction(ClassType classType) : base(null, null, classType, null)
-        {
-            Init();
-        }
-        public void Init()
-        {
-            var compiler = AssemblyCompiler.Instance;
-            TypeRef = LLVMTypeRef.CreateFunction(ReturnType.LLVMType, []);
-            llvmValue = compiler.Module.AddFunction($"{ReturnType.Name}.Init", TypeRef);
-            var entry = llvmValue.AppendBasicBlock("entry");
-            compiler.Builder.PositionAtEnd(entry);
-
-            compiler.Builder.BuildRetVoid();
-
-
-        }
-
-    }
+    
 }

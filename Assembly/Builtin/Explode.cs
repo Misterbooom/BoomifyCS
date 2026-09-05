@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
+﻿using System.Collections.Generic;
 using BoomifyCS.Assembly.BifyObject;
-using BoomifyCS.Exceptions;
 using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.Builtin
 {
     class Explode : BifyFunction
     {
-        private bool needToInit = true;
+        private bool _needToInit = true;
 
         public Explode() : base(null, null, null, null)
         {
@@ -27,15 +23,15 @@ namespace BoomifyCS.Assembly.Builtin
             var argTypes = new[] { LLVMTypeRef.CreatePointer(LLVMTypeRef.Int8, 0) };
             TypeRef = LLVMTypeRef.CreateFunction(returnType, argTypes, true);
 
-            llvmValue = AssemblyCompiler.Instance.Module.AddFunction("printf", TypeRef);
+            LlvmValue = AssemblyCompiler.Instance.Module.AddFunction("printf", TypeRef);
         }
 
         public override BifyValue Call(BifyValue[] args)
         {
-            if (needToInit)
+            if (_needToInit)
             {
                 InitFunction();
-                needToInit = false;
+                _needToInit = false;
             }
 
 
@@ -48,17 +44,17 @@ namespace BoomifyCS.Assembly.Builtin
                 {
                     unsafe
                     {
-                        llvmArgs[i] = AssemblyCompiler.Instance.Builder.BuildFPExt(args[i].GetLLVMValue(),
+                        llvmArgs[i] = AssemblyCompiler.Instance.Builder.BuildFPExt(args[i].GetLlvmValue(),
                         LLVM.DoubleType(), "float_to_double");
                     }
                 }
                 else if (args[i].GetBifyType().CompareType(new BoolType()))
                 {
-                    llvmArgs[i] = AssemblyCompiler.Instance.Builder.BuildZExt(args[i].GetLLVMValue(),LLVMTypeRef.Int32,"int1_to_int32");
+                    llvmArgs[i] = AssemblyCompiler.Instance.Builder.BuildZExt(args[i].GetLlvmValue(),LLVMTypeRef.Int32,"int1_to_int32");
                 }
                 else
                 {
-                    llvmArgs[i] = args[i].GetLLVMValue();
+                    llvmArgs[i] = args[i].GetLlvmValue();
 
 
                 }
@@ -67,7 +63,7 @@ namespace BoomifyCS.Assembly.Builtin
 
             AssemblyCompiler.Instance.Builder.BuildCall2(
                 TypeRef,
-                llvmValue,
+                LlvmValue,
                 llvmArgs,
                     "printfCall"
                 );

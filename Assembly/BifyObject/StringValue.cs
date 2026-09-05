@@ -1,21 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.BifyObject
 {
-    public class CharValue : BifyValue
+    public class CharValue(LLVMValueRef value) : BifyValue(value, new CharType())
     {
-        public CharValue(LLVMValueRef value)
-            : base(value, new CharType())
-        {
-        }
-
         public override BifyValue Equal(BifyValue other, LLVMBuilderRef builder)
         {
             if (!CompareType(other))
@@ -25,7 +16,7 @@ namespace BoomifyCS.Assembly.BifyObject
                 return null;
             }
 
-            var compareValue = builder.BuildICmp(LLVMIntPredicate.LLVMIntEQ, GetLLVMValue(), other.GetLLVMValue());
+            var compareValue = builder.BuildICmp(LLVMIntPredicate.LLVMIntEQ, GetLlvmValue(), other.GetLlvmValue());
             return new BoolType().CreateValueRef(compareValue);
         }
 
@@ -38,7 +29,7 @@ namespace BoomifyCS.Assembly.BifyObject
                 return null;
             }
 
-            var compareValue = builder.BuildICmp(LLVMIntPredicate.LLVMIntNE, GetLLVMValue(), other.GetLLVMValue());
+            var compareValue = builder.BuildICmp(LLVMIntPredicate.LLVMIntNE, GetLlvmValue(), other.GetLlvmValue());
             return new BoolType().CreateValueRef(compareValue);
         }
 
@@ -52,7 +43,7 @@ namespace BoomifyCS.Assembly.BifyObject
                 return null;
             }
 
-            LLVMValueRef result = builder.BuildICmp(LLVMIntPredicate.LLVMIntSGT, GetLLVMValue(), other.GetLLVMValue(), "chartgttmp");
+            LLVMValueRef result = builder.BuildICmp(LLVMIntPredicate.LLVMIntSGT, GetLlvmValue(), other.GetLlvmValue(), "chartgttmp");
             return new BoolValue(result);
         }
 
@@ -66,7 +57,7 @@ namespace BoomifyCS.Assembly.BifyObject
                 return null;
             }
 
-            LLVMValueRef result = builder.BuildICmp(LLVMIntPredicate.LLVMIntSLT, GetLLVMValue(), other.GetLLVMValue(), "charlttmp");
+            LLVMValueRef result = builder.BuildICmp(LLVMIntPredicate.LLVMIntSLT, GetLlvmValue(), other.GetLlvmValue(), "charlttmp");
             return new BoolValue(result);
         }
 
@@ -80,7 +71,7 @@ namespace BoomifyCS.Assembly.BifyObject
                 return null;
             }
 
-            LLVMValueRef result = builder.BuildICmp(LLVMIntPredicate.LLVMIntSLE, GetLLVMValue(), other.GetLLVMValue(), "charletmp");
+            LLVMValueRef result = builder.BuildICmp(LLVMIntPredicate.LLVMIntSLE, GetLlvmValue(), other.GetLlvmValue(), "charletmp");
             return new BoolValue(result);
         }
 
@@ -94,7 +85,7 @@ namespace BoomifyCS.Assembly.BifyObject
                 return null;
             }
 
-            LLVMValueRef result = builder.BuildICmp(LLVMIntPredicate.LLVMIntSGE, GetLLVMValue(), other.GetLLVMValue(), "chargtmp");
+            LLVMValueRef result = builder.BuildICmp(LLVMIntPredicate.LLVMIntSGE, GetLlvmValue(), other.GetLlvmValue(), "chargtmp");
             return new BoolValue(result);
         }
 
@@ -102,7 +93,7 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             if (this.CompareType(other))
             {
-                LLVMValueRef result = builder.BuildAdd(GetLLVMValue(), other.GetLLVMValue(), "charaddtmp");
+                LLVMValueRef result = builder.BuildAdd(GetLlvmValue(), other.GetLlvmValue(), "charaddtmp");
                 return new CharValue(result);
             }
             else
@@ -118,7 +109,7 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             if (this.CompareType(other))
             {
-                LLVMValueRef result = builder.BuildSub(GetLLVMValue(), other.GetLLVMValue(), "charsubtmp");
+                LLVMValueRef result = builder.BuildSub(GetLlvmValue(), other.GetLlvmValue(), "charsubtmp");
                 return new CharValue(result);
             }
             else
@@ -134,7 +125,7 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             if (this.CompareType(other))
             {
-                LLVMValueRef result = builder.BuildMul(GetLLVMValue(), other.GetLLVMValue(), "charmultmp");
+                LLVMValueRef result = builder.BuildMul(GetLlvmValue(), other.GetLlvmValue(), "charmultmp");
                 return new CharValue(result);
             }
             else
@@ -150,7 +141,7 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             if (this.CompareType(other))
             {
-                LLVMValueRef result = builder.BuildSDiv(GetLLVMValue(), other.GetLLVMValue(), "chardivtmp");
+                LLVMValueRef result = builder.BuildSDiv(GetLlvmValue(), other.GetLlvmValue(), "chardivtmp");
                 return new CharValue(result);
             }
             else
@@ -163,12 +154,8 @@ namespace BoomifyCS.Assembly.BifyObject
         }
     }
 
-    class CharType : BifyType
+    class CharType() : BifyType("char", LLVMTypeRef.Int8)
     {
-        public CharType() : base("char", LLVMTypeRef.Int8)
-        {
-
-        }
         protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
             return new CharValue(value);
@@ -202,14 +189,9 @@ namespace BoomifyCS.Assembly.BifyObject
             return 1;
         }
     }
-    class ConstStringType : BifyType
+    class ConstStringType() : BifyType("string", LLVMTypeRef.CreatePointer(LLVMTypeRef.Int8, 0))
     {
         private static readonly Dictionary<string, LLVMValueRef> GlobalStringCache = new();
-
-        public ConstStringType()
-            : base("string", LLVMTypeRef.CreatePointer(LLVMTypeRef.Int8, 0))
-        {
-        }
 
         public override BifyValue Create(object value)
         {
@@ -222,7 +204,6 @@ namespace BoomifyCS.Assembly.BifyObject
             }
 
             var newStringValue = AssemblyCompiler.Instance.Builder.BuildGlobalStringPtr(stringValue, stringValue);
-            BifyDebug.Log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA " + newStringValue.ToString());
             GlobalStringCache[stringValue] = newStringValue;
 
             var newPointerType = new BifyPointerType(new CharType());

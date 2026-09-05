@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
@@ -8,17 +6,9 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
 {
-    class ClassMethodManager
+    class ClassMethodManager(AstClass classNode, ClassType classType)
     {
-        private AstClass classNode;
-        private ClassType classType;
-        AssemblyCompiler compiler => AssemblyCompiler.Instance;
-
-        public ClassMethodManager(AstClass classNode, ClassType classType)
-        {
-            this.classNode = classNode;
-            this.classType = classType;
-        }
+        AssemblyCompiler Compiler => AssemblyCompiler.Instance;
 
         public void AddMethodsToClass(ref ClassType classType)
         {
@@ -38,8 +28,8 @@ namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
         {
             string functionName = methodNode.FunctionNameNode.Name;
 
-            compiler.Visit(methodNode.TypeNode);
-            IValue value = compiler.StackIValuePop();
+            Compiler.Visit(methodNode.TypeNode);
+            IValue value = Compiler.StackIValuePop();
             if (value is not BifyType)
             {
                 Traceback.Instance.ThrowException(new BifyTypeError($"{value.GetType().Name.ToLower()} cannot be used as type."));
@@ -47,7 +37,7 @@ namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
             }
 
             BifyType functionReturnType = (BifyType)value;
-            compiler.ReturnType = functionReturnType;
+            Compiler.ReturnType = functionReturnType;
 
             var functionArgs = new FunctionArgs(methodNode.ArgumentsNode);
             var functionPathChecker = new FunctionPathChecker(functionReturnType, methodNode.BlockNode);
@@ -55,21 +45,20 @@ namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
             functionArgs.PrependArgument("this", classType);
 
             var functionType = LLVMTypeRef.CreateFunction(
-                functionReturnType.LLVMType,
-                functionArgs.LLVMTypes
+                functionReturnType.LlvmType,
+                functionArgs.LlvmTypes
             );
 
-            var function = compiler.Module.AddFunction($"{classNode.NameNode.Token.Value}.{functionName}", functionType);
+            var function = Compiler.Module.AddFunction($"{classNode.NameNode.Token.Value}.{functionName}", functionType);
 
             var entry = function.AppendBasicBlock("entry");
-            compiler.Builder.PositionAtEnd(entry);
-            compiler.SetFunctionEntryBB(entry);
+            Compiler.Builder.PositionAtEnd(entry);
+            Compiler.SetFunctionEntryBb(entry);
 
-            compiler.VariableManager.EnterLocalScope();
+            Compiler.VariableManager.EnterLocalScope();
 
             var bifyFunction = new BifyFunction(function, functionArgs, functionReturnType, functionType);
-            bifyFunction.ValueFlag |= ValueFlag.Private;
-            FlagProcessor.SetFlags(FlagContext.Method, bifyFunction.GetBifyType(), methodNode.FlagNode.Flags);
+            FlagProcessor.SetFlags(FlagContext.METHOD, bifyFunction.GetBifyType(), methodNode.FlagNode.Flags);
 
             AddFunctionArgsToScope(bifyFunction);
 
@@ -79,12 +68,10 @@ namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
                 blockNode.ChildNodes.Add(new AstReturn(new Lexer.Token(Lexer.TokenType.RETURN, "return"), null));
             }
 
-            compiler.Visit(methodNode.BlockNode);
-            compiler.ClearStack();
+            Compiler.Visit(methodNode.BlockNode);
+            Compiler.ClearStack();
 
-            BifyDebug.Log($"Variable manager before exit : {compiler.VariableManager}");
-            compiler.VariableManager.ExitLocalScope();
-            BifyDebug.Log($"Variable manager after exit : {compiler.VariableManager}");
+            Compiler.VariableManager.ExitLocalScope();
 
             bifyFunction.IsMethod = true;
             return new ClassMethod(functionName, bifyFunction);
@@ -94,15 +81,15 @@ namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
         {
             for (uint i = 0; i < function.FunctionArgs.ArgsNames.Length; i++)
             {
-                BifyValue paramValue = function.FunctionArgs.BifyTypes[i].CreateValueRef(LLVM.GetParam(function.GetLLVMValue(), i));
+                BifyValue paramValue = function.FunctionArgs.BifyTypes[i].CreateValueRef(LLVM.GetParam(function.GetLlvmValue(), i));
 
-                var alloca = compiler.Builder.BuildAlloca(paramValue.GetBifyType().LLVMType, function.FunctionArgs.ArgsNames[i]);
-                compiler.Builder.BuildStore(paramValue.GetLLVMValue(), alloca);
+                var alloca = Compiler.Builder.BuildAlloca(paramValue.GetBifyType().LlvmType, function.FunctionArgs.ArgsNames[i]);
+                Compiler.Builder.BuildStore(paramValue.GetLlvmValue(), alloca);
 
                 BifyValue allocaPointer = new AllocaType(paramValue.GetBifyType()).CreateValueRef(alloca);
                 allocaPointer.ValueFlag = paramValue.ValueFlag;
 
-                compiler.VariableManager.RegisterLocalVariable(function.FunctionArgs.ArgsNames[i], allocaPointer);
+                Compiler.VariableManager.RegisterLocalVariable(function.FunctionArgs.ArgsNames[i], allocaPointer);
             }
         }
     }

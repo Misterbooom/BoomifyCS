@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BoomifyCS.Exceptions;
+﻿using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Ast.Handlers
@@ -12,12 +7,12 @@ namespace BoomifyCS.Ast.Handlers
     {
         public override void HandleToken(Token token)
         {
-            builder.CurrentNode = ParseNewExpression(token);
+            Builder.CurrentNode = ParseNewExpression(token);
         }
         public AstNode ParseNewExpression(Token token)
         {
-            builder.NextToken();
-            AstNode nextNode = new BinaryOperatorHandler(builder).ParsePrimary();
+            Builder.NextToken();
+            AstNode nextNode = new BinaryOperatorHandler(Builder).ParsePrimary();
             if (nextNode is not AstCall)
             {
                 new BifySyntaxError("A new expression requires an argument list.").Throw();

@@ -1,19 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using BoomifyCS.Exceptions;
+﻿using System.Collections.Generic;
 using BoomifyCS.Lexer;
-using LLVMSharp;
 
 namespace BoomifyCS.Ast.Handlers
 {
-    abstract class TokenHandler
+    abstract class TokenHandler(AstBuilder builder)
     {
-        protected AstBuilder builder;
-
-        protected TokenHandler(AstBuilder builder)
-        {
-            this.builder = builder;
-        }
+        protected readonly AstBuilder Builder = builder;
 
         public abstract void HandleToken(Token token);
         protected static (AstNode lastOperand, AstNode finalPointer) SwitchLastOperand(AstNode pointer, AstNode operand)

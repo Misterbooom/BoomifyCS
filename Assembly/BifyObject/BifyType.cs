@@ -1,27 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BoomifyCS.Exceptions;
 using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.BifyObject
 {
-    public abstract class BifyType : IValue
+    public abstract class BifyType(string name, LLVMTypeRef llvmType) : IValue
     {
-        public string Name { get; protected set; }
-        public LLVMTypeRef LLVMType { get; protected set; }
-        public ValueFlag ValueFlag = ValueFlag.None;
+        public string Name { get; protected set; } = name;
+        public LLVMTypeRef LlvmType { get; protected set; } = llvmType;
+        public ValueFlag ValueFlag = ValueFlag.NONE;
+        public AccessLevel  AccessLevel = AccessLevel.PRIVATE;
 
-        protected BifyType(string name, LLVMTypeRef llvmType)
-        {
-            Name = name;
-            
-            LLVMType = llvmType;
-        }
-
-        public LLVMValueRef GetLLVMValue()
+        public LLVMValueRef GetLlvmValue()
         {
             return null;
         }
@@ -52,7 +42,7 @@ namespace BoomifyCS.Assembly.BifyObject
         public abstract uint Size();
         public override string ToString()
         {
-            return $"{ValueFlag} {Name} ({LLVMType})";
+            return $" {AccessLevel} {ValueFlag} {Name} ({LlvmType})";
         }
     }
     class AnyType : BifyPointerType
@@ -77,11 +67,5 @@ namespace BoomifyCS.Assembly.BifyObject
             return 8;
         }
     }
-    class AnyValue : PointerValue
-    {
-        public AnyValue(LLVMValueRef value, BifyPointerType pointerType) : base(value, pointerType)
-        {
-        }
-
-    }
+    class AnyValue(LLVMValueRef value, BifyPointerType pointerType) : PointerValue(value, pointerType);
 }

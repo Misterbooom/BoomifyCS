@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 namespace BoomifyCS.Exceptions
 {
@@ -9,11 +8,11 @@ namespace BoomifyCS.Exceptions
         private static Traceback _instance;
         public int Line = 0;
         public string FilePath = "main";
-        public string[] source;
-        public List<CallStackFrame> callStack;
-        private Stack<BifyError> stack;
-        private Stack<Type> track;
-        private Traceback() { stack = []; track = []; }
+        public string[] Source;
+        public List<CallStackFrame> CallStack;
+        private readonly Stack<BifyError> _stack;
+        private readonly Stack<Type> _track;
+        private Traceback() { _stack = []; _track = []; }
         public static Traceback Instance
         {
             get
@@ -26,58 +25,46 @@ namespace BoomifyCS.Exceptions
             }
         }
 
-        public void InitializeSource(string[] sourceCode) => source = sourceCode;
-        public void Catch(Type type) => track.Push(type);
+        public void InitializeSource(string[] sourceCode) => Source = sourceCode;
+        public void Catch(Type type) => _track.Push(type);
         public BifyError GetError()
         {
-            if (stack.Count == 0)
+            if (_stack.Count == 0)
             {
                 return null;
             }
-            return stack.Pop();
+            return _stack.Pop();
         }
-        public void TrackPop() => track.Pop();
+        public void TrackPop() => _track.Pop();
         public void SetCurrentLine(int currentLine) => Line = currentLine;
 
         public void ThrowException(BifyError error, int column = 0)
         {
 
-            if (source != null && source.Length > Line - 1)
+            if (Source != null && Source.Length > Line - 1)
             {
-                error.CurrentLine = Math.Clamp(Line - 1, 0, source.Length - 1);
+                error.CurrentLine = Math.Clamp(Line - 1, 0, Source.Length - 1);
                 error.FileName = FilePath;
-                error.LineTokensString = source[Math.Clamp(Line - 1, 0, source.Length - 1)];
+                error.LineTokensString = Source[Math.Clamp(Line - 1, 0, Source.Length - 1)];
                 error.Column = column;
-                error.CallStack = callStack;
-                foreach (Type type in track)
+                error.CallStack = CallStack;
+                if (_track.Any(type => type == error.GetType()))
                 {
-                    if (type == error.GetType())
-                    {
-                        stack.Push(error);
-                        return;
-                    }
-                    else
-                    {
-                        Console.WriteLine($"{error.GetType().Name.Replace("Bify","")} != {type.Name}");
-                    }
+                    _stack.Push(error);
+                    return;
                 }
 
 
                 error.PrintException();
-                throw new NotFiniteNumberException();
+                throw new ApplicationException();
                 Environment.Exit(-1);
             }
             else
             {
-                string sourceContent = "";
-                foreach (string line in source)
-                {
-                    sourceContent += line;
-                }
+                if (Source == null) return;
+                var sourceContent = Source.Aggregate("", (current, line) => current + line);
                 throw new MissingMemberException(
-                    $"Error: Source code is either uninitialized or contains an invalid Line. Length: {source?.Length ?? 0}. Content: \"{sourceContent}\"");
-
-
+                    $"Error: Source code is either uninitialized or contains an invalid Line. Length: {Source?.Length ?? 0}. Content: \"{sourceContent}\"");
             }
         }
     }

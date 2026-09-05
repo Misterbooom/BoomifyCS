@@ -1,33 +1,26 @@
 ﻿using BoomifyCS.Lexer;
-using BoomifyCS.Exceptions;
 using System.Collections.Generic;
-using BoomifyCS.Parser;
-using System.Linq;
 
 namespace BoomifyCS.Ast.Handlers
 {
-    class IdentifierHandler : TokenHandler
+    class IdentifierHandler(AstBuilder builder) : TokenHandler(builder)
     {
-        public IdentifierHandler(AstBuilder builder) : base(builder)
-        {
-        }
-
         public override void HandleToken(Token token)
         {
             if (token.Type == TokenType.CONSTRUCTOR)
             {
-                builder.Nodes.Add(new AstIdentifier(new Token(TokenType.IDENTIFIER,"void"),"void"));
-                builder.Nodes.Add(new AstIdentifier(token, token.Value));
+                Builder.Nodes.Add(new AstIdentifier(new Token(TokenType.IDENTIFIER,"void"),"void"));
+                Builder.Nodes.Add(new AstIdentifier(token, token.Value));
 
-                new FunctionHandler(builder).HandleToken(token);
+                new FunctionHandler(Builder).HandleToken(token);
                 return;
             }
-            if (builder.IsType(token))
+            if (Builder.IsType(token))
             {
                 HandleTypeDeclaration(token);
                 return;
             }
-            if (IsNextTokenFunctionCall() && builder.Nodes.Count != 0)
+            if (IsNextTokenFunctionCall() && Builder.Nodes.Count != 0)
             {
                 HandleFunctionCall(token);
                 return;
@@ -37,13 +30,13 @@ namespace BoomifyCS.Ast.Handlers
 
         private void HandleTypeDeclaration(Token token)
         {
-            builder.Nodes.Add(new AstIdentifier(token, token.Value));
-            builder.tokenIndex++;
+            Builder.Nodes.Add(new AstIdentifier(token, token.Value));
+            Builder.TokenIndex++;
             TokenType stopTokenType = TokenType.NULL;
             List<Token> tokens = [];
-            while (!builder.IsAtEnd())
+            while (!Builder.IsAtEnd())
             {
-                Token t = builder.NextToken();
+                Token t = Builder.NextToken();
                 if (t.Type == TokenType.ASSIGN || t.Type == TokenType.LPAREN)
                 {
                     stopTokenType = t.Type;
@@ -55,16 +48,16 @@ namespace BoomifyCS.Ast.Handlers
             {
                 return;
             }
-            builder.Nodes.Add(builder.ParseTokens(tokens));
+            Builder.Nodes.Add(Builder.ParseTokens(tokens));
 
             if (stopTokenType == TokenType.LPAREN)
             {
-                builder.tokenIndex--;
-                new FunctionHandler(builder).HandleToken(token);
+                Builder.TokenIndex--;
+                new FunctionHandler(Builder).HandleToken(token);
             }
             else
             {
-                new VariableDeclarationHandler(builder).HandleToken(new Token(TokenType.ASSIGN,"="));
+                new VariableDeclarationHandler(Builder).HandleToken(new Token(TokenType.ASSIGN,"="));
             }
 
 
@@ -76,31 +69,31 @@ namespace BoomifyCS.Ast.Handlers
 
         private bool IsNextTokenFunctionCall()
         {
-            Token next = TokensFormatter.GetTokenOrNull(builder.tokens, builder.tokenIndex + 1);
+            Token next = TokensFormatter.GetTokenOrNull(Builder.Tokens, Builder.TokenIndex + 1);
             return next != null && next.Type == TokenType.LPAREN;
         }
 
         private void HandleFunctionCall(Token token)
         {
-            builder.Nodes.Add(new AstIdentifier(token, token.Value));
-            new FunctionHandler(builder).HandleToken(token);
+            Builder.Nodes.Add(new AstIdentifier(token, token.Value));
+            new FunctionHandler(Builder).HandleToken(token);
         }
 
         private void HandleExpression(Token token)
         {
-            builder.CurrentNode = new BinaryOperatorHandler(builder).ParsePrimary();
+            Builder.CurrentNode = new BinaryOperatorHandler(Builder).ParsePrimary();
         }
 
         public AstNode ParseIdentfier(Token token, bool isAlreadyNextToken = false)
         {
             if (!isAlreadyNextToken)
-                builder.tokenIndex++;
+                Builder.TokenIndex++;
             return new AstIdentifier(token, token.Value);
         }
 
         private AstNode ParseCall(Token functionNameToken)
         {
-            var args = builder.ParseTokens(builder.GetConditionTokens());
+            var args = Builder.ParseTokens(Builder.GetConditionTokens());
             return new AstCall(functionNameToken, NodeConventer.TokenToNode(functionNameToken), args);
         }
     }

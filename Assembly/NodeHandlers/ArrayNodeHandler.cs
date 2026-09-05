@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using BoomifyCS.Assembly.BifyObject;
+﻿using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
@@ -13,17 +12,17 @@ namespace BoomifyCS.Assembly.NodeHandlers
             AstArray astArray = (AstArray)node;
             uint argCount = CountArgs(astArray.ArgumentsNode);
 
-            if (argCount == 0 && compiler.StackCount == 0)
+            if (argCount == 0 && Compiler.StackCount == 0)
             {
                 Traceback.Instance.ThrowException(new BifyTypeError("Cannot construct an array: no type provided."));
                 return;
             }
 
             ArrayType arrayType;
-            if (compiler.StackCount == 0)
+            if (Compiler.StackCount == 0)
             {
-                compiler.Visit(astArray.ArgumentsNode);
-                IValue rawTypeValue = compiler.StackElementAt(compiler.StackCount - 1);
+                Compiler.Visit(astArray.ArgumentsNode);
+                IValue rawTypeValue = Compiler.StackElementAt(Compiler.StackCount - 1);
                 if (rawTypeValue is not BifyValue typeValue)
                 {
                     Traceback.Instance.ThrowException(new BifyTypeError("Cannot construct an array: no type provided."));
@@ -33,7 +32,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             }
             else
             {
-                BifyType typeOnStack = (BifyType)compiler.StackIValuePop();
+                BifyType typeOnStack = (BifyType)Compiler.StackIValuePop();
                 if (typeOnStack is not ArrayType declaredArrayType)
                 {
                     Traceback.Instance.ThrowException(new BifyTypeError(
@@ -42,7 +41,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                     return;
                 }
                 arrayType = declaredArrayType;
-                compiler.Visit(astArray.ArgumentsNode);
+                Compiler.Visit(astArray.ArgumentsNode);
             }
 
             BifyValue[] values = BuildArrayFromStack(argCount, arrayType);
@@ -53,7 +52,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 arrayType.SetElementCount(argCount);
             }
 
-            compiler.StackPush(arrayType.Create(values));
+            Compiler.StackPush(arrayType.Create(values));
         }
 
         private BifyValue[] BuildArrayFromStack(uint argCount, ArrayType arrayType)
@@ -61,7 +60,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             BifyValue[] values = new BifyValue[argCount];
             for (int i = (int)argCount - 1; i >= 0; i--)
             {
-                IValue value = compiler.StackIValuePop();
+                IValue value = Compiler.StackIValuePop();
                 if (value is BifyType bifyType)
                 {
                     Traceback.Instance.ThrowException(new BifyTypeError(

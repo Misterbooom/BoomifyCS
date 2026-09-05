@@ -49,14 +49,5 @@ namespace BoomifyCS.Ast
             { TokenType.RANGE,    0 },       // Range operator (for slicing/ranges)
         };
 
-        private enum PrecedenceLevel
-        {
-            Highest = 12,
-            Arithmetic = 8,
-            Comparison = 7,
-            Boolean = 3,
-            Bitwise = 1,
-            Lowest = 0
-        }
     }
 }

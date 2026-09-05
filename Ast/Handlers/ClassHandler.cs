@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BoomifyCS.Exceptions;
+﻿using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Ast.Handlers
@@ -12,17 +7,17 @@ namespace BoomifyCS.Ast.Handlers
     {
         public override void HandleToken(Token token)
         {
-            Token identifierToken = builder.GetNextToken();
+            Token identifierToken = Builder.GetNextToken();
             if (identifierToken?.Type != TokenType.IDENTIFIER)
             {
                 new BifySyntaxError($"Invalid class name: '{identifierToken?.Value ?? "null"}'.").Throw();
             }
             AstNode nameNode = new AstIdentifier(identifierToken, identifierToken.Value);
-            builder.NextToken();
-            AstNode bodyNode = builder.HandleBody("Class");
+            Builder.NextToken();
+            AstNode bodyNode = Builder.HandleBody("Class");
             VerifyClassBody((AstBlock)bodyNode);
-            builder.CurrentNode = new AstClass(token, nameNode, bodyNode);
-            builder.AddType(identifierToken.Value);
+            Builder.CurrentNode = new AstClass(token, nameNode, bodyNode);
+            Builder.AddType(identifierToken.Value);
         }
         private void VerifyClassBody(AstBlock body)
         {

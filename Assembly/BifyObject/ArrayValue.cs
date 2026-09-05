@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BoomifyCS.Assembly.Builtin;
 using BoomifyCS.Exceptions;
 using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.BifyObject
 {
-    class ArrayValue : BifyValue
+    class ArrayValue(LLVMValueRef value, ArrayType type) : BifyValue(value, type)
     {
         public BifyValue[] Items = [];
-        public ArrayValue(LLVMValueRef value, ArrayType type) : base(value, type) { }
 
         public override BifyValue Index(BifyValue indexValue, LLVMBuilderRef builder)
         {
@@ -28,9 +24,9 @@ namespace BoomifyCS.Assembly.BifyObject
             {
                 LLVMValueRef zeroIndex = LLVM.ConstInt(LLVM.Int32Type(), 0, 0);
 
-                LLVMValueRef[] indices = new LLVMValueRef[] {  indexValue.GetLLVMValue() };
+                LLVMValueRef[] indices = new LLVMValueRef[] {  indexValue.GetLlvmValue() };
 
-                LLVMValueRef gep = builder.BuildInBoundsGEP2(((ArrayType)GetBifyType()).ItemType.LLVMType, GetLLVMValue(), indices, "arrayIndex");
+                LLVMValueRef gep = builder.BuildInBoundsGEP2(((ArrayType)GetBifyType()).ItemType.LlvmType, GetLlvmValue(), indices, "arrayIndex");
 
                 ArrayType arrayType = (ArrayType)GetBifyType();
                 
@@ -42,38 +38,32 @@ namespace BoomifyCS.Assembly.BifyObject
             unsafe
             {
                 LLVMValueRef zeroIndex = LLVM.ConstInt(LLVM.Int32Type(), 0, 0);
-                LLVMValueRef[] indices = new LLVMValueRef[] { new IntegerValue(zeroIndex).GetLLVMValue() };
-                LLVMValueRef gep = builder.BuildInBoundsGEP2(((ArrayType)GetBifyType()).ItemType.LLVMType, GetLLVMValue(), indices, "arrayIndex");
+                LLVMValueRef[] indices = new LLVMValueRef[] { new IntegerValue(zeroIndex).GetLlvmValue() };
+                LLVMValueRef gep = builder.BuildInBoundsGEP2(((ArrayType)GetBifyType()).ItemType.LlvmType, GetLlvmValue(), indices, "arrayIndex");
                 ArrayType arrayType = (ArrayType)GetBifyType();
                 return new BifyPointerType(arrayType.ItemType).CreateValueRef(gep);
             }
         }
     }
 
-    class ArrayType : BifyType
+    class ArrayType(BifyType itemType, uint elementCount) : BifyType(itemType.Name + "[]",
+        LLVMTypeRef.CreatePointer(LLVMTypeRef.CreateArray(itemType.LlvmType, elementCount), 0))
     {
-        public BifyType ItemType { get; private set; }
-        public uint ElementCount { get; private set; }
-
-        public ArrayType(BifyType itemType, uint elementCount)
-            : base(itemType.Name + "[]", LLVMTypeRef.CreatePointer(LLVMTypeRef.CreateArray(itemType.LLVMType, elementCount),0))
-        {
-            ItemType = itemType;
-            ElementCount = elementCount;
-        }
+        public BifyType ItemType { get; private set; } = itemType;
+        public uint ElementCount { get; private set; } = elementCount;
 
         public void SetElementCount(uint elementCount)
         {
             ElementCount = elementCount;
-            LLVMType = LLVMTypeRef.CreateArray(ItemType.LLVMType, elementCount);
+            LlvmType = LLVMTypeRef.CreateArray(ItemType.LlvmType, elementCount);
         }
 
         public override BifyValue Create(object value)
         { 
             BifyValue[] bifyValues = (BifyValue[])value;
-            LLVMValueRef[] values = bifyValues.Select(item => item.GetLLVMValue()).ToArray();
+            LLVMValueRef[] values = bifyValues.Select(item => item.GetLlvmValue()).ToArray();
 
-            LLVMValueRef arrayConst = LLVMValueRef.CreateConstArray(LLVMType, values);
+            LLVMValueRef arrayConst = LLVMValueRef.CreateConstArray(LlvmType, values);
 
             return new ArrayValue(arrayConst, this);
         }
@@ -88,7 +78,7 @@ namespace BoomifyCS.Assembly.BifyObject
     }
    class CheckArrayIndex: BifyFunction
     {
-        private bool needToInit = true;
+        private bool _needToInit = true;
         public CheckArrayIndex() : base(null, null, null, null)
         {
             var arguments = new Dictionary<string, BifyType> {
@@ -105,18 +95,18 @@ namespace BoomifyCS.Assembly.BifyObject
         private void Init()
         {
             TypeRef = LLVMTypeRef.CreateFunction(
-                ReturnType.LLVMType,
-                FunctionArgs.LLVMTypes,
+                ReturnType.LlvmType,
+                FunctionArgs.LlvmTypes,
                 false);
             var compiler = AssemblyCompiler.Instance;
-            llvmValue = compiler.Module.AddFunction("arrayIndexCheck", TypeRef);
-            var entry = llvmValue.AppendBasicBlock("entry");
+            LlvmValue = compiler.Module.AddFunction("arrayIndexCheck", TypeRef);
+            var entry = LlvmValue.AppendBasicBlock("entry");
             compiler.Builder.PositionAtEnd(entry);
-            LLVMValueRef maxIndex = llvmValue.GetParam(0);
-            LLVMValueRef arrayIndex = llvmValue.GetParam(1);
+            LLVMValueRef maxIndex = LlvmValue.GetParam(0);
+            LLVMValueRef arrayIndex = LlvmValue.GetParam(1);
 
-            var thenBlock = llvmValue.AppendBasicBlock("then");
-            var elseBlock = llvmValue.AppendBasicBlock("else");
+            var thenBlock = LlvmValue.AppendBasicBlock("then");
+            var elseBlock = LlvmValue.AppendBasicBlock("else");
             LLVMValueRef condition = compiler.Builder.BuildICmp(LLVMIntPredicate.LLVMIntUGT, arrayIndex, maxIndex, "indexCheck");
             compiler.Builder.BuildCondBr(condition, thenBlock, elseBlock);
             compiler.Builder.PositionAtEnd(thenBlock);
@@ -140,14 +130,14 @@ namespace BoomifyCS.Assembly.BifyObject
             }
             else
             {
-                llvmValue = existedFunction;
-                TypeRef = LLVMTypeRef.CreateFunction(ReturnType.LLVMType,existedFunction.TypeOf.GetParamTypes());
+                LlvmValue = existedFunction;
+                TypeRef = LLVMTypeRef.CreateFunction(ReturnType.LlvmType,existedFunction.TypeOf.GetParamTypes());
             }
             if (args.Length != 2)
             {
                 Traceback.Instance.ThrowException(new BifyArgumentError($"Expected 2 arguments but got {args.Length}."));
             }
-            var res = AssemblyCompiler.Instance.Builder.BuildCall2(TypeRef, llvmValue, args.Select(item => item.GetLLVMValue()).ToArray());
+            var res = AssemblyCompiler.Instance.Builder.BuildCall2(TypeRef, LlvmValue, args.Select(item => item.GetLlvmValue()).ToArray());
             return new VoidType().Create(null);
 
 

@@ -1,5 +1,4 @@
-﻿using System;
-using BoomifyCS.Assembly.BifyObject;
+﻿using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 
@@ -12,17 +11,17 @@ namespace BoomifyCS.Assembly.NodeHandlers
             AstReturn returnNode = node as AstReturn;
             if (returnNode.ArgumentsNode == null)
             {
-                if (!compiler.ReturnType.CompareType(typeof(VoidType)))
+                if (!Compiler.ReturnType.CompareType(typeof(VoidType)))
                 {
                     Traceback.Instance.ThrowException(
-                        new BifyTypeError(ErrorMessage.InvalidFunctionReturnType("void", compiler.ReturnType.Name)));
+                        new BifyTypeError(ErrorMessage.InvalidFunctionReturnType("void", Compiler.ReturnType.Name)));
                     return;
                 }
-                compiler.Builder.BuildRetVoid();
+                Compiler.Builder.BuildRetVoid();
                 return;
             }
-            compiler.Visit(returnNode.ArgumentsNode);
-            IValue returnIValue = compiler.StackIValuePop();
+            Compiler.Visit(returnNode.ArgumentsNode);
+            IValue returnIValue = Compiler.StackIValuePop();
             if (returnIValue is BifyType)
             {
                 Traceback.Instance.ThrowException(
@@ -30,13 +29,13 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 return;
             }
             BifyValue returnValue = (BifyValue)returnIValue;
-            if (!compiler.ReturnType.CompareType(returnValue.GetBifyType()))
+            if (!Compiler.ReturnType.CompareType(returnValue.GetBifyType()))
             {
                 Traceback.Instance.ThrowException(
-                    new BifyTypeError(ErrorMessage.InvalidFunctionReturnType(returnValue.GetTypeName(), compiler.ReturnType.Name)));
+                    new BifyTypeError(ErrorMessage.InvalidFunctionReturnType(returnValue.GetTypeName(), Compiler.ReturnType.Name)));
                 return;
             }
-            compiler.Builder.BuildRet(returnValue.GetLLVMValue());
+            Compiler.Builder.BuildRet(returnValue.GetLlvmValue());
         }
     }
 }

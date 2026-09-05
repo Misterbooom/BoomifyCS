@@ -3,17 +3,11 @@ using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
-using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class AssignmentOperatorNodeHandler : NodeHandler
+    class AssignmentOperatorNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
-        public AssignmentOperatorNodeHandler(AssemblyCompiler compiler)
-            : base(compiler)
-        {
-        }
-
         public override void HandleNode(AstNode node)
         {
             AstAssignmentOperator assignmentOperatorNode = (AstAssignmentOperator)node;
@@ -23,8 +17,8 @@ namespace BoomifyCS.Assembly.NodeHandlers
             BifyValue dereferencedValue = pointerValue.Dereference();
 
             BifyValue resultValue = Calculate(dereferencedValue, operandValue, assignmentOperatorNode.Token.Type)
-                .ExplicitCast(targetType, compiler.Builder);
-            compiler.Builder.BuildStore(resultValue.GetLLVMValue(), pointerValue.GetLLVMValue());
+                .ExplicitCast(targetType, Compiler.Builder);
+            Compiler.Builder.BuildStore(resultValue.GetLlvmValue(), pointerValue.GetLlvmValue());
         }
 
         private BifyValue Calculate(BifyValue lhs, BifyValue rhs, TokenType token)
@@ -32,13 +26,13 @@ namespace BoomifyCS.Assembly.NodeHandlers
             switch (token)
             {
                 case TokenType.ADDE:
-                    return lhs.Add(rhs, compiler.Builder);
+                    return lhs.Add(rhs, Compiler.Builder);
                 case TokenType.SUBE:
-                    return lhs.Sub(rhs, compiler.Builder);
+                    return lhs.Sub(rhs, Compiler.Builder);
                 case TokenType.MULE:
-                    return lhs.Mul(rhs, compiler.Builder);
+                    return lhs.Mul(rhs, Compiler.Builder);
                 case TokenType.DIVE:
-                    return lhs.Div(rhs, compiler.Builder);
+                    return lhs.Div(rhs, Compiler.Builder);
                 case TokenType.ASSIGN:
                     return rhs;
                 default:
@@ -48,9 +42,9 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
         private PointerValue GetPointerValue(AstAssignmentOperator assignmentOperatorNode)
         {
-            compiler.Flag |= NodeVisitFlag.ASSIGNMENT_INDEX;
-            compiler.Visit(assignmentOperatorNode.IdentifierNode);
-            IValue iValue = compiler.StackIValuePop();
+            Compiler.Flag |= NodeVisitFlag.ASSIGNMENT_INDEX;
+            Compiler.Visit(assignmentOperatorNode.IdentifierNode);
+            IValue iValue = Compiler.StackIValuePop();
             if (iValue is BifyType bifyType)
             {
                 Traceback.Instance.ThrowException(new BifyTypeError($"{bifyType.Name} cannot be used as type."));
@@ -61,7 +55,9 @@ namespace BoomifyCS.Assembly.NodeHandlers
             {
                 throw new NotSupportedException($"Assignment operator is not supported for {((BifyValue)iValue).GetBifyType().GetType()} not a {iValue}");
             }
-            if (targetPointer.ValueFlag.HasFlag(ValueFlag.Constant))
+
+            var pointertype = targetPointer.GetBifyType() as BifyPointerType;
+            if (pointertype.PointedType.ValueFlag.HasFlag(ValueFlag.CONSTANT))
             {
                 new BifyTypeError("Assigning to constant variable!").Throw();
             }
@@ -70,8 +66,8 @@ namespace BoomifyCS.Assembly.NodeHandlers
 
         private BifyValue GetOperandValue(AstAssignmentOperator assignmentOperatorNode)
         {
-            compiler.Visit(assignmentOperatorNode.ValueNode);
-            IValue iValue = compiler.StackIValuePop();
+            Compiler.Visit(assignmentOperatorNode.ValueNode);
+            IValue iValue = Compiler.StackIValuePop();
             if (iValue is BifyType bifyType)
             {
                 Traceback.Instance.ThrowException(new BifyTypeError($"{bifyType.Name} cannot be used as type."));

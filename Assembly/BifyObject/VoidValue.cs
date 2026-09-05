@@ -1,18 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.BifyObject
 {
 
-    class VoidType : BifyType
+    class VoidType() : BifyType("void", LLVMTypeRef.Void)
     {
-        public VoidType() : base("void", LLVMTypeRef.Void)
-        { }
         public override BifyValue Create(object value)
         {
             return new NullValue();
@@ -27,17 +20,15 @@ namespace BoomifyCS.Assembly.BifyObject
             return 0;
         }
     }
-    class NullType : BifyPointerType
+    class NullType(BifyType pointedType) : BifyPointerType(pointedType)
     {
-        public NullType(BifyType pointedType) : base(pointedType) { }
-
         public static BifyValue Create(BifyType targetPointerType)
         {
             if (targetPointerType is BifyPointerType pointerType)
             {
-                return new NullValue(pointerType, LLVMValueRef.CreateConstPointerNull(pointerType.LLVMType))
+                return new NullValue(pointerType, LLVMValueRef.CreateConstPointerNull(pointerType.LlvmType))
                 {
-                    ValueFlag = ValueFlag.Constant,
+                    ValueFlag = ValueFlag.CONSTANT,
                 };
             }
             throw new InvalidOperationException("Null can only be assigned to a pointer type.");
@@ -54,18 +45,11 @@ namespace BoomifyCS.Assembly.BifyObject
         }
     }
 
-    class NullValue : PointerValue
+    class NullValue(BifyPointerType type, LLVMValueRef valueRef) : PointerValue(valueRef, type)
     {
-        public NullValue(BifyPointerType type, LLVMValueRef valueRef) : base(valueRef, type) { }
-        public NullValue() : base(LLVMValueRef.CreateConstPointerNull(LLVMTypeRef.CreatePointer(LLVMTypeRef.Void, 0)), new NullType(new VoidType())) { }
+        public NullValue() : this(new NullType(new VoidType()), LLVMValueRef.CreateConstPointerNull(LLVMTypeRef.CreatePointer(LLVMTypeRef.Void, 0))) { }
     }
-    class TypeValue: BifyValue
-    {
-        public TypeValue(BifyType bifyType) : base(null, bifyType)
-        {
-
-        }
-    }
+    class TypeValue(BifyType bifyType) : BifyValue(null, bifyType);
 
 
 }

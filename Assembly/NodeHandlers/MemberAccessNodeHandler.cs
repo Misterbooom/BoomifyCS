@@ -1,55 +1,49 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class MemberAccessNodeHandler:NodeHandler
+    class MemberAccessNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
-        public MemberAccessNodeHandler(AssemblyCompiler compiler) : base(compiler) { }
         public override void HandleNode(AstNode node)
         {
-            if (node.Right is not AstIdentifier)
+            if (node.Right is not AstIdentifier identifier)
             {
                 Traceback.Instance.ThrowException(new BifyTypeError("Invalid member access. Expected identifier."));
                 return;
             }
-            bool loadMemberPointer = !compiler.Flag.HasFlag(NodeVisitFlag.ASSIGNMENT_INDEX);
-            compiler.Flag &= ~NodeVisitFlag.ASSIGNMENT_INDEX;
-            compiler.Visit(node.Left);
-            IValue iValue = compiler.StackIValuePop();
+            bool loadMemberPointer = !Compiler.Flag.HasFlag(NodeVisitFlag.ASSIGNMENT_INDEX);
+            Compiler.Flag &= ~NodeVisitFlag.ASSIGNMENT_INDEX;
+            Compiler.Visit(node.Left);
+            IValue iValue = Compiler.StackIValuePop();
             if (iValue is BifyType)
             {
                 Traceback.Instance.ThrowException(new BifyTypeError("Invalid operand: type provided instead of value"));
                 return;
             }
             BifyValue bifyValue = (BifyValue)iValue;
-            string memberName = ((AstIdentifier)node.Right).Name;
-            BifyValue memberValue = bifyValue.GetAttribute(memberName,compiler.CurrentClass, compiler.Builder);
+            string memberName = identifier.Name;
+            BifyValue memberValue = bifyValue.GetAttribute(memberName,Compiler.CurrentClass, Compiler.Builder);
             if (!loadMemberPointer)
             {
-                compiler.StackPush(memberValue);
+                Compiler.StackPush(memberValue);
 
             }
-            else {
-                if (memberValue is PointerValue pointerValue)
+            else
+            {
+                switch (memberValue)
                 {
-                    compiler.StackPush(pointerValue.Dereference());
+                    case PointerValue pointerValue:
+                        Compiler.StackPush(pointerValue.Dereference());
+                        break;
+                    case BifyMethodRef:
+                        Compiler.StackPush(memberValue);
+                        break;
+                    default:
+                        throw new InvalidOperationException($"Unexpected type of class member: '{memberValue.GetType()}'");
                 }
-                else if (memberValue is BifyMethodRef)
-                {
-                    compiler.StackPush(memberValue);
-                }
-                else
-                {
-                    throw new InvalidOperationException($"Unexpected type of class member: '{memberValue.GetType()}'");
-                }
-
             }
         }
     }

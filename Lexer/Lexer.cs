@@ -1,10 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Data.Common;
-using System;
 using System.Text;
 using System.Text.RegularExpressions;
 using BoomifyCS.Exceptions;
-using System.Linq;
 
 namespace BoomifyCS.Lexer
 {
@@ -14,9 +11,9 @@ namespace BoomifyCS.Lexer
         private readonly string _code;
         private int _lineCount = 1;
         private readonly string[] _lines;
-        int column = 1; // Initialize column counter
+        int _column = 1; // Initialize column counter
 
-        List<Token> tokens = [];
+        readonly List<Token> _tokens = [];
 
         public MyLexer(string code)
         {
@@ -63,7 +60,7 @@ namespace BoomifyCS.Lexer
                 {
                     if (parenthesesStack.Count == 0)
                     {
-                        Traceback.Instance.ThrowException(new BifySyntaxError(ErrorMessage.UnmatchedClosingParenthesis(), "", ")"), column);
+                        Traceback.Instance.ThrowException(new BifySyntaxError(ErrorMessage.UnmatchedClosingParenthesis(), "", ")"), _column);
                     }
                     parenthesesStack.Pop();
                 }
@@ -104,7 +101,7 @@ namespace BoomifyCS.Lexer
                 else if (IsIdentifier(currentChar))
                 {
                     string identifier = GenerateIdentifier();
-                    if (TokenConfig.multiCharTokens.TryGetValue(identifier, out TokenType tokenType))
+                    if (TokenConfig.MultiCharTokens.TryGetValue(identifier, out TokenType tokenType))
                     {
                         AddToken(new Token(tokenType, identifier));
                     }
@@ -128,7 +125,7 @@ namespace BoomifyCS.Lexer
                     UpdateColumn(multichar.Key.Length);
                 }
                
-                else if (TokenConfig.singleCharTokens.TryGetValue(currentChar, out TokenType tokenType))
+                else if (TokenConfig.SingleCharTokens.TryGetValue(currentChar, out TokenType tokenType))
                 {
                     AddToken(new Token(tokenType, currentChar.ToString()));
                     UpdateColumn(currentChar);
@@ -143,17 +140,17 @@ namespace BoomifyCS.Lexer
                 _position++;
                 Traceback.Instance.SetCurrentLine(_lineCount);
             }
-            return tokens;
+            return _tokens;
         }
-        private void ResetColumn() => column = 1;
-        private void UpdateColumn(char currentChar) => column++;
-        private void UpdateColumn(int length = 1) => column += length;
+        private void ResetColumn() => _column = 1;
+        private void UpdateColumn(char currentChar) => _column++;
+        private void UpdateColumn(int length = 1) => _column += length;
 
         private void AddToken(Token token)
         {
             token.Line = _lineCount;
-            token.Column = column;
-            tokens.Add(token);
+            token.Column = _column;
+            _tokens.Add(token);
         }
 
 
@@ -210,7 +207,7 @@ namespace BoomifyCS.Lexer
             KeyValuePair<string, TokenType>? longestMatch = null;
             int startPosition = _position;
 
-            foreach (KeyValuePair<string, TokenType> kvp in TokenConfig.multiCharTokens)
+            foreach (KeyValuePair<string, TokenType> kvp in TokenConfig.MultiCharTokens)
             {
                 if (_position + kvp.Key.Length <= _code.Length)
                 {

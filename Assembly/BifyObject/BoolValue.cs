@@ -1,20 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BoomifyCS.Exceptions;
 using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.BifyObject
 {
-    class BoolValue : BifyValue
+    class BoolValue(LLVMValueRef value) : BifyValue(value, new BoolType())
     {
-        public BoolValue(LLVMValueRef value) : base(value, new BoolType())
-        {
-        }
-        
-
         public override BifyValue Equal(BifyValue other, LLVMBuilderRef builder)
         {
             if (!this.CompareType(other))
@@ -25,7 +16,7 @@ namespace BoomifyCS.Assembly.BifyObject
                 return null;
             }
             var value = builder.BuildICmp(LLVMIntPredicate.LLVMIntEQ,
-                this.GetLLVMValue(), other.GetLLVMValue(), "equal");
+                this.GetLlvmValue(), other.GetLlvmValue(), "equal");
             return new BoolValue(value);
         }
 
@@ -39,22 +30,19 @@ namespace BoomifyCS.Assembly.BifyObject
                 return null;
             }
             var value = builder.BuildICmp(LLVMIntPredicate.LLVMIntNE,
-                this.GetLLVMValue(), other.GetLLVMValue(), "not_equal");
+                this.GetLlvmValue(), other.GetLlvmValue(), "not_equal");
             return new BoolValue(value);
         }
 
         public override BifyValue Not(LLVMBuilderRef builder)
         {
-            var value = builder.BuildNot(this.GetLLVMValue(), "not");
+            var value = builder.BuildNot(this.GetLlvmValue(), "not");
             return new BoolValue(value);
         }
     }
 
-    class BoolType : BifyType
+    class BoolType() : BifyType("bool", LLVMTypeRef.Int1)
     {
-        public BoolType() : base("bool", LLVMTypeRef.Int1)
-        {
-        }
         public override BifyValue DefaultValue()
         {
             return Create(false);
@@ -66,7 +54,7 @@ namespace BoomifyCS.Assembly.BifyObject
             {
                 // Expecting value to be convertible to int.
                 int intValue = Convert.ToInt32(value);
-                return new BoolValue(LLVMValueRef.CreateConstInt(LLVMType, (ulong)intValue, false));
+                return new BoolValue(LLVMValueRef.CreateConstInt(LlvmType, (ulong)intValue, false));
             }
             catch (Exception ex)
             {

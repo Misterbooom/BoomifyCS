@@ -1,5 +1,4 @@
-﻿using System;
-using BoomifyCS.Exceptions;
+﻿using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Ast.Validators

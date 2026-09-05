@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BoomifyCS.Exceptions;
+﻿using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
-using BoomifyCS.Parser;
 
 namespace BoomifyCS.Ast.Handlers
 {
@@ -13,15 +7,15 @@ namespace BoomifyCS.Ast.Handlers
     {
         public override void HandleToken(Token token)
         {
-            if (builder.Nodes.Count == 0)
+            if (Builder.Nodes.Count == 0)
             {
                 new BifySyntaxError("Assignment operator used without a preceding expression. Please ensure an identifier is present before '='.").Throw();
             }
-            if (builder.Nodes.Count == 2 || builder.Nodes.Count == 3)
+            if (Builder.Nodes.Count == 2 || Builder.Nodes.Count == 3)
             {
-                new VariableDeclarationHandler(builder).HandleToken(token);
+                new VariableDeclarationHandler(Builder).HandleToken(token);
             }
-            else if (builder.Nodes.Count == 1)
+            else if (Builder.Nodes.Count == 1)
             {
                 HandleAssignment(token);
             }
@@ -32,20 +26,20 @@ namespace BoomifyCS.Ast.Handlers
         }
         private void HandleAssignment(Token token)
         {
-            var node = builder.Nodes[0];
+            var node = Builder.Nodes[0];
             if (node is AstIdentifier || node is AstIndexOperator || node is AstMemberAccess)
             {
                 var identifierNode = node; // Assign the node to a variable named identifierNode
-                builder.NextToken();
-                var valueTokens = builder.tokens[builder.tokenIndex..];
-                var valueNode = builder.ParseTokens(valueTokens);
+                Builder.NextToken();
+                var valueTokens = Builder.Tokens[Builder.TokenIndex..];
+                var valueNode = Builder.ParseTokens(valueTokens);
                 if (valueNode == null)
                 {
                     new BifySyntaxError(ErrorMessage.EmptyValueAssigned()).Throw();
                 }
-                builder.Nodes.Clear();
-                builder.CurrentNode = new AstAssignmentOperator(token, identifierNode, valueNode);
-                builder.MoveToEnd();
+                Builder.Nodes.Clear();
+                Builder.CurrentNode = new AstAssignmentOperator(token, identifierNode, valueNode);
+                Builder.MoveToEnd();
             }
             else
             {

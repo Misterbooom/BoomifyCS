@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BoomifyCS.Lexer;
+﻿using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Ast.Handlers
 {
@@ -12,10 +7,10 @@ namespace BoomifyCS.Ast.Handlers
         public override void HandleToken(Token token)
         {
 
-            builder.NextToken();
-            AstNode valueNode = builder.ParseTokens(builder.tokens[(builder.tokenIndex)..]);
-            builder.MoveToEnd();
-            builder.CurrentNode = new AstReturn(token, valueNode);
+            Builder.NextToken();
+            AstNode valueNode = Builder.ParseTokens(Builder.Tokens[(Builder.TokenIndex)..]);
+            Builder.MoveToEnd();
+            Builder.CurrentNode = new AstReturn(token, valueNode);
         }
     }
 }

@@ -4,22 +4,21 @@ using System.Linq;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
-using LLVMSharp;
 using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.BifyObject
 {
     class FunctionArgs
     {
-        private Dictionary<string, BifyType> arguments = new Dictionary<string, BifyType>();
+        private Dictionary<string, BifyType> _arguments = new Dictionary<string, BifyType>();
 
-        public LLVMTypeRef[] LLVMTypes => arguments.Values
-            .Select(type => type.LLVMType)
+        public LLVMTypeRef[] LlvmTypes => _arguments.Values
+            .Select(type => type.LlvmType)
             .ToArray();
 
-        public BifyType[] BifyTypes => arguments.Values.ToArray();
+        public BifyType[] BifyTypes => _arguments.Values.ToArray();
 
-        public string[] ArgsNames => arguments.Keys.ToArray();
+        public string[] ArgsNames => _arguments.Keys.ToArray();
 
         public FunctionArgs(AstNode argNode)
         {
@@ -31,7 +30,7 @@ namespace BoomifyCS.Assembly.BifyObject
             if (newArguments == null)
                 throw new ArgumentNullException(nameof(newArguments), "Arguments cannot be null.");
 
-            arguments = new Dictionary<string, BifyType>(newArguments);
+            _arguments = new Dictionary<string, BifyType>(newArguments);
         }
         public void PrependArgument(string name, BifyType argument)
         {
@@ -41,12 +40,12 @@ namespace BoomifyCS.Assembly.BifyObject
                 throw new ArgumentNullException(nameof(argument), "Argument cannot be null.");
 
             var newArguments = new Dictionary<string, BifyType> { { name, argument } };
-            foreach (var kvp in arguments)
+            foreach (var kvp in _arguments)
             {
                 newArguments.Add(kvp.Key, kvp.Value);
             }
 
-            arguments = newArguments;
+            _arguments = newArguments;
         }
         public bool HasSameTypes(FunctionArgs other)
         {
@@ -55,49 +54,40 @@ namespace BoomifyCS.Assembly.BifyObject
         }
         public bool HasSameTypes(BifyType[] other, int start = 0)
         {
-            Console.WriteLine($"[HasSameTypes] Called with start={start}, other.Length={(other == null ? "null" : other.Length.ToString())}");
 
             if (other == null)
             {
-                Console.WriteLine("[HasSameTypes] Other array is null.");
                 return false;
             }
 
             var thisTypes = this.BifyTypes;
-            Console.WriteLine($"[HasSameTypes] thisTypes.Length={thisTypes.Length}");
 
             if (start < 0 || start > thisTypes.Length)
             {
-                Console.WriteLine($"[HasSameTypes] Invalid start index: {start}");
                 return false;
             }
 
             int sliceLength = thisTypes.Length - start;
-            Console.WriteLine($"[HasSameTypes] sliceLength={sliceLength}");
 
             if (sliceLength != other.Length)
             {
-                Console.WriteLine($"[HasSameTypes] Length mismatch: sliceLength={sliceLength}, other.Length={other.Length}");
                 return false;
             }
 
             for (int i = 0; i < other.Length; i++)
             {
                 bool compareResult = thisTypes[i + start].CompareType(other[i]);
-                Console.WriteLine($"[HasSameTypes] Comparing thisTypes[{i + start}] ({thisTypes[i + start]}) with other[{i}] ({other[i]}): {compareResult}");
                 if (!compareResult)
                 {
-                    Console.WriteLine($"[HasSameTypes] Type mismatch at index {i}: {thisTypes[i + start]} vs {other[i]}");
                     return false;
                 }
             }
 
-            Console.WriteLine("[HasSameTypes] All types match.");
             return true;
         }
         public override string ToString()
         {
-            return string.Join(", ", arguments.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
+            return string.Join(", ", _arguments.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
         }
 
         private void ExtractArgs(AstNode node)
@@ -118,7 +108,7 @@ namespace BoomifyCS.Assembly.BifyObject
                     return;
                 }
                 BifyType type = (BifyType)value;
-                if (arguments.ContainsKey(name))
+                if (_arguments.ContainsKey(name))
                 {
                     Traceback.Instance.ThrowException(new BifyArgumentError($"Duplicate argument '{name}' found."));
                     return;
@@ -127,10 +117,10 @@ namespace BoomifyCS.Assembly.BifyObject
                 {
                     if (param.Flag.Token.Type == TokenType.CONST)
                     {
-                        type.ValueFlag |= ValueFlag.Constant;
+                        type.ValueFlag |= ValueFlag.CONSTANT;
                     }
                 }
-                arguments.Add(name, type);
+                _arguments.Add(name, type);
             }
             else if (node.Token.Type == TokenType.COMMA)
             {

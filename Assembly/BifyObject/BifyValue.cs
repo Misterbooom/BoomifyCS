@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks.Sources;
 using BoomifyCS.Assembly.Builtin;
 using BoomifyCS.Exceptions;
 using LLVMSharp.Interop;
@@ -7,29 +6,26 @@ using LLVMSharp.Interop;
 namespace BoomifyCS.Assembly.BifyObject
 {
 
-    public abstract class BifyValue : IValue
+    public abstract class BifyValue(LLVMValueRef value, BifyType type) : IValue
     {
         public ValueFlag ValueFlag
         {
-            get => type.ValueFlag;
-            set
-            {
-                type.ValueFlag = value;
-            }
+            get => Type.ValueFlag;
+            set => Type.ValueFlag = value;
         }
-        protected LLVMValueRef llvmValue;
-        protected BifyType type;
 
-        public BifyValue(LLVMValueRef value, BifyType type)
+        public AccessLevel AccessLevel
         {
-            this.llvmValue = value;
-            this.type = type;
+            get => Type.AccessLevel;
+            set => Type.AccessLevel = value;
         }
-       
-        public LLVMValueRef GetLLVMValue() => llvmValue;
-        public void SetLLVMValue(LLVMValueRef value) => llvmValue = value;
-        public BifyType GetBifyType() => type;
-        public string GetTypeName() => type.Name;
+        protected LLVMValueRef LlvmValue = value;
+        protected readonly BifyType Type = type;
+
+        public LLVMValueRef GetLlvmValue() => LlvmValue;
+        public void SetLlvmValue(LLVMValueRef value) => LlvmValue = value;
+        public BifyType GetBifyType() => Type;
+        public string GetTypeName() => Type.Name;
         public virtual bool CompareType(Type other) => GetBifyType().CompareType(other);
         public virtual bool CompareType(BifyValue other) => GetBifyType().CompareType(other.GetBifyType());
         
@@ -58,7 +54,7 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             Traceback.Instance.ThrowException(new BifyTypeError($"{GetTypeName()} doesn't support Equal"));
 
-            return new BoolType().Create(other.llvmValue == llvmValue ? 1 : 0);
+            return new BoolType().Create(other.LlvmValue == LlvmValue ? 1 : 0);
         }
         public virtual BifyValue NotEqual(BifyValue other, LLVMBuilderRef builder)
         {
@@ -117,7 +113,7 @@ namespace BoomifyCS.Assembly.BifyObject
         }
         public override string ToString()
         {
-            return $"{ValueFlag} {GetTypeName()}({llvmValue})";
+            return $"{ValueFlag} {GetTypeName()}({LlvmValue})";
         }
     }
 }

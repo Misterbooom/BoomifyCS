@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using BoomifyCS.Ast.Validators;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
-using BoomifyCS.Parser;
 
 namespace BoomifyCS.Ast.Handlers
 {
@@ -14,25 +9,25 @@ namespace BoomifyCS.Ast.Handlers
     {
         public override void HandleToken(Token token)
         {
-            builder.tokenIndex++;
-            var splittedTokens = TokensFormatter.SplitTokensByType(builder.GetConditionTokens(),TokenType.SEMICOLON);
+            Builder.TokenIndex++;
+            var splittedTokens = TokensFormatter.SplitTokensByType(Builder.GetConditionTokens(),TokenType.SEMICOLON);
 
-            AstNode initNode = builder.ParseTokens(splittedTokens.ElementAtOrDefault(0));
+            AstNode initNode = Builder.ParseTokens(splittedTokens.ElementAtOrDefault(0));
 
-            AstNode conditionNode = builder.ParseTokens(splittedTokens.ElementAtOrDefault(1));
+            AstNode conditionNode = Builder.ParseTokens(splittedTokens.ElementAtOrDefault(1));
 
-            AstNode incrementNode = builder.ParseTokens(splittedTokens.ElementAtOrDefault(2));
-            if (builder.GetNextToken()?.Type != TokenType.LCUR)
+            AstNode incrementNode = Builder.ParseTokens(splittedTokens.ElementAtOrDefault(2));
+            if (Builder.GetNextToken()?.Type != TokenType.LCUR)
 
             {
                 new BifySyntaxError("For body not found!").Throw();
             }
-            var blockNode = builder.HandleBody("For");
+            var blockNode = Builder.HandleBody("For");
             Traceback.Instance.SetCurrentLine(token.Line);
             AstFor astFor = new AstFor(token, blockNode, conditionNode, incrementNode,initNode);
             LoopValidator.ValidateForStatement(splittedTokens,astFor);
-            builder.MoveToEnd();
-            builder.CurrentNode = astFor;
+            Builder.MoveToEnd();
+            Builder.CurrentNode = astFor;
 
 
 

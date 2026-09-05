@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
-using BoomifyCS.Parser;
 
 namespace BoomifyCS.Ast
 {
@@ -144,7 +140,7 @@ namespace BoomifyCS.Ast
                 BifySyntaxError error = new(
                     ErrorMessage.UnmatchedToken(open.ToString(), close.ToString()),
                     "",
-                    GetKeyByValue(TokenConfig.singleCharTokens, open).ToString()
+                    GetKeyByValue(TokenConfig.SingleCharTokens, open).ToString()
  
 
                 );

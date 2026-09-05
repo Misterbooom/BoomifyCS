@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using BoomifyCS.Lexer;
-using LLVMSharp.Interop;
 
 namespace BoomifyCS.Ast
 {
@@ -70,59 +68,22 @@ namespace BoomifyCS.Ast
         public override string ToString() => StrHelper();
     }
 
-    public abstract class AstConstant : AstNode
+    public abstract class AstConstant(Token token, object value) : AstNode(token)
     {
-        public object Value { get; protected set; }
-
-        public AstConstant(Token token, object value) : base(token)
-        {
-            this.Value = value;
-        }
-
+        public object Value { get; protected set; } = value;
 
 
         public override string ToString() => StrHelper();
     }
 
-    public class AstNumber : AstConstant
-    {
-        public AstNumber(Token token, int value) : base(token, value)
-        {
-        }
+    public class AstNumber(Token token, int value) : AstConstant(token, value);
 
+    public class AstString(Token token, string value) : AstConstant(token, value);
 
-    }
+    public class AstBoolean(Token token, bool value) : AstConstant(token, value);
 
-    public class AstString : AstConstant
-    {
-        public AstString(Token token, string value) : base(token, value)
-        {
-        }
-
-
-    }
-
-    public class AstBoolean : AstConstant
-    {
-        public AstBoolean(Token token, bool value) : base(token, value)
-        {
-        }
-
-
-    }
-
-    public class AstNull : AstConstant
-    {
-        public AstNull(Token token) : base(token, null)
-        {
-        }
-    }
-    public class AstFloat : AstConstant
-    {
-        public AstFloat(Token token, float value) : base(token, value)
-        {
-        }
-    }
+    public class AstNull(Token token) : AstConstant(token, null);
+    public class AstFloat(Token token, float value) : AstConstant(token, value);
 
 
     public class AstAssignment(Token token, AstNode left = null, AstNode right = null) : AstNode(token, left, right)
@@ -142,9 +103,9 @@ namespace BoomifyCS.Ast
 
     public class AstVarDecl(Token token, AstAssignment assignmentNode, AstNode type = null, AstFlag flagNode = null, AstNode left = null, AstNode right = null) : AstNode(token, left, right)
     {
-        public AstAssignment AssignmentNode = assignmentNode;
-        public AstNode Type = type;
-        public AstFlag Flag = flagNode;
+        public readonly AstAssignment AssignmentNode = assignmentNode;
+        public readonly AstNode Type = type;
+        public readonly AstFlag Flag = flagNode;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -158,7 +119,7 @@ namespace BoomifyCS.Ast
     }
     public class AstLine(AstNode child) : AstNode(new Token(TokenType.EOL, ";"))
     {
-        public AstNode Child = child;
+        public readonly AstNode Child = child;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -171,18 +132,18 @@ namespace BoomifyCS.Ast
     }
     public class AstIdentifier(Token token, string name) : AstNode(token)
     {
-        public string Name = name;
+        public readonly string Name = name;
     }
     public class AstBracket(Token token) : AstNode(token)
     {
     }
-    public class AstEOL(Token token) : AstNode(token)
+    public class AstEol(Token token) : AstNode(token)
     {
     }
     public class AstBlock(List<AstNode> childsNodes) : AstNode(new Token(TokenType.BLOCK, "Block"))
     {
 
-        public List<AstNode> ChildNodes = childsNodes;
+        public readonly List<AstNode> ChildNodes = childsNodes;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -203,10 +164,10 @@ namespace BoomifyCS.Ast
     }
     public class AstIf(Token token, AstNode conditionNode, AstNode blockNode, AstElse elseNode = null) : AstNode(token)
     {
-        public AstNode ConditionNode = conditionNode;
-        public AstNode BlockNode = blockNode;
+        public readonly AstNode ConditionNode = conditionNode;
+        public readonly AstNode BlockNode = blockNode;
         public AstElse ElseNode = elseNode;
-        public List<AstElseIf> ElseIfNodes = [];
+        public readonly List<AstElseIf> ElseIfNodes = [];
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -239,7 +200,7 @@ namespace BoomifyCS.Ast
     }
     public class AstElse(Token token, AstNode blockNode) : AstNode(token)
     {
-        public AstNode BlockNode = blockNode;
+        public readonly AstNode BlockNode = blockNode;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -250,8 +211,8 @@ namespace BoomifyCS.Ast
     }
     public class AstElseIf(Token token, AstNode blockNode, AstNode conditionNode) : AstNode(token)
     {
-        public AstNode BlockNode = blockNode;
-        public AstNode ConditionNode = conditionNode;
+        public readonly AstNode BlockNode = blockNode;
+        public readonly AstNode ConditionNode = conditionNode;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -264,8 +225,8 @@ namespace BoomifyCS.Ast
     }
     public class AstWhile(Token token, AstNode blockNode, AstNode conditionNode) : AstNode(token)
     {
-        public AstNode BlockNode = blockNode;
-        public AstNode ConditionNode = conditionNode;
+        public readonly AstNode BlockNode = blockNode;
+        public readonly AstNode ConditionNode = conditionNode;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -278,10 +239,10 @@ namespace BoomifyCS.Ast
     }
     public class AstFor(Token token, AstNode blockNode, AstNode conditionNode, AstNode incrementNode, AstNode initNode) : AstNode(token)
     {
-        public AstNode BlockNode = blockNode;
-        public AstNode ConditionNode = conditionNode;
-        public AstNode IncrementNode = incrementNode;
-        public AstNode InitNode = initNode;
+        public readonly AstNode BlockNode = blockNode;
+        public readonly AstNode ConditionNode = conditionNode;
+        public readonly AstNode IncrementNode = incrementNode;
+        public readonly AstNode InitNode = initNode;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -295,8 +256,8 @@ namespace BoomifyCS.Ast
     }
     public class AstCall(Token token, AstNode callableName, AstNode argumentsNode = null) : AstNode(token)
     {
-        public AstNode CallableName = callableName;
-        public AstNode ArgumentsNode = argumentsNode;
+        public readonly AstNode CallableName = callableName;
+        public readonly AstNode ArgumentsNode = argumentsNode;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -309,8 +270,8 @@ namespace BoomifyCS.Ast
     }
     public class AstUnaryOperator(Token token, AstNode value, bool isPrefix = false) : AstNode(token)
     {
-        public AstNode Operand = value;
-        public bool IsPrefix = isPrefix;
+        public readonly AstNode Operand = value;
+        public readonly bool IsPrefix = isPrefix;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -325,11 +286,11 @@ namespace BoomifyCS.Ast
     }
     public class AstFunctionDecl(Token token, AstNode typeNode, AstIdentifier functionNameNode, AstNode argumentsNode, AstBlock blockNode,AstFlag flagNode) : AstNode(token)
     {
-        public AstNode ArgumentsNode = argumentsNode;
-        public AstIdentifier FunctionNameNode = functionNameNode;
-        public AstBlock BlockNode = blockNode;
-        public AstNode TypeNode = typeNode;
-        public AstFlag FlagNode = flagNode;
+        public readonly AstNode ArgumentsNode = argumentsNode;
+        public readonly AstIdentifier FunctionNameNode = functionNameNode;
+        public readonly AstBlock BlockNode = blockNode;
+        public readonly AstNode TypeNode = typeNode;
+        public readonly AstFlag FlagNode = flagNode;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -343,7 +304,7 @@ namespace BoomifyCS.Ast
     }
     public class AstModule(string moduleName, string modulePath, List<AstNode> nodes) : AstNode(new Token(TokenType.IDENTIFIER, moduleName))
     {
-        public List<AstNode> ChildNodes = nodes;
+        public readonly List<AstNode> ChildNodes = nodes;
         public string ModuleName = moduleName;
         public string ModulePath = modulePath;
 
@@ -362,8 +323,8 @@ namespace BoomifyCS.Ast
     }
     public class AstAssignmentOperator(Token token, AstNode identifierNode, AstNode valueNode) : AstNode(token)
     {
-        public AstNode IdentifierNode = identifierNode;
-        public AstNode ValueNode = valueNode;
+        public readonly AstNode IdentifierNode = identifierNode;
+        public readonly AstNode ValueNode = valueNode;
 
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
@@ -379,7 +340,7 @@ namespace BoomifyCS.Ast
     public class AstContinue(Token token) : AstNode(token) { }
     public class AstReturn(Token token, AstNode argumentsNode) : AstNode(token)
     {
-        public AstNode ArgumentsNode = argumentsNode;
+        public readonly AstNode ArgumentsNode = argumentsNode;
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note, false);
@@ -389,7 +350,7 @@ namespace BoomifyCS.Ast
     }
     public class AstArray(Token token, AstNode argumentsNode) : AstNode(token)
     {
-        public AstNode ArgumentsNode = argumentsNode;
+        public readonly AstNode ArgumentsNode = argumentsNode;
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note, false);
@@ -418,8 +379,8 @@ namespace BoomifyCS.Ast
     }
     public class AstIndexOperator(AstNode nodeIndex, AstNode operandNode) : AstNode(new Token(TokenType.NUMBER, "UNKNOWN"))
     {
-        public AstNode IndexNode = nodeIndex;
-        public AstNode TargetNode = operandNode;
+        public readonly AstNode IndexNode = nodeIndex;
+        public readonly AstNode TargetNode = operandNode;
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note, isLeft);
@@ -430,9 +391,9 @@ namespace BoomifyCS.Ast
     }
     public class AstParam(AstNode type, AstNode name, AstNode flag) : AstNode(new Token(TokenType.AND, "Param"))
     {
-        public AstNode Type = type;
-        public AstNode Name = name;
-        public AstNode Flag = flag;
+        public readonly AstNode Type = type;
+        public readonly AstNode Name = name;
+        public readonly AstNode Flag = flag;
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
@@ -451,8 +412,8 @@ namespace BoomifyCS.Ast
     }
     public class AstClass(Token token, AstNode nameNode, AstNode bodyNode) : AstNode(token)
     {
-        public AstNode NameNode = nameNode;
-        public AstNode BodyNode = bodyNode;
+        public readonly AstNode NameNode = nameNode;
+        public readonly AstNode BodyNode = bodyNode;
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string nameStr = NameNode?.StrHelper(level + 1, "Name: ");
@@ -464,8 +425,8 @@ namespace BoomifyCS.Ast
     }
     public class AstCast(Token token, AstNode typeNode, AstNode valueNode) : AstNode(token)
     {
-        public AstNode TypeNode = typeNode;
-        public AstNode ValueNode = valueNode;
+        public readonly AstNode TypeNode = typeNode;
+        public readonly AstNode ValueNode = valueNode;
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string typeStr = TypeNode?.StrHelper(level + 1, "Type: ");
@@ -478,8 +439,8 @@ namespace BoomifyCS.Ast
     }
     public class AstNew(Token token, AstNode valueNode, AstNode arguments) : AstNode(token)
     {
-        public AstNode ValueNode = valueNode;
-        public AstNode ArgumentsNode = arguments;
+        public readonly AstNode ValueNode = valueNode;
+        public readonly AstNode ArgumentsNode = arguments;
         public override string StrHelper(int level = 0, string note = "", bool isLeft = true)
         {
             string baseStr = base.StrHelper(level, note);
@@ -491,7 +452,7 @@ namespace BoomifyCS.Ast
     public class AstMemberAccess(Token token, AstNode left, AstNode right) : AstNode(token, left, right) { }
     public class AstFlag(Token token,List<AstNode> flags): AstNode(token)
     {
-        public List<AstNode> Flags = flags;
+        public readonly List<AstNode> Flags = flags;
         public bool HasFlag(string name)
         {
             foreach (AstNode flag in Flags)

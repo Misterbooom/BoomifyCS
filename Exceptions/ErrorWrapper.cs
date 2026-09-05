@@ -3,15 +3,8 @@ using System.IO;
 
 namespace BoomifyCS.Exceptions
 {
-    public class SimpleErrorWrapper
+    public class SimpleErrorWrapper(Exception exception)
     {
-        private readonly Exception _exception;
-
-        public SimpleErrorWrapper(Exception exception)
-        {
-            _exception = exception;
-        }
-
         /// <summary>
         /// Prints the detailed traceback and code snippets using improved colors.
         /// </summary>
@@ -27,7 +20,7 @@ namespace BoomifyCS.Exceptions
             Console.WriteLine();
 
             // Print the exception details.
-            PrintException(_exception, contextLines);
+            PrintException(exception, contextLines);
 
             // Restore the console color.
             Console.ForegroundColor = originalColor;

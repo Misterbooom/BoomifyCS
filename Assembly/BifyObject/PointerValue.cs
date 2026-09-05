@@ -2,38 +2,29 @@
 using System.Collections.Generic;
 using System.Linq;
 using LLVMSharp.Interop;
-using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Assembly.Builtin;
 
 namespace BoomifyCS.Assembly.BifyObject
 {
-    class AllocaPointer : PointerValue
-    {
-        public AllocaPointer(LLVMValueRef value, BifyPointerType type) : base(value, type) { }
-    }
+    class AllocaPointer(LLVMValueRef value, BifyPointerType type) : PointerValue(value, type);
 
-    class AllocaType : BifyPointerType
+    class AllocaType(BifyType pointedType) : BifyPointerType(pointedType)
     {
-        public AllocaType(BifyType pointedType) : base(pointedType) {
-        }
         protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
             return new AllocaPointer(value, this);
         }
     }
 
-    class PointerValue : BifyValue
+    class PointerValue(LLVMValueRef value, BifyPointerType pointerType) : BifyValue(value, pointerType)
     {
-        private static NullPointerCheck nullPointerCheck = new NullPointerCheck();
-
-        public PointerValue(LLVMValueRef value, BifyPointerType pointerType)
-            : base(value, pointerType) { }
+        private static readonly NullPointerCheck NullPointerCheck = new NullPointerCheck();
 
         private void CheckNull(string operation)
         {
 #if (DEBUG_COMPILE)
-            nullPointerCheck.Call(new BifyValue[] { this });
+            NullPointerCheck.Call(new BifyValue[] { this });
 #endif
         }
 
@@ -46,10 +37,10 @@ namespace BoomifyCS.Assembly.BifyObject
                     new BifyTypeError("Pointer arithmetic requires an integer offset in addition."));
                 return null;
             }
-            LLVMValueRef[] indices = new LLVMValueRef[] { other.GetLLVMValue() };
+            LLVMValueRef[] indices = new LLVMValueRef[] { other.GetLlvmValue() };
             BifyPointerType pointerType = (BifyPointerType)GetBifyType();
-            LLVMValueRef newPtr = builder.BuildGEP2(pointerType.PointedType.LLVMType, GetLLVMValue(), indices, "ptr_add");
-            return new PointerValue(newPtr, (BifyPointerType)this.type);
+            LLVMValueRef newPtr = builder.BuildGEP2(pointerType.PointedType.LlvmType, GetLlvmValue(), indices, "ptr_add");
+            return new PointerValue(newPtr, (BifyPointerType)this.Type);
         }
 
         public override BifyValue Sub(BifyValue other, LLVMBuilderRef builder)
@@ -61,11 +52,11 @@ namespace BoomifyCS.Assembly.BifyObject
                     new BifyTypeError("Pointer arithmetic requires an integer offset in subtraction."));
                 return null;
             }
-            LLVMValueRef zero = LLVMValueRef.CreateConstInt(other.GetBifyType().LLVMType, 0, false);
-            LLVMValueRef negOffset = builder.BuildSub(zero, other.GetLLVMValue(), "neg_offset");
+            LLVMValueRef zero = LLVMValueRef.CreateConstInt(other.GetBifyType().LlvmType, 0, false);
+            LLVMValueRef negOffset = builder.BuildSub(zero, other.GetLlvmValue(), "neg_offset");
             LLVMValueRef[] indices = new LLVMValueRef[] { negOffset };
             BifyPointerType pointerType = (BifyPointerType)GetBifyType();
-            LLVMValueRef newPtr = builder.BuildGEP2(pointerType.PointedType.LLVMType, GetLLVMValue(), indices, "ptr_sub");
+            LLVMValueRef newPtr = builder.BuildGEP2(pointerType.PointedType.LlvmType, GetLlvmValue(), indices, "ptr_sub");
             return GetBifyType().CreateValueRef(newPtr);
         }
 
@@ -73,10 +64,10 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             CheckNull("pointer dereference");
             var pointerType = (BifyPointerType)GetBifyType();
-            LLVMValueRef loadedValue = AssemblyCompiler.Instance.Builder.BuildLoad2(pointerType.PointedType.LLVMType, GetLLVMValue(), "dereferenced_ptr");
+            LLVMValueRef loadedValue = AssemblyCompiler.Instance.Builder.BuildLoad2(pointerType.PointedType.LlvmType, GetLlvmValue(), "dereferenced_ptr");
             
             var dereferenced = pointerType.PointedType.CreateValueRef(loadedValue);
-            dereferenced.ValueFlag = ValueFlag.None;
+            dereferenced.ValueFlag = ValueFlag.NONE;
             return dereferenced;
         }
 
@@ -89,22 +80,18 @@ namespace BoomifyCS.Assembly.BifyObject
                     new BifyTypeError("Pointer arithmetic requires an integer offset in indexing."));
                 return null;
             }
-            LLVMValueRef[] indices = new LLVMValueRef[] { indexValue.GetLLVMValue() };
+            LLVMValueRef[] indices = new LLVMValueRef[] { indexValue.GetLlvmValue() };
             BifyPointerType pointerType = (BifyPointerType)GetBifyType();
-            LLVMValueRef newPtr = builder.BuildGEP2(pointerType.PointedType.LLVMType, GetLLVMValue(), indices, $"ptr_index_{pointerType.PointedType.Name}");
+            LLVMValueRef newPtr = builder.BuildGEP2(pointerType.PointedType.LlvmType, GetLlvmValue(), indices, $"ptr_index_{pointerType.PointedType.Name}");
             return pointerType.CreateValueRef(newPtr);
         }
     }
 
-    class BifyPointerType : BifyType
+    class BifyPointerType(BifyType pointedType)
+        : BifyType(pointedType.Name + "*", LLVMTypeRef.CreatePointer(pointedType.LlvmType, 0))
     {
-        public BifyType PointedType { get; private set; }
+        public BifyType PointedType { get; private set; } = pointedType;
 
-        public BifyPointerType(BifyType pointedType)
-            : base(pointedType.Name + "*", LLVMTypeRef.CreatePointer(pointedType.LLVMType, 0))
-        {
-            PointedType = pointedType;
-        }
         public override BifyValue DefaultValue()
         {
             return NullType.Create(this);
@@ -145,16 +132,16 @@ namespace BoomifyCS.Assembly.BifyObject
 
         private void Init()
         {
-            TypeRef = LLVMTypeRef.CreateFunction(ReturnType.LLVMType, FunctionArgs.LLVMTypes, false);
+            TypeRef = LLVMTypeRef.CreateFunction(ReturnType.LlvmType, FunctionArgs.LlvmTypes, false);
             var compiler = AssemblyCompiler.Instance;
-            llvmValue = compiler.Module.AddFunction("nullPointerCheck", TypeRef);
-            var entry = llvmValue.AppendBasicBlock("entry");
+            LlvmValue = compiler.Module.AddFunction("nullPointerCheck", TypeRef);
+            var entry = LlvmValue.AppendBasicBlock("entry");
             compiler.Builder.PositionAtEnd(entry);
-            LLVMValueRef ptrArg = llvmValue.GetParam(0);
-            LLVMValueRef nullConst = new NullValue().GetLLVMValue();
+            LLVMValueRef ptrArg = LlvmValue.GetParam(0);
+            LLVMValueRef nullConst = new NullValue().GetLlvmValue();
             LLVMValueRef condition = compiler.Builder.BuildICmp(LLVMIntPredicate.LLVMIntEQ, ptrArg, nullConst, "nullCheck");
-            var thenBlock = llvmValue.AppendBasicBlock("then");
-            var elseBlock = llvmValue.AppendBasicBlock("else");
+            var thenBlock = LlvmValue.AppendBasicBlock("then");
+            var elseBlock = LlvmValue.AppendBasicBlock("else");
             compiler.Builder.BuildCondBr(condition, thenBlock, elseBlock);
             compiler.Builder.PositionAtEnd(thenBlock);
             StdC.RaiseError(new BifyNullError("Null pointer encountered."));
@@ -174,14 +161,14 @@ namespace BoomifyCS.Assembly.BifyObject
             }
             else
             {
-                llvmValue = existedFunction;
-                TypeRef = LLVMTypeRef.CreateFunction(ReturnType.LLVMType, existedFunction.TypeOf.GetParamTypes());
+                LlvmValue = existedFunction;
+                TypeRef = LLVMTypeRef.CreateFunction(ReturnType.LlvmType, existedFunction.TypeOf.GetParamTypes());
             }
             if (args.Length != 1)
             {
                 Traceback.Instance.ThrowException(new BifyArgumentError($"Expected 1 argument but got {args.Length}."));
             }
-            AssemblyCompiler.Instance.Builder.BuildCall2(TypeRef, llvmValue, args.Select(item => item.GetLLVMValue()).ToArray());
+            AssemblyCompiler.Instance.Builder.BuildCall2(TypeRef, LlvmValue, args.Select(item => item.GetLlvmValue()).ToArray());
             return new VoidType().Create(null);
         }
     }

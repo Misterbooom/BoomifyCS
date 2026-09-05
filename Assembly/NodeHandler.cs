@@ -1,21 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BoomifyCS.Ast;
-using BoomifyCS.Lexer;
+﻿using BoomifyCS.Ast;
 
 namespace BoomifyCS.Assembly
 {
-    abstract class NodeHandler
+    abstract class NodeHandler(AssemblyCompiler compiler)
     {
-        protected AssemblyCompiler compiler;
-
-        protected NodeHandler(AssemblyCompiler compiler)
-        {
-            this.compiler = compiler;
-        }
+        protected readonly AssemblyCompiler Compiler = compiler;
 
         public abstract void HandleNode(AstNode node);
     }

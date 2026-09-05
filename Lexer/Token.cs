@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace BoomifyCS.Lexer
 {
@@ -97,12 +93,15 @@ namespace BoomifyCS.Lexer
         RANGE,
         INDEX_OPERATOR,
         POINTER,
-        CHAR
+        CHAR,
+        PUBLIC,
+        PRIVATE,
+        PROTECTED
     }
     public class Token(TokenType type, string value, List<Token> tokens = null)
     {
         public TokenType Type = type;
-        public string Value = value;
+        public readonly string Value = value;
         public int Line;
         public int Column;
         public List<Token> Tokens = tokens;

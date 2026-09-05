@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using BoomifyCS.Lexer;
-
-namespace BoomifyCS.Exceptions
+﻿namespace BoomifyCS.Exceptions
 {
 
 
@@ -45,7 +42,7 @@ namespace BoomifyCS.Exceptions
     {
     }
 
-    public class BifyIOError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
+    public class BifyIoError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
     }
 
@@ -113,7 +110,7 @@ namespace BoomifyCS.Exceptions
     {
     }
 
-    public class BifyEOFError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
+    public class BifyEofError(string message, string tokens = "", string invalidTokens = "", int currentLine = 0) : BifyError(message, tokens, invalidTokens, currentLine)
     {
     }
 

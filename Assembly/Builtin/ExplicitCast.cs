@@ -1,22 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BoomifyCS.Assembly.BifyObject;
+﻿using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Exceptions;
 using LLVMSharp.Interop;
-using NUnit.Framework.Constraints;
 
 namespace BoomifyCS.Assembly.Builtin
 {
-    class ExplicitCastHandler
+    class ExplicitCastHandler(BifyValue bifyValue)
     {
-        private BifyValue bifyValue;
-        public ExplicitCastHandler(BifyValue bifyValue)
-        {
-            this.bifyValue = bifyValue;
-        }
         public BifyValue PerformExplicitCast(BifyType desiredType, LLVMBuilderRef builder)
         {
             if (desiredType.CompareType(bifyValue.GetBifyType()))
@@ -41,14 +30,14 @@ namespace BoomifyCS.Assembly.Builtin
         }
         private BifyValue HandleCharCast(CharValue value, LLVMBuilderRef builder)
         {
-            var res = builder.BuildSExt(value.GetLLVMValue(), LLVMTypeRef.Int32, "char_to_int");
+            var res = builder.BuildSExt(value.GetLlvmValue(), LLVMTypeRef.Int32, "char_to_int");
             return new IntegerValue(res);
         }
 
         private BifyValue HandlePointerCast(BifyPointerType desiredPtr, LLVMBuilderRef builder)
         {
             if (desiredPtr.PointedType.CompareType(bifyValue.GetBifyType()))
-                return desiredPtr.CreateValueRef(bifyValue.GetLLVMValue());
+                return desiredPtr.CreateValueRef(bifyValue.GetLlvmValue());
 
             if (bifyValue.GetBifyType() is NullType)
                 return NullType.Create(desiredPtr);
@@ -57,11 +46,11 @@ namespace BoomifyCS.Assembly.Builtin
                 return HandleArrayPointerCast(arrayType, desiredPtr, builder);
             if (bifyValue.GetBifyType().CompareType(typeof(AnyType)))
             {
-                return desiredPtr.CreateValueRef(bifyValue.GetLLVMValue());
+                return desiredPtr.CreateValueRef(bifyValue.GetLlvmValue());
             }
             if (desiredPtr is AnyType)
             {
-                return new AnyType().CreateValueRef(bifyValue.GetLLVMValue());
+                return new AnyType().CreateValueRef(bifyValue.GetLlvmValue());
             }
 
             return null;
@@ -71,12 +60,12 @@ namespace BoomifyCS.Assembly.Builtin
         {
             if (desiredPtr.PointedType.CompareType(arrayType.ItemType))
             {
-                var arr = new AllocaType(arrayType).CreateValueRef(builder.BuildAlloca(arrayType.LLVMType, "arr"));
+                var arr = new AllocaType(arrayType).CreateValueRef(builder.BuildAlloca(arrayType.LlvmType, "arr"));
 
-                builder.BuildStore(bifyValue.GetLLVMValue(), arr.GetLLVMValue());
+                builder.BuildStore(bifyValue.GetLlvmValue(), arr.GetLlvmValue());
 
 
-                var res = ((ArrayValue)arrayType.CreateValueRef(arr.GetLLVMValue())).ZeroIndex(builder);
+                var res = ((ArrayValue)arrayType.CreateValueRef(arr.GetLlvmValue())).ZeroIndex(builder);
                 return res;
             }
 
@@ -94,13 +83,13 @@ namespace BoomifyCS.Assembly.Builtin
 
         private BifyValue CastIntegerToFloat(BifyType desiredType, LLVMBuilderRef builder)
         {
-            LLVMValueRef floatValue = builder.BuildSIToFP(bifyValue.GetLLVMValue(), desiredType.LLVMType, "cast_int_to_float");
+            LLVMValueRef floatValue = builder.BuildSIToFP(bifyValue.GetLlvmValue(), desiredType.LlvmType, "cast_int_to_float");
             return new FloatValue(floatValue);
         }
 
         private BifyValue CastFloatToInteger(BifyType desiredType, LLVMBuilderRef builder)
         {
-            LLVMValueRef intValue = builder.BuildFPToSI(bifyValue.GetLLVMValue(), desiredType.LLVMType, "cast_float_to_int");
+            LLVMValueRef intValue = builder.BuildFPToSI(bifyValue.GetLlvmValue(), desiredType.LlvmType, "cast_float_to_int");
             return new IntegerValue(intValue);
         }
     }

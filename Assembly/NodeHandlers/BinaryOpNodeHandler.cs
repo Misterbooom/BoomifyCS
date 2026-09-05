@@ -1,53 +1,49 @@
 ﻿using System;
-using BoomifyCS.Assembly;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Assembly.Builtin;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
-using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class BinaryOpNodeHandler : NodeHandler
+    class BinaryOpNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
-        public BinaryOpNodeHandler(AssemblyCompiler compiler) : base(compiler) { }
-
         public override void HandleNode(AstNode node)
         {
             if (node is AstBinaryOp && node.Token.Type == TokenType.COMMA)
             {
-                compiler.Visit(node.Left);
-                compiler.Visit(node.Right);
+                Compiler.Visit(node.Left);
+                Compiler.Visit(node.Right);
                 return;
             }
 
             else if (node.Token.Type == TokenType.NOT)
             {
-                compiler.Visit(node.Left);
-                IValue ivalue = compiler.StackIValuePop();
+                Compiler.Visit(node.Left);
+                IValue ivalue = Compiler.StackIValuePop();
                 if (ivalue is BifyType)
                 {
                     Traceback.Instance.ThrowException(new BifyTypeError("Invalid operand: type provided instead of value"));
                     return;
                 }
                 BifyValue value = (BifyValue)ivalue;
-                BifyValue result = value.Not(compiler.Builder);
-                compiler.StackPush(result);
+                BifyValue result = value.Not(Compiler.Builder);
+                Compiler.StackPush(result);
                 return;
             }
             else
             {
-                compiler.Visit(node.Left);
-                compiler.Visit(node.Right);
-                IValue rhsI = compiler.StackIValuePop();
+                Compiler.Visit(node.Left);
+                Compiler.Visit(node.Right);
+                IValue rhsI = Compiler.StackIValuePop();
                 if (rhsI is BifyType)
                 {
                     Traceback.Instance.ThrowException(new BifyTypeError("Invalid operand: type provided instead of value"));
                     return;
                 }
                 BifyValue rhs = (BifyValue)rhsI;
-                IValue lhsI = compiler.StackIValuePop();
+                IValue lhsI = Compiler.StackIValuePop();
                 if (lhsI is BifyType)
                 {
                     Traceback.Instance.ThrowException(new BifyTypeError("Invalid operand: type provided instead of value"));
@@ -55,7 +51,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 }
                 BifyValue lhs = (BifyValue)lhsI;
                 BifyValue result = BinaryVal(lhs, rhs, node.Token.Type);
-                compiler.StackPush(result);
+                Compiler.StackPush(result);
             }
         }
 
@@ -64,11 +60,11 @@ namespace BoomifyCS.Assembly.NodeHandlers
             switch (type)
             {
                 case TokenType.ADD:
-                    return lhs.Add(rhs, compiler.Builder);
+                    return lhs.Add(rhs, Compiler.Builder);
                 case TokenType.SUB:
-                    return lhs.Sub(rhs, compiler.Builder);
+                    return lhs.Sub(rhs, Compiler.Builder);
                 case TokenType.MUL:
-                    return lhs.Mul(rhs, compiler.Builder);
+                    return lhs.Mul(rhs, Compiler.Builder);
                 case TokenType.DIV:
 #if DEBUG_COMPILE
                     if (rhs.CompareType(typeof(IntegerType)) || rhs.CompareType(typeof(FloatType)))
@@ -77,25 +73,25 @@ namespace BoomifyCS.Assembly.NodeHandlers
                             .Call([lhs, rhs, new IntegerType().Create(Traceback.Instance.Line)]);
                     }
 #endif
-                    return lhs.Div(rhs, compiler.Builder);
+                    return lhs.Div(rhs, Compiler.Builder);
                 case TokenType.EQ:
-                    return lhs.Equal(rhs, compiler.Builder);
+                    return lhs.Equal(rhs, Compiler.Builder);
                 case TokenType.NEQ:
-                    return lhs.NotEqual(rhs, compiler.Builder);
+                    return lhs.NotEqual(rhs, Compiler.Builder);
                 case TokenType.LT:
-                    return lhs.LessThan(rhs, compiler.Builder);
+                    return lhs.LessThan(rhs, Compiler.Builder);
                 case TokenType.GT:
-                    return lhs.GreaterThan(rhs, compiler.Builder);
+                    return lhs.GreaterThan(rhs, Compiler.Builder);
                 case TokenType.LTEQ:
-                    return lhs.LessThanOrEqual(rhs, compiler.Builder);
+                    return lhs.LessThanOrEqual(rhs, Compiler.Builder);
                 case TokenType.GTEQ:
-                    return lhs.GreaterThanOrEqual(rhs, compiler.Builder);
+                    return lhs.GreaterThanOrEqual(rhs, Compiler.Builder);
                 case TokenType.OR:
                     if (!lhs.CompareType(typeof(BoolType)) || !rhs.CompareType(typeof(BoolType)))
                     {
                         Traceback.Instance.ThrowException(new BifyTypeError($"Cannot compare {lhs.GetTypeName()} with {rhs.GetTypeName()}"));
                     }
-                    return new BoolValue(compiler.Builder.BuildOr(lhs.GetLLVMValue(), rhs.GetLLVMValue(), "or"));
+                    return new BoolValue(Compiler.Builder.BuildOr(lhs.GetLlvmValue(), rhs.GetLlvmValue(), "or"));
                 case TokenType.AND:
 
                     
@@ -103,7 +99,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                     {
                         Traceback.Instance.ThrowException(new BifyTypeError($"Cannot 'and' {lhs.GetTypeName()} with {rhs.GetTypeName()}"));
                     }
-                    return new BoolValue(compiler.Builder.BuildAnd(lhs.GetLLVMValue(), rhs.GetLLVMValue(), "and"));
+                    return new BoolValue(Compiler.Builder.BuildAnd(lhs.GetLlvmValue(), rhs.GetLlvmValue(), "and"));
                 default:
                     throw new NotImplementedException($"Not implemented binary operator. Type: {type}");
             }

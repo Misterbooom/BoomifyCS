@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
-using BoomifyCS.Parser;
+
 namespace BoomifyCS.Ast.Validators
 {
     class VariableDeclarationValidator

@@ -2,14 +2,12 @@
 using BoomifyCS.Assembly;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
-using System.ComponentModel.DataAnnotations;
-using NUnit.Framework;
 
 class FunctionPathChecker
 {
-    public bool AllPathsReturn = false;
-    private BifyType _functionType;
-    private AssemblyVariableManager _variableManager = AssemblyCompiler.Instance.VariableManager;
+    public readonly bool AllPathsReturn = false;
+    private readonly BifyType _functionType;
+    private readonly AssemblyVariableManager _variableManager = AssemblyCompiler.Instance.VariableManager;
 
     public FunctionPathChecker(BifyType functionType, AstNode node)
     {

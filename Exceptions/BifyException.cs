@@ -1,40 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Runtime.CompilerServices;
-using System.Text;
-using BoomifyCS.Lexer;
-using ColorConsole = Colorful.Console;
+﻿using System.Collections.Generic;
+using Spectre.Console;
 
 namespace BoomifyCS.Exceptions
 {
-    public static class AnsiColorHelper
-    {
-        public static void WriteLine(string text, Color color)
-        {
-            Console.Write($"\x1b[38;2;{color.R};{color.G};{color.B}m{text}\x1b[0m\n");
-        }
-
-        public static void Write(string text, Color color)
-        {
-            Console.Write($"\x1b[38;2;{color.R};{color.G};{color.B}m{text}\x1b[0m");
-        }
-    }
-
     public abstract class BifyError
     {
         public int CurrentLine { get; set; }
-        public int Column { get; set; } 
+        public int Column { get; set; }
         public List<CallStackFrame> CallStack { get; set; } = new();
         public string LineTokensString { get; set; } = "";
         public string InvalidTokensString { get; set; }
-        public string FileName { get; set; }
-        public string Message;
+        public string FileName { get; set; } = "0";
+        public readonly string Message;
 
-        protected BifyError() : base()
-        {
-            FileName = "0";
-        }
+        protected BifyError() { }
 
         protected BifyError(string message, string tokens, string invalidTokens, int currentLine = 1, int column = 0)
         {
@@ -47,77 +26,94 @@ namespace BoomifyCS.Exceptions
 
         public void PrintException()
         {
-            string exceptionInfo = $"{this.GetType().Name.Replace("Bify", "")}: {Message}";
-            string fileInfo = $"    File '{FileName}', Line {CurrentLine}, column {Column}";
+            string errorType = this.GetType().Name.Replace("Bify", "");
 
-            AnsiColorHelper.WriteLine(exceptionInfo, Color.IndianRed);
-            AnsiColorHelper.WriteLine(fileInfo, Color.OrangeRed);
+            var panel = new Panel($"[indianred]{Markup.Escape(Message)}[/]")
+            {
+                Header = new PanelHeader($"[red bold]{errorType}[/]"),
+                Border = BoxBorder.Rounded,
+                Padding = new Padding(1, 0, 1, 0)
+            };
+            AnsiConsole.Write(panel);
+
+            AnsiConsole.MarkupLine($"    File [orangered1]'{Markup.Escape(FileName)}'[/], Line [yellow]{CurrentLine}[/], Column [yellow]{Column}[/]");
 
             WriteLineTokens(10);
             PrintCallStack();
         }
 
-        private void PrintCallStack()
+        public void WriteLineTokens(int indentInt)
         {
-            if (CallStack != null && CallStack.Count != 0)
+            string indent = new string(' ', indentInt);
+
+            if (string.IsNullOrEmpty(InvalidTokensString) || Column <= 0)
             {
-                foreach (var frame in CallStack)
-                {
-                    Console.Write(new string(' ', 4));
-                    AnsiColorHelper.WriteLine(new string('-', 35), Color.Gray);
-
-                    AnsiColorHelper.Write("    at ", Color.Red);
-                    AnsiColorHelper.Write(frame.FilePath, Color.IndianRed);
-                    AnsiColorHelper.Write(": ", Color.Red);
-                    AnsiColorHelper.Write(frame.FunctionName, Color.Red);
-                    AnsiColorHelper.Write(" (Line ", Color.Red);
-                    AnsiColorHelper.Write(frame.LineNumber.ToString(), Color.Red);
-                    AnsiColorHelper.WriteLine(")", Color.Red);
-
-                    AnsiColorHelper.WriteLine($"        {frame.CodeLine}", Color.Red);
-                }
-
-                Console.Write(new string(' ', 4));
-                AnsiColorHelper.WriteLine(new string('-', 35), Color.Gray);
+                AnsiConsole.MarkupLine(indent + $"[grey]{Markup.Escape(LineTokensString)}[/]");
+                return;
             }
+
+            int errorIndex = Column - 1;
+            int errorLength = InvalidTokensString.Length;
+
+            if (errorIndex < 0 || errorIndex >= LineTokensString.Length)
+            {
+                AnsiConsole.MarkupLine(indent + $"[grey]{Markup.Escape(LineTokensString)}[/]");
+                return;
+            }
+
+            if (errorIndex + errorLength > LineTokensString.Length)
+            {
+                errorLength = LineTokensString.Length - errorIndex;
+            }
+
+            string beforeError = LineTokensString.Substring(0, errorIndex);
+            string errorPart = LineTokensString.Substring(errorIndex, errorLength);
+            string afterError = LineTokensString.Substring(errorIndex + errorLength);
+
+            AnsiConsole.Markup(indent);
+            AnsiConsole.Markup($"[grey]{Markup.Escape(beforeError)}[/]");
+            AnsiConsole.Markup($"[red underline]{Markup.Escape(errorPart)}[/]");
+            AnsiConsole.MarkupLine($"[grey]{Markup.Escape(afterError)}[/]");
+
+            AnsiConsole.MarkupLine(indent + new string(' ', errorIndex) + $"[red]{new string('^', errorLength)}[/]");
         }
 
-       
+        private void PrintCallStack()
+        {
+            if (CallStack == null || CallStack.Count == 0) return;
+
+            var table = new Table()
+                .Border(TableBorder.Rounded)
+                .BorderColor(Color.Grey)
+                .Title("[indianred]Call Stack[/]");
+
+            table.AddColumn("[grey]File[/]");
+            table.AddColumn("[grey]Function[/]");
+            table.AddColumn("[grey]Line[/]");
+            table.AddColumn("[grey]Code[/]");
+
+            foreach (var frame in CallStack)
+            {
+                table.AddRow(
+                    $"[indianred]{Markup.Escape(frame.FilePath)}[/]",
+                    $"[red]{Markup.Escape(frame.FunctionName)}[/]",
+                    $"[yellow]{frame.LineNumber}[/]",
+                    $"[darkgray]{Markup.Escape(frame.CodeLine ?? string.Empty)}[/]"
+                );
+            }
+
+            AnsiConsole.Write(table);
+        }
 
         public T Throw<T>()
         {
             Traceback.Instance.ThrowException(this);
-            return default(T);
+            return default;
         }
+
         public void Throw()
         {
             Traceback.Instance.ThrowException(this);
-        }
-        public void WriteLineTokens(int indentInt)
-        {
-            StringBuilder builder = new();
-            for (int i = 0; i < indentInt; i++)
-            {
-                builder.Append(' ');
-            }
-
-            Console.Write(builder.ToString());
-
-            for (int i = 0; i < LineTokensString.Length; i++)
-            {
-                if (i == Column - 1 && InvalidTokensString != null)
-                {
-                    AnsiColorHelper.Write(LineTokensString.Substring(i, InvalidTokensString.Length), Color.Red);
-
-                    i += InvalidTokensString.Length - 1;
-                }
-                else
-                {
-                    AnsiColorHelper.Write(LineTokensString[i].ToString(), Color.LightGray);
-                }
-            }
-
-            Console.Write("\n");
         }
     }
 }

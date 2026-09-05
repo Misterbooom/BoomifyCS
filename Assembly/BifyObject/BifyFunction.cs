@@ -1,36 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using LLVMSharp;
 using LLVMSharp.Interop;
 #nullable enable
 namespace BoomifyCS.Assembly.BifyObject
 {
-    class BifyFunction : BifyValue
+    class BifyFunction(
+        LLVMValueRef value,
+        FunctionArgs args,
+        BifyType returnType,
+        LLVMTypeRef type,
+        bool isVariadic = false)
+        : BifyValue(value, new FunctionType(type))
     {
-        public FunctionArgs FunctionArgs;
-        public BifyType ReturnType;
-        public LLVMTypeRef TypeRef;
-        public bool IsVariadic;
+        public FunctionArgs FunctionArgs = args;
+        public BifyType ReturnType = returnType;
+        public LLVMTypeRef TypeRef = type;
+        public bool IsVariadic = isVariadic;
         public bool IsMethod = false;
         public ClassValue? ParentClass;
-        public BifyFunction(LLVMValueRef value, FunctionArgs args, BifyType returnType, LLVMTypeRef type, bool isVariadic = false) 
-            : base(value,new FunctionType(type))
-        {
-            FunctionArgs = args;
-            IsVariadic = isVariadic;
-            ReturnType = returnType;
-            TypeRef = type;
-        }
+
         public override BifyValue Call(BifyValue[] args)
         {
             return ReturnType.CreateValueRef(
                 AssemblyCompiler.Instance.Builder.BuildCall2(
                      TypeRef,
-                     GetLLVMValue(),
-                     args.Select(item => item.GetLLVMValue()).ToArray(),
+                     GetLlvmValue(),
+                     args.Select(item => item.GetLlvmValue()).ToArray(),
                      ReturnType is not VoidType? "calltmp":"" 
                  )
             );
@@ -40,11 +35,8 @@ namespace BoomifyCS.Assembly.BifyObject
             return $"{(IsMethod ? ParentClass?.GetTypeName() + "." : "")}{GetTypeName()}({FunctionArgs}) -> {ReturnType}";
         }
     }
-    class FunctionType : BifyType
+    class FunctionType(LLVMTypeRef type) : BifyType("callable", type)
     {
-        public FunctionType(LLVMTypeRef type):base("callable", type)
-        {
-        }
         protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
             throw new NotImplementedException();

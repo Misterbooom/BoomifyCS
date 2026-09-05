@@ -11,6 +11,7 @@ using BoomifyCS.Assembly;
 using BoomifyCS.Exceptions;
 using System.CommandLine;
 using System.Threading.Tasks;
+using Spectre.Console;
 
 namespace BoomifyCS
 {
@@ -18,10 +19,21 @@ namespace BoomifyCS
     {
         static Task<int> Main(string[] args)
         {
+            var rawOut = new StreamWriter(Console.OpenStandardOutput()) 
+            { 
+                AutoFlush = true 
+            };
+
+            AnsiConsole.Console = AnsiConsole.Create(new AnsiConsoleSettings
+            {
+                Ansi = AnsiSupport.Yes,
+                ColorSystem = ColorSystemSupport.TrueColor, 
+                Out = new AnsiConsoleOutput(rawOut)         
+            });
             try
             {
                 Argument<FileInfo> inputArgument = new Argument<FileInfo>("input").AcceptExistingOnly();
-                Option<FileInfo> outputOption = new Option<FileInfo>("input",aliases: ["--output", "--o"]).AcceptExistingOnly();
+                Option<FileInfo> outputOption = new Option<FileInfo>("input", aliases: ["--output", "--o"]);
                 Option<bool> execOption = new Option<bool>("--exec", "--exec");
                 var rootCommand = new RootCommand("BoomifyCS Compiler")
                 {
@@ -40,12 +52,16 @@ namespace BoomifyCS
                     
                     string outPath = output?.FullName ?? Path.ChangeExtension(input.FullName, ".out");
                     Console.WriteLine($"Compiling {outPath}");
+                   
                     RunCompiler(input.FullName, outPath, compilerFlags);
+
+                    
                 });
                 return Task.FromResult(rootCommand.Parse(args).Invoke());
             }
             catch (Exception exception)
             {
+                AnsiConsole.WriteException(exception);
                 return Task.FromException<int>(exception);
             }
         }

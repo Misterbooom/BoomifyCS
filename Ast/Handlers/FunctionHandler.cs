@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using BoomifyCS.Ast.Validators;
+﻿using System.Collections.Generic;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 
@@ -13,7 +9,7 @@ namespace BoomifyCS.Ast.Handlers
         public override void HandleToken(Token token)
         {
 
-            GetVariableInfo(builder, out var identifierNode, out var typeNode, out var flagNode);
+            GetVariableInfo(Builder, out var identifierNode, out var typeNode, out var flagNode);
         
             if (identifierNode is not AstIdentifier id)
             {
@@ -26,15 +22,15 @@ namespace BoomifyCS.Ast.Handlers
             
 
 
-            List<List<Token>> splitedTokens = TokensFormatter.SplitTokensByType(builder.GetConditionTokens(), TokenType.COMMA);
+            List<List<Token>> splitedTokens = TokensFormatter.SplitTokensByType(Builder.GetConditionTokens(), TokenType.COMMA);
             AstParam[] parametersNodes = BuildParameters(splitedTokens);
             AstBinaryOp parameters = ConnectParameters(parametersNodes);
-            AstBlock blockNode = builder.HandleBody("Function");
+            AstBlock blockNode = Builder.HandleBody("Function");
 
             AstNode functionNode = new AstFunctionDecl(token,typeNode,(AstIdentifier)identifierNode,parameters,blockNode,flagNode);
-            builder.CurrentNode = functionNode;
-            builder.tokenIndex++;
-            builder.Nodes.Clear();
+            Builder.CurrentNode = functionNode;
+            Builder.TokenIndex++;
+            Builder.Nodes.Clear();
 
 
         }

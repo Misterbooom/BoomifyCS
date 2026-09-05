@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
@@ -8,69 +7,65 @@ namespace BoomifyCS.Assembly
 {
     public enum FlagContext
     {
-        ClassAttribute,
-        Method,
-        Function,
-        Variable,
+        CLASS_ATTRIBUTE,
+        METHOD,
+        FUNCTION,
+        VARIABLE,
     }
     class FlagProcessor
     {
        
-        public static void SetFlags(FlagContext flagContext,BifyType type,List<AstNode> flags)
+        public static void SetFlags(FlagContext flagContext, BifyType type, List<AstNode> flags)
         {
-          
             foreach (var flag in flags)
             {
-                var valueFlag = GetFlag(flagContext, flag.Token.Value);
-                if (valueFlag != ValueFlag.None)
+                if (flag.Token.Value == "const")
                 {
-                    type.ValueFlag |= valueFlag;
+                    if (flagContext is not (FlagContext.VARIABLE or FlagContext.CLASS_ATTRIBUTE))
+                        new BifyArgumentError($"Invalid flag 'const' for {flagContext.ToString().ToLower()}.").Throw();
+                    type.ValueFlag |= ValueFlag.CONSTANT;
+                    continue;
                 }
+                var accessLevel = GetAccesLevel(flagContext, flag.Token.Value);
+                type.AccessLevel = accessLevel;
             }
         }
-        private  static ValueFlag GetFlag(FlagContext flagContext, string name)
+        private  static AccessLevel GetAccesLevel(FlagContext flagContext, string name)
         {
             if (string.IsNullOrEmpty(name))
-                return ValueFlag.None;
+                return AccessLevel.PRIVATE;
 
             return flagContext switch
             {
-                FlagContext.ClassAttribute => GetClassAttributeFlag(name),
-                FlagContext.Method => GetMethodFlag(name),
-                FlagContext.Function => GetFunctionFlag(name),
-                FlagContext.Variable => GetVariableFlag(name),
-                _ => new BifyArgumentError($"Unsupported flag context: {flagContext}").Throw<ValueFlag>()
+                FlagContext.CLASS_ATTRIBUTE => GetAttributeAccessLevel(name),
+                FlagContext.METHOD => GetMethodAccessLevel(name),
+                FlagContext.FUNCTION => GetFunctionAccessLevel(name),
+                _ => new BifyArgumentError($"Unsupported flag context: {flagContext}").Throw<AccessLevel>()
             };
         }
 
-        private static ValueFlag GetClassAttributeFlag(string name) => name switch
+        private static AccessLevel GetAttributeAccessLevel(string name) => name switch
         {
-            "public" => ValueFlag.Public,
-            "private" => ValueFlag.Private,
-            "protected" => ValueFlag.Protected,
-            _ => new BifyArgumentError($"Invalid flag '{name}' for class attribute.").Throw<ValueFlag>()
+            "public" => AccessLevel.PUBLIC,
+            "private" => AccessLevel.PRIVATE,
+            "protected" => AccessLevel.PROTECTED,
+            _ => new BifyArgumentError($"Invalid flag '{name}' for class attribute.").Throw<AccessLevel>()
         };
 
-        private static ValueFlag GetMethodFlag(string name) => name switch
+        private static AccessLevel GetMethodAccessLevel(string name) => name switch
         {
-            "public" => ValueFlag.Public,
-            "private" => ValueFlag.Private,
-            "protected" => ValueFlag.Protected,
-            "const" => ValueFlag.Constant,
-            _ => new BifyArgumentError($"Invalid flag '{name}' for method.").Throw<ValueFlag>()
+            "public" => AccessLevel.PUBLIC,
+            "private" => AccessLevel.PRIVATE,
+            "protected" => AccessLevel.PROTECTED,
+            _ => new BifyArgumentError($"Invalid flag '{name}' for method.").Throw<AccessLevel>()
         };
 
-        private static ValueFlag GetFunctionFlag(string name) => name switch
+        private static AccessLevel GetFunctionAccessLevel(string name) => name switch
         {
             
-            _ => new BifyArgumentError($"Invalid flag '{name}' for function.").Throw<ValueFlag>()
+            _ => new BifyArgumentError($"Invalid flag '{name}' for function.").Throw<AccessLevel>()
         };
 
-        private static ValueFlag GetVariableFlag(string name) => name switch
-        {
-            "const" => ValueFlag.Constant,
-            _ => new BifyArgumentError($"Invalid flag '{name}' for Variable context").Throw<ValueFlag>()
-        };
     }
 
     

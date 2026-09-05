@@ -1,45 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
-using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
 {
    
-    class ClassAttributeManager
+    class ClassAttributeManager(AstClass classNode)
     {
-        private AstClass classNode;
-        private AssemblyCompiler compiler = AssemblyCompiler.Instance;
-        public ClassAttributeManager(AstClass classNode) {
-            this.classNode = classNode;
-        }
-        public ClassAttribute[] GetAttributes()
+        public Dictionary<ClassAttribute, AstNode>  GetAttributes()
         {
-            List<ClassAttribute> attributes = new List<ClassAttribute>();
+            Dictionary<ClassAttribute, AstNode> attributes = new();
             foreach (AstNode node in ((AstBlock)classNode.BodyNode).ChildNodes)
             {
                 if (node is AstVarDecl varDecl)
                 {
-                    attributes.Add(HandleAttribute(varDecl));
+                    var res = HandleAttribute(varDecl);
+                    attributes.Add(res.Item1, res.Item2);
                 }
             }
-            return attributes.ToArray();
+            return attributes;
         }
-        private ClassAttribute HandleAttribute(AstVarDecl node)
+        private (ClassAttribute, AstNode) HandleAttribute(AstVarDecl node)
         {
+
+            
             string varName = node.AssignmentNode.Left.Token.Value;
             var variableHandler = new VariableDeclarationNodeHandler(AssemblyCompiler.Instance);
             BifyType attributeType = variableHandler.DetermineVariableType(node,varName);
-            BifyValue attributeValue = variableHandler.GetVariableValue(node, varName,attributeType);
-            attributeValue.ValueFlag |= ValueFlag.Private;
-            FlagProcessor.SetFlags(FlagContext.ClassAttribute, attributeValue.GetBifyType(), node.Flag.Flags);
-            ClassAttribute attribute = new ClassAttribute(varName,attributeValue);
-            return attribute;
+            FlagProcessor.SetFlags(FlagContext.CLASS_ATTRIBUTE, attributeType, node.Flag.Flags);
+            // BifyValue attributeValue = variableHandler.GetVariableValue(node, varName,attributeType);
+            
+            ClassAttribute attribute = new ClassAttribute(varName,attributeType);
+        
+            BifyDebug.Log($"attribute: {attribute}");
+            return (attribute, node);
         }
        
     }

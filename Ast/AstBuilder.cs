@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using BoomifyCS.Ast.Validators;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 using BoomifyCS.Parser;
-using System.Linq;
 using BoomifyCS.Assembly;
 
 namespace BoomifyCS.Ast
 {
     class AstBuilder
     {
-        public int tokenIndex = 0;
-        public List<Token> tokens;
+        public int TokenIndex = 0;
+        public readonly List<Token> Tokens;
         public AstNode? CurrentNode
         {
             get => _currentNode;
@@ -26,25 +24,25 @@ namespace BoomifyCS.Ast
             }
         }
         private AstNode? _currentNode;
-        public bool IsHandlingLine = true;
+        public readonly bool IsHandlingLine = true;
         public List<AstNode> Nodes { get; set; } = new List<AstNode>();
-        private static List<string> typeTable = [];
+        private static readonly List<string> TypeTable = [];
 
         public AstBuilder(List<Token> tokens, bool isHandlingLine = true)
         {
-            this.tokens = tokens;
+            this.Tokens = tokens;
             this.IsHandlingLine = isHandlingLine;
         }
 
         public AstNode BuildNode()
         {
-            if (tokens == null || tokens.Count == 0)
+            if (Tokens == null || Tokens.Count == 0)
             {
                 return null;
             }
-            while (tokenIndex < tokens.Count)
+            while (TokenIndex < Tokens.Count)
             {
-                Token token = tokens[tokenIndex];
+                Token token = Tokens[TokenIndex];
                 var handler = TokenHandlerFactory.CreateHandler(token, this);
                 handler.HandleToken(token);
 
@@ -73,23 +71,23 @@ namespace BoomifyCS.Ast
         public Token GetPreviousToken()
         {
 
-            return TokensFormatter.GetTokenOrNull(tokens, tokenIndex - 1);
+            return TokensFormatter.GetTokenOrNull(Tokens, TokenIndex - 1);
         }
         public Token Peek()
         {
-            Token token = tokenIndex < tokens.Count ? tokens[tokenIndex] : null;
+            Token token = TokenIndex < Tokens.Count ? Tokens[TokenIndex] : null;
             Traceback.Instance.SetCurrentLine(token == null ? Traceback.Instance.Line : token.Line);
             return token;
         }
 
         public Token NextToken()
         {
-            Token token = tokens[tokenIndex++];
+            Token token = Tokens[TokenIndex++];
             Traceback.Instance.SetCurrentLine(token.Line);
             return token;
         }
 
-        public bool IsAtEnd() => tokenIndex >= tokens.Count;
+        public bool IsAtEnd() => TokenIndex >= Tokens.Count;
 
         public Token Consume(TokenType type, string message = "Unexpected token")
         {
@@ -109,24 +107,24 @@ namespace BoomifyCS.Ast
         {
             AssemblyCompiler compiler = AssemblyCompiler.Instance;
 
-            return compiler.VariableManager.TryGetBifyType(token.Value) != null || typeTable.Contains(token.Value) || token.Value == "var";
+            return compiler.VariableManager.TryGetBifyType(token.Value) != null || TypeTable.Contains(token.Value) || token.Value == "var";
         }
         public void AddType(string name)
         {
-            typeTable.Add(name);
+            TypeTable.Add(name);
         }
         public Token GetNextToken()
         {
-            if (tokenIndex + 1 >= tokens.Count)
+            if (TokenIndex + 1 >= Tokens.Count)
             {
                 return null;
             }
-            Token token = tokens[tokenIndex + 1];
+            Token token = Tokens[TokenIndex + 1];
             return token;
         }
         public void MoveToEnd()
         {
-            tokenIndex = tokens.Count;
+            TokenIndex = Tokens.Count;
         }
         public AstBlock HandleBody(string name)
         {
@@ -145,17 +143,17 @@ namespace BoomifyCS.Ast
             }
 
             AstBlock blockNode = ParseBlock(bodyTokens);
-            tokenIndex++;
+            TokenIndex++;
             return blockNode;
         }
 
-        public List<Token> GetConditionTokens() => TokensFormatter.GetTokensBetween(tokens, ref tokenIndex, TokenType.LPAREN, TokenType.RPAREN);
+        public List<Token> GetConditionTokens() => TokensFormatter.GetTokensBetween(Tokens, ref TokenIndex, TokenType.LPAREN, TokenType.RPAREN);
 
-        public List<Token> GetBlockTokens() => TokensFormatter.GetTokensBetween(tokens, ref tokenIndex, TokenType.LCUR, TokenType.RCUR);
+        public List<Token> GetBlockTokens() => TokensFormatter.GetTokensBetween(Tokens, ref TokenIndex, TokenType.LCUR, TokenType.RCUR);
 
         public AstNode ParseTokens(List<Token> conditionTokens) => new AstBuilder(conditionTokens, false).BuildNode();
 
-        public AstBlock ParseBlock(List<Token> blockTokens) => new AstBlock(((AstModule)new AstTree(Traceback.Instance.source).ParseTokens(blockTokens)).ChildNodes);
+        public AstBlock ParseBlock(List<Token> blockTokens) => new AstBlock(((AstModule)new AstTree(Traceback.Instance.Source).ParseTokens(blockTokens)).ChildNodes);
         private void HandleInvalidSyntax()
         {
             if (Nodes.Count == 2)

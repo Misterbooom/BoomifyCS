@@ -1,23 +1,18 @@
 ﻿class Printer{
 	int integer;
-	char* string;
+	public const char* string = "hello World!";
 	public constructor(int a){
 		this.integer = a;
 	}
 	public constructor(char* b){
-		this.string = b;
 	}
 	public void print(int a ){
 		explode("Integer: %d\n", a);
 	}
 	public void print(char* b){
-		explode("String: %s", b);
+		explode("String: %s\n", b);
 	}
 
 }
 void main(){
-
-	Printer p2 = new Printer("Test String");
-	p2.print(12);
-
 }

@@ -1,67 +1,64 @@
 ﻿using BoomifyCS.Lexer;
 using BoomifyCS.Exceptions;
 using System.Collections.Generic;
-using System;
 
 namespace BoomifyCS.Ast.Handlers
 {
-    class BinaryOperatorHandler : TokenHandler
+    class BinaryOperatorHandler(AstBuilder builder) : TokenHandler(builder)
     {
-        private Token binaryOpToken = null;
-        bool isUnary = false;
-
-        public BinaryOperatorHandler(AstBuilder builder) : base(builder) { }
+        private Token _binaryOpToken = null;
+        bool _isUnary = false;
 
         public override void HandleToken(Token token)
         {
             
-            binaryOpToken = token;
+            _binaryOpToken = token;
 
-            if (builder.Nodes.Count == 0)
+            if (Builder.Nodes.Count == 0)
             {
-                isUnary = true;
+                _isUnary = true;
             }
             else
             {
-                Token previousToken = builder.GetPreviousToken();
+                Token previousToken = Builder.GetPreviousToken();
                 if (previousToken != null)
                 {
-                    isUnary = previousToken.Type == TokenType.LPAREN || TokenConfig.binaryOperators.ContainsValue(previousToken.Type);
+                    _isUnary = previousToken.Type == TokenType.LPAREN || TokenConfig.BinaryOperators.ContainsValue(previousToken.Type);
                 }
             }
 
-            if (isUnary)
+            if (_isUnary)
             {
-                builder.tokenIndex++;
+                Builder.TokenIndex++;
                 AstNode operand = ParsePrimary();
                 if (token.Type == TokenType.MUL)
                 {
                     token.Type = TokenType.POINTER;
                 }
-                builder.CurrentNode = new AstUnaryOperator(token, operand,true);
+                Builder.CurrentNode = new AstUnaryOperator(token, operand,true);
                 return;
             }
 
-            AstNode left = builder.Nodes[^1];
-            builder.Nodes.RemoveAt(builder.Nodes.Count - 1);
+            AstNode left = Builder.Nodes[^1];
+            Builder.Nodes.RemoveAt(Builder.Nodes.Count - 1);
 
             int precedence = AstConfig.Precedence[token.Type];
-            builder.tokenIndex++;
+            Builder.TokenIndex++;
 
             AstNode right = ParseRight(precedence);
-            if (isUnary)
+            if (_isUnary)
             {
-                builder.Nodes.Add(left);
+                Builder.Nodes.Add(left);
                 Token newToken = token;
                 if (token.Type == TokenType.MUL)
                 {
                     newToken.Type = TokenType.POINTER;
                 }
-                builder.CurrentNode = new AstUnaryOperator(newToken, right,true);
+                Builder.CurrentNode = new AstUnaryOperator(newToken, right,true);
             }
             else
             {
-                builder.CurrentNode = new AstBinaryOp(token, left, right);
+                Builder.CurrentNode = new AstBinaryOp(token, left, right);
 
             }
         }
@@ -69,19 +66,19 @@ namespace BoomifyCS.Ast.Handlers
         private AstNode ParseRight(int minPrecedence)
         {
             AstNode left = ParsePrimary();
-            while (!builder.IsAtEnd())
+            while (!Builder.IsAtEnd())
             {
-                Token next = builder.Peek();
+                Token next = Builder.Peek();
                 
-                if (binaryOpToken.Type == TokenType.MUL && next.Type == TokenType.ASSIGN )
+                if (_binaryOpToken.Type == TokenType.MUL && next.Type == TokenType.ASSIGN )
                 {
-                    isUnary = true;
+                    _isUnary = true;
                     break;
                 }
 
                 if (!AstConfig.Precedence.TryGetValue(next.Type, out int prec) || prec < minPrecedence)
                     break;
-                Token op = builder.NextToken();
+                Token op = Builder.NextToken();
                 AstNode right = ParseRight(prec + 1);
                 left = new AstBinaryOp(op, left, right);
             }
@@ -95,22 +92,22 @@ namespace BoomifyCS.Ast.Handlers
 
         public AstNode ParsePrimary(bool handlePostfix = true)
         {
-            if (builder.IsAtEnd())
+            if (Builder.IsAtEnd())
             {
-                new BifySyntaxError($"Unexpected end of expression. Please check that your expression is complete.: {builder.GetPreviousToken()}").Throw();
+                new BifySyntaxError($"Unexpected end of expression. Please check that your expression is complete.: {Builder.GetPreviousToken()}").Throw();
             }
 
-            Token token = builder.NextToken();
+            Token token = Builder.NextToken();
 
             AstNode baseNode = token.Type switch
             {
-                TokenType.IDENTIFIER or TokenType.CONST => new IdentifierHandler(builder).ParseIdentfier(token, true),
+                TokenType.IDENTIFIER or TokenType.CONST => new IdentifierHandler(Builder).ParseIdentfier(token, true),
                 TokenType.NUMBER => NodeConventer.TokenToNode(token),
                 TokenType.LPAREN => ParseParenthesizedExpression(),
                 TokenType.SUB or TokenType.MUL or TokenType.INCREMENT or TokenType.DECREMENT or TokenType.NOT=> HandleUnaryOperator(token),
-                TokenType.LBRACKET => new ArrayHandler(builder).GetArrayNode(token),
+                TokenType.LBRACKET => new ArrayHandler(Builder).GetArrayNode(token),
                 TokenType.STRING or TokenType.CHAR => NodeConventer.TokenToNode(token),
-                TokenType.NEW => new NewHandler(builder).ParseNewExpression(token),
+                TokenType.NEW => new NewHandler(Builder).ParseNewExpression(token),
                 _ => new BifySyntaxError($"Unexpected token '{token.Value}' found in expression. Verify your syntax and try again.").Throw<AstNode>()
             };
             baseNode.LineNumber = token.Line;
@@ -122,20 +119,20 @@ namespace BoomifyCS.Ast.Handlers
 
         public AstNode ParsePostfix(AstNode expr)
         {
-            while (!builder.IsAtEnd())
+            while (!Builder.IsAtEnd())
             {
-                Token next = builder.Peek();
+                Token next = Builder.Peek();
                 if (next.Type == TokenType.LPAREN)
                 {
-                    var args = builder.ParseTokens(builder.GetConditionTokens());
+                    var args = Builder.ParseTokens(Builder.GetConditionTokens());
                     expr = new AstCall(next, expr, args);
                 }
                 else if (next.Type == TokenType.LBRACKET)
                 {
-                    var indexTokens = TokensFormatter.GetTokensBetween(builder.tokens, ref builder.tokenIndex,
+                    var indexTokens = TokensFormatter.GetTokensBetween(Builder.Tokens, ref Builder.TokenIndex,
                                 TokenType.LBRACKET, TokenType.RBRACKET);
 
-                    var indexNode = builder.ParseTokens(indexTokens);
+                    var indexNode = Builder.ParseTokens(indexTokens);
 
                     expr = new AstIndexOperator(indexNode, expr);
                 }
@@ -145,16 +142,16 @@ namespace BoomifyCS.Ast.Handlers
                 }
                 else if (next.Type == TokenType.DOT)
                 {
-                    builder.NextToken();
+                    Builder.NextToken();
                     expr = new AstMemberAccess(next, expr,ParsePrimary(false));
-                    builder.tokenIndex--;
+                    Builder.TokenIndex--;
                 }
                 else
                 {
                     break;
                 }
                 expr.LineNumber = next.Line;
-                builder.tokenIndex++;
+                Builder.TokenIndex++;
             }
             return expr;
         }
@@ -171,10 +168,10 @@ namespace BoomifyCS.Ast.Handlers
 
         private AstNode ParseParenthesizedExpression()
         {
-            builder.tokenIndex--;
-            List<Token> innerTokens = builder.GetConditionTokens();
-            AstNode node = builder.ParseTokens(innerTokens);
-            builder.tokenIndex++;
+            Builder.TokenIndex--;
+            List<Token> innerTokens = Builder.GetConditionTokens();
+            AstNode node = Builder.ParseTokens(innerTokens);
+            Builder.TokenIndex++;
             if (node?.Token.Type == TokenType.POINTER || node is AstIdentifier)
             {
                 AstNode valueNode = ParsePrimary();

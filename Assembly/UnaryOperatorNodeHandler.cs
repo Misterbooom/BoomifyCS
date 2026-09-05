@@ -1,31 +1,28 @@
-﻿using System;
-using BoomifyCS.Assembly.BifyObject;
+﻿using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class UnaryOperatorNodeHandler : NodeHandler
+    class UnaryOperatorNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
-        public UnaryOperatorNodeHandler(AssemblyCompiler compiler) : base(compiler) { }
-
         public override void HandleNode(AstNode node)
         {
             AstUnaryOperator unaryOperator = (AstUnaryOperator)node;
 
             if (unaryOperator.Token.Type == TokenType.POINTER)
             {
-                compiler.Visit(unaryOperator.Operand);
-                IValue value = compiler.StackIValuePop();
+                Compiler.Visit(unaryOperator.Operand);
+                IValue value = Compiler.StackIValuePop();
 
                 if (value is BifyType bifyType)
                 {
-                    compiler.StackPush(new BifyPointerType(bifyType));
+                    Compiler.StackPush(new BifyPointerType(bifyType));
                 }
                 else if (value is PointerValue pointer)
                 {
-                    compiler.StackPush(pointer.Dereference());
+                    Compiler.StackPush(pointer.Dereference());
                 }
                 else
                 {
@@ -34,9 +31,9 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 return;
             }
 
-            compiler.Flag |= NodeVisitFlag.ASSIGNMENT_INDEX;
-            compiler.Visit(unaryOperator.Operand);
-            IValue operandValue = compiler.StackIValuePop();
+            Compiler.Flag |= NodeVisitFlag.ASSIGNMENT_INDEX;
+            Compiler.Visit(unaryOperator.Operand);
+            IValue operandValue = Compiler.StackIValuePop();
             if (operandValue is AllocaPointer alloca)
             {
                 HandleUnaryWithVariable(unaryOperator.Token.Type, alloca, unaryOperator.IsPrefix);
@@ -46,14 +43,14 @@ namespace BoomifyCS.Assembly.NodeHandlers
         {
             BifyValue loadedValue = allocaPointer.Dereference();
             BifyValue result = CalculateResult(tokenType, loadedValue);
-            compiler.Builder.BuildStore(result.GetLLVMValue(), allocaPointer.GetLLVMValue());
+            Compiler.Builder.BuildStore(result.GetLlvmValue(), allocaPointer.GetLlvmValue());
             if (isPrefix)
             {
-                compiler.StackPush(result);
+                Compiler.StackPush(result);
             }
             else
             {
-                compiler.StackPush(loadedValue);
+                Compiler.StackPush(loadedValue);
             }
         }
         private BifyValue CalculateResult(TokenType tokenType, BifyValue operandValue)
@@ -62,9 +59,9 @@ namespace BoomifyCS.Assembly.NodeHandlers
             switch (tokenType)
             {
                 case TokenType.INCREMENT:
-                    return operandValue.Add(one, compiler.Builder);
+                    return operandValue.Add(one, Compiler.Builder);
                 case TokenType.DECREMENT:
-                    return operandValue.Sub(one, compiler.Builder);
+                    return operandValue.Sub(one, Compiler.Builder);
                 default:
                     Traceback.Instance.ThrowException(new BifyTypeError($"Invalid unary operator '{tokenType}'"));
                     return null;

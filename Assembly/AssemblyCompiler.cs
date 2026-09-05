@@ -7,7 +7,6 @@ using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 using System.Linq;
-using NUnit.Framework.Internal;
 
 namespace BoomifyCS.Assembly
 {
@@ -27,9 +26,8 @@ namespace BoomifyCS.Assembly
     class AssemblyCompiler : IDisposable
     {
         private static AssemblyCompiler _instance;
-        private static readonly object _lock = new();
+        private static readonly object Lock = new();
 
-        public AssemblerCodeManager AssemblerCode { get; } = new();
         public AssemblyVariableManager VariableManager { get; }
         public LLVMContext Context { get; }
         public LLVMModuleRef Module { get; }
@@ -54,9 +52,9 @@ namespace BoomifyCS.Assembly
             }
         }
 
-        public LLVMBasicBlockRef FunctionEntryBB { get; private set; }
+        public LLVMBasicBlockRef FunctionEntryBb { get; private set; }
 
-        public LLVMBasicBlockRef ErrorBB;
+        public LLVMBasicBlockRef ErrorBb;
 
         private readonly Stack<IValue> _stack = new();
 
@@ -79,7 +77,7 @@ namespace BoomifyCS.Assembly
         {
             get
             {
-                lock (_lock)
+                lock (Lock)
                 {
                     _instance ??= new AssemblyCompiler();
                     return _instance;
@@ -104,10 +102,10 @@ namespace BoomifyCS.Assembly
             }
         }
 
-        public void SetFunctionEntryBB(LLVMBasicBlockRef entryBB)
+        public void SetFunctionEntryBb(LLVMBasicBlockRef entryBb)
         {
-            FunctionEntryBB = entryBB;
-            Builder.PositionAtEnd(entryBB);
+            FunctionEntryBb = entryBb;
+            Builder.PositionAtEnd(entryBb);
         }
 
         public void StackPush(IValue value)
@@ -177,17 +175,22 @@ namespace BoomifyCS.Assembly
                 return;
             }
 
-            if (Path.GetExtension(outputFilePath) == ".o")
+            string fileExtension = Path.GetExtension(outputFilePath);
+            if (fileExtension == ".o")
             {
                 GenerateObjectFile(filePath, outputFilePath);
             }
-            else if (Path.GetExtension(outputFilePath) == ".out" || Path.GetExtension(outputFilePath) == "")
+            else if (fileExtension == ".out" || fileExtension == "")
             {
                 GenerateExecutable(filePath, outputFilePath, flags);
             }
+            else if (fileExtension == ".ir")
+            {
+                File.WriteAllText(outputFilePath,Module.ToString());
+            }
             else
             {
-                Console.WriteLine($"Invalid output file extension: {Path.GetExtension(outputFilePath)}");
+                Console.WriteLine($"Invalid output file extension: {fileExtension}");
             }
         }
 
@@ -195,9 +198,17 @@ namespace BoomifyCS.Assembly
         {
             unsafe
             {
-                LLVMTargetMachineRef targetMachine = CreateTargetMachine();
-                targetMachine.EmitToFile(Module, outputFilePath, LLVMCodeGenFileType.LLVMObjectFile);
-                LLVM.DisposeTargetMachine(targetMachine);
+                try
+                {
+                    LLVMTargetMachineRef targetMachine = CreateTargetMachine();
+                    targetMachine.EmitToFile(Module, outputFilePath, LLVMCodeGenFileType.LLVMObjectFile);
+                    LLVM.DisposeTargetMachine(targetMachine);
+                }
+                catch (Exception e)
+                {
+                    BifyDebug.Log($"Failed to create target machine: {e.Message}");
+                }
+
             }
         }
 
@@ -205,10 +216,12 @@ namespace BoomifyCS.Assembly
         private void GenerateExecutable(string filePath, string outputFilePath, CompilerFlags flags)
         {
             string tempObjFile = Path.GetTempFileName() + ".o";
-
+            BifyDebug.Log("Generating object file:"  + tempObjFile);
             GenerateObjectFile(filePath, tempObjFile);
+            BifyDebug.Log("Compiling object file: " + tempObjFile);
             LinkLibraries(tempObjFile, outputFilePath);
-
+            
+            
             if (File.Exists(tempObjFile))
             {
                 File.Delete(tempObjFile);
@@ -220,28 +233,19 @@ namespace BoomifyCS.Assembly
                 var processInfo = new System.Diagnostics.ProcessStartInfo
                 {
                     FileName = outputFilePath,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
+                    RedirectStandardOutput = false,
+                    RedirectStandardError = false,
                     UseShellExecute = false,
                     CreateNoWindow = true
                 };
 
                 using var process = new System.Diagnostics.Process { StartInfo = processInfo };
-    
-                process.OutputDataReceived += (sender, args) => {
-                    if (args.Data != null) Console.WriteLine(args.Data);
-                };
-                process.ErrorDataReceived += (sender, args) => {
-                    if (args.Data != null) Console.Error.WriteLine(args.Data);
-                };
 
                 process.Start();
-
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-
-                process.WaitForExit();
     
+    
+                process.WaitForExit();
+
                 if (process.ExitCode != 0)
                 {
                     BifyDebug.Log($"Process ended up with error. Code: {process.ExitCode}");

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Net.NetworkInformation;
-using BoomifyCS.Lexer;
-
-namespace BoomifyCS.Exceptions
+﻿namespace BoomifyCS.Exceptions
 {
     public static class ErrorMessage
     {

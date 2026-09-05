@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using BoomifyCS.Ast;
+﻿using System.Collections.Generic;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
-using BoomifyCS.Parser;
+
 namespace BoomifyCS.Ast
 {
     class AstTree

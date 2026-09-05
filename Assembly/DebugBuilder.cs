@@ -1,39 +1,37 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Exceptions;
-using LLVMSharp;
 using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly
 {
     class DebugBuilder
     {
-        private LLVMDIBuilderRef diBuilder;
-        private LLVMModuleRef module;
-        private LLVMMetadataRef compileUnit;
-        private LLVMMetadataRef file;
-        private LLVMMetadataRef currentScope;
+        private readonly LLVMDIBuilderRef _diBuilder;
+        private readonly LLVMModuleRef _module;
+        private readonly LLVMMetadataRef _compileUnit;
+        private readonly LLVMMetadataRef _file;
+        private LLVMMetadataRef _currentScope;
 
         public unsafe DebugBuilder(LLVMModuleRef module)
         {
-            this.module = module;
+            this._module = module;
 
             module.AddModuleFlag("Debug Info Version", LLVMModuleFlagBehavior.LLVMModuleFlagBehaviorWarning, (uint)3);
             module.AddModuleFlag("Dwarf Version", LLVMModuleFlagBehavior.LLVMModuleFlagBehaviorError, 4u);
             module.AddModuleFlag("PIC Level", LLVMModuleFlagBehavior.LLVMModuleFlagBehaviorError, 2u);
 
-            diBuilder = LLVM.CreateDIBuilder(module);
+            _diBuilder = LLVM.CreateDIBuilder(module);
 
-            file = diBuilder.CreateFile(
+            _file = _diBuilder.CreateFile(
                 Path.GetFileName(Traceback.Instance.FilePath),
                 Path.GetDirectoryName(Traceback.Instance.FilePath));
 
             // Создание компиляционной единицы
-            compileUnit = diBuilder.CreateCompileUnit(
+            _compileUnit = _diBuilder.CreateCompileUnit(
                 LLVMDWARFSourceLanguage.LLVMDWARFSourceLanguageC,
-                file,
+                _file,
                 "BoomifyCS Compiler",
                 0, 
                 "", 
@@ -44,12 +42,12 @@ namespace BoomifyCS.Assembly
                 1, 1, "", ""
             );
 
-            currentScope = compileUnit;
+            _currentScope = _compileUnit;
         }
 
         public void PushLexicalScope(LLVMMetadataRef scope)
         {
-            currentScope = scope;
+            _currentScope = scope;
         }
 
 
@@ -62,11 +60,11 @@ namespace BoomifyCS.Assembly
             int isLocal = 1,
             int isDefinition = 1)
         {
-            var func = diBuilder.CreateFunction(
-                currentScope,
+            var func = _diBuilder.CreateFunction(
+                _currentScope,
                 name,
                 linkageName,
-                file,
+                _file,
                 line,
                 functionType,
                 isLocal,
@@ -75,14 +73,14 @@ namespace BoomifyCS.Assembly
                 LLVMDIFlags.LLVMDIFlagPublic,
                 0);
 
-            currentScope = func;
+            _currentScope = func;
             return func;
         }
 
         public LLVMMetadataRef CreateSubroutineType(LLVMMetadataRef[] parameterTypes)
         {
-            return diBuilder.CreateSubroutineType(
-                file,
+            return _diBuilder.CreateSubroutineType(
+                _file,
                 parameterTypes,
                 LLVMDIFlags.LLVMDIFlagZero
 
@@ -92,10 +90,10 @@ namespace BoomifyCS.Assembly
         public unsafe LLVMMetadataRef CreateDebugLocation(uint line, uint column)
         {
             return LLVM.DIBuilderCreateDebugLocation(
-                module.Context,
+                _module.Context,
                 line,
                 column,
-                currentScope,
+                _currentScope,
                 null);
         }
         public LLVMMetadataRef[] CreateParametersType(BifyType[] type)
@@ -119,7 +117,7 @@ namespace BoomifyCS.Assembly
                 {
                     sbyte* sp = (sbyte*)p;
                     return LLVM.DIBuilderCreateBasicType(
-                     diBuilder, sp, (uint)name.Length,
+                     _diBuilder, sp, (uint)name.Length,
                      sizeBits, 0, LLVMDIFlags.LLVMDIFlagZero
 
 
