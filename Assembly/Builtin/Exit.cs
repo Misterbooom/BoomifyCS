@@ -5,7 +5,7 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.Builtin
 {
-    class Exit : BifyFunction
+    internal class Exit : BifyFunction
     {
         private bool _needToInit = true;
         public Exit() : base(null, null, null, null)

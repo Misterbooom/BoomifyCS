@@ -5,8 +5,7 @@ using BoomifyCS.Exceptions;
 
 namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
 {
-   
-    class ClassAttributeManager(AstClass classNode)
+    internal class ClassAttributeManager(AstClass classNode)
     {
         public Dictionary<ClassAttribute, AstNode>  GetAttributes()
         {
@@ -27,7 +26,7 @@ namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
             
             string varName = node.AssignmentNode.Left.Token.Value;
             var variableHandler = new VariableDeclarationNodeHandler(AssemblyCompiler.Instance);
-            BifyType attributeType = variableHandler.DetermineVariableType(node,varName);
+            var (attributeType, _) = variableHandler.DetermineVariableType(node,varName);
             FlagProcessor.SetFlags(FlagContext.CLASS_ATTRIBUTE, attributeType, node.Flag.Flags);
             // BifyValue attributeValue = variableHandler.GetVariableValue(node, varName,attributeType);
             

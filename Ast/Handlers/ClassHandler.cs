@@ -3,7 +3,7 @@ using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Ast.Handlers
 {
-    class ClassHandler(AstBuilder builder) : TokenHandler(builder)
+    internal class ClassHandler(AstBuilder builder) : TokenHandler(builder)
     {
         public override void HandleToken(Token token)
         {

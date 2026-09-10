@@ -3,7 +3,7 @@ using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Ast.Handlers
 {
-    abstract class TokenHandler(AstBuilder builder)
+    internal abstract class TokenHandler(AstBuilder builder)
     {
         protected readonly AstBuilder Builder = builder;
 
@@ -35,7 +35,7 @@ namespace BoomifyCS.Ast.Handlers
 
             return (lastOperand, final );
         }
-        protected static void GetVariableInfo(AstBuilder builder, out AstNode identifierNode, out AstNode typeNode, out AstFlag flagNode)
+        protected static void GetFieldInfo(AstBuilder builder, out AstNode identifierNode, out AstNode typeNode, out AstFlag flagNode)
         {
             identifierNode = null;
             typeNode = null;

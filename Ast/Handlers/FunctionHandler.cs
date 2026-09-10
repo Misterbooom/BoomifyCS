@@ -4,18 +4,18 @@ using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Ast.Handlers
 {
-    class FunctionHandler(AstBuilder builder) : TokenHandler(builder)
+    internal class FunctionHandler(AstBuilder builder) : TokenHandler(builder)
     {
         public override void HandleToken(Token token)
         {
 
-            GetVariableInfo(Builder, out var identifierNode, out var typeNode, out var flagNode);
+            GetFieldInfo(Builder, out var identifierNode, out var typeNode, out var flagNode);
         
-            if (identifierNode is not AstIdentifier id)
+            if (identifierNode is not AstIdentifier)
             {
                 new BifySyntaxError($"Invalid identifier name '{identifierNode?.Token?.Value}'. Expected a valid name like `x`, `value`, etc.").Throw();
             }
-            if (typeNode is not AstIdentifier type && typeNode.Token.Type != TokenType.POINTER)
+            if (typeNode is not (AstIdentifier or AstIndexOperator) && typeNode.Token.Type != TokenType.POINTER)
             {
                 new BifySyntaxError($"Invalid type '{typeNode?.Token?.Value}'. Make sure the function has a valid type like `int`, `float`, etc.").Throw();
             }

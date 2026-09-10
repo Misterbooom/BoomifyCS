@@ -5,7 +5,7 @@ using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Ast
 {
-    class TokensFormatter
+    internal class TokensFormatter
     {
         public static List<List<Token>> SplitLines(List<Token> tokens)
         {
@@ -55,14 +55,14 @@ namespace BoomifyCS.Ast
             return lines;
         }
 
-        private static bool IsConditionChainToken(Token token)
+        private static bool IsConditionChainToken(Token? token)
         {
             return token != null &&
                   (token.Type == TokenType.IF ||
                    token.Type == TokenType.ELSE);
         }
 
-        private static bool IsNewCondition(Token token, Token prevToken)
+        private static bool IsNewCondition(Token token, Token? prevToken)
         {
             return (token.Type == TokenType.IF && (prevToken == null || prevToken.Type != TokenType.ELSE)) ||
                    (token.Type == TokenType.ELSE && prevToken == null);

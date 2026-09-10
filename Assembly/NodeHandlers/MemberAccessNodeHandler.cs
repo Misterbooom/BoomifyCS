@@ -5,7 +5,7 @@ using BoomifyCS.Exceptions;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class MemberAccessNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    internal class MemberAccessNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
         public override void HandleNode(AstNode node)
         {
@@ -36,7 +36,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 switch (memberValue)
                 {
                     case PointerValue pointerValue:
-                        Compiler.StackPush(pointerValue.Dereference());
+                        Compiler.StackPush(pointerValue.Dereference(true));
                         break;
                     case BifyMethodRef:
                         Compiler.StackPush(memberValue);

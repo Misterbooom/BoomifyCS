@@ -5,7 +5,7 @@ using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class ArrayNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    internal class ArrayNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
         public override void HandleNode(AstNode node)
         {
@@ -53,6 +53,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             }
 
             Compiler.StackPush(arrayType.Create(values));
+            BifyDebug.Log($"Array: {Compiler.StackPeek<ArrayValue>("")}");
         }
 
         private BifyValue[] BuildArrayFromStack(uint argCount, ArrayType arrayType)

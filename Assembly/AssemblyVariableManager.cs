@@ -115,7 +115,7 @@ namespace BoomifyCS.Assembly
         {
             if (_localScopes.Count == 0)
                 throw new InvalidOperationException("Local scope not created. Call EnterLocalScope before registering local variables.");
-            if (_localScopes.Peek().ContainsKey(name))
+            if (_localScopes.Peek().ContainsKey(name) || _globalVariables.ContainsKey(name))
             {
                 Traceback.Instance.ThrowException(new BifyNameError($"Variable redefinded: '{name}'"));
                 return;
@@ -131,6 +131,11 @@ namespace BoomifyCS.Assembly
                 return;
             }
             _globalVariables[name] = variable;
+        }
+
+        public bool VariableExists(string name)
+        {
+            return _globalVariables.ContainsKey(name) ||  _localScopes.Peek().ContainsKey(name);
         }
 
         public IValue? GetVariable(string name)

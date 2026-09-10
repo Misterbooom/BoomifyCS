@@ -2,7 +2,7 @@
 
 namespace BoomifyCS.Ast.Handlers
 {
-    class ArrayHandler(AstBuilder builder):TokenHandler(builder)
+    internal class ArrayHandler(AstBuilder builder):TokenHandler(builder)
     {
         public override void HandleToken(Token token)
         {

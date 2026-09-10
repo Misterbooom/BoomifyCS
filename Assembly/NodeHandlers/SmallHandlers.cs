@@ -6,7 +6,7 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class ModuleHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    internal class ModuleHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
         public override void HandleNode(AstNode node)
         {
@@ -17,7 +17,8 @@ namespace BoomifyCS.Assembly.NodeHandlers
             }
         }
     }
-    class BlockNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+
+    internal class BlockNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
         public override void HandleNode(AstNode node)
         {
@@ -36,7 +37,8 @@ namespace BoomifyCS.Assembly.NodeHandlers
             }
         }
     }
-    class IdentifierNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+
+    internal class IdentifierNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
         public override void HandleNode(AstNode node)
         {
@@ -69,7 +71,8 @@ namespace BoomifyCS.Assembly.NodeHandlers
             }
         }
     }
-    class ConstantNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+
+    internal class ConstantNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
         public override void HandleNode(AstNode node)
         {

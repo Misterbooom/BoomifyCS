@@ -2,7 +2,7 @@
 
 namespace BoomifyCS.Ast.Validators
 {
-    class ConditionStatementValidator
+    internal class ConditionStatementValidator
     {
     
         public static void ThrowUnmatchedIfError(AstElse astElse)

@@ -8,7 +8,7 @@ using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Tests
 {
-    class Tests
+    internal class Tests
     {
         public static void RunTests()
         {

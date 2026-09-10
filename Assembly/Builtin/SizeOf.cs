@@ -3,7 +3,7 @@ using BoomifyCS.Assembly.BifyObject;
 
 namespace BoomifyCS.Assembly.Builtin
 {
-    class SizeOf:BifyFunction
+    internal class SizeOf:BifyFunction
     {
         public SizeOf() : base(null, null, null, null)
         {

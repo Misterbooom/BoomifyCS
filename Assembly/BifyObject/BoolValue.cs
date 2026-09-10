@@ -4,7 +4,7 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.BifyObject
 {
-    class BoolValue(LLVMValueRef value) : BifyValue(value, new BoolType())
+    internal class BoolValue(LLVMValueRef value) : BifyValue(value, new BoolType())
     {
         public override BifyValue Equal(BifyValue other, LLVMBuilderRef builder)
         {
@@ -41,7 +41,7 @@ namespace BoomifyCS.Assembly.BifyObject
         }
     }
 
-    class BoolType() : BifyType("bool", LLVMTypeRef.Int1)
+    internal class BoolType() : BifyType("bool", LLVMTypeRef.Int1)
     {
         public override BifyValue DefaultValue()
         {

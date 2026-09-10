@@ -8,7 +8,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
     /// <summary>
     /// Generates LLVM IR for if-else and elseif statements.
     /// </summary>
-    class ConditionStatementNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    internal class ConditionStatementNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
         public override void HandleNode(AstNode node)
         {

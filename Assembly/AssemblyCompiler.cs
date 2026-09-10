@@ -11,19 +11,20 @@ using System.Linq;
 namespace BoomifyCS.Assembly
 {
     [Flags]
-    enum NodeVisitFlag
+    internal enum NodeVisitFlag
     {
         NONE,
         ASSIGNMENT_INDEX = 1 << 0,
     }
 
     [Flags]
-    enum CompilerFlags
+    internal enum CompilerFlags
     {
         NONE, 
         EXECUTE = 1 << 0
     }
-    class AssemblyCompiler : IDisposable
+
+    internal class AssemblyCompiler : IDisposable
     {
         private static AssemblyCompiler _instance;
         private static readonly object Lock = new();
@@ -152,8 +153,37 @@ namespace BoomifyCS.Assembly
                 return default;
             }
         }
+        public T StackPeek<T>(string errroMessage)
+        {
+            try
+            {
+                if (_stack.Count == 0)
+                {
+                    throw new InvalidOperationException("Stack is empty.");
+                }
 
-        public void Visit(AstNode node)
+                T peekedValue = (T)_stack.Peek();
+                if (peekedValue is not T)
+                {
+                    new BifyTypeError(errroMessage).Throw();
+                    return default;
+                }
+
+                return peekedValue;
+            }
+            catch (InvalidCastException)
+            {
+                new BifyTypeError(errroMessage).Throw();
+                return default;
+            }
+        }
+
+        public string StackToString()
+        {
+            if (_stack.Count == 0) return "Stack: [Empty]";
+            return $"Stack ({_stack.Count} items):\n" + string.Join(Environment.NewLine, _stack.Select((v, i) => $"  [{i}] {v}"));
+        }
+        public void Visit(AstNode? node)
         {
             if (node == null)
             {

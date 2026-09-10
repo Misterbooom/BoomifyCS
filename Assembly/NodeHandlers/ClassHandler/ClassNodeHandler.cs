@@ -1,11 +1,11 @@
-﻿﻿using System.Linq;
+﻿using System.Linq;
 using BoomifyCS.Assembly.BifyObject;
 using BoomifyCS.Ast;
 using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
 {
-    class ClassNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    internal class ClassNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
         public override void HandleNode(AstNode node)
         {

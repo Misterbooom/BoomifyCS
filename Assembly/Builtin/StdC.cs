@@ -6,9 +6,9 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.Builtin
 {
-    class StdC
+    internal class StdC
     {
-        public static void RaiseError(BifyError bifyError, BifyValue line = null)
+        public static void RaiseError(BifyError bifyError, BifyValue? line = null)
         {
             var printErrorFunc = StdC.DeclarFunction("printError",
             [new ConstStringType(), new ConstStringType(), new ConstStringType(), new BifyObject.IntegerType()], new VoidType()
@@ -31,7 +31,8 @@ namespace BoomifyCS.Assembly.Builtin
 
 
     }
-    class CFunction : BifyFunction
+
+    internal class CFunction : BifyFunction
     {
         private readonly string _name;
         public CFunction(string name, BifyType returnType, BifyType[] typeRefs, LLVMTypeRef functionType) : base(null, null, returnType, functionType)

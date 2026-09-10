@@ -10,7 +10,7 @@ namespace BoomifyCS.Assembly.BifyObject
 {
 #nullable enable
 
-    class ClassMember
+    internal class ClassMember
     {
         public readonly string Name;
         public readonly BifyValue? Value;
@@ -30,9 +30,9 @@ namespace BoomifyCS.Assembly.BifyObject
         }
     }
 
-    class ClassAttribute(string name, BifyType type) : ClassMember(name, null, type);
+    internal class ClassAttribute(string name, BifyType type) : ClassMember(name, null, type);
 
-    class BifyMethodRef(string methodName, ClassValue classType, List<BifyFunction> overloads)
+    internal class BifyMethodRef(string methodName, ClassValue classType, List<BifyFunction> overloads)
         : BifyValue(null, overloads.First().GetBifyType())
     {
         private string MethodName { get; } = methodName;
@@ -61,7 +61,8 @@ namespace BoomifyCS.Assembly.BifyObject
         }
 
     }
-    class ClassMethod : ClassMember
+
+    internal class ClassMethod : ClassMember
     {
         private readonly List<BifyFunction> _overloads = new();
         private readonly AccessLevel _methodAccessFlag;
@@ -101,7 +102,7 @@ namespace BoomifyCS.Assembly.BifyObject
     }
 
 
-    class ClassValue(LLVMValueRef value, BifyType type) : BifyValue(value, type)
+    internal class ClassValue(LLVMValueRef value, BifyType type) : BifyValue(value, type)
     {
         public override BifyValue GetAttribute(string name, BifyType other, LLVMBuilderRef builder)
         {
@@ -141,7 +142,7 @@ namespace BoomifyCS.Assembly.BifyObject
 
     }
 
-    class ClassType(string name, LLVMTypeRef structType) : BifyType(name, LLVMTypeRef.CreatePointer(structType, 0))
+    internal class ClassType(string name, LLVMTypeRef structType) : BifyType(name, LLVMTypeRef.CreatePointer(structType, 0))
     {
         private Dictionary<string, ClassMethod> _classMethods = new();
         public Dictionary<string, List<ClassMethod>> Constructor = new();

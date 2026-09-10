@@ -6,7 +6,7 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
 {
-    class ClassMethodManager(AstClass classNode, ClassType classType)
+    internal class ClassMethodManager(AstClass classNode, ClassType classType)
     {
         AssemblyCompiler Compiler => AssemblyCompiler.Instance;
 

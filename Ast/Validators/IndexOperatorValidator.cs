@@ -3,7 +3,7 @@ using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Ast.Validators
 {
-    class IndexOperatorValidator
+    internal class IndexOperatorValidator
     {
         public static bool Validate(AstNode previousNode, AstNode indexNode)
         {

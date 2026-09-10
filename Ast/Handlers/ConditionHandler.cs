@@ -4,7 +4,7 @@ using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Ast.Handlers
 {
-    class ConditionHandler(AstBuilder builder) : TokenHandler(builder)
+    internal class ConditionHandler(AstBuilder builder) : TokenHandler(builder)
     {
         AstIf _currentIfNode = null;
         public override void HandleToken(Token token)
@@ -25,7 +25,7 @@ namespace BoomifyCS.Ast.Handlers
 
             HandleElseOrElseIf(Builder.Peek());
         }
-        private void HandleElseOrElseIf(Token token)
+        private void HandleElseOrElseIf(Token? token)
         {
 
             

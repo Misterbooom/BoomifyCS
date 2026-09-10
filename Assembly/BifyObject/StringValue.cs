@@ -154,7 +154,7 @@ namespace BoomifyCS.Assembly.BifyObject
         }
     }
 
-    class CharType() : BifyType("char", LLVMTypeRef.Int8)
+    internal class CharType() : BifyType("char", LLVMTypeRef.Int8)
     {
         protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
@@ -189,7 +189,8 @@ namespace BoomifyCS.Assembly.BifyObject
             return 1;
         }
     }
-    class ConstStringType() : BifyType("string", LLVMTypeRef.CreatePointer(LLVMTypeRef.Int8, 0))
+
+    internal class ConstStringType() : BifyType("string", LLVMTypeRef.CreatePointer(LLVMTypeRef.Int8, 0))
     {
         private static readonly Dictionary<string, LLVMValueRef> GlobalStringCache = new();
 

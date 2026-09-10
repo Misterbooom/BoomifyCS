@@ -3,7 +3,7 @@ using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Ast.Validators
 {
-    class UnaryOperatorValidator
+    internal class UnaryOperatorValidator
     {
         public static bool Validate(string op,Token identifierToken)
         {

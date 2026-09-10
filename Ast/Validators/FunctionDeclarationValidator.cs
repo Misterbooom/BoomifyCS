@@ -3,7 +3,7 @@ using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Ast.Validators
 {
-    class FunctionDeclarationValidator
+    internal class FunctionDeclarationValidator
     {
         public static void Validate(Token nameToken, AstNode parametersNode, AstNode blockNode, AstNode typeNode)
         {

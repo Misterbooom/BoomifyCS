@@ -4,10 +4,9 @@ using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 using BoomifyCS.Parser;
 using BoomifyCS.Assembly;
-
 namespace BoomifyCS.Ast
 {
-    class AstBuilder
+    internal class AstBuilder
     {
         public int TokenIndex = 0;
         public readonly List<Token> Tokens;
@@ -67,7 +66,27 @@ namespace BoomifyCS.Ast
             }
             return Nodes.Count == 1 ? Nodes[0] : null;
         }
+        public List<AstNode> BuildNodes()
+        {
+            if (Tokens == null || Tokens.Count == 0)
+            {
+                return null;
+            }
+            while (TokenIndex < Tokens.Count)
+            {
+                Token token = Tokens[TokenIndex];
+                var handler = TokenHandlerFactory.CreateHandler(token, this);
+                handler.HandleToken(token);
 
+                if (CurrentNode != null)
+                {
+                    CurrentNode.LineNumber = CurrentNode.Token.Line;
+                    Nodes.Add(CurrentNode);
+                    CurrentNode = null;
+                }
+            }
+            return Nodes;
+        }
         public Token GetPreviousToken()
         {
 
@@ -85,6 +104,11 @@ namespace BoomifyCS.Ast
             Token token = Tokens[TokenIndex++];
             Traceback.Instance.SetCurrentLine(token.Line);
             return token;
+        }
+
+        public Token? PeekTokenOrNull()
+        {
+            return TokenIndex >= Tokens.Count ? null : Tokens[TokenIndex];
         }
 
         public bool IsAtEnd() => TokenIndex >= Tokens.Count;
@@ -113,7 +137,7 @@ namespace BoomifyCS.Ast
         {
             TypeTable.Add(name);
         }
-        public Token GetNextToken()
+        public Token? GetNextToken()
         {
             if (TokenIndex + 1 >= Tokens.Count)
             {
@@ -152,7 +176,7 @@ namespace BoomifyCS.Ast
         public List<Token> GetBlockTokens() => TokensFormatter.GetTokensBetween(Tokens, ref TokenIndex, TokenType.LCUR, TokenType.RCUR);
 
         public AstNode ParseTokens(List<Token> conditionTokens) => new AstBuilder(conditionTokens, false).BuildNode();
-
+        public List<AstNode> ParseTokensInNodes(List<Token> tokens) => new AstBuilder(tokens, false).BuildNodes();
         public AstBlock ParseBlock(List<Token> blockTokens) => new AstBlock(((AstModule)new AstTree(Traceback.Instance.Source).ParseTokens(blockTokens)).ChildNodes);
         private void HandleInvalidSyntax()
         {

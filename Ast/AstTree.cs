@@ -4,7 +4,7 @@ using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Ast
 {
-    class AstTree
+    internal class AstTree
     {
         public AstTree(string[] sourceCode)
         {

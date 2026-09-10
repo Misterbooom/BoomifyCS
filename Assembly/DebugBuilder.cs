@@ -6,7 +6,7 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly
 {
-    class DebugBuilder
+    internal class DebugBuilder
     {
         private readonly LLVMDIBuilderRef _diBuilder;
         private readonly LLVMModuleRef _module;

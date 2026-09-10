@@ -4,7 +4,7 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.Builtin
 {
-    class Explode : BifyFunction
+    internal class Explode : BifyFunction
     {
         private bool _needToInit = true;
 

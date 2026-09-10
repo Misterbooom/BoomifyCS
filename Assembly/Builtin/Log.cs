@@ -4,7 +4,7 @@ using BoomifyCS.Assembly.BifyObject;
 
 namespace BoomifyCS.Assembly.Builtin
 {
-    class Log:BifyFunction
+    internal class Log:BifyFunction
     {
         public Log() : base(null, null, null,null)
         {

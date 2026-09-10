@@ -3,8 +3,7 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.BifyObject
 {
-
-    class VoidType() : BifyType("void", LLVMTypeRef.Void)
+    internal class VoidType() : BifyType("void", LLVMTypeRef.Void)
     {
         public override BifyValue Create(object value)
         {
@@ -20,7 +19,8 @@ namespace BoomifyCS.Assembly.BifyObject
             return 0;
         }
     }
-    class NullType(BifyType pointedType) : BifyPointerType(pointedType)
+
+    internal class NullType(BifyType pointedType) : BifyPointerType(pointedType)
     {
         public static BifyValue Create(BifyType targetPointerType)
         {
@@ -45,11 +45,12 @@ namespace BoomifyCS.Assembly.BifyObject
         }
     }
 
-    class NullValue(BifyPointerType type, LLVMValueRef valueRef) : PointerValue(valueRef, type)
+    internal class NullValue(BifyPointerType type, LLVMValueRef valueRef) : PointerValue(valueRef, type)
     {
         public NullValue() : this(new NullType(new VoidType()), LLVMValueRef.CreateConstPointerNull(LLVMTypeRef.CreatePointer(LLVMTypeRef.Void, 0))) { }
     }
-    class TypeValue(BifyType bifyType) : BifyValue(null, bifyType);
+
+    internal class TypeValue(BifyType bifyType) : BifyValue(null, bifyType);
 
 
 }

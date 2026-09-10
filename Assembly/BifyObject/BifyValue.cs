@@ -39,7 +39,7 @@ namespace BoomifyCS.Assembly.BifyObject
         {
             return new ExplicitCastHandler(this).PerformExplicitCast(desiredType,builder);
         }
-        public virtual BifyValue Index(BifyValue indexValue, LLVMBuilderRef builder)
+        public virtual BifyValue Index(BifyValue indexValue, LLVMBuilderRef builder, bool loadPointer = true)
         {
             Traceback.Instance.ThrowException(new BifyTypeError($"{GetTypeName()} doesn't support Index"));
             return null;

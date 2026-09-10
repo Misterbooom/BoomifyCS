@@ -7,7 +7,7 @@ using BoomifyCS.Assembly.NodeHandlers.ClassHandler;
 
 namespace BoomifyCS.Assembly
 {
-    class NodeHandlerFactory
+    internal class NodeHandlerFactory
     {
         public static NodeHandler CreateHandler(AstNode node, AssemblyCompiler compiler)
         {

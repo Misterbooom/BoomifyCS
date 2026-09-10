@@ -1,10 +1,10 @@
-﻿using BoomifyCS.Lexer;
+﻿﻿using BoomifyCS.Lexer;
 using BoomifyCS.Exceptions;
 using System.Collections.Generic;
 
 namespace BoomifyCS.Ast.Handlers
 {
-    class BinaryOperatorHandler(AstBuilder builder) : TokenHandler(builder)
+    internal class BinaryOperatorHandler(AstBuilder builder) : TokenHandler(builder)
     {
         private Token _binaryOpToken = null;
         bool _isUnary = false;
@@ -101,7 +101,7 @@ namespace BoomifyCS.Ast.Handlers
 
             AstNode baseNode = token.Type switch
             {
-                TokenType.IDENTIFIER or TokenType.CONST => new IdentifierHandler(Builder).ParseIdentfier(token, true),
+                TokenType.IDENTIFIER or TokenType.CONST => new IdentifierHandler(Builder).ParseIdentifier(token, true),
                 TokenType.NUMBER => NodeConventer.TokenToNode(token),
                 TokenType.LPAREN => ParseParenthesizedExpression(),
                 TokenType.SUB or TokenType.MUL or TokenType.INCREMENT or TokenType.DECREMENT or TokenType.NOT=> HandleUnaryOperator(token),
@@ -117,7 +117,7 @@ namespace BoomifyCS.Ast.Handlers
                 return baseNode;
         }
 
-        public AstNode ParsePostfix(AstNode expr)
+        private AstNode ParsePostfix(AstNode expr)
         {
             while (!Builder.IsAtEnd())
             {
@@ -131,12 +131,11 @@ namespace BoomifyCS.Ast.Handlers
                 {
                     var indexTokens = TokensFormatter.GetTokensBetween(Builder.Tokens, ref Builder.TokenIndex,
                                 TokenType.LBRACKET, TokenType.RBRACKET);
-
+                    
                     var indexNode = Builder.ParseTokens(indexTokens);
-
                     expr = new AstIndexOperator(indexNode, expr);
                 }
-                else if (next.Type == TokenType.INCREMENT || next.Type == TokenType.DECREMENT)
+                else if (next.Type is TokenType.INCREMENT or TokenType.DECREMENT)
                 {
                     expr = new AstUnaryOperator(next, expr);
                 }

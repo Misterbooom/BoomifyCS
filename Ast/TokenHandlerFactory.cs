@@ -3,7 +3,7 @@ using BoomifyCS.Ast.Handlers;
 using BoomifyCS.Exceptions;
 using BoomifyCS.Lexer;
 
-static class TokenHandlerFactory
+internal static class TokenHandlerFactory
 {
     public static TokenHandler CreateHandler(Token token, AstBuilder builder)
     {
@@ -33,7 +33,8 @@ static class TokenHandlerFactory
     }
 
 }
-class DefaultTokenHandler(AstBuilder builder) : TokenHandler(builder)
+
+internal class DefaultTokenHandler(AstBuilder builder) : TokenHandler(builder)
 {
     public override void HandleToken(Token token)
     {

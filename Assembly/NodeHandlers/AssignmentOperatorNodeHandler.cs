@@ -6,7 +6,7 @@ using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class AssignmentOperatorNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    internal class AssignmentOperatorNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
         public override void HandleNode(AstNode node)
         {
@@ -14,10 +14,19 @@ namespace BoomifyCS.Assembly.NodeHandlers
             PointerValue pointerValue = GetPointerValue(assignmentOperatorNode);
             BifyType targetType = ((BifyPointerType)pointerValue.GetBifyType()).PointedType;
             BifyValue operandValue = GetOperandValue(assignmentOperatorNode);
-            BifyValue dereferencedValue = pointerValue.Dereference();
 
-            BifyValue resultValue = Calculate(dereferencedValue, operandValue, assignmentOperatorNode.Token.Type)
-                .ExplicitCast(targetType, Compiler.Builder);
+            BifyValue resultValue;
+
+            if (assignmentOperatorNode.Token.Type == TokenType.ASSIGN)
+            {
+                resultValue = operandValue;
+            }
+            else
+            {
+                BifyValue dereferencedValue = pointerValue.Dereference(false);
+                resultValue = Calculate(dereferencedValue, operandValue, assignmentOperatorNode.Token.Type);
+            }
+            resultValue = resultValue.ExplicitCast(targetType is ArrayType arr ? arr.ItemType:targetType, Compiler.Builder);
             Compiler.Builder.BuildStore(resultValue.GetLlvmValue(), pointerValue.GetLlvmValue());
         }
 
@@ -33,8 +42,6 @@ namespace BoomifyCS.Assembly.NodeHandlers
                     return lhs.Mul(rhs, Compiler.Builder);
                 case TokenType.DIVE:
                     return lhs.Div(rhs, Compiler.Builder);
-                case TokenType.ASSIGN:
-                    return rhs;
                 default:
                     throw new NotSupportedException($"Operator {token} is not supported.");
             }
@@ -44,12 +51,16 @@ namespace BoomifyCS.Assembly.NodeHandlers
         {
             Compiler.Flag |= NodeVisitFlag.ASSIGNMENT_INDEX;
             Compiler.Visit(assignmentOperatorNode.IdentifierNode);
+            
+            Compiler.Flag &= ~NodeVisitFlag.ASSIGNMENT_INDEX; 
+
             IValue iValue = Compiler.StackIValuePop();
             if (iValue is BifyType bifyType)
             {
                 Traceback.Instance.ThrowException(new BifyTypeError($"{bifyType.Name} cannot be used as type."));
                 return null;
             }
+            
             PointerValue targetPointer = iValue as PointerValue;
             if (targetPointer == null)
             {

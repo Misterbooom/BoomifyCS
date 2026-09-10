@@ -5,7 +5,7 @@ using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class UnaryOperatorNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    internal class UnaryOperatorNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
         public override void HandleNode(AstNode node)
         {
@@ -22,7 +22,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 }
                 else if (value is PointerValue pointer)
                 {
-                    Compiler.StackPush(pointer.Dereference());
+                    Compiler.StackPush(pointer.Dereference(true));
                 }
                 else
                 {
@@ -41,7 +41,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
         }
         private void HandleUnaryWithVariable(TokenType tokenType, AllocaPointer allocaPointer, bool isPrefix)
         {
-            BifyValue loadedValue = allocaPointer.Dereference();
+            BifyValue loadedValue = allocaPointer.Dereference(false);
             BifyValue result = CalculateResult(tokenType, loadedValue);
             Compiler.Builder.BuildStore(result.GetLlvmValue(), allocaPointer.GetLlvmValue());
             if (isPrefix)

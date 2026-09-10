@@ -5,7 +5,7 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.Builtin
 {
-    class Input : BifyFunction
+    internal class Input : BifyFunction
     {
         bool _needToInit = true;
 

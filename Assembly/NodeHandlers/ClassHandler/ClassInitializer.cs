@@ -3,7 +3,7 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.NodeHandlers.ClassHandler
 {
-    class ClassInitializer(ClassType classType)
+    internal class ClassInitializer(ClassType classType)
     {
         public (LLVMValueRef, LLVMTypeRef) InitClass()
         {

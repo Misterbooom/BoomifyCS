@@ -2,7 +2,7 @@
 
 namespace BoomifyCS.Assembly
 {
-    abstract class NodeHandler(AssemblyCompiler compiler)
+    internal abstract class NodeHandler(AssemblyCompiler compiler)
     {
         protected readonly AssemblyCompiler Compiler = compiler;
 

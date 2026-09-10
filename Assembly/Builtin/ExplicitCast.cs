@@ -4,7 +4,7 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.Builtin
 {
-    class ExplicitCastHandler(BifyValue bifyValue)
+    internal class ExplicitCastHandler(BifyValue bifyValue)
     {
         public BifyValue PerformExplicitCast(BifyType desiredType, LLVMBuilderRef builder)
         {
@@ -41,9 +41,6 @@ namespace BoomifyCS.Assembly.Builtin
 
             if (bifyValue.GetBifyType() is NullType)
                 return NullType.Create(desiredPtr);
-
-            if (bifyValue.GetBifyType() is ArrayType arrayType)
-                return HandleArrayPointerCast(arrayType, desiredPtr, builder);
             if (bifyValue.GetBifyType().CompareType(typeof(AnyType)))
             {
                 return desiredPtr.CreateValueRef(bifyValue.GetLlvmValue());
@@ -56,30 +53,7 @@ namespace BoomifyCS.Assembly.Builtin
             return null;
         }
 
-        private BifyValue HandleArrayPointerCast(ArrayType arrayType, BifyPointerType desiredPtr, LLVMBuilderRef builder)
-        {
-            if (desiredPtr.PointedType.CompareType(arrayType.ItemType))
-            {
-                var arr = new AllocaType(arrayType).CreateValueRef(builder.BuildAlloca(arrayType.LlvmType, "arr"));
-
-                builder.BuildStore(bifyValue.GetLlvmValue(), arr.GetLlvmValue());
-
-
-                var res = ((ArrayValue)arrayType.CreateValueRef(arr.GetLlvmValue())).ZeroIndex(builder);
-                return res;
-            }
-
-
-            string expected = arrayType.ItemType.Name;
-            string provided = desiredPtr.PointedType.Name;
-            Traceback.Instance.ThrowException(
-                new BifyTypeError(
-                    $"Cannot obtain pointer to array item: type mismatch. " +
-                    $"Expected element type '{expected}' but pointer targets '{provided}'."
-                )
-            );
-            return null;
-        }
+     
 
         private BifyValue CastIntegerToFloat(BifyType desiredType, LLVMBuilderRef builder)
         {

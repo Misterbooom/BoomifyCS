@@ -3,13 +3,13 @@ using BoomifyCS.Assembly;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 
-class FunctionPathChecker
+internal class FunctionPathChecker
 {
     public readonly bool AllPathsReturn = false;
     private readonly BifyType _functionType;
     private readonly AssemblyVariableManager _variableManager = AssemblyCompiler.Instance.VariableManager;
 
-    public FunctionPathChecker(BifyType functionType, AstNode node)
+    public FunctionPathChecker(BifyType functionType, AstNode? node)
     {
         _functionType = functionType;
         if (node == null)

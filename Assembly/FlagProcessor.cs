@@ -12,7 +12,8 @@ namespace BoomifyCS.Assembly
         FUNCTION,
         VARIABLE,
     }
-    class FlagProcessor
+
+    internal class FlagProcessor
     {
        
         public static void SetFlags(FlagContext flagContext, BifyType type, List<AstNode> flags)

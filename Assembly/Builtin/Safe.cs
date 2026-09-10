@@ -6,7 +6,7 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.Builtin
 {
-    class SafeDiv : BifyFunction
+    internal class SafeDiv : BifyFunction
     {
         private static SafeDiv _instance;
         private readonly List<BifyType> _returnTypes = [];

@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class CallNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    internal class CallNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
         public static readonly BifyFunction PushFrame = StdC.DeclarFunction("pushFrame",
             new BifyType[] { new IntegerType(), new ConstStringType() }, new VoidType());
@@ -120,7 +120,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
             providedArgs.Reverse();
             return providedArgs;
         }
-        public static int CountArgs(AstNode node)
+        public static int CountArgs(AstNode? node)
         {
             if (node == null) return 0;
             if (node is AstBinaryOp binaryOp && binaryOp.Token.Type == TokenType.COMMA)

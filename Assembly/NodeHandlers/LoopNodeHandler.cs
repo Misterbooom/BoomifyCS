@@ -6,7 +6,7 @@ using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class LoopNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    internal class LoopNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
         public override void HandleNode(AstNode node)
         {

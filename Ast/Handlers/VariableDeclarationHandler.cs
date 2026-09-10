@@ -5,11 +5,11 @@ using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Ast.Handlers
 {
-    class VariableDeclarationHandler(AstBuilder builder) : TokenHandler(builder)
+    internal class VariableDeclarationHandler(AstBuilder builder) : TokenHandler(builder)
     {
         public override void HandleToken(Token token)
         {
-            GetVariableInfo(Builder,out AstNode identifierNode, out AstNode typeNode, out AstFlag flagNode);
+            GetFieldInfo(Builder,out AstNode identifierNode, out AstNode typeNode, out AstFlag flagNode);
           
             AstNode valueNode = null;
             List<Token> valueTokens = [];

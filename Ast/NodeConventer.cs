@@ -3,7 +3,7 @@ using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Ast
 {
-    class NodeConventer
+    internal class NodeConventer
     {
         public static AstNode TokenToNode(Token token)
         {
@@ -57,7 +57,7 @@ namespace BoomifyCS.Ast
                 default: return null;
             }
         }
-        public static int CountCommaNode(AstNode node)
+        public static int CountCommaNode(AstNode? node)
         {
             if (node == null)
                 return 0;

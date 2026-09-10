@@ -6,7 +6,7 @@ using BoomifyCS.Exceptions;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class NewNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    internal class NewNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
         public override void HandleNode(AstNode node)
         {

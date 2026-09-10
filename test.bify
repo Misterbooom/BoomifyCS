@@ -1,18 +1,7 @@
-﻿class Printer{
-	int integer;
-	public const char* string = "hello World!";
-	public constructor(int a){
-		this.integer = a;
-	}
-	public constructor(char* b){
-	}
-	public void print(int a ){
-		explode("Integer: %d\n", a);
-	}
-	public void print(char* b){
-		explode("String: %s\n", b);
-	}
-
+﻿
+float f(){
+    return 1;
 }
 void main(){
+    int[3] arr = [1,2,3];
 }

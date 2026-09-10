@@ -7,9 +7,9 @@ using BoomifyCS.Assembly.Builtin;
 
 namespace BoomifyCS.Assembly.BifyObject
 {
-    class AllocaPointer(LLVMValueRef value, BifyPointerType type) : PointerValue(value, type);
+    internal class AllocaPointer(LLVMValueRef value, BifyPointerType type) : PointerValue(value, type);
 
-    class AllocaType(BifyType pointedType) : BifyPointerType(pointedType)
+    internal class AllocaType(BifyType pointedType) : BifyPointerType(pointedType)
     {
         protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {
@@ -17,11 +17,10 @@ namespace BoomifyCS.Assembly.BifyObject
         }
     }
 
-    class PointerValue(LLVMValueRef value, BifyPointerType pointerType) : BifyValue(value, pointerType)
+    internal class PointerValue(LLVMValueRef value, BifyPointerType pointerType) : BifyValue(value, pointerType)
     {
         private static readonly NullPointerCheck NullPointerCheck = new NullPointerCheck();
-
-        private void CheckNull(string operation)
+        public void CheckNull(string operation)
         {
 #if (DEBUG_COMPILE)
             NullPointerCheck.Call(new BifyValue[] { this });
@@ -60,9 +59,10 @@ namespace BoomifyCS.Assembly.BifyObject
             return GetBifyType().CreateValueRef(newPtr);
         }
 
-        public BifyValue Dereference()
+        public BifyValue Dereference(bool checkOnNull)
         {
-            CheckNull("pointer dereference");
+            if (checkOnNull)
+                CheckNull("pointer dereference");
             var pointerType = (BifyPointerType)GetBifyType();
             LLVMValueRef loadedValue = AssemblyCompiler.Instance.Builder.BuildLoad2(pointerType.PointedType.LlvmType, GetLlvmValue(), "dereferenced_ptr");
             
@@ -71,23 +71,53 @@ namespace BoomifyCS.Assembly.BifyObject
             return dereferenced;
         }
 
-        public override BifyValue Index(BifyValue indexValue, LLVMBuilderRef builder)
+        public override BifyValue Index(BifyValue indexValue, LLVMBuilderRef builder, bool loadPointer = true)
         {
-            CheckNull("pointer indexing");
             if (indexValue.GetBifyType() is not IntegerType)
             {
                 Traceback.Instance.ThrowException(
                     new BifyTypeError("Pointer arithmetic requires an integer offset in indexing."));
                 return null;
             }
-            LLVMValueRef[] indices = new LLVMValueRef[] { indexValue.GetLlvmValue() };
+
             BifyPointerType pointerType = (BifyPointerType)GetBifyType();
-            LLVMValueRef newPtr = builder.BuildGEP2(pointerType.PointedType.LlvmType, GetLlvmValue(), indices, $"ptr_index_{pointerType.PointedType.Name}");
-            return pointerType.CreateValueRef(newPtr);
+
+            if (pointerType.PointedType is ArrayType arrayType)
+            {
+                var checkArrayIndex = new CheckArrayIndex();
+                var maxIndex = LLVMValueRef.CreateConstInt(LLVMTypeRef.Int32, arrayType.ElementCount - 1, false);
+                checkArrayIndex.Call([new IntegerType().CreateValueRef(maxIndex), indexValue]);
+
+                LLVMValueRef zeroIndex = LLVMValueRef.CreateConstInt(LLVMTypeRef.Int32, 0, false);
+                LLVMValueRef[] arrayIndices = [ zeroIndex, indexValue.GetLlvmValue() ];
+        
+                LLVMValueRef arrayGep = builder.BuildInBoundsGEP2(arrayType.LlvmType, GetLlvmValue(), arrayIndices, "arrayIndex");
+
+                if (loadPointer)
+                {
+                    LLVMValueRef loaded = builder.BuildLoad2(arrayType.ItemType.LlvmType, arrayGep, "loaded_item");
+                    return arrayType.ItemType.CreateValueRef(loaded);
+                }
+        
+                return new BifyPointerType(arrayType.ItemType).CreateValueRef(arrayGep);
+            }
+
+            CheckNull("pointer indexing");
+    
+            LLVMValueRef[] ptrIndices = [ indexValue.GetLlvmValue() ];
+            LLVMValueRef gep = builder.BuildGEP2(pointerType.PointedType.LlvmType, GetLlvmValue(), ptrIndices, $"ptr_index_{pointerType.PointedType.Name}");
+
+            if (loadPointer)
+            {
+                LLVMValueRef loaded = builder.BuildLoad2(pointerType.PointedType.LlvmType, gep, "loaded_ptr_item");
+                return pointerType.PointedType.CreateValueRef(loaded);
+            }
+    
+            return new BifyPointerType(pointerType.PointedType).CreateValueRef(gep);
         }
     }
 
-    class BifyPointerType(BifyType pointedType)
+    internal class BifyPointerType(BifyType pointedType)
         : BifyType(pointedType.Name + "*", LLVMTypeRef.CreatePointer(pointedType.LlvmType, 0))
     {
         public BifyType PointedType { get; private set; } = pointedType;
@@ -119,7 +149,7 @@ namespace BoomifyCS.Assembly.BifyObject
         }
     }
 
-    class NullPointerCheck : BifyFunction
+    internal class NullPointerCheck : BifyFunction
     {
         public NullPointerCheck() : base(null, null, null, null)
         {

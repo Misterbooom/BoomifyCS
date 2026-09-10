@@ -8,7 +8,7 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.BifyObject
 {
-    class FunctionArgs
+    internal class FunctionArgs
     {
         private Dictionary<string, BifyType> _arguments = new Dictionary<string, BifyType>();
 
@@ -52,7 +52,7 @@ namespace BoomifyCS.Assembly.BifyObject
             
             return HasSameTypes(other.BifyTypes);
         }
-        public bool HasSameTypes(BifyType[] other, int start = 0)
+        public bool HasSameTypes(BifyType[]? other, int start = 0)
         {
 
             if (other == null)
@@ -90,7 +90,7 @@ namespace BoomifyCS.Assembly.BifyObject
             return string.Join(", ", _arguments.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
         }
 
-        private void ExtractArgs(AstNode node)
+        private void ExtractArgs(AstNode? node)
         {
             if (node == null)
             {

@@ -4,7 +4,7 @@ using BoomifyCS.Exceptions;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class CastNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    internal class CastNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
         public override void HandleNode(AstNode node)
         {

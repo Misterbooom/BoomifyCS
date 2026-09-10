@@ -7,7 +7,7 @@ using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class BinaryOpNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    internal class BinaryOpNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
         public override void HandleNode(AstNode node)
         {

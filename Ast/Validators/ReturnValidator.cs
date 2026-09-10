@@ -2,7 +2,7 @@
 
 namespace BoomifyCS.Ast.Validators
 {
-    class ReturnValidator
+    internal class ReturnValidator
     {
         public static void Validate(AstReturn node)
         {

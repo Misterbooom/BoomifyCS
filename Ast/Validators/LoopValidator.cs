@@ -5,7 +5,7 @@ using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Ast.Validators
 {
-    class LoopValidator
+    internal class LoopValidator
     {
         public static void ValidateWhileStatement(AstWhile astWhile)
         {
@@ -44,7 +44,7 @@ namespace BoomifyCS.Ast.Validators
             }
         }
 
-        private static void ValidateNode(AstNode node, Func<AstNode, bool> isValid, string nullError, string typeError, Token token)
+        private static void ValidateNode(AstNode? node, Func<AstNode, bool> isValid, string nullError, string typeError, Token token)
         {
             if (node == null)
             {

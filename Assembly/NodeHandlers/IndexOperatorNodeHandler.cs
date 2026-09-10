@@ -4,17 +4,12 @@ using BoomifyCS.Assembly.BifyObject;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class IndexOperatorNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    internal class IndexOperatorNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
         public override void HandleNode(AstNode node)
         {
             AstIndexOperator indexOperatorNode = (AstIndexOperator)node;
-            bool loadResultPointer = true;
-            if (Compiler.Flag.HasFlag(NodeVisitFlag.ASSIGNMENT_INDEX))
-            {
-                loadResultPointer = false;
-                Compiler.Flag &= ~NodeVisitFlag.ASSIGNMENT_INDEX;
-            }
+            bool loadResultPointer = !Compiler.Flag.HasFlag(NodeVisitFlag.ASSIGNMENT_INDEX);
             Compiler.Visit(indexOperatorNode.TargetNode);
             IValue iValue = Compiler.StackIValuePop();
             if (iValue is BifyType type)
@@ -28,6 +23,7 @@ namespace BoomifyCS.Assembly.NodeHandlers
         }
         private void HandleIndexing(BifyValue targetValue,AstNode indexNode,bool loadResultPointer)
         {
+            BifyDebug.Log($"Target Value: {targetValue}");
             Compiler.Visit(indexNode);
             IValue iValue = Compiler.StackIValuePop();
 
@@ -36,13 +32,16 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 new BifyTypeError("Invalid index: a type was provided instead of a runtime value.").Throw();
             }
             BifyValue indexValue = (BifyValue)iValue;
-            PointerValue indexedResult = targetValue.Index(indexValue, Compiler.Builder) as PointerValue;
+
+            var indexedResult = targetValue.Index(indexValue, Compiler.Builder, loadResultPointer);
+            BifyDebug.Log($"Loading Result Pointer: {indexedResult} {loadResultPointer}" );
+            
             if (indexedResult == null)
             {
                 new BifyTypeError("Indexing operation must return a pointer type.").Throw(); 
             }
             
-            Compiler.StackPush(loadResultPointer ? indexedResult.Dereference() : indexedResult);
+            Compiler.StackPush(indexedResult);
             
 
         }

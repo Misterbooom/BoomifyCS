@@ -4,7 +4,7 @@ using LLVMSharp.Interop;
 #nullable enable
 namespace BoomifyCS.Assembly.BifyObject
 {
-    class BifyFunction(
+    internal class BifyFunction(
         LLVMValueRef value,
         FunctionArgs args,
         BifyType returnType,
@@ -35,7 +35,8 @@ namespace BoomifyCS.Assembly.BifyObject
             return $"{(IsMethod ? ParentClass?.GetTypeName() + "." : "")}{GetTypeName()}({FunctionArgs}) -> {ReturnType}";
         }
     }
-    class FunctionType(LLVMTypeRef type) : BifyType("callable", type)
+
+    internal class FunctionType(LLVMTypeRef type) : BifyType("callable", type)
     {
         protected override BifyValue CreateByValueRef(LLVMValueRef value)
         {

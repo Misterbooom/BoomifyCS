@@ -5,7 +5,7 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class FunctionDeclarationNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    internal class FunctionDeclarationNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
         public override void HandleNode(AstNode node)
         {

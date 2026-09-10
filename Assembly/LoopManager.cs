@@ -3,13 +3,14 @@ using LLVMSharp.Interop;
 
 namespace BoomifyCS.Assembly
 {
-    class LoopContext(LLVMBasicBlockRef conditionBb, LLVMBasicBlockRef mergeBb, LLVMBasicBlockRef continueBb)
+    internal class LoopContext(LLVMBasicBlockRef conditionBb, LLVMBasicBlockRef mergeBb, LLVMBasicBlockRef continueBb)
     {
         public LLVMBasicBlockRef ConditionBb = conditionBb;
         public LLVMBasicBlockRef MergeBb = mergeBb;
         public LLVMBasicBlockRef ContinueBb = continueBb;
     }
-    class LoopManager
+
+    internal class LoopManager
     {
         private readonly Stack<LoopContext> _loopsStack = [];
         private readonly Stack<int> _branches = [];

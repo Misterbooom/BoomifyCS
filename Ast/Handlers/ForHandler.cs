@@ -5,7 +5,7 @@ using BoomifyCS.Lexer;
 
 namespace BoomifyCS.Ast.Handlers
 {
-    class ForHandler(AstBuilder builder):TokenHandler(builder)
+    internal class ForHandler(AstBuilder builder):TokenHandler(builder)
     {
         public override void HandleToken(Token token)
         {

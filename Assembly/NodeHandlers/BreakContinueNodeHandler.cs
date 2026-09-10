@@ -3,7 +3,7 @@ using BoomifyCS.Exceptions;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class BreakContinueNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    internal class BreakContinueNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
         public override void HandleNode(AstNode node)
         {

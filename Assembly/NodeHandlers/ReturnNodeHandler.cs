@@ -1,10 +1,11 @@
 ﻿using BoomifyCS.Assembly.BifyObject;
+using BoomifyCS.Assembly.Builtin;
 using BoomifyCS.Ast;
 using BoomifyCS.Exceptions;
 
 namespace BoomifyCS.Assembly.NodeHandlers
 {
-    class ReturnNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
+    internal class ReturnNodeHandler(AssemblyCompiler compiler) : NodeHandler(compiler)
     {
         public override void HandleNode(AstNode node)
         {
@@ -20,6 +21,11 @@ namespace BoomifyCS.Assembly.NodeHandlers
                 Compiler.Builder.BuildRetVoid();
                 return;
             }
+
+            if (Compiler.ReturnType.CompareType(typeof(ArrayType)))
+            {
+                new BifyTypeError("Cannot return stack-allocated array.").Throw();
+            }
             Compiler.Visit(returnNode.ArgumentsNode);
             IValue returnIValue = Compiler.StackIValuePop();
             if (returnIValue is BifyType)
@@ -28,13 +34,8 @@ namespace BoomifyCS.Assembly.NodeHandlers
                     new BifyTypeError("Invalid return: a type was provided instead of a runtime value."));
                 return;
             }
-            BifyValue returnValue = (BifyValue)returnIValue;
-            if (!Compiler.ReturnType.CompareType(returnValue.GetBifyType()))
-            {
-                Traceback.Instance.ThrowException(
-                    new BifyTypeError(ErrorMessage.InvalidFunctionReturnType(returnValue.GetTypeName(), Compiler.ReturnType.Name)));
-                return;
-            }
+            BifyValue returnValue = ((BifyValue)returnIValue).ExplicitCast(Compiler.ReturnType, compiler.Builder);
+            
             Compiler.Builder.BuildRet(returnValue.GetLlvmValue());
         }
     }
